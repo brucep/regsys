@@ -225,104 +225,111 @@ class NSEvent
 			{
 				switch ($table):
 					case 'events':
-						$query = sprintf('CREATE TABLE `%s` (
-							`id`             int(10) unsigned NOT NULL auto_increment,
-							`name`           varchar(255) NOT NULL,
-							`early_end`      int(10) unsigned NOT NULL default 0,
-							`prereg_end`     int(10) unsigned NOT NULL default 0,
-							`discount1`      varchar(255) NOT NULL,
-							`discount2`      varchar(255) NOT NULL,
-							`discount_label` varchar(255) NOT NULL,
-							`discount_note`  varchar(255) NOT NULL,
-							`has_vip`        tinyint(1) unsigned NOT NULL default 0,
-							`has_volunteers` tinyint(1) unsigned NOT NULL default 0,
-							`has_housing`    tinyint(1) unsigned NOT NULL default 0,
-							`nights`         tinyint(2) unsigned NOT NULL default 1,
-							`levels`         varchar(255) NOT NULL,
+						$query = sprintf("CREATE TABLE `%s` (
+							`id`                 int(10) unsigned NOT NULL auto_increment,
+							`name`               varchar(255) NOT NULL,
+							`early_end`          int(10) unsigned NOT NULL default '0',
+							`prereg_end`         int(10) unsigned NOT NULL default '0',
+							`refund_end`         int(10) unsigned NOT NULL default '0',
+							`discount1`          varchar(255) NOT NULL,
+							`discount2`          varchar(255) NOT NULL,
+							`discount_label`     varchar(255) NOT NULL,
+							`discount_note`      varchar(255) NOT NULL,
+							`has_vip`            tinyint(1) unsigned NOT NULL default '0',
+							`has_volunteers`     tinyint(1) unsigned NOT NULL default '0',
+							`has_housing`        tinyint(1) unsigned NOT NULL default '0',
+							`nights`             tinyint(2) unsigned NOT NULL default '1',
+							`limit_per_position` smallint(5) unsigned NOT NULL default '0',
+							`levels`             varchar(255) NOT NULL,
+							`shirt_description`  text NOT NULL,
 							PRIMARY KEY  (`id`)
-							);', $table_name);
+							);", $table_name);
 						break;
 				
 					case 'items':
-						$query = sprintf('CREATE TABLE `%s` (
+						$query = sprintf("CREATE TABLE `%s` (
 							`event_id`               int(10) unsigned NOT NULL,
 							`id`                     int(10) unsigned NOT NULL auto_increment,
 							`name`                   varchar(200) NOT NULL,
 							`type`                   varchar(11) NOT NULL,
-							`preregistration`        tinyint(1) unsigned NOT NULL default 1,
-							`price_early`            tinyint(3) unsigned NOT NULL default 0,
-							`price_early_discount1`  tinyint(3) unsigned NOT NULL default 0,
-							`price_early_discount2`  tinyint(3) unsigned NOT NULL default 0,
-							`price_prereg`           tinyint(3) unsigned NOT NULL default 0,
-							`price_prereg_discount1` tinyint(3) unsigned NOT NULL default 0,
-							`price_prereg_discount2` tinyint(3) unsigned NOT NULL default 0,
-							`price_door`             tinyint(3) unsigned NOT NULL default 0,
-							`price_door_discount1`   tinyint(3) unsigned NOT NULL default 0,
-							`price_door_discount2`   tinyint(3) unsigned NOT NULL default 0,
-							`price_vip`              tinyint(3) unsigned NOT NULL default 0,
-							`limit_total`            smallint(5) unsigned NOT NULL default 0,
-							`limit_per_position`     smallint(5) unsigned NOT NULL default 0,
+							`preregistration`        tinyint(1) unsigned NOT NULL default '1',
+							`price_early`            tinyint(3) unsigned NOT NULL default '0',
+							`price_early_discount1`  tinyint(3) unsigned NOT NULL default '0',
+							`price_early_discount2`  tinyint(3) unsigned NOT NULL default '0',
+							`price_prereg`           tinyint(3) unsigned NOT NULL default '0',
+							`price_prereg_discount1` tinyint(3) unsigned NOT NULL default '0',
+							`price_prereg_discount2` tinyint(3) unsigned NOT NULL default '0',
+							`price_door`             tinyint(3) unsigned NOT NULL default '0',
+							`price_door_discount1`   tinyint(3) unsigned NOT NULL default '0',
+							`price_door_discount2`   tinyint(3) unsigned NOT NULL default '0',
+							`price_vip`              tinyint(3) unsigned NOT NULL default '0',
+							`limit_total`            smallint(5) unsigned NOT NULL default '0',
+							`limit_per_position`     smallint(5) unsigned NOT NULL default '0',
+							`expiration_date`        int(10) unsigned NOT NULL default '0',
 							`has_meta`               varchar(20) NOT NULL,
 							`description`            varchar(255) NOT NULL,
+							`note`                   varchar(255) NOT NULL,
 							PRIMARY KEY  (`id`)
-							);', $table_name);
+							);", $table_name);
 						break;
 					
 					case 'dancers':
-						$query = sprintf('CREATE TABLE `%s` (
-							`event_id`        int(10) unsigned NOT NULL,
-							`id`              int(10) unsigned NOT NULL auto_increment,
-							`first_name`      varchar(100) NOT NULL,
-							`last_name`       varchar(100) NOT NULL,
-							`email`           varchar(100) NOT NULL,
-							`position`        tinyint(1) NOT NULL,
-							`level`           tinyint(1) unsigned NOT NULL default 1,
-							`status`          tinyint(1) unsigned NOT NULL default 0,
-							`date_registered` int(10) unsigned NOT NULL default 0,
+						$query = sprintf("CREATE TABLE `%s` (
+							`event_id`          int(10) unsigned NOT NULL,
+							`id`                int(10) unsigned NOT NULL auto_increment,
+							`first_name`        varchar(100) NOT NULL,
+							`last_name`         varchar(100) NOT NULL,
+							`email`             varchar(100) NOT NULL,
+							`position`          tinyint(1) NOT NULL,
+							`level`             tinyint(1) unsigned NOT NULL default '1',
+							`status`            tinyint(1) unsigned NOT NULL default '0',
+							`date_registered`   int(10) unsigned NOT NULL default '0',
+							`payment_method`    varchar(6) NOT NULL,
+							`payment_discount`  varchar(3) NOT NULL default '0',
+							`payment_confirmed` tinyint(1) unsigned NOT NULL default '0',
+							`amount_owed`       smallint(5) unsigned NOT NULL default '0',
+							`note`              varchar(255) NOT NULL,
 							PRIMARY KEY  (`id`)
-							);', $table_name);
+							);", $table_name);
 						break;
 					
 					case 'registrations':
-						$query = sprintf('CREATE TABLE `%s` (
-							`event_id`       int(10) unsigned NOT NULL,
-							`dancer_id`      int(10) unsigned NOT NULL,
-							`item_id`        int(10) unsigned NOT NULL,
-							`price`          tinyint(3) unsigned NOT NULL,
-							`payment_method` varchar(6) NOT NULL,
-							`payment_meta`   varchar(19) NOT NULL,
-							`refund_meta`    varchar(19) NOT NULL,
-							`item_meta`      text NOT NULL,
+						$query = sprintf("CREATE TABLE `%s` (
+							`event_id`  int(10) unsigned NOT NULL,
+							`dancer_id` int(10) unsigned NOT NULL,
+							`item_id`   int(10) unsigned NOT NULL,
+							`price`     tinyint(3) unsigned NOT NULL,
+							`item_meta` text NOT NULL,
 							PRIMARY KEY  (`dancer_id`,`item_id`)
-							);', $table_name);
+							);", $table_name);
 						break;
 					
 					case 'housing_needed':
-						$query = sprintf('CREATE TABLE `%s` (
+						$query = sprintf("CREATE TABLE `%s` (
 							`event_id`   int(10) unsigned NOT NULL,
 							`dancer_id`  int(10) unsigned NOT NULL,
-							`car`        tinyint(1) unsigned NOT NULL default 0,
-							`no_smoking` tinyint(1) unsigned NOT NULL default 0,
-							`no_pets`    tinyint(1) unsigned NOT NULL default 0,
-							`gender`     tinyint(1) unsigned NOT NULL default 3,
-							`nights`     tinyint(2) unsigned NOT NULL default 1,
+							`car`        tinyint(1) unsigned NOT NULL default '0',
+							`no_smoking` tinyint(1) unsigned NOT NULL default '0',
+							`no_pets`    tinyint(1) unsigned NOT NULL default '0',
+							`gender`     tinyint(1) unsigned NOT NULL default '3',
+							`nights`     tinyint(2) unsigned NOT NULL default '1',
 							`comment`    text NOT NULL,
 							PRIMARY KEY  (`dancer_id`)
-							);', $table_name);
+							);", $table_name);
 						break;
 					
 					case 'housing_providers':
-						$query = sprintf('CREATE TABLE `%s` (
+						$query = sprintf("CREATE TABLE `%s` (
 							`event_id`  int(10) unsigned NOT NULL,
 							`dancer_id` int(10) unsigned NOT NULL,
-							`available` tinyint(2) unsigned NOT NULL default 0,
-							`smoking`   tinyint(1) unsigned NOT NULL default 0,
-							`pets`      tinyint(1) unsigned NOT NULL default 0,
-							`gender`    tinyint(1) unsigned NOT NULL default 3,
-							`nights`    tinyint(2) unsigned NOT NULL default 1,
+							`available` tinyint(2) unsigned NOT NULL default '0',
+							`smoking`   tinyint(1) unsigned NOT NULL default '0',
+							`pets`      tinyint(1) unsigned NOT NULL default '0',
+							`gender`    tinyint(1) unsigned NOT NULL default '3',
+							`nights`    tinyint(2) unsigned NOT NULL default '1',
 							`comment`   text NOT NULL,
 							PRIMARY KEY  (`dancer_id`)
-							);', $table_name);
+							);", $table_name);
 						break;
 				endswitch;
 				
