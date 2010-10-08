@@ -1,6 +1,7 @@
 <?php
 /*
 Plugin Name: NSEvent
+Plugin URI: http://github.com/brucep/nsevent
 Description: An event registration and reporting system for dance organizations.
 Version: 1.0
 Author: Bruce Phillips
