@@ -1,0 +1,5 @@
+@import "admin-common.css";
+
+/* Don't show the rest of the WordPress admin interface */
+#wphead, #adminmenu, #screen-meta, #footer, { display: none; }
+#wpbody { margin-left: 0; background-color: inherit; }

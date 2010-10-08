@@ -1,0 +1,25 @@
+@import "admin-common.css";
+
+html { background-color: #fff; }
+#wphead, #adminmenu, #screen-meta, #footer, #update-nag, #nsevent .no-print { display: none; }
+#wpbody { margin-left: 0; }
+
+#nsevent #dancer a.button { display: none; }
+#nsevent #dancer h2 a { color: inherit; text-decoration: none; }
+
+#nsevent td.dancer-name a { color: inherit !important; }
+#nsevent #reg-list td { font-family: Georgia, serif !important; }
+#nsevent #reg-list td.owed input {
+	text-align: right;
+	border: 0;
+	background-color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+#nsevent #packet-printout ul { font-size: 16pt !important; }
+#nsevent #packet-printout h5 { font-size: 16pt !important; }
+#nsevent #packet-printout h4 { font-size: 32pt !important; margin: 1em 0 2em; }
+
+#nsevent #packet-printout div.dancer { page-break-after:always; margin: 0; border: none; }
+#nsevent #packet-printout div.dancer:nth-last-of-type(1) { page-break-after: avoid; }

@@ -1,0 +1,148 @@
+.nsevent-registration div.field {
+margin-top: 1em;
+}
+.nsevent-registration #submit input {
+display: block;
+margin: 0 auto;
+padding: 0.2em 0.5em;
+background-color: #fff;
+border: 1px solid #d9d9d9;
+-webkit-border-radius: 8px;
+-moz-border-radius: 8px;
+}
+.nsevent-registration #submit input:hover{
+  background-color:#ff7;
+}
+form#nsevent-reg-info div.no_show {display: none;}
+form#nsevent-reg-info div.nsevent-validation-error {
+margin: 1em -0.4em;
+padding: 0.4em;
+background-color: #fcc;
+}
+form#nsevent-reg-info tr.nsevent-validation-error td {
+padding: 0.4em;
+background-color: #fcc;
+}
+
+form#nsevent-reg-info div#pricing-dates {
+  margin-top: 1em;
+}
+
+form fieldset,div.nsevent-registration div.price_table {
+margin-bottom: 3em;
+padding: 1em 1em;
+background-color: #d6e7f1;
+}
+
+form#nsevent-reg-info h2,div.nsevent-registration div.price_table h2 {
+margin: 1.5em 0 0;
+padding: 0.4em;
+font-weight: bold;
+font-size: 1.1em;
+color: #fff;
+background-color: #1c90c7;
+}
+form#nsevent-reg-info fieldset h2 span {
+font-size: 0.8em;
+margin-left: 0.8em;
+}
+form#nsevent-reg-info fieldset p {
+margin: 1em 0 0 !important;
+}
+form.nsevent-registration fieldset div:first-child {
+  margin-top: 0 !important;
+}
+form#nsevent-reg-info div.text label {
+display: block;
+width: 8em;
+float: left;
+}
+form#nsevent-reg-info div.text input {
+margin-top: -1px;
+}
+form#nsevent-reg-info table,div.nsevent-registration table {
+  width: 100%;
+}
+form#nsevent-reg-info thead th,div.nsevent-registration thead th {
+font-size: 0.8em;
+text-align: left;
+background-color: #afd1e4;
+}
+form#nsevent-reg-info tbody tr.limit_reached td {
+background-color: #d1d1d1;
+}
+form#nsevent-reg-info tbody tr.limit_reached td:first-child {
+padding-left: 1em;
+}
+form#nsevent-reg-info tbody td,div.nsevent-registration tbody td {
+padding: 0.5em 0;
+border-top: 1px solid #b3b3b3;
+}
+form#nsevent-reg-info td.not_early {
+text-decoration: line-through;
+}
+form#nsevent-reg-info.still_early #packages table th.price {
+width: 11%;
+}
+form#nsevent-reg-info.not_early #packages table th.price {
+width: 16%;
+}
+form#nsevent-reg-info td.note input[type=text],form#nsevent-reg-info textarea {
+width: 100%;
+}
+form#nsevent-reg-info td.note ul,form#nsevent-reg-info td.note ul li {
+margin: 0 !important;
+padding: 0 !important;
+list-style: inside circle;
+}
+form#nsevent-reg-info fieldset#shirt table {
+width: 95%;
+}
+form#nsevent-reg-info fieldset#shirt select {
+width: 100%;
+}
+form#nsevent-reg-info div#shirt-description {
+  margin-top: 1.5em;
+}
+form#nsevent-reg-info div#shirt-description img {
+  float: left;
+  clear: left;
+  margin-right: 1em;
+}
+form#nsevent-reg-info div#shirt-description h3 {
+  margin-top: 1em;
+  font-weight: bold;
+}
+form#nsevent-reg-info div#shirt-description h3 + p {
+  margin-top: 0.5em !important;
+  margin-bottom: 1.5em !important;
+}
+form#nsevent-confirm div.field {
+clear: left;
+border-bottom: 1px solid #b3b3b3;
+}
+form#nsevent-confirm div.field span.label {
+display: block;
+width: 8em;
+float: left;
+}
+form#nsevent-confirm div.field span.item-meta {
+padding-left: 1em;
+}
+
+form#nsevent-confirm #submit {
+margin-top: 2em;
+}
+div.nsevent-registration p,form#nsevent-confirmed-paypal p {
+margin: 1em;
+}
+div.nsevent-registration ol {
+margin: 1em 1em 1em 4em !important;
+}
+div.nsevent-registration ol li {
+margin-bottom: 0.5em !important;
+}
+div#nsevent-accepted-paypal input#paypal-button {
+display: block;
+margin: 2em auto 1em;
+}
