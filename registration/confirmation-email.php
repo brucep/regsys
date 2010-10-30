@@ -64,7 +64,7 @@ HOUSING PROVIDER
 <?php endif; ?>
 
 <?php endif; ?>
-
+<?php if (self::$validated_package_id): ?>
 PACKAGE
 -------
 
@@ -76,7 +76,7 @@ printf('- $%1$d :: %2$s%3$s',
 ?>
 
 
-
+<?php endif; ?>
 <?php if ($competitions): ?>
 COMPETITIONS
 ------------
@@ -112,7 +112,8 @@ TOTALS
 
 <?php
 
-printf('- $%1$d :: Package'."\n", $package_cost);
+if (self::$validated_package_id)
+	printf('- $%1$d :: Package'."\n", $package_cost);
 
 if ($competitions)
 	printf('- $%1$d :: Competitions'."\n", $competitions_cost);

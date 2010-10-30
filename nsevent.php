@@ -23,7 +23,7 @@ Except as contained in this notice, the name of the author not be used in advert
 if (!class_exists('NSEvent')):
 class NSEvent
 {
-	static public $event, $vip, $validated_package_id, $validated_items;
+	static public $event, $vip, $validated_package_id = 0, $validated_items;
 	private $database;
 	private $default_options = array(
 		'current_event_id'           => '',
@@ -406,7 +406,7 @@ class NSEvent
 					'position'        => 'intval|in[1,2]|NSEvent::validate_position',
 					'status'          => 'NSEvent::validate_status',
 					'volunteer_phone' => 'if[status]|trim|NSEvent::validate_volunteer_phone',
-					'package'         => 'NSEvent::validate_package',
+					'package'         => 'intval|NSEvent::validate_package',
 					'items'           => 'NSEvent::validate_items',
 					'payment_method'  => 'in[Mail,PayPal]',
 					));
@@ -462,8 +462,7 @@ class NSEvent
 			else
 			{
 				# Used for confirmation page and email
-				$package           = self::$validated_items[self::$validated_package_id];
-				$package_cost      = $package->get_price_for_discount($_POST['discount'], $early_bird);
+				$package_cost      = (self::$validated_package_id === 0) ? 0 : self::$validated_items[self::$validated_package_id]->get_price_for_discount($_POST['discount'], $early_bird);;
 				$competitions      = array();
 				$competitions_cost = 0;
 				$shirts            = array();
@@ -603,10 +602,7 @@ class NSEvent
 	
 	static public function validate_package($package_id)
 	{
-		if (empty($_POST['package']))
-			return False;
-		
-		if (self::$vip and $package_id == 0)
+		if ($package_id === 0)
 			return True;
 		elseif (self::validate_items(array($package_id => $package_id)))
 		{

@@ -147,12 +147,10 @@ $shirts       = NSEvent_Item::find_by(array(':preregistration' => 1, ':type' => 
 										<td class="description"><?php echo esc_html($item->description); ?></td>
 									</tr>
 <?php 	endforeach; ?>
-<?php 	if ($vip): ?>
 									<tr>
 										<td><?php NSEvent_FormInput::radio('package', array('value' => 0, 'label' => 'N/A')); ?></td>
-										<td class="description"><?php _e('<strong>VIPs:</strong> To help us track attendance, please choose the most suitable package for yourself. (If you\'re an instructor, please don\'t choose a package that contains classes/workshops.)', 'nsevent'); ?></td>
+										<td class="description"><?php if ($vip) _e('<strong>VIPs:</strong> To help us track attendance, please choose the most suitable package for yourself.', 'nsevent'); ?></td>
 									</tr>
-<?php 	endif; ?>
 								</tbody>
 							</table>
 						</fieldset>
