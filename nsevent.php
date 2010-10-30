@@ -34,6 +34,7 @@ class NSEvent
 		'confirmation_email_bcc'     => '',
 		);
 	
+	private function __clone() {}
 	private function __construct()
 	{
 		add_action('admin_init', array($this, 'admin_init'));
