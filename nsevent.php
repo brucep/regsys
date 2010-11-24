@@ -24,8 +24,8 @@ if (!class_exists('NSEvent')):
 class NSEvent
 {
 	static public $event, $vip, $validated_package_id = 0, $validated_items;
-	private $database;
-	private $default_options = array(
+	static private $database;
+	static private $default_options = array(
 		'current_event_id'           => '',
 		'registration_testing'       => False,
 		'paypal_business'            => '',
@@ -35,39 +35,35 @@ class NSEvent
 		);
 	
 	private function __clone() {}
-	private function __construct()
-	{
-		add_action('admin_init', array($this, 'admin_init'));
-		add_action('admin_menu', array($this, 'admin_menu'));
-	}
+	private function __construct() {}
 	
-	private function database_connect()
+	static private function database_connect()
 	{
 		global $wpdb;
 		
-		if (!isset($database))
+		if (!isset(self::$database))
 		{
 			require dirname(__FILE__).'/includes/database.php';
-			$this->database = NSEvent_Database::get_instance();
-			$this->database->connect();
-			$this->database->prefix = $wpdb->prefix.'nsevent';
+			self::$database = NSEvent_Database::get_instance();
+			self::$database->connect();
+			self::$database->prefix = $wpdb->prefix.'nsevent';
 		}
 	}
 	
-	public function admin_init()
+	static public function admin_init()
 	{
 		load_plugin_textdomain('nsevent', False, basename(__FILE__, '.php').'/translations');
-		register_setting('nsevent', 'nsevent', array($this, 'admin_validate_options'));
+		register_setting('nsevent', 'nsevent', 'NSEvent::admin_validate_options');
 	}
 	
-	public function admin_menu()
+	static public function admin_menu()
 	{
-		$hookname = add_menu_page('Events', 'Events', 'edit_pages', 'nsevent', array($this, 'page_request'));
-		add_submenu_page('nsevent', 'NSEvent Options', 'Options', 'administrator', 'nsevent-options', array($this, 'page_options'));
-		add_action('admin_print_styles-'.$hookname, array($this, 'admin_print_styles'));
+		$hookname = add_menu_page('Events', 'Events', 'edit_pages', 'nsevent', 'NSEvent::page_request');
+		add_submenu_page('nsevent', 'NSEvent Options', 'Options', 'administrator', 'nsevent-options', 'NSEvent::page_options');
+		add_action('admin_print_styles-'.$hookname, 'NSEvent::admin_print_styles');
 	}
 
-	public function admin_print_styles()
+	static public function admin_print_styles()
 	{
 	    if (!isset($_GET['style']) or !in_array($_GET['style'], array('iPhone', 'print'))) {
     		wp_enqueue_style('nsevent-admin',        sprintf('%s/%s/css/admin-screen.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), False, False, 'screen and (min-device-width: 481px)');
@@ -92,7 +88,7 @@ class NSEvent
 		echo '<meta name="viewport" content="initial-scale=1.0;" />';
 	}
 		
-	public function admin_validate_options($input)
+	static public function admin_validate_options($input)
 	{
 		$options = get_option('nsevent', array());
 		
@@ -117,12 +113,12 @@ class NSEvent
 		return $options;
 	}
 	
-	public function page_options()
+	static public function page_options()
 	{
 		if (!current_user_can('administrator'))
 			return;
 		
-		$this->database_connect();
+		self::database_connect();
 		
 		$events = NSEvent_Event::find_all();
 		$options = get_option('nsevent', array());
@@ -130,7 +126,7 @@ class NSEvent
 		require dirname(__FILE__).'/admin/options.php';
 	}
 	
-	public function page_request()
+	static public function page_request()
 	{
 		global $wpdb;
 		
@@ -141,7 +137,7 @@ class NSEvent
 		if (empty($_GET['event_id']))  $_GET['event_id']  = '';
 		if (empty($_GET['parameter'])) $_GET['parameter'] = '';
 		
-		$this->database_connect();
+		self::database_connect();
 		
 		try
 		{
@@ -203,7 +199,7 @@ class NSEvent
 		}
 	}
 	
-	public function plugin_activate()
+	static public function plugin_activate()
 	{
 		global $wpdb;
 		
@@ -338,18 +334,13 @@ class NSEvent
 				dbDelta($query);
 			}
 			
-			$this->default_options['confirmation_email_address'] = get_option('admin_email');
-			add_option('nsevent', $this->default_options, '', 'no');
+			self::$default_options['confirmation_email_address'] = get_option('admin_email');
+			add_option('nsevent', self::$default_options, '', 'no');
 		}
 			
 	}
 	
-	// public function plugin_deactivate()
-	// {
-	// 	delete_option('nsevent');
-	// }
-	
-	public function registration()
+	static public function registration()
 	{
 		global $post;
 		
@@ -362,12 +353,12 @@ class NSEvent
 			define('DONOTCACHEPAGE', True);
 			
 			$options = get_option('nsevent');
-			$options = array_merge($this->default_options, $options); # Make sure keys exists
+			$options = array_merge(self::$default_options, $options); # Make sure keys exists
 			
 			require dirname(__FILE__).'/includes/form-input.php';
 			require dirname(__FILE__).'/includes/form-validation.php';
 			NSEvent_FormValidation::set_error_messages();
-			$this->database_connect();
+			self::database_connect();
 			
 			# Find current event
 			$event = self::$event = NSEvent_Event::find($options['current_event_id']);
@@ -379,7 +370,7 @@ class NSEvent
 			$early_bird = ($event->early_end and time() < $event->early_end);
 			$early_bird_class = $early_bird ? 'early-bird' : 'not-early-bird';
 			
-			add_action('wp_head', array($this, 'registration_wp_head'));
+			add_action('wp_head', 'NSEvent::registration_wp_head');
 			wp_enqueue_style('nsevent-registration', sprintf('%s/%s/css/registration.css', WP_PLUGIN_URL, basename(__FILE__, '.php')));
 			
 			# Check if the current theme has a stylesheet for the registration
@@ -590,12 +581,12 @@ class NSEvent
 		}
 	}
 	
-	// public function registration_send_email($event, $dancer)
+	// static public function registration_send_email($event, $dancer)
 	// {
 	// 	
 	// }
 	
-	public function registration_wp_head()
+	static public function registration_wp_head()
 	{
 		# Block search engines for this page if they are not blocked already
 		if (get_option('blog_public')) {
@@ -774,17 +765,9 @@ class NSEvent
 
 		return $href;
 	}
-	
-	static public function &get_instance()
-	{
-		static $instance;
-		if (!isset($instance))
-			$instance = new self;
-		return $instance;
-	}
 }
 
-$nsevent_plugin = NSEvent::get_instance();
-register_activation_hook(__FILE__, array($nsevent_plugin, 'plugin_activate'));
-// register_deactivation_hook(__FILE__, array($nsevent_plugin, 'plugin_deactivate'));
+add_action('admin_init', 'NSEvent::admin_init');
+add_action('admin_menu', 'NSEvent::admin_menu');
+register_activation_hook(__FILE__, 'NSEvent::plugin_activate');
 endif;
