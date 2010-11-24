@@ -351,6 +351,8 @@ class NSEvent
 	
 	public function registration()
 	{
+		global $post;
+		
 		try
 		{
 			# Define a constant for themes to use
@@ -582,9 +584,9 @@ class NSEvent
 		}
 		catch (Exception $e)
 		{
-			get_header();
+			if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); }
 			printf('<div class="nsevent-exception">%s</div>'."\n", $e->getMessage());
-			get_footer();
+			if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); }
 		}
 	}
 	

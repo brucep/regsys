@@ -5,7 +5,7 @@ $competitions = NSEvent_Item::find_by(array(':preregistration' => 1, ':type' => 
 $shirts       = NSEvent_Item::find_by(array(':preregistration' => 1, ':type' => 'shirt'));
 
 ?>
-<?php get_header(); ?>
+<?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); } ?>
 
 		<div id="container" class="onecolumn">
 			<div id="content">
@@ -413,4 +413,4 @@ $shirts       = NSEvent_Item::find_by(array(':preregistration' => 1, ':type' => 
 			</div><!-- #content -->
 		</div><!-- #container -->
 
-<?php get_footer(); ?>
+<?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); } ?>
