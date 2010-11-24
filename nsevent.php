@@ -340,7 +340,7 @@ class NSEvent
 			
 	}
 	
-	static public function registration()
+	static public function registration_form()
 	{
 		global $post;
 		
@@ -370,15 +370,7 @@ class NSEvent
 			$early_bird = ($event->early_end and time() < $event->early_end);
 			$early_bird_class = $early_bird ? 'early-bird' : 'not-early-bird';
 			
-			add_action('wp_head', 'NSEvent::registration_wp_head');
-			wp_enqueue_style('nsevent-registration', sprintf('%s/%s/css/registration.css', WP_PLUGIN_URL, basename(__FILE__, '.php')));
 			
-			# Check if the current theme has a stylesheet for the registration
-			$theme_stylesheet = sprintf('%s/%s/nsevent/registration.css', get_theme_root(), get_stylesheet());
-			if (file_exists($theme_stylesheet))
-				wp_enqueue_style('nsevent-registration-theme', sprintf('%s/nsevent/registration.css', get_bloginfo('stylesheet_directory')));
-
-
 			// TODO: How to handle dates? Specify times as a date and assume end of that day, or specify specific time in field?
 			// Idea: Specify specific time, and if (during event edit) time is 00:00:00, then automatically change to 11:59:59?
 			
@@ -450,7 +442,6 @@ class NSEvent
 			# Determine appropriate file for current step
 			if (empty($_POST) or !NSEvent_FormValidation::validate())
 			{
-				wp_enqueue_script('nsevent-reg-info', sprintf('%s/%s/js/reg-info.js', WP_PLUGIN_URL, basename(__FILE__, '.php')), array('jquery'));
 				$file = 'form-reg-info';
 			}
 			else
@@ -585,6 +576,19 @@ class NSEvent
 	// {
 	// 	
 	// }
+	
+	static public function registration_head()
+	{
+		add_action('wp_head', 'NSEvent::registration_wp_head');
+		wp_enqueue_style('nsevent-registration', sprintf('%s/%s/css/registration.css', WP_PLUGIN_URL, basename(__FILE__, '.php')));
+		
+		# Check if the current theme has a stylesheet for the registration
+		$theme_stylesheet = sprintf('%s/%s/nsevent/registration.css', get_theme_root(), get_stylesheet());
+		if (file_exists($theme_stylesheet))
+			wp_enqueue_style('nsevent-registration-theme', sprintf('%s/nsevent/registration.css', get_bloginfo('stylesheet_directory')));
+		
+		wp_enqueue_script('nsevent-reg-info', sprintf('%s/%s/js/reg-info.js', WP_PLUGIN_URL, basename(__FILE__, '.php')), array('jquery'));
+	}
 	
 	static public function registration_wp_head()
 	{
