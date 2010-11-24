@@ -398,7 +398,7 @@ $shirts       = NSEvent_Item::find_by(array(':preregistration' => 1, ':type' => 
 
 								<div class="caption">
 									<p><?php printf(__('(Refunds are not available after %s.)', 'nsevent'), date('F jS', $event->refund_end())); ?></p>
-<?php if ($event->payment_note): ?>
+<?php if (!empty($event->payment_note)): ?>
 									<p><?php echo esc_html($event->payment_note); ?></p>
 <?php endif; ?>
 								</div>
