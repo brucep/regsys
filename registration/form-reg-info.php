@@ -393,7 +393,7 @@ $shirts       = NSEvent_Item::find_by(array(':preregistration' => 1, ':type' => 
 						<fieldset id="payment">
 							<?php echo NSEvent_FormValidation::get_error('payment_method'), "\n"; ?>
 							<div class="field">
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'PayPal', 'label' => __('PayPal ($2 processing fee)', 'nsevent'))); ?></div>
+								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'PayPal', 'label' => sprintf(__('PayPal%s', 'nsevent'), (empty($options['paypal_fee']) ? '' : sprintf(__(' ($%d processing fee)', 'nsevent'), $options['paypal_fee']))))); ?></div>
 								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'Mail', 'default' => True, 'label' => sprintf(__('Mail (Check must be postmarked by %s.)', 'nsevent'), date('F jS', $event->postmark_by())))); ?></div>
 
 								<div class="caption">

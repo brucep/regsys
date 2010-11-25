@@ -29,6 +29,7 @@ class NSEvent
 		'current_event_id'           => '',
 		'registration_testing'       => False,
 		'paypal_business'            => '',
+		'paypal_fee'                 => 0,
 		'paypal_sandbox'             => False,
 		'confirmation_email_address' => '',
 		'confirmation_email_bcc'     => '',
@@ -97,6 +98,9 @@ class NSEvent
 		
 		if (isset($input['paypal_business']))
 			$options['paypal_business'] = trim($input['paypal_business']);
+		
+		if (isset($input['paypal_fee']))
+			$options['paypal_fee'] = (int) $input['paypal_fee'];
 		
 		if (isset($input['confirmation_email_address']))
 			$options['confirmation_email_address'] = trim($input['confirmation_email_address']);

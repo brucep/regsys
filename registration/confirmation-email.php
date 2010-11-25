@@ -121,10 +121,13 @@ if ($competitions)
 if ($shirts)
 	printf('- $%1$d :: Shirts'."\n", $shirts_cost);
 
-if ($dancer->payment_method == 'PayPal')
-	printf('- $%1$d  :: PayPal Processing Fee'."\n", 2);
+if ($dancer->payment_method == 'PayPal' and !empty($options['paypal_fee']))
+{
+	printf('- $%1$d  :: PayPal Processing Fee'."\n", $options['paypal_fee']);
+	$total_cost = $total_cost + (int) $options['paypal_fee'];
+}
 
-printf(' - $%1$d :: Grand Total', ($dancer->payment_method != 'PayPal') ? $total_cost : $total_cost + 2);
+printf(' - $%1$d :: Grand Total', $total_cost);
 
 ?>
 

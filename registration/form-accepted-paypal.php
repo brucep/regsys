@@ -25,9 +25,11 @@
 							<?php NSEvent_FormInput::hidden('first_name'); echo "\n"; ?>
 							<?php NSEvent_FormInput::hidden('last_name');  echo "\n"; ?>
 
+<?php if ($options['paypal_fee']): ?>
 							<?php NSEvent_FormInput::hidden('item_name_1', array('value' => __('Processing Fee', 'nsevent'))); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('amount_1',    array('value' => 2)); echo "\n"; ?>
+							<?php NSEvent_FormInput::hidden('amount_1',    array('value' => (int) $options['paypal_fee'])); echo "\n"; ?>
 
+<?php endif; ?>
 <?php $i = 2; ?>
 <?php foreach (NSEvent::$validated_items as $item): ?>
 							<?php NSEvent_FormInput::hidden('item_name_'.$i, array('value' => $item->name)); echo "\n"; ?>

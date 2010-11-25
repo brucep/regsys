@@ -43,6 +43,14 @@
 			</tr>
 
 			<tr valign="top">
+				<th scope="row">PayPal Fee</th>
+				<td>
+					<input type="text" name="nsevent[paypal_fee]" value="<?php if (isset($options['paypal_fee'])) echo (int) $options['paypal_fee']; ?>" class="regular-text">
+					<span class="description"><?php _e('The processing fee, if any, for payments made via PayPal.', 'nsevent'); ?></span>
+				</td>
+			</tr>
+
+			<tr valign="top">
 				<th scope="row"><?php _e('Confirmation Email Address', 'nsevent'); ?></th>
 				<td>
 					<input type="text" name="nsevent[confirmation_email_address]" value="<?php if (isset($options['confirmation_email_address'])) echo esc_attr($options['confirmation_email_address']); ?>" class="regular-text">
