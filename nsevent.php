@@ -513,45 +513,23 @@ class NSEvent
 					// TODO: For VIPs, force payment_method to "mail" if their total cost is 0?
 					
 					
-					// # Confirmation email
-					// // if (!$options['registration_testing'])
-					// // {
-					// 	# Get body of email message
-					// 	ob_start();
-					// 	require dirname(__FILE__).'/registration/confirmation-email.php';
-					// 	$body = preg_replace("/^(- .+\n)\n+-/m", '$1-', ob_get_contents());
-					// 	ob_end_clean();
-					// 	
-					// 	
-					// 	# Include Swift Mailer and setup message
-					// 	require dirname(__FILE__).'/includes/swift-mailer/lib/swift_required.php';
-					// 	
-					// 	$message = Swift_Message::newInstance()
-					// 		->setSubject(sprintf(__('Registration for %s: %s', 'nsevent'), $event->name, $dancer->name()))
-					// 		->setFrom($options['confirmation_email_address'])
-					// 		->setReplyTo($options['confirmation_email_address'])
-					// 		->addTo($dancer->email, $dancer->name())
-					// 		->setBody($body);
-					// 	
-					// 	if ($options['confirmation_email_bcc'])
-					// 		$message->setBcc($options['confirmation_email_bcc']);
-					// 	
-					// 	$headers = $message->getHeaders();
-					// 	$headers->addTextHeader('X-Mailer', 'NSEvent Mailer');
-					// 	
-					// 	// TODO: Make STMP info configurable
-					// 	# Setup transport method
-					// 	$transport = Swift_SmtpTransport::newInstance()
-					// 		->setHost('smtp.gmail.com')
-					// 		->setPort('465')
-					// 		->setEncryption('ssl')
-					// 		->setUsername('')
-					// 		->setPassword('');
-					// 	
-					// 	# Send message
-					// 	$mailer = Swift_Mailer::newInstance($transport);
-					// 	$mailer->send($message);
-					// //}
+					# Confirmation email
+					if (!$options['registration_testing'])
+					{
+						$confirmation_email = array(
+							'to_email' => $dancer->email,
+							'to_name'  => $dancer->name(),
+							'subject'  => sprintf(__('Registration for %s: %s', 'nsevent'), $event->name, $dancer->name())
+							);
+						
+						# Get body of email message
+						ob_start();
+						require dirname(__FILE__).'/registration/confirmation-email.php';
+						$confirmation_email['body'] = preg_replace("/^(- .+\n)\n+-/m", '$1-', ob_get_contents());
+						ob_end_clean();
+						
+						self::send_confirmation_email($confirmation_email);
+					}
 					
 					
 					if (isset($_POST['payment_method']) and $_POST['payment_method'] == 'PayPal')
@@ -599,6 +577,49 @@ class NSEvent
 		# Block search engines for this page if they are not blocked already
 		if (get_option('blog_public')) {
 			echo '<meta name=\'robots\' content=\'noindex,nofollow\' />'."\n";
+		}
+	}
+	
+	static public function send_confirmation_email(array $parameters)
+	{
+		$options = get_option('nsevent');
+		
+		$parameters = array_merge(array(
+			'to_email' => '',
+			'to_name'  => '',
+			'subject'  => '',
+			'body'     => '',
+			), $parameters);
+		
+		if (class_exists('SwiftMailerWP'))
+		{
+			$message = Swift_Message::newInstance()
+							->setSubject($parameters['subject'])
+							->setFrom($options['confirmation_email_address'])
+							->setReplyTo($options['confirmation_email_address'])
+							->addTo($parameters['to_email'], $parameters['to_name'])
+							->setBody($parameters['body']);
+			
+			if ($options['confirmation_email_bcc'])
+				$message->setBcc($options['confirmation_email_bcc']);
+			
+			$headers = $message->getHeaders();
+			$headers->addTextHeader('X-Mailer', 'NSEvent Mailer');
+			
+			return SwiftMailerWP::get_instance()->get_mailer()->send($message);
+		}
+		else
+		{
+			$headers = sprintf('From: %1$s'."\r\n".'Reply-To: %1$s'."\r\n".'X-Mailer: NSEvent Mailer'."\r\n", $options['confirmation_email_address']);
+			
+			if ($options['confirmation_email_bcc'])
+				$headers .= sprintf('Bcc: %s'."\r\n", $options['confirmation_email_bcc']);
+			
+			return wp_mail(
+				$parameters['to_email'],
+				$parameters['subject'],
+				$parameters['body'],
+				$headers);
 		}
 	}
 	
