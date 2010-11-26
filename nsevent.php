@@ -143,7 +143,7 @@ class NSEvent
 			
 			if (empty($_GET['request']))
 			{
-				throw new Exception(__('No page request specified.', 'nsevent'));
+				$_GET['request'] = 'index';
 			}
 			
 			self::database_connect();
