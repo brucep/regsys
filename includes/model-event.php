@@ -65,7 +65,15 @@ class NSEvent_Event extends NSEvent_Model
 	
 	public function postmark_by($early = False)
 	{
-		$timestamp = $early ? $this->early_end : $this->prereg_end;
+		if (!empty($this->payment_by))
+		{
+			$timestamp = $this->payment_by;
+		}
+		else
+		{
+			$timestamp = $early ? $this->early_end : $this->prereg_end;
+		}
+		
 		$day_of_week = date('N', $timestamp);
 		
 		if ($day_of_week == 7)

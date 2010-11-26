@@ -247,6 +247,7 @@ class NSEvent
 							`early_end`          int(10) unsigned NOT NULL default '0',
 							`prereg_end`         int(10) unsigned NOT NULL default '0',
 							`refund_end`         int(10) unsigned NOT NULL default '0',
+							`payment_by`         int(10) unsigned NOT NULL default '0',
 							`discount1`          varchar(255) NOT NULL,
 							`discount2`          varchar(255) NOT NULL,
 							`discount_label`     varchar(255) NOT NULL,
