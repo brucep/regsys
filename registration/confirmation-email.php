@@ -141,8 +141,8 @@ printf(' - $%1$d :: Grand Total', $total_cost);
 
 You still need to do the following:
 
-*. Write a check to "%3\$s" for $%1\$d
-*. Send your check to:  
+* Write a check to "%3\$s" for $%1\$d
+* Send your check to:  
 %4\$s
 
 *REFUNDS ARE NOT ALLOWED AFTER %2\$s.*
