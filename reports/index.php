@@ -6,7 +6,7 @@ $options = get_option('nsevent');
 ?>
 
 <div class="wrap" id="nsevent">
-	<h2><?php _e('Events', 'nsevent'); ?><?php if (current_user_can('administrator')): ?><a href="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;request=event-edit" class="button add-new-h2"><?php _e('Add New Event', 'nsevent'); ?></a><?php endif; ?></h2>
+	<h2><?php _e('Events', 'nsevent'); ?><?php if (current_user_can('administrator')): ?><a href="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=add&amp;request=event-edit" class="button add-new-h2"><?php _e('Add New Event', 'nsevent'); ?></a><?php endif; ?></h2>
 
 	<h3><?php _e('Choose Event', 'nsevent'); ?></h3>
 
