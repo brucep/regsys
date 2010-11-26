@@ -71,7 +71,7 @@ PACKAGE
 <?php
 printf('- $%1$d :: %2$s%3$s',
 	$package_cost,
-	$package->name,
+	self::$validated_items[self::$validated_package_id]->name,
 	($event->early_end and $dancer->date_registered <= $event_early_end) ? ' [Early Bird]' : '');
 ?>
 
@@ -141,9 +141,8 @@ printf(' - $%1$d :: Grand Total', $total_cost);
 
 You still need to do the following:
 
-1. Print out this email
-2. Write a check to "%3\$s" for $%1\$d
-3. Send your printed email and check to:  
+*. Write a check to "%3\$s" for $%1\$d
+*. Send your check to:  
 %4\$s
 
 *REFUNDS ARE NOT ALLOWED AFTER %2\$s.*
