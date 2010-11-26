@@ -30,7 +30,7 @@
 							<?php NSEvent_FormInput::hidden('amount_1',    array('value' => (int) $options['paypal_fee'])); echo "\n"; ?>
 
 <?php endif; ?>
-<?php $i = 2; ?>
+<?php $i = ($options['paypal_fee']) ? 2 : 1; ?>
 <?php foreach (NSEvent::$validated_items as $item): ?>
 							<?php NSEvent_FormInput::hidden('item_name_'.$i, array('value' => $item->name)); echo "\n"; ?>
 							<?php NSEvent_FormInput::hidden('amount_'.$i,    array('value' => $dancer->registrations($item->id)->price)); echo "\n"; ?>
