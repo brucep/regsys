@@ -5,7 +5,7 @@ $dancers = NSEvent_Dancer::find_all();
 ?>
 
 <div class="wrap" id="nsevent">
-	<h2><?php $event->report_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
 
 	<h3>
 		<?php _e('Dancers', 'nsevent'); echo "\n"; ?>
@@ -36,7 +36,7 @@ $dancers = NSEvent_Dancer::find_all();
 		<tbody>
 <?php if ($dancers): $i = 1; foreach($dancers as $dancer): ?>
 			<tr class="vcard<?php if (!($i % 2)) echo ' alternate'; ?>">
-				<td class="column-title dancer-name"><?php if (!current_user_can('administrator')): echo esc_html($dancer->name(True)); else: $event->report_link('dancer', $dancer->name(True), $dancer->id); endif; ?><?php if ($dancer->is_vip()) echo ' [VIP]'; ?></td>
+				<td class="column-title dancer-name"><?php if (current_user_can('administrator')): $event->request_link('dancer', $dancer->name(True), array('dancer' => (int) $dancer->id)); else: echo esc_html($dancer->name(True)); endif; ?><?php if ($dancer->is_vip()) echo ' [VIP]'; ?></td>
 				<td><a href="mailto:<?php printf('%s <%s>?subject=%s', $dancer->name(), $dancer->email, $event->name); ?>"><span class="email"><?php echo esc_html($dancer->email); ?></span></a></td>
 				<td><?php echo ($dancer->position()) ? esc_html($dancer->position()) : '&mdash;'; ?></td>
 				<td><?php echo ($dancer->level()) ? esc_html($dancer->level()) : '&mdash;'; ?></td>

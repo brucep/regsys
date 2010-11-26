@@ -7,7 +7,7 @@ $number_volunteers = $this->database->query('SELECT COUNT(id) FROM %1$s_dancers 
 ?>
 
 <div class="wrap" id="nsevent">
-	<h2><?php $event->report_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
 
 	<h3>
 		<?php _e('Volunteers', 'nsevent'); if ($number_volunteers) printf(' (%d)', $number_volunteers); echo "\n"; ?>

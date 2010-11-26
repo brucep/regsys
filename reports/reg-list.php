@@ -30,7 +30,7 @@ if (!empty($_POST)) {
 ?>
 
 <div class="wrap" id="nsevent"><div id="reg-list">
-	<h2><?php $event->report_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
 
 	<form action="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->id; ?>&amp;request=reg-list<?php if (isset($_GET['vip-only'])) echo '&amp;vip-only'; ?>" method="post">
 	<input type="submit" value="<?php _e('Save Payment Info', 'nsevent'); ?>" class="no-print" style="float: right; margin: 0 0 1em;" />
@@ -68,7 +68,7 @@ if (!empty($_POST)) {
 		<tbody>
 <?php if ($dancers): $i = 1; foreach($dancers as $dancer): if (!isset($_GET['vip-only']) and $dancer->is_vip()) continue; ?>
 			<tr<?php if (!($i % 2)) echo ' class="alternate"'; ?>>
-				<td class="column-title dancer-name"><?php if (!current_user_can('administrator')): echo esc_html($dancer->name(True)); else: $event->report_link('dancer', $dancer->name(True), $dancer->id); endif; ?><?php if ($dancer->is_vip()) echo ' [VIP]'; ?></td>
+				<td class="column-title dancer-name"><?php if (current_user_can('administrator')): $event->request_link('dancer', $dancer->name(True), array('dancer' => (int) $dancer->id)); else: echo esc_html($dancer->name(True)); endif; ?><?php if ($dancer->is_vip()) echo ' [VIP]'; ?></td>
 <?php
  		foreach ($item_ids as $type => $ids):
 			foreach ($dancer->registrations($ids) as $reg)

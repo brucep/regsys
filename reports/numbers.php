@@ -42,7 +42,7 @@ foreach ($shirts as $item)
 ?>
 
 <div class="wrap" id="nsevent">
-	<h2><?php $event->report_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
 
 	<h3><?php _e('Attendance&nbsp;/&nbsp;Numbers', 'nsevent'); ?></h3>
 	

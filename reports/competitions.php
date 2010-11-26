@@ -5,7 +5,7 @@ $items = NSEvent_Item::find_by(array(':type' => 'competition'));
 ?>
 
 <div class="wrap" id="nsevent">
-	<h2><?php $event->report_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
 
 	<h3>
 		<?php _e('Competitions', 'nsevent'); echo "\n"; ?>
@@ -58,7 +58,7 @@ $items = NSEvent_Item::find_by(array(':type' => 'competition'));
 <?php 		$registered_dancers = $item->registered_dancers(); ?>
 <?php 		if ($registered_dancers): $i = 1; foreach ($registered_dancers as $registered_dancer): ?>
 			<tr class="<?php if (!($i % 2)) echo ' alternate'; ?>">
-				<td class="column-title"><strong><?php $event->report_link('dancer', $registered_dancer->name(), $registered_dancer->id); ?><strong></td>
+				<td class="column-title"><strong><?php $event->request_link('dancer', $registered_dancer->name(), array('dancer' => (int) $registered_dancer->id)); ?><strong></td>
 <?php 			if (in_array($item->has_meta, array('position', 'partner_name', 'team_members'))): ?>
 				<td><?php echo esc_html(ucwords($registered_dancer->item_meta)); ?></td>
 <?php 			endif; ?>			

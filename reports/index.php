@@ -36,11 +36,11 @@ $options = get_option('nsevent');
 		<tbody>
 <?php if ($events): $i = 1; foreach($events as $event): ?>
 			<tr class="<?php if (!($i % 2)) echo 'alternate'; if (isset($options['current_event_id']) and $options['current_event_id'] == $event->id) echo ' current-event'; ?>">
-				<td class="column-title"><strong><a class="row-title" href="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo (int) $event->id ?>&amp;request=index-event"><?php echo esc_html($event->name); ?></a><strong></td>
+				<td class="column-title"><strong><a class="row-title" href="<?php echo $event->request_href('index-event'); ?>"><?php echo esc_html($event->name); ?></a><strong></td>
 				<td><?php echo ($event->early_end) ? date('Y-m-d', $event->early_end) : '&mdash;';?></td>
 				<td><?php echo date('Y-m-d', $event->prereg_end); ?></td>
 <?php if (current_user_can('administrator')): ?>
-				<td class="manage-column"><?php $event->report_link('event-edit', __('Edit Event', 'nsevent'), $event->id); ?></td>
+				<td class="manage-column"><?php $event->request_link('event-edit', __('Edit Event', 'nsevent')); ?></td>
 <?php endif; ?>
 			</tr>
 <?php $i++; endforeach; else: ?>

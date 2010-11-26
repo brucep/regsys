@@ -5,7 +5,7 @@ $dancers = NSEvent_Dancer::find_all();
 ?>
 
 <div class="wrap" id="nsevent"><div id="packet-printout">
-	<h2 class="no-print"><?php $event->report_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2 class="no-print"><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
 
 	<h3 class="no-print" style="margin-bottom: 2em;"><?php _e('Packet Printouts', 'nsevent'); ?></h3>
 <?php foreach ($dancers as $dancer): ?>

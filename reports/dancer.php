@@ -1,7 +1,9 @@
 <?php
 
-if (!$dancer = NSEvent_Dancer::find($_GET['parameter']))
-	throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['parameter']));
+if (!isset($_GET['dancer']))
+	throw new Exception(__('Dancer ID not specified.', 'nsevent'));
+elseif (!$dancer = NSEvent_Dancer::find($_GET['dancer']))
+	throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['dancer']));
 
 $options = get_option('nsevent');
 $options = array_merge($this->default_options, $options);
@@ -10,13 +12,13 @@ $options = array_merge($this->default_options, $options);
 
 <div class="wrap" id="nsevent">
 <div id="dancer">
-	<h2><?php $event->report_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
 
 	<h3>
 	    <?php echo esc_html($dancer->name()); ?>
 <?php if (current_user_can('administrator')): ?>
-		<?php $event->report_link('dancer-edit', __('Edit Dancer', 'nsevent'), $dancer->id, 'button add-new-h3'); echo "\n"; ?>
-		<?php $event->report_link('dancer-delete', __('Delete Dancer', 'nsevent'), $dancer->id, 'button add-new-h3'); echo "\n"; ?>
+		<?php $event->request_link('dancer-edit', __('Edit Dancer', 'nsevent'), array('dancer' => (int) $dancer->id), 'button add-new-h3'); echo "\n"; ?>
+		<?php $event->request_link('dancer-delete', __('Delete Dancer', 'nsevent'), array('dancer' => (int) $dancer->id), 'button add-new-h3'); echo "\n"; ?>
 <?php endif; ?>
     </h3>
 
@@ -36,7 +38,7 @@ $options = array_merge($this->default_options, $options);
 	<h4>
 <?php _e('Registrations', 'nsevent'); ?>
 <?php 	if (current_user_can('administrator')): ?>
-		<a href="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->id; ?>&amp;request=registration-add&amp;parameter=<?php echo (int) $dancer->id; ?>" class="button add-new-h4"><?php _e('Add Registration', 'nsevent'); ?></a>
+		<a href="<?php $event->request_href('registration-add', array('dancer' => (int) $dancer->id)); ?>" class="button add-new-h4"><?php _e('Add Registration', 'nsevent'); ?></a>
 <?php 		if ($dancer->payment_method == 'PayPal'): ?>
 		<a href="<?php echo NSEvent::paypal_href($dancer, $options); ?>" class="button add-new-h4"><?php _e('PayPal Link', 'nsevent'); ?></a>
 <?php 		endif; ?>
@@ -56,7 +58,7 @@ $options = array_merge($this->default_options, $options);
 	<h4>
 		<?php echo esc_html($dancer->housing_type); ?>
 <?php 	if (current_user_can('administrator')): ?>
-		<a href="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->id; ?>&amp;request=housing-delete&amp;parameter=<?php echo (int) $dancer->id; ?>" class="button add-new-h4"><?php _e('Delete Housing Info', 'nsevent'); ?></a>
+		<a href="<?php $event->request_href('housing-delete', array('dancer' => (int) $dancer->id)); ?>" class="button add-new-h4"><?php _e('Delete Housing Info', 'nsevent'); ?></a>
 <?php 	endif; ?>
 	</h4>
 	

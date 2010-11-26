@@ -134,17 +134,20 @@ class NSEvent
 	{
 		global $wpdb;
 		
-		if (!current_user_can('edit_pages'))
-			return;
-		
-		if (empty($_GET['request']))   $_GET['request']   = 'index';
-		if (empty($_GET['event_id']))  $_GET['event_id']  = '';
-		if (empty($_GET['parameter'])) $_GET['parameter'] = '';
-		
-		self::database_connect();
-		
 		try
 		{
+			if (!current_user_can('edit_pages'))
+			{
+				throw new Exception(__('Cheatin&#8217; uh?'));
+			}
+			
+			if (empty($_GET['request']))
+			{
+				throw new Exception(__('No page request specified.', 'nsevent'));
+			}
+			
+			self::database_connect();
+			
 			switch ($_GET['request'])
 			{
 				# List of events
@@ -157,16 +160,27 @@ class NSEvent
 				case 'dancer-edit':
 				case 'housing-delete':
 				case 'registration-add':
-    				if (!current_user_can('administrator'))
-    					throw new Exception(__('Cheatin&#8217; uh?'));
-				    if (!$event = NSEvent_Event::find($_GET['event_id']))
-						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
-					NSEvent_Model::$event = $event;
-					if (!$dancer = NSEvent_Dancer::find($_GET['parameter']))
+					if (empty($_GET['dancer']))
+					{
+						throw new Exception(__('Dancer ID not specified.', 'nsevent'));
+					}
+					if (!$dancer = NSEvent_Dancer::find($_GET['dancer']))
+					{
 						throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['parameter']));
+					}
 				case 'event-edit':
 					if (!current_user_can('administrator'))
+					{
 						throw new Exception(__('Cheatin&#8217; uh?'));
+					}
+					if (empty($_GET['event_id']))
+					{
+						throw new Exception(__('Event ID not specified.', 'nsevent'));
+					}
+				    if ($_GET['event_id'] !== 'add' and (!$event = NSEvent_Model::$event = NSEvent_Event::find($_GET['event_id'])))
+					{
+						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
+					}
 					require dirname(__FILE__).'/includes/form-input.php';
 					$file = sprintf('admin/%s.php', $_GET['request']);
 					break;
@@ -192,7 +206,7 @@ class NSEvent
 					break;
 				
 				default:
-					throw new Exception(sprintf(__('Unable to handle request: %s', 'nsevent'), esc_html($_GET['request'])));
+					throw new Exception(sprintf(__('Unable to handle page request: %s', 'nsevent'), esc_html($_GET['request'])));
 			}
 			
 			require dirname(__FILE__)."/$file";

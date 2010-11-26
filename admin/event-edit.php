@@ -26,11 +26,8 @@ if (!empty($_POST))
 		return;
 	}
 }
-elseif (isset($_GET['parameter']))
+elseif (isset($event))
 {
-	if (!$event = NSEvent_Event::find($_GET['parameter']))
-		throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['parameter']));
-	
 	# Put values into POST so that form is pre-populated.
 	$reflection = new ReflectionObject($event);
 	foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property)
@@ -40,9 +37,9 @@ elseif (isset($_GET['parameter']))
 ?>
 
 <div class="wrap" id="nsevent">
-	<h2><?php echo (isset($_GET['parameter'])) ? __('Edit Event', 'nsevent') : __('Add New Event', 'nsevent'); ?></h2>
+	<h2><?php echo (isset($event)) ? __('Edit Event', 'nsevent') : __('Add New Event', 'nsevent'); ?></h2>
 
-	<form action="<?php echo $event->report_href('event-edit', (isset($_GET['parameter']) ? $_GET['parameter'] : False)); ?>" method="post">
+	<form action="<?php echo (isset($event)) ? $event->request_href('event-edit') : sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=new&amp;request=event-edit', get_bloginfo('wpurl')); ?>" method="post">
 		<ul>			
 			<li><?php NSEvent_FormInput::text('name', array('label' =>  __('Name', 'nsevent'))); ?></li>
 			<li><?php NSEvent_FormInput::text('prereg_end', array('label' => __('Preregistration End Date', 'nsevent'))); ?></li>

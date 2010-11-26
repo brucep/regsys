@@ -107,19 +107,25 @@ class NSEvent_Event extends NSEvent_Model
 			return self::$database->query('SELECT * FROM %1$s_dancers WHERE event_id = :event_id AND status = 1 ORDER BY last_name ASC, first_name ASC', array(':event_id' => self::$event->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Dancer');
 	}
 	
-	public function report_href($request, $parameter = False)
+	public function request_href($request, array $parameters = array())
 	{
-		return sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=%s%s',
+		$href = sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=%s',
 			get_bloginfo('wpurl'),
 			$this->id,
-			rawurlencode($request),
-			($parameter === False) ? '' : '&amp;parameter='.rawurlencode($parameter));
+			rawurlencode($request));
+		
+		foreach ($parameters as $key => $value)
+		{
+			$href .= sprintf('&amp%s=%s', rawurlencode($key), rawurlencode($value));
+		}
+		
+		return $href;
 	}
 	
-	public function report_link($request, $label, $parameter = False, $class = '', $format = '')
+	public function request_link($request, $label, array $parameters = array(), $class = '', $format = '')
 	{
 		printf('<a href="%1$s%4$s"%3$s>%2$s</a>',
-			$this->report_href($request, $parameter),
+			$this->request_href($request, $parameters),
 			esc_html($label),
 			empty($class)  ? '' : sprintf(' class="%s"', esc_attr($class)),
 			empty($format) ? '' : sprintf('&amp;format=%s', rawurlencode($format)));

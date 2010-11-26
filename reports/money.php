@@ -6,7 +6,7 @@ $items = NSEvent_Item::find_all();
 ?>
 
 <div class="wrap" id="nsevent">
-	<h2><?php $event->report_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
 
 	<h3><?php _e('Money', 'nsevent'); ?></h3>
 
@@ -39,7 +39,7 @@ $items = NSEvent_Item::find_all();
 <?php 		if ($dancer->total_cost() === 0) continue; $i++; ?>
 			<tr class="<?php if (!($i % 2)) echo ' alternate'; ?>">
 				<!-- <a href="mailto:<?php echo rawurlencode(sprintf('%s <%s>', $dancer->name(), $dancer->email)); ?>"> -->
-				<td class="column-title"><strong><?php $event->report_link('dancer', $dancer->name(True), $dancer->id); ?><strong></td>
+				<td class="column-title"><strong><?php $event->request_link('dancer', $dancer->name(True), array('dancer' => (int) $dancer->id)); ?><strong></td>
 <?php 		foreach($items as $item): ?>
 				<td><?php if ($dancer->cost_for_registered_item($item->id)) printf('$%d', $dancer->cost_for_registered_item($item->id)); ?></td>
 <?php 		endforeach; ?>
