@@ -33,7 +33,6 @@ VOLUNTEER
 HOUSING NEEDED
 --------------
 
-- <?php echo ($_POST['housing_needed_car']) ? 'I will have a car.' : 'I will not have a car.', "\n"; ?>
 <?php 	if ($_POST['housing_needed_no_smoking']): ?>
 - I would prefer no smoking.
 <?php 	endif; ?>
