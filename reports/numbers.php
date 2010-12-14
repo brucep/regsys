@@ -11,11 +11,11 @@ if ($event->levels())
 {
 	foreach ($event->levels() as $index => $level)
 	{
-		$lists['Levels (Total)'][$level] = $this->database->query('SELECT COUNT(id) FROM %1$s_dancers WHERE event_id = :event_id AND level = :level', array(':event_id' => $event->id, ':level' => $index))->fetchColumn();
+		$lists['Levels (Total)'][$level] = self::$database->query('SELECT COUNT(id) FROM %1$s_dancers WHERE event_id = :event_id AND level = :level', array(':event_id' => $event->id, ':level' => $index))->fetchColumn();
 		// TODO: Only show when there are items with meta of `count_classes`
 		$lists['Levels (Class Balance)'][$level] = sprintf('%d leads, %d follows',
-			$this->database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`has_meta` = "count_for_classes"', array(':event_id' => $event->id, ':level' => $index, ':position' => 1))->fetchColumn(),
-			$this->database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`has_meta` = "count_for_classes"', array(':event_id' => $event->id, ':level' => $index, ':position' => 2))->fetchColumn());
+			self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`has_meta` = "count_for_classes"', array(':event_id' => $event->id, ':level' => $index, ':position' => 1))->fetchColumn(),
+			self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`has_meta` = "count_for_classes"', array(':event_id' => $event->id, ':level' => $index, ':position' => 2))->fetchColumn());
 	}
 	
 	$lists['Levels (Total)'] = array_filter($lists['Levels (Total)']);
