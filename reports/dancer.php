@@ -6,7 +6,7 @@ elseif (!$dancer = NSEvent_Dancer::find($_GET['dancer']))
 	throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['dancer']));
 
 $options = get_option('nsevent');
-$options = array_merge($this->default_options, $options);
+$options = array_merge(self::$default_options, $options);
 
 ?>
 

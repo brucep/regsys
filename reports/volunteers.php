@@ -2,7 +2,7 @@
 
 $volunteers = $event->volunteers();
 
-$number_volunteers = $this->database->query('SELECT COUNT(id) FROM %1$s_dancers WHERE event_id = :event_id and status = 1', array(':event_id' => $event->id))->fetchColumn();
+$number_volunteers = self::$database->query('SELECT COUNT(id) FROM %1$s_dancers WHERE event_id = :event_id and status = 1', array(':event_id' => $event->id))->fetchColumn();
 
 ?>
 
