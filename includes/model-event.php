@@ -124,7 +124,7 @@ class NSEvent_Event extends NSEvent_Model
 		
 		foreach ($parameters as $key => $value)
 		{
-			$href .= sprintf('&amp%s=%s', rawurlencode($key), rawurlencode($value));
+			$href .= sprintf('&amp;%s=%s', rawurlencode($key), rawurlencode($value));
 		}
 		
 		return $href;
