@@ -70,6 +70,7 @@
 <?php endif; ?>
 
 						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); echo ($_POST['payment_method'] === 'PayPal') ? _e('PayPal', 'nsevent') : _e('Mail', 'nsevent'); ?></div>
+						<div class="field"><span class="label"><?php _e('Total Amount', 'nsevent'); ?>:</span> <?php printf('$%d', $total_cost); ?></div>
 						<?php NSEvent_FormInput::hidden('payment_method'); echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('confirmed'); echo "\n"; ?>
 						

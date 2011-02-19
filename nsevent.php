@@ -473,6 +473,11 @@ class NSEvent
 				$shirts_cost       = 0;
 				$total_cost        = 0;
 				
+				foreach (self::$validated_items as $item)
+				{
+					$total_cost += $item->get_price_for_discount($_POST['discount'], $early_bird);;
+				}
+				
 				if (!isset($_POST['confirmed']))
 				{
 					$dancer = new NSEvent_Dancer($_POST);
@@ -507,8 +512,6 @@ class NSEvent
 							$shirts[$item->id] = $item;
 							$shirts_cost += $item_price;
 						}
-						
-						$total_cost += $item_price;
 						
 						NSEvent_Registration::add(array(
 							'dancer_id' => $dancer->id,
