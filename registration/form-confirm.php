@@ -1,15 +1,9 @@
-<?php get_header(); ?>
+<?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); } ?>
 
-		<div id="container" class="onecolumn">
-			<div id="content">
-
-<?php the_post(); ?>
-
-				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+				<div id="nsevent-registration-form-confirm" <?php post_class('nsevent-registration-form'); ?>>
 					<h1 class="entry-title"><?php printf(__('Confirm Registration for %s', 'nsevent'), esc_html($event->name)); ?></h1>
-					<div class="entry-content"><?php //echo '<pre>', var_dump($_POST), '</pre>'; ?></div>
 
-					<form action="<?php echo get_permalink(); ?>" method="post" id="nsevent-confirm" class="nsevent-registration <?php echo $early_bird_class; if ($vip) echo ' vip'; ?>">
+					<form action="<?php echo get_permalink(); ?>" method="post" <form action="<?php echo get_permalink(); ?>" method="post" class="<?php echo $early_bird_class; if ($vip) { echo ' vip'; } ?>">>
 						<div class="field"><span class="label"><?php _e('Name', 'nsevent'); ?>:</span> <?php echo esc_html($dancer->name()); ?></div>
 						<?php NSEvent_FormInput::hidden('first_name'); echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('last_name'); echo "\n"; ?>
@@ -81,4 +75,4 @@
 			</div><!-- #content -->
 		</div><!-- #container -->
 
-<?php get_footer(); ?>
+<?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); } ?>

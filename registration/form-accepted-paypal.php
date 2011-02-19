@@ -1,15 +1,9 @@
-<?php get_header(); ?>
+<?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); } ?>
 
-		<div id="container" class="onecolumn">
-			<div id="content">
-
-<?php the_post(); ?>
-
-				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+				<div id="nsevent-registration-form-accepted-paypal" <?php post_class('nsevent-registration-form'); ?>>
 					<h1 class="entry-title"><?php printf(__('Registration Accepted for %s', 'nsevent'), esc_html($event->name)); ?></h1>
-					<div class="entry-content"></div><!-- .entry-content -->
 
-					<div id="nsevent-accepted-paypal" class="nsevent-registration <?php echo $early_bird_class; if ($vip) echo ' vip'; ?>">
+					<div id="accepted" class="nsevent-registration <?php echo $early_bird_class; if ($vip) echo ' vip'; ?>">
 						<p><?php _e('Your registration has been recorded.', 'nsevent'); ?></p>
 
 						<form action="<?php echo (!$options['paypal_sandbox']) ? 'https://www.paypal.com/cgi-bin/webscr' : 'https://www.sandbox.paypal.com/cgi-bin/webscr' ?>" method="post">
@@ -42,9 +36,6 @@
 <?php endforeach; ?>
 						</form>
 					</div>
-				</div><!-- #post-<?php the_ID(); ?> -->
+				</div>
 
-			</div><!-- #content -->
-		</div><!-- #container -->
-
-<?php get_footer(); ?>
+<?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); } ?>

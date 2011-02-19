@@ -7,17 +7,13 @@ $shirts       = NSEvent_Item::find_by(array(':preregistration' => 1, ':type' => 
 ?>
 <?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); } ?>
 
-		<div id="container" class="onecolumn">
-			<div id="content">
-<?php the_post(); ?>
-
-				<div <?php post_class(); ?>>
+				<div id="nsevent-registration-form-info" <?php post_class('nsevent-registration-form'); ?>>
 					<h1 class="entry-title"><?php printf(__('Register for %s', 'nsevent'), esc_html($event->name)); ?></h1>
 					<div class="entry-content">
-<?php the_content(); ?>
+						<?php the_content(); ?>
 					</div>
 
-					<form action="<?php echo get_permalink(); ?>" method="post" id="nsevent-reg-info" class="nsevent-registration <?php echo $early_bird_class; if ($vip) echo ' vip'; ?>">
+					<form action="<?php echo get_permalink(); ?>" method="post" class="<?php echo $early_bird_class; if ($vip) { echo ' vip'; } ?>">
 <?php if (!$vip): ?>
 						<div id="pricing-dates">
 <?php 	if ($event->early_end): ?>
