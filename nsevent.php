@@ -23,7 +23,7 @@ Except as contained in this notice, the name of the author not be used in advert
 if (!class_exists('NSEvent')):
 class NSEvent
 {
-	static public $event, $vip, $validated_package_id = 0, $validated_items;
+	static public $event, $vip, $validated_package_id = 0, $validated_items = array();
 	static private $database;
 	static private $default_options = array(
 		'current_event_id'           => '',
