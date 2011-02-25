@@ -24,7 +24,6 @@ if (!class_exists('NSEvent')):
 class NSEvent
 {
 	static public $event, $vip, $validated_package_id = 0, $validated_items = array();
-	static private $database;
 	static private $default_options = array(
 		'current_event_id'           => '',
 		'registration_testing'       => False,
@@ -38,17 +37,25 @@ class NSEvent
 	private function __clone() {}
 	private function __construct() {}
 	
-	static private function database_connect()
+	static private function get_database_connection()
 	{
 		global $wpdb;
 		
-		if (!isset(self::$database))
-		{
-			require dirname(__FILE__).'/includes/database.php';
-			self::$database = NSEvent_Database::get_instance();
-			self::$database->connect();
-			self::$database->prefix = $wpdb->prefix.'nsevent';
-		}
+		require dirname(__FILE__).'/includes/database.php';
+		require dirname(__FILE__).'/includes/model.php';
+		require dirname(__FILE__).'/includes/model-event.php';
+		require dirname(__FILE__).'/includes/model-item.php';
+		require dirname(__FILE__).'/includes/model-dancer.php';
+		require dirname(__FILE__).'/includes/model-registration.php';
+		
+		return new NSEvent_Database(array(
+			'host'     => DB_HOST,
+			'port'     => defined('DB_HOST_PORT') ? DB_HOST_PORT : false,
+			'name'     => DB_NAME,
+			'user'     => DB_USER,
+			'password' => DB_PASSWORD,
+			'prefix'   => $wpdb->prefix.'nsevent',
+			));
 	}
 	
 	static public function admin_init()
@@ -122,7 +129,7 @@ class NSEvent
 		if (!current_user_can('administrator'))
 			return;
 		
-		self::database_connect();
+		NSEvent_Model::set_database(self::get_database_connection());
 		
 		$events = NSEvent_Event::find_all();
 		$options = get_option('nsevent', array());
@@ -146,7 +153,7 @@ class NSEvent
 				$_GET['request'] = 'index';
 			}
 			
-			self::database_connect();
+			NSEvent_Model::set_database(self::get_database_connection());
 			
 			switch ($_GET['request'])
 			{
@@ -377,7 +384,7 @@ class NSEvent
 			require dirname(__FILE__).'/includes/form-input.php';
 			require dirname(__FILE__).'/includes/form-validation.php';
 			NSEvent_FormValidation::set_error_messages();
-			self::database_connect();
+			NSEvent_Model::set_database(self::get_database_connection());
 			
 			# Find current event
 			$event = self::$event = NSEvent_Event::find($options['current_event_id']);

@@ -2,20 +2,10 @@
 
 class NSEvent_Database
 {
-	public $prefix = '';
-	protected $pdo, $connected;
-	protected function __construct() {}
+	private $pdo, $prefix = '';
 	
-	#
-	# Function: connect
-	# Creates a database connection.
-	#
-	public function connect()
+	public function __construct(array $settings)
 	{
-		if ($this->connected)
-			return True;
-		
-		
 		#
 		# Establish connection via PDO
 		#
@@ -24,24 +14,24 @@ class NSEvent_Database
 			$this->pdo = new PDO(
 				sprintf('%s:host=%s;%sdbname=%s',
 					'mysql',
-					DB_HOST,
-					!defined('DB_HOST_PORT') ? '' : 'port={'.DB_HOST_PORT.'};',
-					DB_NAME),
-				DB_USER,
-				DB_PASSWORD,
+					$settings['host'],
+					empty($settings['port']) ? '' : sprintf('port={%d};', $settings['port']),
+					$settings['name']),
+				$settings['user'],
+				$settings['password'],
 				array(
-					PDO::ATTR_PERSISTENT => True,
 					PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));
 			
 			$this->pdo->query('SET NAMES "utf8";');
 			
-			return $this->connected = True;
+			if (!empty($settings['prefix']))
+				$this->prefix = $settings['prefix'];
 		}
 		catch (PDOException $e)
 		{
 			$message = preg_replace('/[A-Z]+\[[0-9]+\]: .+ [0-9]+ (.*?)/', '$1', $e->getMessage());
-			throw new BP_RequestException($message, 500);
+			throw new Exception($message);
 		}
 	}
 
@@ -91,19 +81,4 @@ class NSEvent_Database
 	{
 		return $this->pdo->quote($string);
 	}
-	
-	static public function &get_instance()
-	{
-		static $instance;
-		if (!isset($instance))
-			$instance = new self;
-		return $instance;
-	}
 }
-
-NSEvent_Model::$database = NSEvent_Database::get_instance();
-require dirname(__FILE__).'/model.php';
-require dirname(__FILE__).'/model-event.php';
-require dirname(__FILE__).'/model-item.php';
-require dirname(__FILE__).'/model-dancer.php';
-require dirname(__FILE__).'/model-registration.php';

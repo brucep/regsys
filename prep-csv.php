@@ -8,6 +8,23 @@ class NSEvent_CSVHelper
 {
 	static public $database, $event;
 	
+	static public function set_database($database)
+	{
+		self::$database = $database
+	}
+	
+	static public function load_event()
+	{
+		if (isset($_GET['event_id']))
+		{
+			if (!self::$event = NSEvent_Event::find($_GET['event_id']))
+				throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
+		}
+		else
+			throw new Exception('Event ID not specified.');
+		}
+	}
+	
 	static public function download(array $rows, $filename = '')
 	{
 		$output = fopen('php://output', 'w');
@@ -29,31 +46,7 @@ class NSEvent_CSVHelper
 		
 		exit;
 	}
-	
-	static public function connect_database()
-	{
-		global $wpdb;
-		
-		require dirname(__FILE__).'/includes/database.php';
-		self::$database = NSEvent_Database::get_instance();
-		self::$database->connect();
-		self::$database->prefix = $wpdb->prefix.'nsevent';
-	}
-	
-	static public function load_event()
-	{
-		if (isset($_GET['event_id']))
-		{
-			if (!self::$event = NSEvent_Event::find($_GET['event_id']))
-				throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
-			NSEvent_Model::$event = self::$event;
-		}
-		else
-			throw new Exception('Event ID not specified.');
-	}
 }
 
-NSEvent_CSVHelper::connect_database();
+NSEvent_CSVHelper::set_database(NSEvent::get_database_connection());
 NSEvent_CSVHelper::load_event();
-
-?>
