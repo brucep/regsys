@@ -101,40 +101,8 @@ class NSEvent_Database
 	}
 }
 
-abstract class NSEvent_Model
-{
-	static public $database, $event;
-	
-	public function bit_field($input, array $fields, $return = '')
-	{
-		$result = array();
-		$result_booleans = array();
-		krsort($fields);
-		
-		foreach ($fields as $key => $value)
-			// When not using validated data, check if input is too large
-			if ($input >= $key)
-			{
-				$result[$key] = $value;
-				$result_booleans[$value] = TRUE;
-				$input -= $key;
-			}
-			else
-				$result_booleans[$value] = FALSE;
-		
-		ksort($result);
-		ksort($result_booleans);
-		
-		if ($return == 'string')
-			return ucwords(implode(', ', array_keys(array_filter($result_booleans))));
-		elseif ($return == 'booleans')
-			return $result_booleans;
-		else 
-			return $result;
-	}
-}
-
 NSEvent_Model::$database = NSEvent_Database::get_instance();
+require dirname(__FILE__).'/model.php';
 require dirname(__FILE__).'/model-event.php';
 require dirname(__FILE__).'/model-item.php';
 require dirname(__FILE__).'/model-dancer.php';
