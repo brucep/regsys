@@ -417,7 +417,7 @@ class NSEvent
 					'email'           => 'trim|valid_email|max_length[100]',
 					'position'        => 'intval|in[1,2]|NSEvent::validate_position',
 					'status'          => 'NSEvent::validate_status',
-					'volunteer_phone' => 'if[status]|trim|NSEvent::validate_volunteer_phone',
+					'volunteer_phone' => 'if_set[status]|trim|NSEvent::validate_volunteer_phone',
 					'package'         => 'intval|NSEvent::validate_package',
 					'items'           => 'NSEvent::validate_items',
 					'payment_method'  => 'in[Mail,PayPal]',
@@ -449,18 +449,18 @@ class NSEvent
 				if ($event->has_housing)
 				{
 					NSEvent_FormValidation::add_rules(array(
-						'housing_provider_available' => 'if[housing_provider]|intval|greater_than[0]',
-						'housing_provider_smoking'   => 'if[housing_provider]|intval|in[0,1]',
-						'housing_provider_pets'      => 'if[housing_provider]|intval|in[0,1]',
-						'housing_provider_gender'    => 'if[housing_provider]|intval|in[1,2,3]',
-						'housing_provider_nights'    => 'if[housing_provider]|NSEvent::validate_housing_nights',
-						'housing_provider_comment'   => 'if[housing_provider]|trim|max_length[65536]',
-						'housing_needed_car'         => 'if[housing_needed]|intval|in[0,1]',
-						'housing_needed_no_smoking'  => 'if[housing_needed]|intval|in[0,1]',
-						'housing_needed_no_pets'     => 'if[housing_needed]|intval|in[0,1]',
-						'housing_needed_gender'      => 'if[housing_needed]|intval|in[1,2,3]',
-						'housing_needed_nights'      => 'if[housing_needed]|NSEvent::validate_housing_nights',
-						'housing_needed_comment'     => 'if[housing_needed]|trim|max_length[65536]|stripslashes',
+						'housing_provider_available' => 'if_set[housing_provider]|intval|greater_than[0]',
+						'housing_provider_smoking'   => 'if_set[housing_provider]|intval|in[0,1]',
+						'housing_provider_pets'      => 'if_set[housing_provider]|intval|in[0,1]',
+						'housing_provider_gender'    => 'if_set[housing_provider]|intval|in[1,2,3]',
+						'housing_provider_nights'    => 'if_set[housing_provider]|NSEvent::validate_housing_nights',
+						'housing_provider_comment'   => 'if_set[housing_provider]|trim|max_length[65536]',
+						'housing_needed_car'         => 'if_set[housing_needed]|intval|in[0,1]',
+						'housing_needed_no_smoking'  => 'if_set[housing_needed]|intval|in[0,1]',
+						'housing_needed_no_pets'     => 'if_set[housing_needed]|intval|in[0,1]',
+						'housing_needed_gender'      => 'if_set[housing_needed]|intval|in[1,2,3]',
+						'housing_needed_nights'      => 'if_set[housing_needed]|NSEvent::validate_housing_nights',
+						'housing_needed_comment'     => 'if_set[housing_needed]|trim|max_length[65536]|stripslashes',
 						));
 				}
 			}

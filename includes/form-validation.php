@@ -64,12 +64,25 @@ class NSEvent_FormValidation
 				}
 				
 				
-				if ($condition === 'if' or $condition === 'if_not')
+				if ($condition === 'if_set' or $condition === 'if_not_set')
 				{
-					if ($parameter == Null)
-						throw new NSEvent_FormValidation_Exception(sprintf('%s rule must have a parameter.', ucwords(str_replace('_', ' ', $condition))));
-					else if (($condition === 'if' and !empty($_POST[$parameter]))
-					      or ($condition === 'if_not' and empty($_POST[$parameter])))
+					if ($parameter == null)
+						throw new NSEvent_FormValidation_Exception(sprintf('%s rule must have a valid parameter.', $condition));
+					elseif (($condition === 'if_set' and !empty($_POST[$parameter])) or
+					        ($condition === 'if_not_set' and empty($_POST[$parameter])))
+						continue;
+					else
+						break;
+				}
+				elseif ($condition === 'if_key_value' or $condition === 'if_not_key_value')
+				{
+					if ($parameter == null or strpos($parameter, ',') === false)
+						throw new NSEvent_FormValidation_Exception(sprintf('%s rule must have a valid parameter.', $condition));
+					
+					list($key, $value) = explode(',', $parameter, 2);
+					
+					if (($condition === 'if_key_value' and $_POST[$key] == $value) or
+					    ($condition === 'if_not_key_value' and $_POST[$key] != $value))
 						continue;
 					else
 						break;
