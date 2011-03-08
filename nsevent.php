@@ -37,27 +37,6 @@ class NSEvent
 	private function __clone() {}
 	private function __construct() {}
 	
-	static private function get_database_connection()
-	{
-		global $wpdb;
-		
-		require dirname(__FILE__).'/includes/database.php';
-		require dirname(__FILE__).'/includes/model.php';
-		require dirname(__FILE__).'/includes/model-event.php';
-		require dirname(__FILE__).'/includes/model-item.php';
-		require dirname(__FILE__).'/includes/model-dancer.php';
-		require dirname(__FILE__).'/includes/model-registration.php';
-		
-		return new NSEvent_Database(array(
-			'host'     => DB_HOST,
-			'port'     => defined('DB_HOST_PORT') ? DB_HOST_PORT : false,
-			'name'     => DB_NAME,
-			'user'     => DB_USER,
-			'password' => DB_PASSWORD,
-			'prefix'   => $wpdb->prefix.'nsevent',
-			));
-	}
-	
 	static public function admin_init()
 	{
 		load_plugin_textdomain('nsevent', False, basename(__FILE__, '.php').'/translations');
@@ -124,11 +103,37 @@ class NSEvent
 		return $options;
 	}
 	
+	static public function get_database_connection()
+	{
+		global $wpdb;
+		
+		require dirname(__FILE__).'/includes/database.php';
+		
+		return new NSEvent_Database(array(
+			'host'     => DB_HOST,
+			'port'     => defined('DB_HOST_PORT') ? DB_HOST_PORT : false,
+			'name'     => DB_NAME,
+			'user'     => DB_USER,
+			'password' => DB_PASSWORD,
+			'prefix'   => $wpdb->prefix.'nsevent',
+			));
+	}
+	
+	static public function load_models()
+	{
+		require dirname(__FILE__).'/includes/model.php';
+		require dirname(__FILE__).'/includes/model-event.php';
+		require dirname(__FILE__).'/includes/model-item.php';
+		require dirname(__FILE__).'/includes/model-dancer.php';
+		require dirname(__FILE__).'/includes/model-registration.php';
+	}
+	
 	static public function page_options()
 	{
 		if (!current_user_can('administrator'))
 			return;
 		
+		self::load_models();
 		NSEvent_Model::set_database(self::get_database_connection());
 		
 		$events = NSEvent_Event::find_all();
@@ -153,6 +158,7 @@ class NSEvent
 				$_GET['request'] = 'index';
 			}
 			
+			self::load_models();
 			NSEvent_Model::set_database(self::get_database_connection());
 			
 			switch ($_GET['request'])
@@ -384,6 +390,8 @@ class NSEvent
 			require dirname(__FILE__).'/includes/form-input.php';
 			require dirname(__FILE__).'/includes/form-validation.php';
 			NSEvent_FormValidation::set_error_messages();
+			
+			self::load_models();
 			NSEvent_Model::set_database(self::get_database_connection());
 			
 			# Find current event

@@ -48,5 +48,6 @@ class NSEvent_CSVHelper
 	}
 }
 
+NSEvent::load_models();
 NSEvent_CSVHelper::set_database(NSEvent::get_database_connection());
 NSEvent_CSVHelper::load_event();
