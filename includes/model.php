@@ -2,7 +2,13 @@
 
 abstract class NSEvent_Model
 {
-	static public $database, $event;
+	static public $event;
+	static protected $database;
+	
+	static public function set_database($database)
+	{
+		self::$database = $database;
+	}
 	
 	public function bit_field($input, array $fields, $return = '')
 	{
