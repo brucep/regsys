@@ -107,7 +107,7 @@ class NSEvent
 	{
 		global $wpdb;
 		
-		require dirname(__FILE__).'/includes/database.php';
+		require_once dirname(__FILE__).'/includes/database.php';
 		
 		return new NSEvent_Database(array(
 			'host'     => DB_HOST,
