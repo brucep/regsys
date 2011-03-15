@@ -70,9 +70,6 @@
 						
 						<div id="submit"><input type="submit" value="<?php _e('Confirm&hellip;', 'nsevent'); ?>" /></div>
 					</form>
-				</div><!-- #post-<?php the_ID(); ?> -->
-
-			</div><!-- #content -->
-		</div><!-- #container -->
+				</div>
 
 <?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); } ?>

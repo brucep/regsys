@@ -406,7 +406,4 @@ $shirts       = NSEvent_Item::find_by(array(':preregistration' => 1, ':type' => 
 					</form>
 				</div>
 
-			</div><!-- #content -->
-		</div><!-- #container -->
-
 <?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); } ?>
