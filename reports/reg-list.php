@@ -2,41 +2,51 @@
 
 require dirname(dirname(__FILE__)).'/includes/form-input.php';
 
-if (!isset($_GET['vip-only'])) {
-	$dancers = NSEvent_Dancer::find_all();
+if (!isset($_GET['vip-only']))
+{
+	$dancers = $event->get_dancers();
 }
-else {
-	$dancers = NSEvent_Dancer::find_by('status', 2);
+else
+{
+	$dancers = $event->get_dancers_where(array(':status' => 2));
 }
 
 $database = self::get_database_connection();
 $item_ids = array('package' => null, 'competition' => null, 'shirt' => null);
 foreach ($item_ids as $key => &$value)
-	$value = $database->query('SELECT id FROM %1$s_items WHERE event_id = :event_id AND type = :type', array(':event_id' => $event->id, ':type' => $key))->fetchAll(PDO::FETCH_COLUMN, 0);
+{
+	$value = $database->query('SELECT id FROM %1$s_items WHERE event_id = :event_id AND type = :type', array(':event_id' => $event->get_id(), ':type' => $key))->fetchAll(PDO::FETCH_COLUMN, 0);
+}
 unset($key, $value);
 
-if (!empty($_POST)) {
+if (!empty($_POST))
+{
 	foreach ($dancers as $dancer)
 	{
 		if ((!isset($_GET['vip-only']) and $dancer->is_vip())
-			or (!isset($_POST['amount_owed'][$dancer->id])))
+			or (!isset($_POST['payment_owed'][$dancer->get_id()])))
+		{
 			continue;
+		}
 		
 		$dancer->update_payment_confirmation(
-			(int) isset($_POST['payment_confirmed'][$dancer->id]),
-			(int) $_POST['amount_owed'][$dancer->id]);
+			(int) isset($_POST['payment_confirmed'][$dancer->get_id()]),
+			(int) $_POST['payment_owed'][$dancer->get_id()]);
 	}
 }
 
 ?>
 
 <div class="wrap" id="nsevent"><div id="reg-list">
-	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php echo $event->get_request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->get_name())); ?></h2>
 
-	<form action="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->id; ?>&amp;request=reg-list<?php if (isset($_GET['vip-only'])) echo '&amp;vip-only'; ?>" method="post">
-	<input type="submit" value="<?php _e('Save Payment Info', 'nsevent'); ?>" class="no-print" style="float: right; margin: 0 0 1em;" />
-	<h3><?php _e('Registration List', 'nsevent'); echo "\n"; ?></h3>
+	<form action="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->get_id(); ?>&amp;request=reg-list<?php if (isset($_GET['vip-only'])) echo '&amp;vip-only'; ?>" method="post">
+<?php if ($dancers): ?>
+		<input type="submit" value="<?php _e('Save Payment Info', 'nsevent'); ?>" class="no-print" style="float: right; margin: 0 0 1em;" />
+<?php endif; ?>
+		<h3><?php echo !isset($_GET['vip-only'])? _e('Registration List', 'nsevent') : _e('VIP Payment Confirmation', 'nsevent'); echo "\n"; ?></h3>
 
+<?php if ($dancers): ?>
 	<table class="widefat page fixed report" id="reg-list-table">
 		<thead>
 			<tr>
@@ -67,30 +77,33 @@ if (!empty($_POST)) {
 		</tfoot>
 
 		<tbody>
-<?php if ($dancers): $i = 1; foreach($dancers as $dancer): if (!isset($_GET['vip-only']) and $dancer->is_vip()) continue; ?>
+<?php 	$i = 1; ?>
+<?php 	foreach($dancers as $dancer): if (!isset($_GET['vip-only']) and $dancer->is_vip()) continue; ?>
 			<tr<?php if (!($i % 2)) echo ' class="alternate"'; ?>>
-				<td class="column-title dancer-name"><?php if (current_user_can('administrator')): $event->request_link('dancer', $dancer->name(True), array('dancer' => (int) $dancer->id)); else: echo esc_html($dancer->name(True)); endif; ?><?php if ($dancer->is_vip()) echo ' [VIP]'; ?></td>
+				<td class="column-title dancer-name"><?php if (current_user_can('administrator')): echo $event->get_request_link('dancer', $dancer->get_name_last_first(), array('dancer' => (int) $dancer->get_id())); else: echo esc_html($dancer->get_name_last_first()); endif; ?><?php if ($dancer->is_vip()) echo ' [VIP]'; ?></td>
 <?php
- 		foreach ($item_ids as $type => $ids):
-			foreach ($dancer->registrations($ids) as $reg)
-				$item_names[] = ($type != 'shirt') ? esc_html($reg->item()->name) : esc_html(sprintf('%s (%s)', $reg->item()->name, ucfirst($reg->item_meta)));
+ 			foreach ($item_ids as $type => $ids):
+				foreach ($dancer->get_registered_items($ids) as $item)
+					$item_names[] = ($type != 'shirt') ? esc_html($item->get_name()) : esc_html(sprintf('%s (%s)', $item->get_name(), ucfirst($item->get_registered_meta())));
 ?>
 				<td><?php if (isset($item_names)) echo implode('<br />', $item_names); ?></td>
 <?php 	
-			unset($item_names);
-		endforeach;
+				unset($item_names);
+			endforeach;
 ?>
-				<td><?php echo ($dancer->level()) ? esc_html($dancer->level()) : '&mdash;'; ?></td>
-				<td class="total-cost"><?php printf('$%d', $dancer->total_cost()); ?></td>
-				<td class="paid"><?php NSEvent_FormInput::checkbox(sprintf('payment_confirmed[%d]', $dancer->id), array('value' => 1, 'checked' => (bool) $dancer->payment_confirmed)); ?></td>
-				<td class="owed"><?php NSEvent_FormInput::text(sprintf('amount_owed[%d]', $dancer->id), array('value' => (int) $dancer->amount_owed, 'size' => 3)); ?></td>
-				<td class="no-print"><?php echo $dancer->payment_method; ?></td>
+				<td><?php echo esc_html($event->get_level_for_index($dancer->get_level(), '&mdash;')); ?></td>
+				<td class="total-cost"><?php printf('$%d', $dancer->get_price_total()); ?></td>
+				<td class="paid"><?php NSEvent_FormInput::checkbox(sprintf('payment_confirmed[%d]', $dancer->get_id()), array('value' => 1, 'checked' => (bool) $dancer->get_payment_confirmed())); ?></td>
+				<td class="owed"><?php NSEvent_FormInput::text(sprintf('payment_owed[%d]', $dancer->get_id()), array('value' => (int) $dancer->get_payment_owed(), 'size' => 3)); ?></td>
+				<td class="no-print"><?php echo $dancer->get_payment_method(); ?></td>
 			</tr>
-
-<?php $i++; endforeach; else: ?>
-			<tr><td colspan="3"><?php _e('There are no registered dancers for this event&hellip;', 'nsevent'); ?></td></tr>
-<?php endif; ?>
+<?php 		$i++; ?>
+<?php 	endforeach; ?>
 		</tbody>
 	</table>
+<?php else: ?>
+		<p><?php _e('There are no registered dancers for this event&hellip;', 'nsevent'); ?></p>
+<?php endif; ?>
 	</form>
-</div></div>
+</div>
+</div>

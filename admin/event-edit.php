@@ -14,14 +14,14 @@ if (!empty($_POST))
 	if (NSEvent_FormValidation::validate())
 	{
 		$wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->prefix}nsevent_events (name, prereg_end) VALUES ( %s, %s )", trim($_POST['event_name']), strtotime($_POST['prereg_end'])));
-
+		
 		if (isset($_POST['set_current_event']))
 		{
-			$options = array_merge($this->default_options, get_option('nsevent'));
+			$options = array_merge(self::$default_options, get_option('nsevent'));
 			$options['current_event_id'] = $wpdb->insert_id;
 			update_option('nsevent', $options);
 		}
-	
+		
 		printf('<div class="wrap"><h2>%s</h2></div><a href="%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=index-event">%s</a>', __('Add New Event', 'nsevent'), get_bloginfo('wpurl'), $wpdb->insert_id, __('Event Added', 'nsevent'));
 		return;
 	}
@@ -39,7 +39,7 @@ elseif (isset($event))
 <div class="wrap" id="nsevent">
 	<h2><?php echo (isset($event)) ? __('Edit Event', 'nsevent') : __('Add New Event', 'nsevent'); ?></h2>
 
-	<form action="<?php echo (isset($event)) ? $event->request_href('event-edit') : sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=add&amp;request=event-edit', get_bloginfo('wpurl')); ?>" method="post">
+	<form action="<?php echo (isset($event)) ? $event->get_request_href('event-edit') : sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=add&amp;request=event-edit', get_bloginfo('wpurl')); ?>" method="post">
 		<ul>			
 			<li><?php NSEvent_FormInput::text('name', array('label' =>  __('Name', 'nsevent'))); ?></li>
 			<li><?php NSEvent_FormInput::text('prereg_end', array('label' => __('Preregistration End Date', 'nsevent'))); ?></li>

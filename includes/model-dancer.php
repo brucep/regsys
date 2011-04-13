@@ -1,97 +1,68 @@
 <?php
 
-class NSEvent_Dancer extends NSEvent_Model
+class NSEvent_Model_Dancer extends NSEvent_Model
 {
-	public $first_name, $last_name, $email, $date_registered, $position, $housing_nights_array;
-	private $level, $status, $registrations, $total_cost;
+	private $event_id,
+	        $id,
+	        $first_name,
+	        $last_name,
+	        $email,
+	        $date_registered,
+	        $housing_nights_array,
+	        $housing_type,
+	        $level,
+	        $note,
+	        $position,
+	        $payment_confirmed,
+	        $payment_discount,
+	        $payment_method,
+	        $payment_owed,
+	        $price_total,
+	        $registered_items,
+	    	$status,
+	        $volunteer_phone;
+	
+	public $available, $gender, $nights, $pets, $smoking, $no_pets, $no_smoking, $comment; # Housing
+	
 	public static $possible_housing_genders = array(1 => 'Boys', 2 => 'Girls');
 	
 	public function __construct(array $parameters = array())
 	{
-		foreach($parameters as $key => $value)
+		foreach ($parameters as $key => $value) {
 			$this->$key = $value;
+		}
 	}
 	
-	public static function find_all()
+	public function __toString()
 	{
-		$statement = self::$database->query('SELECT * FROM %s_dancers WHERE event_id = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => self::$event->id));
-		return $statement->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Dancer');
+		return sprintf('%s %s [#%d]', $this->first_name, $this->last_name, $this->id);
 	}
-	
-	public static function find_by($field, $value)
-	{
-		$statement = self::$database->query('SELECT * FROM %s_dancers WHERE event_id = :event_id AND `'.$field.'` = :value ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => self::$event->id, ':value' => $value));
-		return $statement->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Dancer');
-	}
-	
-	public static function find($id)
-	{
-		$statement = self::$database->query('SELECT * FROM %s_dancers WHERE event_id = :event_id AND id = :id', array(':event_id' => self::$event->id, ':id' => $id));
-		return $statement->fetchObject('NSEvent_Dancer');
-	}
-	
-	public static function count($field = Null, $value = Null)
-	{
-		if ($field == Null)
-			$statement = self::$database->query('SELECT COUNT(id) FROM %s_dancers WHERE event_id = :event_id', array(':event_id' => self::$event->id));
-		else
-			$statement = self::$database->query('SELECT COUNT(id) FROM %s_dancers WHERE event_id = :event_id AND `'.$field.'` = :value', array(':event_id' => self::$event->id, ':value' => $value));
 		
-		$result = $statement->fetchColumn();
-		return ($result !== False) ? (int) $result : False;
-	}
-	
-	/*public static function is_already_registered($first_name, $last_name, $email)
+	public function add($event_id)
 	{
-		$statement = self::$database->query('SELECT COUNT(id) FROM %s_dancers WHERE event_id = :event_id AND first_name = :first_name AND last_name = :last_name AND email = :email LIMIT 1', array(':event_id' => self::$event->id));
-		return (bool) $statement->fetchColumn();
-	}*/
-	
-	public static function add(array $parameters)
-	{ // TODO: VIPs who don't owe anything should be marked as paid
-		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level, :status, :date_registered, :payment_method, :payment_discount, DEFAULT, DEFAULT, :note)', array(
-			':event_id'          => self::$event->id,
-			':first_name'        => $parameters['first_name'],
-			':last_name'         => $parameters['last_name'],
-			':email'             => $parameters['email'],
-			':position'          => $parameters['position'],
-			':level'             => !isset($parameters['level']) ? '1' : $parameters['level'],
-			':status'            => $parameters['status'],
+		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level, :status, :date_registered, :payment_method, :payment_discount, DEFAULT, DEFAULT, :volunteer_phone, :note)', array(
+			':event_id'          => $event_id,
+			':first_name'        => $this->first_name,
+			':last_name'         => $this->last_name,
+			':email'             => $this->email,
+			':position'          => $this->position,
+			':level'             => $this->level,
+			':status'            => $this->status,
 			':date_registered'   => time(),
-			':payment_method'    => $parameters['payment_method'],
-			':payment_discount'  => $parameters['discount'],
-			':note'              => !isset($parameters['note']) ? '' : $parameters['note'],
+			':payment_method'    => $this->payment_method,
+			':payment_discount'  => $this->payment_discount,
+			':volunteer_phone'   => $this->volunteer_phone,
+			':note'              => $this->note,
 			));
 		
-		return self::find(self::$database->lastInsertID());
+		$this->event_id = $event_id;
+		$this->id = self::$database->lastInsertID();
 	}
 	
-	public static function count_housing_available()
-	{
-		return self::$database->query('SELECT SUM(available) FROM %1$s_housing_providers WHERE event_id = :event_id', array(':event_id' => self::$event->id))->fetchColumn();
-	}
-	
-	public static function count_housing_needed()
-	{
-		return self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_housing_needed WHERE event_id = :event_id', array(':event_id' => self::$event->id))->fetchColumn();
-	}
-	
-	public static function get_housing_providers()
-	{
-		$statement = self::$database->query('SELECT * FROM %1$s_housing_providers LEFT JOIN %1$s_dancers ON id = dancer_id WHERE %1$s_housing_providers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC', array(':event_id' => self::$event->id));
-		return $statement->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Dancer');
-	}
-	
-	public static function get_housing_needed()
-	{
-		$statement = self::$database->query('SELECT * FROM %1$s_housing_needed LEFT JOIN %1$s_dancers ON id = dancer_id WHERE %1$s_housing_needed.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC', array(':event_id' => self::$event->id));
-		return $statement->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Dancer');
-	}
-	
-	public function add_housing_provider(array $parameters)
+	public function add_housing_provider(array $parameters, $event_id)
 	{
 		self::$database->query('INSERT %1$s_housing_providers VALUES (:event_id, :dancer_id, :available, :smoking, :pets, :gender, :nights, :comment)', array(
-			':event_id'  => self::$event->id,
+			':event_id'  => $event_id,
 			':dancer_id' => $this->id,
 			':available' => $parameters['housing_provider_available'],
 			':smoking'   => $parameters['housing_provider_smoking'],
@@ -102,10 +73,10 @@ class NSEvent_Dancer extends NSEvent_Model
 			));
 	}
 	
-	public function add_housing_needed(array $parameters)
+	public function add_housing_needed(array $parameters, $event_id)
 	{
 		self::$database->query('INSERT %1$s_housing_needed VALUES (:event_id, :dancer_id, :car, :no_smoking, :no_pets, :gender, :nights, :comment)', array(
-			':event_id'   => self::$event->id,
+			':event_id'   => $event_id,
 			':dancer_id'  => $this->id,
 			':car'        => $parameters['housing_needed_car'],
 			':no_smoking' => $parameters['housing_needed_no_smoking'],
@@ -118,167 +89,189 @@ class NSEvent_Dancer extends NSEvent_Model
 	
 	public function delete()
 	{
-	    $statement = self::$database->query('DELETE FROM %1$s_dancers WHERE event_id = :event_id AND id = :id LIMIT 1', array(':event_id' => self::$event->id, ':id' => $this->id));
+	    $statement = self::$database->query('DELETE FROM %1$s_dancers WHERE event_id = :event_id AND id = :id LIMIT 1', array(':event_id' => self::$event->get_id(), ':id' => $this->id));
 	    $counts['dancer'] = $statement->rowCount();
 	    
-	    $statement = self::$database->query('DELETE FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => self::$event->id, ':dancer_id' => $this->id));
+	    $statement = self::$database->query('DELETE FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => self::$event->get_id(), ':dancer_id' => $this->id));
 	    $counts['registrations'] = $statement->rowCount();
 	    
-	    $statement = self::$database->query('DELETE FROM %1$s_housing_needed WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => self::$event->id, ':dancer_id' => $this->id));
+	    $statement = self::$database->query('DELETE FROM %1$s_housing_needed WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => self::$event->get_id(), ':dancer_id' => $this->id));
 	    $counts['housing_needed'] = $statement->rowCount();
 	    
-	    $statement = self::$database->query('DELETE FROM %1$s_housing_providers WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => self::$event->id, ':dancer_id' => $this->id));
+	    $statement = self::$database->query('DELETE FROM %1$s_housing_providers WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => self::$event->get_id(), ':dancer_id' => $this->id));
 	    $counts['housing_provider'] = $statement->rowCount();
 	    
 	    return $counts;
 	}
 	
-	public function update_payment_confirmation($payment_confirmed, $amount_owed)
+	public function update_payment_confirmation($payment_confirmed, $payment_owed)
 	{
 		$this->payment_confirmed = $payment_confirmed;
-		$this->amount_owed = $amount_owed;
+		$this->payment_owed = $payment_owed;
 		
-		$statement = self::$database->query('UPDATE %1$s_dancers SET payment_confirmed = :payment_confirmed, amount_owed = :amount_owed WHERE event_id = :event_id AND id = :id LIMIT 1', array(':event_id' => self::$event->id, ':id' => $this->id, ':payment_confirmed' => $payment_confirmed, ':amount_owed' => $amount_owed));
+		$statement = self::$database->query('UPDATE %1$s_dancers SET payment_confirmed = :payment_confirmed, payment_owed = :payment_owed WHERE event_id = :event_id AND id = :id LIMIT 1', array(':event_id' => $this->event_id, ':id' => $this->id, ':payment_confirmed' => $payment_confirmed, ':payment_owed' => $payment_owed));
 		return (bool) $statement->rowCount();
 	}
 	
-	public function populate_housing_info()
+	public function get_id()
 	{
-		$statement = self::$database->query('SELECT car, no_smoking, no_pets, gender, nights, comment FROM %1$s_housing_needed WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => self::$event->id, ':dancer_id' => $this->id));
-		$housing_info = $statement->fetch(PDO::FETCH_ASSOC);
-		
-		if ($housing_info)
-			$housing_info['housing_type'] = __('Housing Needed', 'nsevent');
-		else
-		{
-			$statement = self::$database->query('SELECT available, smoking, pets, gender, nights, comment FROM %1$s_housing_providers WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => self::$event->id, ':dancer_id' => $this->id));
-			$housing_info = $statement->fetch(PDO::FETCH_ASSOC);
-			
-			if ($housing_info)
-				$housing_info['housing_type'] = __('Housing Provider', 'nsevent');
-		}
-		
-		if ($housing_info)
-		{
-			foreach ($housing_info as $key => $value)
-				$this->$key = $value;
-
-			return True;
-		}
-		else
-			return False;
-		
+		return (int) $this->id;
 	}
 	
-	public function name($last_name_first = False)
+	public function get_name()
 	{
-		if ($last_name_first !== True)
-			return $this->first_name.' '.$this->last_name;
-		else
-			return $this->last_name.', '.$this->first_name;
+		return sprintf('%s %s', $this->first_name, $this->last_name);
 	}
 	
-	public function position()
+	public function get_name_last_first()
 	{
-		switch ($this->position)
-		{
+		return sprintf('%s, %s', $this->last_name, $this->first_name);
+	}
+	
+	public function get_first_name()
+	{
+		return $this->first_name;
+	}
+	
+	public function get_last_name()
+	{
+		return $this->last_name;
+	}
+		
+	public function get_date_registered($format = false)
+	{
+		return ($format === false) ? (int) $this->date_registered : date($format, $this->date_registered);
+	}
+	
+	public function get_email()
+	{
+		return $this->email;
+	}
+	
+	public function get_housing_gender()
+	{
+		return isset($this->gender) ? self::bit_field($this->gender, self::$possible_housing_genders, 'string') : false;
+	}
+	
+	public function get_housing_for_night_by_index($night_id)
+	{
+		if (!isset($this->housing_nights_array)) {
+			$this->housing_nights_array = array_filter(self::bit_field($this->nights, NSEvent_Model_Event::$possible_housing_nights, 'booleans'));
+		}
+		
+		return isset($this->housing_nights_array[$night_id]) ? $this->housing_nights_array[$night_id] : false;
+	}
+	
+	public function get_housing_nights(array $event_nights)
+	{
+		return isset($this->nights) ? self::bit_field($this->nights, $event_nights, 'string') : false;
+	}
+	
+	public function get_housing_type()
+	{
+		return $this->housing_type;
+	}
+	
+	public function get_level()
+	{
+		return (int) $this->level;
+	}
+	
+	public function get_payment_confirmed()
+	{
+		return (bool) $this->payment_confirmed;
+	}
+	
+	public function get_payment_method()
+	{
+		return $this->payment_method;
+	}
+	
+	public function get_payment_owed()
+	{
+		return (int) $this->payment_owed;
+	}
+	
+	public function get_position()
+	{
+		switch ($this->position) {
 			case 1:
-				return "Lead";
+				return __('Lead', 'nsevent');
+			
 			case 2:
-				return "Follow";
+				return __('Follow', 'nsevent');
+			
 			default:
-				return False;
+				return false;
 		}
 	}
 	
-	public function level()
+	public function get_price_for_registered_item($item_id)
 	{
-		return self::$event->levels($this->level);
+		if (!isset($this->registered_items)) {
+			$this->get_registered_items();
+		}
+		
+		return array_key_exists($item_id, $this->registered_items) ? $this->registered_items[$item_id]->get_registered_price() : false;
+	}
+	
+	
+	public function get_price_total()
+	{
+		if (!isset($this->price_total)) {
+			$this->price_total = self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->id))->fetchColumn();
+		}
+		
+		return ($this->price_total !== false) ? (int) $this->price_total : false;
+	}
+	
+	public function get_registered_items($item_id = false)
+	{
+		if (!isset($this->registered_items))
+		{
+			$this->registered_items = array();
+			
+			$registered_items = self::$database->query('SELECT %1$s_items.*, %1$s_registrations.`price` as registered_price, %1$s_registrations.`item_meta` as registered_meta FROM %1$s_registrations LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
+			
+			foreach ($registered_items as $item) {
+				$this->registered_items[$item->get_id()] = $item;
+			}
+		}
+		
+		if (is_array($item_id)) {
+			$result = array();
+			
+			foreach ($this->registered_items as $item) {
+				if (in_array($item->get_id(), $item_id)) {
+					$result[$item->get_id()] = $item;
+				}
+			}
+			
+			return $result;
+		}
+		elseif ($item_id === false) {
+			return $this->registered_items;
+		}
+		elseif (array_key_exists($item_id, $this->registered_items)) {
+			return $this->registered_items[$item_id];
+		}
+		else {
+			return array();
+		}
+	}
+	
+	public function get_volunteer_phone()
+	{
+		return $this->volunteer_phone;
 	}
 	
 	public function is_volunteer()
 	{
-		return ($this->status == 1);
+		return ($this->status === '1');
 	}
 	
 	public function is_vip()
 	{
-		return ($this->status == 2);
-	}
-	
-	public function registrations($item_id = False)
-	{
-		if (!isset($this->registrations))
-		{
-			$registrations = NSEvent_Registration::find_by('dancer_id', $this->id);
-			if (!$registrations)
-				return array();
-			
-			foreach($registrations as $reg)
-				$this->registrations[$reg->item_id] = $reg;
-		}
-		
-		if (is_array($item_id) and !empty($item_id))
-		{
-			$result = array();
-			
-			foreach ($this->registrations as $reg)
-				if (in_array($reg->item_id, $item_id))
-					$result[$reg->item_id] = $reg;
-			
-			return $result;
-		}
-		elseif (empty($item_id))
-			return $this->registrations;
-		elseif (isset($this->registrations[$item_id]))
-			return $this->registrations[$item_id];
-		else
-			return False;
-	}
-	
-	public function cost_for_registered_item($item_id)
-	{
-		if (!isset($this->registrations))
-			$this->registrations();
-		
-		return isset($this->registrations[$item_id]) ? $this->registrations[$item_id]->price : False;
-	}
-	
-	public function total_cost()
-	{
-		if (!isset($this->total_cost))
-			$this->total_cost = self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => self::$event->id, ':dancer_id' => $this->id))->fetchColumn();
-		
-		return (int) $this->total_cost;
-	}
-	
-	public function total_cost_after_paypal()
-	{
-		if (!isset($this->total_cost))
-			$this->total_cost();
-	}
-	
-	public function housing_gender()
-	{
-		if (isset($this->gender))
-			return self::bit_field($this->gender, self::$possible_housing_genders, 'string');
-		else
-			return False;
-	}
-	
-	public function housing_nights()
-	{
-		if (isset($this->nights))
-			return self::bit_field($this->nights, self::$event->nights(), 'string');
-		else
-			return False;
-	}
-	
-	public function housing_check_night($night_id)
-	{
-		if (!isset($this->housing_nights_array))
-			$this->housing_nights_array = array_filter(self::bit_field($this->nights, NSEvent_Event::$possible_nights, 'booleans'));
-		
-		return $this->housing_nights_array[$night_id];
+		return ($this->status === '2');
 	}
 }

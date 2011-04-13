@@ -1,75 +1,59 @@
-<?php
-
-$dancers = NSEvent_Dancer::find_all();
-
-?>
+<?php $dancers = $event->get_dancer_ids(); ?>
 
 <div class="wrap" id="nsevent"><div id="packet-printout">
-	<h2 class="no-print"><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2 class="no-print"><?php echo $event->get_request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->get_name())); ?></h2>
 
 	<h3 class="no-print" style="margin-bottom: 2em;"><?php _e('Packet Printouts', 'nsevent'); ?></h3>
-<?php foreach ($dancers as $dancer): ?>
+
+<?php if ($dancers): ?>
+<?php 	foreach ($dancers as $dancer_id): $dancer = $event->get_dancer_by_id_with_housing_info($dancer_id); ?>
 
 	<div class="dancer">
 		<h4>
-			<?php echo esc_html($dancer->name(True)), "\n"; ?>
-<?php if (!$dancer->is_vip()): ?>
-			<span class="paid-owed"><?php echo ($dancer->payment_confirmed) ? __('Paid &#x2714;', 'nsevent') : sprintf(__('Owed: $%d', 'nsevent'), $dancer->amount_owed); ?></span>
-<?php else: ?>
+			<?php echo esc_html($dancer->get_name_last_first()), "\n"; ?>
+<?php 		if (!$dancer->is_vip()): ?>
+			<span class="paid-owed"><?php echo ($dancer->get_payment_confirmed()) ? __('Paid &#x2714;', 'nsevent') : sprintf(__('Owed: $%d', 'nsevent'), $dancer->get_payment_owed()); ?></span>
+<?php 		else: ?>
 			<span class="paid-owed"><?php _e('VIP', 'nsevent'); ?></span>
-<?php endif; ?>
+<?php 		endif; ?>
 		</h4>
-		
+
 		<h5><?php _e('Personal Info', 'nsevent'); ?></h5>
 		<ul>
-			<li><?php echo __('Position:', 'nsevent'), ' ', esc_html($dancer->position()); ?></li>
-<?php if ($event->levels()): ?>
-			<li><?php echo __('Level:', 'nsevent'), ' ', esc_html($dancer->level()); ?></li>
-<?php endif; ?>
-<?php if ($dancer->is_volunteer()): ?>
+			<li><?php echo __('Position:', 'nsevent'), ' ', esc_html($dancer->get_position()); ?></li>
+<?php 		if ($event->has_levels()): ?>
+			<li><?php echo __('Level:', 'nsevent'), ' ', esc_html($event->get_level_for_index($dancer->get_level())); ?></li>
+<?php 		endif; ?>
+<?php 		if ($dancer->is_volunteer()): ?>
 			<li><?php _e('Volunteer', 'nsevent'); ?></li>
-<?php endif; ?>
+<?php 		endif; ?>
 		</ul>
-		
-		<h5><?php _e('Registrations', 'nsevent'); ?></h5>
-<?php if ($dancer->registrations()): ?>
-		<ul>
-<?php 	foreach($dancer->registrations() as $reg): ?>
-			<li><?php echo esc_html($reg->item()->name); if ($reg->item_meta) printf(' (%s)', esc_html(ucfirst($reg->item_meta))); ?></li>
-<?php 	endforeach; ?>
-		</ul>
-<?php else: ?>
-	<p><?php _e('There are no registrations for this dancer.', 'nsevent'); ?></p>
-<?php endif; ?>
-<?php if ($event->has_housing and $dancer->populate_housing_info()): ?>
 
-<?php if ($dancer->populate_housing_info() and !isset($dancer->available)): ?>
-	<h5><?php echo esc_html($dancer->housing_type); ?></h5>
-	<ul>
-<?php 	if (isset($dancer->available)): ?>
-		<li><?php printf('Available: %d', $dancer->available); ?></li>
-<?php 		if ($dancer->smoking): ?>
-		<li><?php _e('Smokes', 'nsevent'); ?></li>
+		<h5><?php _e('Registrations', 'nsevent'); ?></h5>
+<?php 		if ($dancer->get_registered_items()): ?>
+		<ul>
+<?php 			foreach ($dancer->get_registered_items() as $item): ?>
+			<li><?php echo esc_html($item->get_name()); if ($item->get_registered_meta()) printf(' (%s)', esc_html(ucfirst($item->get_registered_meta()))); ?></li>
+<?php 			endforeach; ?>
+		</ul>
+<?php 		else: ?>
+		<p><?php _e('There are no registrations for this dancer.', 'nsevent'); ?></p>
 <?php 		endif; ?>
-<?php 		if ($dancer->pets): ?>
-		<li><?php _e('Has pets', 'nsevent'); ?></li>
+<?php 		if ($event->has_housing() and $dancer->get_housing_type() == __('Housing Needed', 'nsevent')): ?>
+		<h5><?php echo esc_html($dancer->get_housing_type()); ?></h5>
+		<ul>
+<?php 			if ($dancer->no_smoking): ?>
+			<li><?php _e('Prefers no smoking', 'nsevent'); ?></li>
+<?php 			endif; ?>
+<?php 			if ($dancer->no_pets): ?>
+			<li><?php _e('Prefers no pets', 'nsevent'); ?></li>
+<?php 			endif; ?>
+			<li><?php echo esc_html($dancer->get_housing_gender()); ?></li>
+			<li><?php echo esc_html($dancer->get_housing_nights($event->get_housing_nights())); ?></li>
+		</ul>
 <?php 		endif; ?>
-<?php 	else: ?>
-<?php 		if ($dancer->car): ?>
-		<li><?php _e('Has car', 'nsevent'); ?></li>
-<?php 		endif; ?>
-<?php 		if ($dancer->no_smoking): ?>
-		<li><?php _e('Prefers no smoking', 'nsevent'); ?></li>
-<?php 		endif; ?>
-<?php 		if ($dancer->no_pets): ?>
-		<li><?php _e('Prefers no pets', 'nsevent'); ?></li>
-<?php 		endif; ?>
-<?php 	endif; ?>
-		<li><?php echo esc_html($dancer->housing_gender()); ?></li>
-		<li><?php echo esc_html($dancer->housing_nights()); ?></li>
-	</ul>
-<?php endif; ?>
-<?php endif; ?>
 	</div>
-<?php endforeach; ?>
-</div></div>
+<?php 	endforeach; ?>
+<?php endif; ?>
+</div>
+</div>

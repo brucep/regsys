@@ -125,7 +125,6 @@ class NSEvent
 		require dirname(__FILE__).'/includes/model-event.php';
 		require dirname(__FILE__).'/includes/model-item.php';
 		require dirname(__FILE__).'/includes/model-dancer.php';
-		require dirname(__FILE__).'/includes/model-registration.php';
 	}
 	
 	static public function page_options()
@@ -136,7 +135,7 @@ class NSEvent
 		self::load_models();
 		NSEvent_Model::set_database(self::get_database_connection());
 		
-		$events = NSEvent_Event::find_all();
+		$events = NSEvent_Model_Event::get_events();
 		$options = get_option('nsevent', array());
 		
 		require dirname(__FILE__).'/admin/options.php';
@@ -177,7 +176,7 @@ class NSEvent
 					{
 						throw new Exception(__('Dancer ID not specified.', 'nsevent'));
 					}
-					if (!$dancer = NSEvent_Dancer::find($_GET['dancer']))
+					if (!$dancer = $event->get_dancer($_GET['dancer']))
 					{
 						throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['parameter']));
 					}
@@ -190,7 +189,7 @@ class NSEvent
 					{
 						throw new Exception(__('Event ID not specified.', 'nsevent'));
 					}
-				    if ($_GET['event_id'] !== 'add' and (!$event = NSEvent_Model::$event = NSEvent_Event::find($_GET['event_id'])))
+				    if ($_GET['event_id'] !== 'add' and (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id'])))
 					{
 						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
 					}
@@ -211,9 +210,8 @@ class NSEvent
 				case 'packet-printout':
 				case 'reg-list':
 				case 'volunteers':
-					if (!$event = NSEvent_Event::find($_GET['event_id']))
+					if (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id']))
 						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
-					NSEvent_Model::$event = $event;
 					if (!isset($file))
 						$file = sprintf('reports/%s.php', $_GET['request']);
 					break;
@@ -221,13 +219,13 @@ class NSEvent
 				default:
 					throw new Exception(sprintf(__('Unable to handle page request: %s', 'nsevent'), esc_html($_GET['request'])));
 			}
-			
-			require dirname(__FILE__)."/$file";
 		}
 		catch (Exception $e)
 		{
-			printf('<div class="nsevent-exception">%s</div>', $e->getMessage());
+			printf('<div id="nsevent-exception">%s</div>', $e->getMessage());
 		}
+		
+		require dirname(__FILE__)."/$file";
 	}
 	
 	static public function plugin_activate()
@@ -257,10 +255,10 @@ class NSEvent
 						$query = sprintf("CREATE TABLE `%s` (
 							`id`                 int(10) unsigned NOT NULL auto_increment,
 							`name`               varchar(255) NOT NULL,
-							`early_end`          int(10) unsigned NOT NULL default '0',
-							`prereg_end`         int(10) unsigned NOT NULL default '0',
-							`refund_end`         int(10) unsigned NOT NULL default '0',
-							`payment_by`         int(10) unsigned NOT NULL default '0',
+							`date_early_end`     int(10) unsigned NOT NULL default '0',
+							`date_prereg_end`    int(10) unsigned NOT NULL default '0',
+							`date_refund_end`    int(10) unsigned NOT NULL default '0',
+							`date_payment_by`    int(10) unsigned NOT NULL default '0',
 							`discount1`          varchar(255) NOT NULL,
 							`discount2`          varchar(255) NOT NULL,
 							`discount_label`     varchar(255) NOT NULL,
@@ -268,7 +266,7 @@ class NSEvent
 							`has_vip`            tinyint(1) unsigned NOT NULL default '0',
 							`has_volunteers`     tinyint(1) unsigned NOT NULL default '0',
 							`has_housing`        tinyint(1) unsigned NOT NULL default '0',
-							`nights`             tinyint(2) unsigned NOT NULL default '1',
+							`housing_nights`     tinyint(2) unsigned NOT NULL default '1',
 							`limit_per_position` smallint(5) unsigned NOT NULL default '0',
 							`levels`             varchar(255) NOT NULL,
 							`shirt_description`  text NOT NULL,
@@ -295,8 +293,8 @@ class NSEvent
 							`price_vip`              tinyint(3) unsigned NOT NULL default '0',
 							`limit_total`            smallint(5) unsigned NOT NULL default '0',
 							`limit_per_position`     smallint(5) unsigned NOT NULL default '0',
-							`expiration_date`        int(10) unsigned NOT NULL default '0',
-							`has_meta`               varchar(20) NOT NULL,
+							`date_expires`           int(10) unsigned NOT NULL default '0',
+							`meta`                   varchar(20) NOT NULL,
 							`description`            varchar(255) NOT NULL,
 							`note`                   varchar(255) NOT NULL,
 							PRIMARY KEY  (`id`)
@@ -317,7 +315,8 @@ class NSEvent
 							`payment_method`    varchar(6) NOT NULL,
 							`payment_discount`  varchar(3) NOT NULL default '0',
 							`payment_confirmed` tinyint(1) unsigned NOT NULL default '0',
-							`amount_owed`       smallint(5) unsigned NOT NULL default '0',
+							`payment_owed`      smallint(5) unsigned NOT NULL default '0',
+							`volunteer_phone`   varchar(255) NOT NULL,
 							`note`              varchar(255) NOT NULL,
 							PRIMARY KEY  (`id`)
 							);", $table_name);
@@ -338,7 +337,6 @@ class NSEvent
 						$query = sprintf("CREATE TABLE `%s` (
 							`event_id`   int(10) unsigned NOT NULL,
 							`dancer_id`  int(10) unsigned NOT NULL,
-							`car`        tinyint(1) unsigned NOT NULL default '0',
 							`no_smoking` tinyint(1) unsigned NOT NULL default '0',
 							`no_pets`    tinyint(1) unsigned NOT NULL default '0',
 							`gender`     tinyint(1) unsigned NOT NULL default '3',
@@ -395,21 +393,20 @@ class NSEvent
 			NSEvent_Model::set_database(self::get_database_connection());
 			
 			# Find current event
-			$event = self::$event = NSEvent_Event::find($options['current_event_id']);
+			$event = self::$event = NSEvent_Model_Event::get_event_by_id($options['current_event_id']);
 			if (!$event)
 				throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $options['current_event_id']));
-			NSEvent_Model::$event = $event;
 			
-			$vip = self::$vip = ($event->has_vip and (isset($_GET['vip']) or isset($_POST['vip'])));
-			$early_bird = ($event->early_end and time() < $event->early_end);
-			$early_bird_class = $early_bird ? 'early-bird' : 'not-early-bird';
+			$vip = self::$vip = ($event->has_vip() and (isset($_GET['vip']) or isset($_POST['vip'])));
+			
+			$early_class = $event->is_early_bird() ? 'early-bird' : 'not-early-bird';
 			
 			
 			// TODO: How to handle dates? Specify times as a date and assume end of that day, or specify specific time in field?
 			// Idea: Specify specific time, and if (during event edit) time is 00:00:00, then automatically change to 11:59:59?
 			
 			# Don't allow registration for certain conditions
-			if (time() > $event->prereg_end and !$vip) {
+			if (time() > $event->get_date_prereg_end() and !$vip) {
 				require dirname(__FILE__).'/registration/at-the-door.php';
 				return;
 			}
@@ -432,29 +429,34 @@ class NSEvent
 					));
 				
 				# Level
-				if ($event->levels()) {
+				if ($event->has_levels())
+				{
 					NSEvent_FormValidation::add_rule('level', sprintf('intval|in[%s]',
-						implode(',', array_keys($event->levels()))));
+						implode(',', array_keys($event->get_levels()))));
 				}
-				else {
+				else
+				{
 					$_POST['level'] = 1;
 				}
 				
 				# Discount
-				if ($event->has_vip and $vip === True) {
-					$_POST['discount'] = 'vip';
+				if ($event->has_vip() and $vip === true)
+				{
+					$_POST['payment_discount'] = 'vip';
 				}
-				elseif ($event->discount1 or $event->discount2) {
-					NSEvent_FormValidation::add_rule('discount', sprintf('intval|in[0%s%s]',
-						$event->discount1 ? ',1' : '',
-						$event->discount2 ? ',2' : ''));
+				elseif ($event->has_discount())
+				{
+					NSEvent_FormValidation::add_rule('payment_discount', sprintf('intval|in[0%s%s]',
+						$event->has_discount(1) ? ',1' : '',
+						$event->has_discount(2) ? ',2' : ''));
 				}
-				else {
-					$_POST['discount'] = 0;
+				else
+				{
+					$_POST['payment_discount'] = 0;
 				}
 				
 				# Housing
-				if ($event->has_housing)
+				if ($event->has_housing())
 				{
 					NSEvent_FormValidation::add_rules(array(
 						'housing_provider_available' => 'if_set[housing_provider]|intval|greater_than[0]',
@@ -481,7 +483,7 @@ class NSEvent
 			else
 			{
 				# Used for confirmation page and email
-				$package_cost      = (self::$validated_package_id === 0) ? 0 : self::$validated_items[self::$validated_package_id]->get_price_for_discount($_POST['discount'], $early_bird);;
+				$package_cost      = (self::$validated_package_id === 0) ? 0 : self::$validated_items[self::$validated_package_id]->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird());
 				$competitions      = array();
 				$competitions_cost = 0;
 				$shirts            = array();
@@ -490,57 +492,63 @@ class NSEvent
 				
 				foreach (self::$validated_items as $item)
 				{
-					$total_cost += $item->get_price_for_discount($_POST['discount'], $early_bird);;
+					$total_cost += $item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird());;
 				}
+				
 				
 				if (!isset($_POST['confirmed']))
 				{
-					$dancer = new NSEvent_Dancer($_POST);
+					$dancer = new NSEvent_Model_Dancer($_POST);
 					$file = 'form-confirm';
 				}
 				else
 				{
-					if ($options['registration_testing']) {
-						$_POST['payment_meta'] = __('TEST', 'nsevent');
-					}
-					
-					if ($_POST['status'] == '1') {
-						$_POST['note'] = $_POST['volunteer_phone'];
+					if ($options['registration_testing'])
+					{
+						$_POST['note'] = __('TEST', 'nsevent');
 					}
 					
 					# Add dancer
-					$dancer = NSEvent_Dancer::add($_POST);
-					if (!$dancer) {
-						throw new Exception('Unable to add dancer to database.');
+					$dancer = new NSEvent_Model_Dancer($_POST);
+					$dancer->add($event->get_id());
+					if (!$dancer)
+					{
+						throw new Exception(__('Unable to add dancer to database.', 'nsevent'));
 					}
 					
 					# Add registrations				
 					foreach (self::$validated_items as $item)
 					{
-						$item_price = $item->get_price_for_discount($_POST['discount'], $early_bird);
+						$item_price = $item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird());
 						
-						if ($item->type == 'competition') {
-							$competitions[$item->id] = $item;
+						if ($item->get_type() == 'competition')
+						{
+							$competitions[$item->get_id()] = $item;
 							$competitions_cost += $item_price;
 						}
-						elseif ($item->type == 'shirt') {
-							$shirts[$item->id] = $item;
+						elseif ($item->get_type() == 'shirt')
+						{
+							$shirts[$item->get_id()] = $item;
 							$shirts_cost += $item_price;
 						}
 						
-						NSEvent_Registration::add(array(
-							'dancer_id' => $dancer->id,
-							'item_id'   => $item->id,
+						$event->add_registration(array(
+							'dancer_id' => $dancer->get_id(),
+							'item_id'   => $item->get_id(),
 							'price'     => $item_price,
-							'item_meta' => (!isset($_POST['item_meta'][$item->id]) ? '' : $_POST['item_meta'][$item->id]),
+							'item_meta' => (!isset($_POST['item_meta'][$item->get_id()]) ? '' : $_POST['item_meta'][$item->get_id()]),
 							));
 					}
 					
 					# Add housing info
 					if (isset($_POST['housing_needed']))
-						$dancer->add_housing_needed($_POST);
+					{
+						$dancer->add_housing_needed($_POST, $event->get_id());
+					}
 					elseif (isset($_POST['housing_provider']))
-						$dancer->add_housing_provider($_POST);
+					{
+						$dancer->add_housing_provider($_POST, $event->get_id());
+					}
 					
 					
 					// TODO: For VIPs, force payment_method to "mail" if their total cost is 0?
@@ -550,9 +558,9 @@ class NSEvent
 					if (!$options['registration_testing'])
 					{
 						$confirmation_email = array(
-							'to_email' => $dancer->email,
-							'to_name'  => $dancer->name(),
-							'subject'  => sprintf(__('Registration for %s: %s', 'nsevent'), $event->name, $dancer->name())
+							'to_email' => $dancer->get_email(),
+							'to_name'  => $dancer->get_name(),
+							'subject'  => sprintf(__('Registration for %s: %s', 'nsevent'), $event->get_name(), $dancer->get_name())
 							);
 						
 						# Get body of email message
@@ -566,23 +574,31 @@ class NSEvent
 					
 					
 					if (isset($_POST['payment_method']) and $_POST['payment_method'] == 'PayPal')
+					{
 						$file = 'form-accepted-paypal';
+					}
 					else
+					{
 						$file = 'form-accepted-mail';
+					}
 				}
 			}
 			
 			# Allow themes to provide their own files
 			# Otherwise, load appropriate file for current step
 			if (file_exists(sprintf('%s/%s/nsevent/%s.php', get_theme_root(), get_stylesheet(), $file)))
+			{
 				require sprintf('%s/%s/nsevent/%s.php', get_theme_root(), get_stylesheet(), $file);
+			}
 			else
+			{
 				require sprintf('%s/registration/%s.php', dirname(__FILE__), $file);
+			}
 		}
 		catch (Exception $e)
 		{
 			if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); }
-			printf('<div class="nsevent-exception">%s</div>'."\n", $e->getMessage());
+			printf('<div id="nsevent-exception">%s</div>'."\n", $e->getMessage());
 			if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); }
 		}
 	}
@@ -682,79 +698,76 @@ class NSEvent
 		$items_did_validate = True;
 		foreach($items as $key => $value)
 		{
-			$item = NSEvent_Item::find($key);
+			$item = self::$event->get_item_by_id($key);
 			if (!$item)
 				continue;
 			
-			if ($item->has_meta)
+			switch ($item->get_meta())
 			{
-				switch ($item->has_meta)
-				{
-					# If position wasn't specified specifically for item, use dancer's position.
-					case 'position':
-						if (!isset($_POST['item_meta'][$item->id]) or !in_array($_POST['item_meta'][$item->id], array('lead', 'follow')))
-							if (!NSEvent_FormValidation::get_error('position'))
-								$_POST['item_meta'][$item->id] = ($_POST['position'] == 1) ? 'lead' : 'follow';
-						break;
-					
-					case 'partner_name':
-						if (empty($_POST['item_meta'][$item->id]))
+				# If position wasn't specified specifically for item, use dancer's position.
+				case 'position':
+					if (!isset($_POST['item_meta'][$item->get_id()]) or !in_array($_POST['item_meta'][$item->get_id()], array('lead', 'follow')))
+						if (!NSEvent_FormValidation::get_error('position'))
+							$_POST['item_meta'][$item->get_id()] = ($_POST['position'] == 1) ? 'lead' : 'follow';
+					break;
+				
+				case 'partner_name':
+					if (empty($_POST['item_meta'][$item->get_id()]))
+					{
+						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Your partner\'s name must be specified for %s.', 'nsevent'), $item->name));
+						$items_did_validate = False;
+						continue 2;
+					}
+					else
+					{
+						$_POST['item_meta'][$item->get_id()] = trim($_POST['item_meta'][$item->get_id()]);
+						// TODO: Check if partner has already registered for this item.
+					}
+					break;
+				
+				case 'team_members':
+					if (empty($_POST['item_meta'][$item->get_id()]))
+					{
+						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Team members must be specified for %s.', 'nsevent'), $item->name));
+						$items_did_validate = False;
+						continue 2;
+					}
+					else
+					{
+						# Standarize formatting
+						$_POST['item_meta'][$item->get_id()] = ucwords(preg_replace(array("/[\r\n]+/", "/\n+/", "/\r+/", '/,([^ ])/', '/, , /'), ', $1', trim($_POST['item_meta'][$item->get_id()])));
+						
+						if (strlen($_POST['item_meta'][$item->get_id()]) > 65536)
 						{
-							NSEvent_FormValidation::set_error('item_'.$item->id, sprintf(__('Your partner\'s name must be specified for %s.', 'nsevent'), $item->name));
+							NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('%s is too long.', 'nsevent'), sprintf(__('Team members list for %s', 'nsevent'), $item->name)));
 							$items_did_validate = False;
 							continue 2;
 						}
-						else
-						{
-							$_POST['item_meta'][$item->id] = trim($_POST['item_meta'][$item->id]);
-							// TODO: Check if partner has already registered for this item.
-						}
-						break;
-					
-					case 'team_members':
-						if (empty($_POST['item_meta'][$item->id]))
-						{
-							NSEvent_FormValidation::set_error('item_'.$item->id, sprintf(__('Team members must be specified for %s.', 'nsevent'), $item->name));
-							$items_did_validate = False;
-							continue 2;
-						}
-						else
-						{
-							# Standarize formatting
-							$_POST['item_meta'][$item->id] = ucwords(preg_replace(array("/[\r\n]+/", "/\n+/", "/\r+/", '/,([^ ])/', '/, , /'), ', $1', trim($_POST['item_meta'][$item->id])));
-							
-							if (strlen($_POST['item_meta'][$item->id]) > 65536)
-							{
-								NSEvent_FormValidation::set_error('item_'.$item->id, sprintf(__('%s is too long.', 'nsevent'), sprintf(__('Team members list for %s', 'nsevent'), $item->name)));
-								$items_did_validate = False;
-								continue 2;
-							}
-						}
-						break;
-					
-					case 'size':
-						if (!in_array($value, array_merge(array('none'), explode(',', $item->description))))
-						{
-							NSEvent_FormValidation::set_error('item_'.$item->id, sprintf(__('An invalid size was choosen for %s.', 'nsevent'), $item->name));
-							$items_did_validate = False;
-							continue 2;
-						}
-						elseif ($value === 'none')
-							continue 2; # No size selected;
-						$_POST['item_meta'][$item->id] = $value; # Populate `item_meta` for the confirmation and PayPal page
-						break;
-				}
+					}
+					break;
+				
+				case 'size':
+					if (!in_array($value, array_merge(array('none'), explode(',', $item->get_description()))))
+					{
+						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('An invalid size was choosen for %s.', 'nsevent'), $item->get_name()));
+						$items_did_validate = False;
+						continue 2;
+					}
+					elseif ($value === 'none')
+						continue 2; # No size selected;
+					$_POST['item_meta'][$item->get_id()] = $value; # Populate `item_meta` for the confirmation and PayPal page
+					break;
 			}
 			
 			# Check openings again, in case they have filled since the form was first displayed to the user
-			if (($item->has_meta != 'position' and !$item->openings()) or ($item->has_meta == 'position' and !$item->openings($_POST['item_meta'][$item->id])))
+			if (($item->get_meta() != 'position' and !$item->count_openings()) or ($item->get_meta() == 'position' and !$item->get_openings($_POST['item_meta'][$item->get_id()])))
 			{
-				NSEvent_FormValidation::set_error('item_'.$item->id, sprintf(__('There are no longer any openings for %s.', 'nsevent'), $item->name));
-				$items_did_validate = False;
+				NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('There are no longer any openings for %s.', 'nsevent'), $item->name));
+				$items_did_validate = false;
 				continue;
 			}
 			
-			self::$validated_items[$item->id] = $item;
+			self::$validated_items[$item->get_id()] = $item;
 		}
 		
 		return $items_did_validate;
@@ -762,7 +775,7 @@ class NSEvent
 	
 	static public function validate_position($position)
 	{
-		if (self::$event->limit_per_position and self::$event->limit_per_position <= NSEvent_Dancer::count('position', $position))
+		if (self::$event->limit_per_position and self::$event->limit_per_position <= $event->count_dancers('position', $position))
 		{
 			NSEvent_FormValidation::set_error('position', __('Registrations are no longer being accepted for that position.', 'nsevent'));
 			return False;
@@ -775,7 +788,7 @@ class NSEvent
 	{
 		if (self::$vip === True)
 			return 2;
-		else if (self::$event->has_volunteers and $_POST['status'] == '1')
+		else if (self::$event->has_volunteers() and $_POST['status'] == '1')
 		{
 			return 1;
 		}
@@ -810,21 +823,21 @@ class NSEvent
 		$href = sprintf('https://www.paypal.com/cgi-bin/webscr?cmd=_cart&amp;upload=1&amp;no_shipping=1&amp;%1$sbusiness=%2$s&amp;custom=%3$d&amp;item_name_1=%4$s&amp;amount_1=%5$d',
 			!empty($notify_url) ? sprintf('notify_url=%1$s&amp;', rawurlencode($notify_url)) : '',
 			rawurlencode($options['paypal_business']),
-			$dancer->id,
+			$dancer->get_id(),
 			__('Processing Fee', 'nsevent'),
 			2);
-				
+		
 		$i = 2;
-		foreach ($dancer->registrations($item_ids) as $reg)
+		foreach ($dancer->get_registered_items($item_ids) as $item)
 		{
-			$href .= sprintf('&amp;item_name_%1$d=%2$s&amp;amount_%1$d=%3$s', $i, rawurlencode($reg->item()->name), rawurlencode($reg->price));
-
+			$href .= sprintf('&amp;item_name_%1$d=%2$s&amp;amount_%1$d=%3$s', $i, rawurlencode($item->get_name()), rawurlencode($item->get_registered_price()));
+			
 			if (!empty($reg->item_meta))
-				$href .= sprintf('&amp;on0_%1$d=%2$s&amp;os0_%1$d=%3$s', $i, $reg->item()->meta_label(), ucfirst($reg->item_meta));
-
+				$href .= sprintf('&amp;on0_%1$d=%2$s&amp;os0_%1$d=%3$s', $i, $item->get_meta_label(), ucfirst($item->registered_meta));
+			
 			$i++;
 		}
-
+		
 		return $href;
 	}
 }

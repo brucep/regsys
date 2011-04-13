@@ -1,41 +1,39 @@
-<?php
-
-$items = NSEvent_Item::find_by(array(':type' => 'competition'));
-
-?>
+<?php $items = $event->get_items_where(array(':type' => 'competition')); ?>
 
 <div class="wrap" id="nsevent">
-	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php echo $event->get_request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->get_name())); ?></h2>
 
 	<h3>
 		<?php _e('Competitions', 'nsevent'); echo "\n"; ?>
-		<a href="<?php printf('%s/%s/reports/email-csv.php?event_id=%d&amp;request=competitors', WP_PLUGIN_URL, basename(dirname(dirname(__FILE__))), $event->id); ?>" class="button add-new-h3"><?php _e('Download Email Addresses', 'nsevent'); ?></a>
+<?php if ($items): ?>
+		<a href="<?php printf('%s/%s/reports/email-csv.php?event_id=%d&amp;request=competitors', WP_PLUGIN_URL, basename(dirname(dirname(__FILE__))), $event->get_id()); ?>" class="button add-new-h3"><?php _e('Download Email Addresses', 'nsevent'); ?></a>
+<?php endif; ?>
 	</h3>
 
 <?php if ($items): ?>
-<?php 	foreach($items as $item): ?>
+<?php 	foreach ($items as $item): ?>
 	<h4>
-		<?php echo esc_html($item->name), "\n"; ?>
-<?php 		if ($item->has_meta !== 'position'): ?>
-		<?php printf(' (%d)'."\n", NSEvent_Registration::count_for_item($item->id)); ?>
+		<?php echo esc_html($item->get_name()), "\n"; ?>
+<?php 		if ($item->get_meta() !== 'position'): ?>
+		<?php printf(' (%d)'."\n", $event->count_registrations_where(array(':item_id' => $item->get_id()))); ?>
 <?php		else: ?>
 		<?php
 		 		printf(' (%3$d %1$s, %4$d %2$s)'."\n",
-					_n('lead', 'leads', NSEvent_Registration::count_for_item($item->id, 'lead'), 'nsevent'),
-					_n('follow', 'follows', NSEvent_Registration::count_for_item($item->id, 'follow'), 'nsevent'),
-					NSEvent_Registration::count_for_item($item->id, 'lead'),
-					NSEvent_Registration::count_for_item($item->id, 'follow')); ?>
+					_n('lead', 'leads', $event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'lead'), 'nsevent')),
+					_n('follow', 'follows', $event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'follow'), 'nsevent')),
+					$event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'lead')),
+					$event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'follow'))); ?>
 <?php		endif; ?>
 	</h4>
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
 				<th class="manage-column column-title"><div><?php _e('Name', 'nsevent'); ?></div></th>
-<?php 		if ($item->has_meta == 'position'): ?>
+<?php 		if ($item->get_meta() == 'position'): ?>
 				<th class="manage-column"><div><?php _e('Position', 'nsevent'); ?></div></th>
-<?php 		elseif ($item->has_meta == 'partner_name'): ?>
+<?php 		elseif ($item->get_meta() == 'partner_name'): ?>
 				<th class="manage-column"><div><?php _e('Partner', 'nsevent'); ?></div></th>
-<?php 		elseif ($item->has_meta == 'team_members'): ?>
+<?php 		elseif ($item->get_meta() == 'team_members'): ?>
 				<th class="manage-column"><div><?php _e('Team Members', 'nsevent'); ?></div></th>
 <?php 		endif; ?>
 			</tr>
@@ -44,26 +42,28 @@ $items = NSEvent_Item::find_by(array(':type' => 'competition'));
 		<tfoot>
 			<tr>
 				<th class="manage-column column-title"><?php _e('Name', 'nsevent'); ?></th>
-<?php 		if ($item->has_meta == 'position'): ?>
+<?php 		if ($item->get_meta() == 'position'): ?>
 				<th class="manage-column"><?php _e('Position', 'nsevent'); ?></th>
-<?php 		elseif ($item->has_meta == 'partner_name'): ?>
+<?php 		elseif ($item->get_meta() == 'partner_name'): ?>
 				<th class="manage-column"><?php _e('Partner', 'nsevent'); ?></th>
-<?php 		elseif ($item->has_meta == 'team_members'): ?>
+<?php 		elseif ($item->get_meta() == 'team_members'): ?>
 				<th class="manage-column"><?php _e('Team Members', 'nsevent'); ?></th>
 <?php 		endif; ?>
 			</tr>
 		</tfoot>
 
 		<tbody>
-<?php 		$registered_dancers = $item->registered_dancers(); ?>
-<?php 		if ($registered_dancers): $i = 1; foreach ($registered_dancers as $registered_dancer): ?>
-			<tr class="<?php if (!($i % 2)) echo ' alternate'; ?>">
-				<td class="column-title"><strong><?php $event->request_link('dancer', $registered_dancer->name(), array('dancer' => (int) $registered_dancer->id)); ?><strong></td>
-<?php 			if (in_array($item->has_meta, array('position', 'partner_name', 'team_members'))): ?>
+<?php 		$registered_dancers = $item->get_registered_dancers(); ?>
+<?php 		if ($registered_dancers): $i = 1; ?>
+<?php 			foreach ($registered_dancers as $registered_dancer): ?>
+			<tr class="<?php if (!($i++ % 2)) echo ' alternate'; ?>">
+				<td class="column-title"><strong><?php echo $event->get_request_link('dancer', $registered_dancer->get_name(), array('dancer' => $registered_dancer->get_id())); ?><strong></td>
+<?php 				if (in_array($item->get_meta(), array('position', 'partner_name', 'team_members'))): ?>
 				<td><?php echo esc_html(ucwords($registered_dancer->item_meta)); ?></td>
-<?php 			endif; ?>			
+<?php 				endif; ?>			
 			</tr>
-<?php 		$i++; endforeach; else: ?>
+<?php 			endforeach; ?>
+<?php 		else: ?>
 			<tr><td colspan="2"><?php _e('There are no registered dancers for this competition&hellip;', 'nsevent'); ?></td></tr>
 <?php 		endif; ?>
 		</tbody>

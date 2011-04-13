@@ -9,10 +9,10 @@ if (!isset($_GET['request']) or !in_array($_GET['request'], array('housing-neede
 if ($_GET['request'] === 'housing-needed') {
 	$rows[0] = array_merge(
 		array(__('Last Name', 'nsevent'), __('First Name', 'nsevent')),
-		NSEvent_CSVHelper::$event->nights(),
+		NSEvent_CSVHelper::$event->get_housing_nights(),
 		array(__('Gender', 'nsevent')));
 
-	$dancers_housing = NSEvent_Dancer::get_housing_needed();
+	$dancers_housing = NSEvent_CSVHelper::$event->get_dancers_needing_housing();
 	$housing_title = __('Housing Needed', 'nsevent');
 
 	$rows[0] = array_merge($rows[0], array(
@@ -23,13 +23,12 @@ if ($_GET['request'] === 'housing-needed') {
 	
 	foreach ($dancers_housing as $dancer)
 	{
-		$row = array($dancer->last_name, $dancer->first_name);
+		$row = array($dancer->get_last_name(), $dancer->get_first_name());
 		
-		foreach (NSEvent_CSVHelper::$event->nights() as $night)
-			$row[] = ($dancer->housing_check_night($night)) ? '•' : '';
+		foreach (NSEvent_CSVHelper::$event->get_housing_nights() as $night)
+			$row[] = ($dancer->get_housing_for_night_by_index($night)) ? '•' : '';
 		
-		$row[] = $dancer->housing_gender();
-		$row[] = ($dancer->car)        ? '•' : '';
+		$row[] = $dancer->get_housing_gender();
 		$row[] = ($dancer->no_pets)    ? '•' : '';
 		$row[] = ($dancer->no_smoking) ? '•' : '';
 		$row[] = $dancer->comment;
@@ -40,10 +39,10 @@ if ($_GET['request'] === 'housing-needed') {
 elseif ($_GET['request'] === 'housing-providers') {
 	$rows[0] = array_merge(
 		array(__('Last Name', 'nsevent'), __('First Name', 'nsevent')),
-		NSEvent_CSVHelper::$event->nights(),
+		NSEvent_CSVHelper::$event->get_housing_nights(),
 		array(__('Gender', 'nsevent')));
 
-	$dancers_housing = NSEvent_Dancer::get_housing_providers();
+	$dancers_housing = NSEvent_CSVHelper::$event->get_dancers_providing_housing();
 	$housing_title = __('Housing Providers', 'nsevent');
 	
 	$rows[0] = array_merge($rows[0], array(
@@ -54,12 +53,12 @@ elseif ($_GET['request'] === 'housing-providers') {
 	
 	foreach ($dancers_housing as $dancer)
 	{
-		$row = array($dancer->last_name, $dancer->first_name);
+		$row = array($dancer->get_last_name(), $dancer->get_first_name());
 		
 		foreach (NSEvent_CSVHelper::$event->nights() as $night)
-			$row[] = ($dancer->housing_check_night($night)) ? '1' : '';
+			$row[] = ($dancer->get_housing_for_night_by_index($night)) ? '1' : '';
 		
-		$row[] = $dancer->housing_gender();
+		$row[] = $dancer->get_housing_gender();
 		$row[] = $dancer->available;
 		$row[] = ($dancer->pets)    ? '1' : '';
 		$row[] = ($dancer->smoking) ? '1' : '';
@@ -69,13 +68,13 @@ elseif ($_GET['request'] === 'housing-providers') {
 	}
 }
 elseif ($_GET['request'] === 'housing-needed-email') {
-	$dancers_housing = NSEvent_Dancer::get_housing_needed();
+	$dancers_housing = NSEvent_CSVHelper::$event->get_dancers_needing_housing();
 	$housing_title = __('Housing Needed Emails', 'nsevent');
 	$rows[0] = array(__('Last Name', 'nsevent'), __('First Name', 'nsevent'), __('Email Address', 'nsevent'));
 	
 	foreach ($dancers_housing as $dancer)
 	{
-		$rows[] = array($dancer->last_name, $dancer->first_name, $dancer->email);
+		$rows[] = array($dancer->get_last_name(), $dancer->get_first_name(), $dancer->get_email());
 	}
 }
 

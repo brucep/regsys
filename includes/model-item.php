@@ -1,117 +1,76 @@
 <?php
 
-class NSEvent_Item extends NSEvent_Model
+class NSEvent_Model_Item extends NSEvent_Model
 {
-	protected $registered_dancers, $openings;
-	
-	public static function find_all()
+	private $event_id,
+	        $id,
+	        $name,
+	        $date_expires,
+	        $description,
+	        $limit_per_position,
+	        $limit_total,
+	        $meta,
+	        $note,
+	        $openings,
+	        $preregistration,
+	        $price_early,
+	        $price_early_discount1,
+	        $price_early_discount2,
+	        $price_prereg,
+	        $price_prereg_discount1,
+	        $price_prereg_discount2,
+	        $price_door,
+	        $price_door_discount1,
+	        $price_door_discount2,
+	        $price_vip,
+	        $registered_dancers,
+	        $registered_meta,
+	        $registered_price,
+	        $type;
+		
+	public function __toString()
 	{
-		$statement = self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => self::$event->id));
-		return $statement->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Item');
+		return sprintf('%s [#%d]', $this->name, $this->id);
 	}
 	
-	public static function find_by(array $where)
+	public function get_id()
 	{
-		if (empty($where))
-			return False;
-		
-		foreach($where as $field => $value)
-			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
-		
-		$query = implode(' AND', $query);
-		$where[':event_id'] = self::$event->id;
-		
-		$statement = self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id AND'.$query, $where);
-		return $statement->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Item');
+		return (int) $this->id;
 	}
 	
-	public static function find($id)
+	public function get_name()
 	{
-		$statement = self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id AND id = :id', array(':event_id' => self::$event->id, ':id' => $id));
-		return $statement->fetchObject('NSEvent_Item');
+		return $this->name;
 	}
 	
-	public function openings($position = False)
+	public function get_description()
 	{
-		if (!isset($this->openings))
-			if (!$this->limit_total and !$this->limit_per_position)
-				$this->openings = True;
-			else
-			{
-				if ($this->limit_total)
-				{
-					$limit = $this->limit_total;
-					$number_dancers = NSEvent_Registration::count_for_item($this->id);
-				}
-				else if ($position === False)
-				{
-					$limit = $this->limit_per_position * 2;
-					return $limit - NSEvent_Registration::count_for_item($this->id);
-				}
-				else
-				{
-					$limit = $this->limit_per_position;
-					$number_dancers = NSEvent_Registration::count_for_item($this->id, $position);
-				}
-			
-				if ($number_dancers !== False)
-					if (($limit - $number_dancers) > 0)
-						$openings = $limit - $number_dancers;
-					else
-						$openings = 0;
-				else
-					# If there was an error communicating with the database, assume there are no more openings.
-					$openings = False;
-				
-				if ($position === False)
-					$this->openings = $openings;
-				else
-					return $openings;
-			}
-		
-		return $this->openings;
+		return $this->description;
 	}
 	
-	public function get_price_for_discount($discount, $early = False)
+	public function get_date_expires($format = false)
 	{
-		if ($discount === 'vip') {
-			$price = $this->price_vip;
-		}
-		elseif ($early) {
-			if ($discount === 0) {
-				$price = $this->price_early;
-			}
-			elseif ($discount === 1) {
-				$price = $this->price_early_discount1;
-			}
-			elseif ($discount === 2) {
-				$price = $this->price_early_discount2;
-			}
-		}
-		else {
-			if ($discount === 0) {
-				$price = $this->price_prereg;
-			}
-			elseif ($discount === 1) {
-				$price = $this->price_prereg_discount1;
-			}
-			elseif ($discount === 2) {
-				$price = $this->price_prereg_discount2;
-			}
-		}
-		
-		if (isset($price)) {
-		 	return (int) $price;
-		}
-		else {
-		 	throw new Exception(__('Unable to get the price for the specified discount.', 'nsevent'));
-		}
+		return ($format === false) ? (int) $this->date_expires : date($format, $this->date_expires);
 	}
 	
-	public function meta_label()
+	public function get_limit_per_position()
 	{
-		switch ($this->has_meta)
-		{
+		return (int) $this->limit_per_position;
+	}
+	
+	public function get_limit_total()
+	{
+		return (int) $this->limit_total;
+	}
+	
+	public function get_meta()
+	{
+		return $this->meta;
+	}
+	
+	public function get_meta_label()
+	{
+		switch ($this->meta) {
 			case 'position':
 				return __('Position', 'nsevent');
 			
@@ -125,26 +84,157 @@ class NSEvent_Item extends NSEvent_Model
 				return __('Size', 'nsevent');
 			
 			default:
-				return False;
+				return false;
 		}
 	}
 	
-	public function total_money_from_registrations()
+	public function get_price_for_discount($discount = false, $early = false)
 	{
-		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id', array(':event_id' => self::$event->id, ':item_id' => $this->id))->fetchColumn();
+		if ($discount === 'vip') {
+			$price = $this->price_vip;
+		}
+		elseif ($early === true) {
+			if ($discount === 1) {
+				$price = $this->price_early_discount1;
+			}
+			elseif ($discount === 2) {
+				$price = $this->price_early_discount2;
+			}
+			else {
+				$price = $this->price_early;
+			}
+		}
+		elseif ($early === 'door') {
+			if ($discount === 1) {
+				$price = $this->price_door_discount1;
+			}
+			elseif ($discount === 2) {
+				$price = $this->price_door_discount2;
+			}
+			else {
+				$price = $this->price_door;
+			}
+		}
+		else {
+			if ($discount === 1) {
+				$price = $this->price_prereg_discount1;
+			}
+			elseif ($discount === 2) {
+				$price = $this->price_prereg_discount2;
+			}
+			else {
+				$price = $this->price_prereg;
+			}
+		}
+		
+		if (isset($price)) {
+		 	return (int) $price;
+		}
+		else {
+		 	throw new Exception(__('Unable to get the price for the specified discount.', 'nsevent'));
+		}
 	}
 	
-	public function registered_dancers()
+	public function get_registered_dancers()
 	{
-		if (!isset($this->registered_dancers))
-		{
-			$order_by = ($this->has_meta != 'position') ? '' : 'item_meta DESC, ';
+		if (!isset($this->registered_dancers)) {
+			$order_by = ($this->meta != 'position') ? '' : 'item_meta DESC, ';
 			$order_by .= 'last_name ASC, first_name ASC';
 			
-			$statement = self::$database->query('SELECT %1$s_dancers.*, %1$s_registrations.`item_meta` FROM %1$s_registrations LEFT JOIN %1$s_dancers ON id = dancer_id WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id ORDER BY '.$order_by, array(':event_id' => self::$event->id, ':item_id' => $this->id));
-			$this->registered_dancers = $statement->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Dancer');
+			$this->registered_dancers = self::$database->query('SELECT %1$s_dancers.*, %1$s_registrations.`item_meta` FROM %1$s_registrations LEFT JOIN %1$s_dancers ON id = dancer_id WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id ORDER BY '.$order_by, array(':event_id' => $this->event_id, ':item_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 		}
 		
 		return $this->registered_dancers;
+	}
+	
+	public function get_registered_meta()
+	{
+		return $this->registered_meta;
+	}
+	
+	public function get_registered_price()
+	{
+		return $this->registered_price;
+	}
+	
+	public function get_total_money_from_registrations()
+	{
+		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $this->id))->fetchColumn();
+	}
+	
+	public function get_type()
+	{
+		return $this->type;
+	}
+	
+	public function is_expired()
+	{
+		return ($this->date_expires and $this->date_expires <= time());
+	}
+	
+	public function count_openings($position = false)
+	{
+		if (!isset($this->openings)) {
+			if (!$this->limit_total and !$this->limit_per_position) {
+				$this->openings = true;
+			}
+			else {
+				if ($this->limit_total) {
+					$limit = $this->limit_total;
+					$number_dancers = $this->count_registrations_where(array(':item_id' => $this->id));
+				}
+				elseif ($position === false) {
+					$limit = $this->limit_per_position * 2;
+					return $limit - $this->count_registrations_where(array(':item_id' => $this->id));
+				}
+				else {
+					$limit = $this->limit_per_position;
+					$number_dancers = $this->count_registrations_where(array(':item_id' => $this->id, ':position' => $position), 'dancers');
+				}
+			
+				if ($number_dancers !== false) {
+					$openings = (($limit - $number_dancers) > 0) ? $limit - $number_dancers : 0;
+				}
+				else
+				{
+					# If there was an error communicating with the database, assume there are no more openings.
+					$openings = false;
+				}
+				
+				if ($position === false) {
+					$this->openings = $openings;
+				}
+				else {
+					return $openings;
+				}
+			}
+		}
+		
+		return $this->openings;
+	}
+	
+	private function count_registrations_where(array $where = array(), $join_table = false)
+	{
+		$where = array_merge(array(':event_id' => $this->event_id, ':item_id' => $this->id), $where);
+		$query = array();
+		
+		foreach ($where as $field => $value) {
+			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
+		}
+		
+		$query = ' WHERE '.implode(' AND', $query);
+		
+		switch ($join_table) {
+			case 'items':
+				$query = 'JOIN %1$s_items ON %1$s_items.`id` = %1$s_registrations.`item_id`'.$query;
+				break;
+			
+			case 'dancers':
+				$query = 'JOIN %1$s_dancers ON %1$s_dancers.`id` = %1$s_registrations.`dancer_id`'.$query;
+				break;
+		}
+		
+		$result = self::$database->query('SELECT COUNT(event_id) FROM %1$s_registrations '.$query, $where)->fetchColumn();
+		return ($result !== false) ? (int) $result : false;
 	}
 }

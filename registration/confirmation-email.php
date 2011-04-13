@@ -1,6 +1,6 @@
-<?php echo $dancer->name(), ",\n"; ?>
+<?php echo $dancer->get_name(), ",\n"; ?>
 
-Thanks for registering for <?php echo $event->name; ?>!  
+Thanks for registering for <?php echo $event->get_name(); ?>!  
 We are very excited that you're joining us!
 
 We have you confirmed for the following:
@@ -39,7 +39,7 @@ HOUSING NEEDED
 <?php 	if ($_POST['housing_needed_no_pets']): ?>
 - I would prefer no pets.
 <?php 	endif; ?>
-- I would prefer to be housed with: <?php echo NSEvent_Model::bit_field($_POST['housing_needed_gender'], NSEvent_Dancer::$possible_housing_genders, 'string'), "\n"; ?>
+- I would prefer to be housed with: <?php echo NSEvent_Model::bit_field($_POST['housing_needed_gender'], NSEvent_Model_Dancer::$possible_housing_genders, 'string'), "\n"; ?>
 - I will need housing for: <?php echo NSEvent_Model::bit_field($_POST['housing_needed_nights'], $event->nights(), 'string'), "\n"; ?>
 <?php 	if (!empty($_POST['housing_needed_comment'])): ?>
 <?php echo "\n", $_POST['housing_needed_comment'], "\n"; ?>
@@ -56,7 +56,7 @@ HOUSING PROVIDER
 <?php 	if ($_POST['housing_provider_pets']): ?>
 - I have pets.
 <?php 	endif; ?>
-- I will house: <?php echo NSEvent_Model::bit_field($_POST['housing_provider_gender'], NSEvent_Dancer::$possible_housing_genders, 'string'), "\n"; ?>
+- I will house: <?php echo NSEvent_Model::bit_field($_POST['housing_provider_gender'], NSEvent_Model_Dancer::$possible_housing_genders, 'string'), "\n"; ?>
 - I will provide housing for: <?php echo NSEvent_Model::bit_field($_POST['housing_provider_nights'], $event->nights(), 'string'), "\n"; ?>
 <?php 	if (!empty($_POST['housing_provider_comment'])): ?>
 <?php echo "\n", $_POST['housing_provider_comment'], "\n"; ?>
@@ -71,7 +71,7 @@ PACKAGE
 printf('- $%1$d :: %2$s%3$s',
 	$package_cost,
 	self::$validated_items[self::$validated_package_id]->name,
-	($event->early_end and $dancer->date_registered <= $event_early_end) ? ' [Early Bird]' : '');
+	($event->get_early_end() and $dancer->get_date_registered() <= $event->get_early_end()) ? ' [Early Bird]' : '');
 ?>
 
 
@@ -83,9 +83,9 @@ COMPETITIONS
 <?php
 	foreach ($competitions as $item):
  		printf('- $%1$d :: %2$s%3$s'."\n",
-			$item->get_price_for_discount($_POST['discount'], $early_bird),
+			$item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird()),
 			$item->name,
-			(isset($_POST['item_meta'][$item->id])) ? sprintf(' (%s)', ucfirst($_POST['item_meta'][$item->id])) : '');
+			(isset($_POST['item_meta'][$item->get_id()])) ? sprintf(' (%s)', ucfirst($_POST['item_meta'][$item->get_id()])) : '');
  	endforeach;
 ?>
 
@@ -98,9 +98,9 @@ SHIRTS
 <?php
 	foreach ($shirts as $item):
  		printf('- $%1$d :: %2$s%3$s'."\n",
-			$item->get_price_for_discount($_POST['discount'], $early_bird),
+			$item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird()),
 			$item->name,
-			(isset($_POST['item_meta'][$item->id])) ? sprintf(' (%s)', ucfirst($_POST['item_meta'][$item->id])) : '');
+			(isset($_POST['item_meta'][$item->get_id()])) ? sprintf(' (%s)', ucfirst($_POST['item_meta'][$item->get_id()])) : '');
  	endforeach;
 ?>
 
@@ -147,8 +147,8 @@ You still need to do the following:
 *REFUNDS ARE NOT ALLOWED AFTER %2\$s.*
 EOD
 		, 'nsevent'),
-			$dancer->total_cost(),
-			date('F jS', $event->postmark_by()),
+			$dancer->get_price_total(),
+			date('F jS', $event->get_date_postmark_by()),
 			'Naptown Stomp',
 			"\tSwingIN c/o  \n\tNaptown Stomp  \n\tP.O. BOX 1051  \n\tINDIANAPOLIS IN  46206");
 

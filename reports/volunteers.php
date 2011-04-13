@@ -1,17 +1,13 @@
-<?php
-
-$volunteers = $event->volunteers();
-
-$number_volunteers = self::$database->query('SELECT COUNT(id) FROM %1$s_dancers WHERE event_id = :event_id and status = 1', array(':event_id' => $event->id))->fetchColumn();
-
-?>
+<?php $volunteers = $event->get_dancers_where(array(':status' => 1)); ?>
 
 <div class="wrap" id="nsevent">
-	<h2><?php $event->request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->name)); ?></h2>
+	<h2><?php echo $event->get_request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->get_name())); ?></h2>
 
 	<h3>
-		<?php _e('Volunteers', 'nsevent'); if ($number_volunteers) printf(' (%d)', $number_volunteers); echo "\n"; ?>
-		<a href="<?php printf('%s/%s/reports/email-csv.php?event_id=%d&amp;request=volunteers', WP_PLUGIN_URL, basename(dirname(dirname(__FILE__))), $event->id); ?>" class="button add-new-h3"><?php _e('Download Email Addresses', 'nsevent'); ?></a>
+		<?php _e('Volunteers', 'nsevent'); if (count($volunteers)) printf(' (%d)', count($volunteers)); echo "\n"; ?>
+<?php if ($volunteers): ?>
+		<a href="<?php printf('%s/%s/reports/email-csv.php?event_id=%d&amp;request=volunteers', WP_PLUGIN_URL, basename(dirname(dirname(__FILE__))), $event->get_id()); ?>" class="button add-new-h3"><?php _e('Download Email Addresses', 'nsevent'); ?></a>
+<?php endif; ?>
 	</h3>
 
 <?php if ($volunteers): ?>
@@ -33,8 +29,8 @@ $number_volunteers = self::$database->query('SELECT COUNT(id) FROM %1$s_dancers 
 		<tbody>
 <?php 	foreach($volunteers as $dancer): ?>
 			<tr class="vcard">
-				<td class="dancer-name fn"><?php echo esc_html($dancer->name(True)); ?></td>
-				<td class="tel"><?php echo esc_html($dancer->note); ?></td>
+				<td class="dancer-name fn"><?php echo esc_html($dancer->get_name_last_first()); ?></td>
+				<td class="tel"><?php echo esc_html($dancer->get_volunteer_phone()); ?></td>
 			</tr>
 <?php 	endforeach; ?>
 		</tbody>

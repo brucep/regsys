@@ -2,39 +2,42 @@
 
 abstract class NSEvent_Model
 {
-	static public $event;
 	static protected $database;
 	
 	static public function set_database($database)
 	{
 		self::$database = $database;
 	}
-	
-	public function bit_field($input, array $fields, $return = '')
+		
+	static protected function bit_field($input, array $fields, $return = '')
 	{
 		$result = array();
 		$result_booleans = array();
 		krsort($fields);
 		
-		foreach ($fields as $key => $value)
+		foreach ($fields as $key => $value) {
 			// When not using validated data, check if input is too large
-			if ($input >= $key)
-			{
+			if ($input >= $key) {
 				$result[$key] = $value;
-				$result_booleans[$value] = TRUE;
+				$result_booleans[$value] = true;
 				$input -= $key;
 			}
-			else
-				$result_booleans[$value] = FALSE;
+			else {
+				$result_booleans[$value] = false;
+			}
+		}
 		
 		ksort($result);
 		ksort($result_booleans);
 		
-		if ($return == 'string')
+		if ($return == 'string') {
 			return ucwords(implode(', ', array_keys(array_filter($result_booleans))));
-		elseif ($return == 'booleans')
+		}
+		elseif ($return == 'booleans') {
 			return $result_booleans;
-		else 
+		}
+		else {
 			return $result;
+		}
 	}
 }

@@ -10,19 +10,18 @@ class NSEvent_CSVHelper
 	
 	static public function set_database($database)
 	{
-		self::$database = $database
+		self::$database = $database;
 	}
 	
 	static public function load_event()
 	{
 		if (isset($_GET['event_id']))
 		{
-			if (!self::$event = NSEvent_Event::find($_GET['event_id']))
+			if (!self::$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id']))
 				throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
 		}
 		else
 			throw new Exception('Event ID not specified.');
-		}
 	}
 	
 	static public function download(array $rows, $filename = '')
@@ -49,5 +48,6 @@ class NSEvent_CSVHelper
 }
 
 NSEvent::load_models();
+NSEvent_Model::set_database(NSEvent::get_database_connection());
 NSEvent_CSVHelper::set_database(NSEvent::get_database_connection());
 NSEvent_CSVHelper::load_event();
