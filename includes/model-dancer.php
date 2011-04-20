@@ -52,7 +52,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 			':payment_method'    => $this->payment_method,
 			':payment_discount'  => $this->payment_discount,
 			':volunteer_phone'   => $this->volunteer_phone,
-			':note'              => $this->note,
+			':note'              => (string) $this->note,
 			));
 		
 		$this->event_id = $event_id;
