@@ -7,6 +7,8 @@
 		<?php settings_fields('nsevent' ); ?>
 		<?php $options = get_option('nsevent'); ?>
 
+		<h3><?php _e('Registration', 'nsevent'); ?></h3>
+
 		<table class="form-table">
 			<tr valign="top">
 				<th scope="row"><?php _e('Current Event', 'nsevent'); ?></th>
@@ -16,7 +18,7 @@
 						<option class="level-0" value="<?php echo (int) $event->get_id(); ?>"<?php if (isset($options['current_event_id']) and $options['current_event_id'] == $event->get_id()) echo ' selected="selected"'; ?>><?php echo esc_attr($event->get_name()); ?></option>
 <?php endforeach; ?>
 					</select>
-					<span class="description">The event currently used by the registration form.</span>
+					<span class="description"><?php _e('The event currently used by the registration form.', 'nsevent'); ?></span>
 				</td>
 			</tr>
 
@@ -33,9 +35,13 @@
 					</fieldset>
 				</td>
 			</tr>
+		</table>
 
+		<h3><?php _e('PayPal', 'nsevent'); ?></h3>
+
+		<table class="form-table">
 			<tr valign="top">
-				<th scope="row">PayPal Business Address</th>
+				<th scope="row"><?php _e('PayPal Business Address', 'nsevent'); ?></th>
 				<td>
 					<input type="text" name="nsevent[paypal_business]" value="<?php if (isset($options['paypal_business'])) echo esc_attr($options['paypal_business']); ?>" class="regular-text">
 					<span class="description"><?php _e('The email address used to receive payments via PayPal. (If this is not set, then the PayPal payment option will not be available.)', 'nsevent'); ?></span>
@@ -43,13 +49,17 @@
 			</tr>
 
 			<tr valign="top">
-				<th scope="row">PayPal Fee</th>
+				<th scope="row"><?php _e('PayPal Fee', 'nsevent'); ?></th>
 				<td>
 					<input type="text" name="nsevent[paypal_fee]" value="<?php if (isset($options['paypal_fee'])) echo (int) $options['paypal_fee']; ?>" class="regular-text">
 					<span class="description"><?php _e('The processing fee, if any, for payments made via PayPal.', 'nsevent'); ?></span>
 				</td>
 			</tr>
+		</table>
 
+		<h3><?php _e('Confirmation Email', 'nsevent'); ?></h3>
+
+		<table class="form-table">
 			<tr valign="top">
 				<th scope="row"><?php _e('Confirmation Email Address', 'nsevent'); ?></th>
 				<td>
