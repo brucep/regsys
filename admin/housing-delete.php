@@ -1,16 +1,18 @@
 <?php
 
-if (!$dancer->populate_housing_info())
+if (!$dancer->populate_housing_info()) {
 	throw new Exception('Housing information not found for Dancer ID: %d', $dancer->get_id());
-
+}
 
 if (isset($_POST['confirm_delete'])):
     $nsevent_database = NSEvent_Database::get_instance();
-
-	if (isset($dancer->available))
+	
+	if (isset($dancer->available)) {
 		$statement = $nsevent_database->query('DELETE FROM %1$s_housing_providers WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $event->get_id(), ':dancer_id' => $dancer->get_id()));
-	else
+	}
+	else {
 		$statement = $nsevent_database->query('DELETE FROM %1$s_housing_needed WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $event->get_id(), ':dancer_id' => $dancer->get_id()));
+	}
 
 ?>
 <div class="wrap" id="nsevent">

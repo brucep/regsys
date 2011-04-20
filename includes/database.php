@@ -9,8 +9,7 @@ class NSEvent_Database
 		#
 		# Establish connection via PDO
 		#
-		try
-		{
+		try {
 			$this->pdo = new PDO(
 				sprintf('%s:host=%s;%sdbname=%s',
 					'mysql',
@@ -25,45 +24,46 @@ class NSEvent_Database
 			
 			$this->pdo->query('SET NAMES "utf8";');
 			
-			if (!empty($settings['prefix']))
+			if (!empty($settings['prefix'])) {
 				$this->prefix = $settings['prefix'];
+			}
 		}
-		catch (PDOException $e)
-		{
+		catch (PDOException $e) {
 			$message = preg_replace('/[A-Z]+\[[0-9]+\]: .+ [0-9]+ (.*?)/', '$1', $e->getMessage());
 			throw new Exception($message);
 		}
 	}
-
+	
 	#
 	# Function: query
 	# Executes a SQL query.
 	#
-	public function query($query, array $params = array(), $use_prefix = True)
+	public function query($query, array $params = array(), $use_prefix = true)
 	{
-		try
-		{
-			if ($use_prefix)
+		try {
+			if ($use_prefix) {
 				$query = sprintf($query, $this->prefix);
+			}
 			
 			$statement = $this->pdo->prepare($query);
 			
-			if (!($statement->execute($params)))
+			if (!($statement->execute($params))) {
 				throw PDOException();
+			}
 		}
-		catch (PDOException $e)
-		{
+		catch (PDOException $e) {
 			$message = preg_replace("/[A-Z]+\[[0-9]+\]: .+ [0-9]+ (.*?)/", "\\1", $e->getMessage());
 			
-			if (defined('WP_DEBUG'))
-				$message .= "</p>\n\n<pre>$query\n\n".print_r($params, True)."</pre>\n\n";
+			if (defined('WP_DEBUG')) {
+				$message .= "</p>\n\n<pre>$query\n\n".print_r($params, true)."</pre>\n\n";
+			}
 			
 			throw new Exception($message);
 		}
 		
 		return $statement;
 	}
-
+	
 	#
 	# Function: lastInsertID
 	# Returns the ID of the last inserted row.

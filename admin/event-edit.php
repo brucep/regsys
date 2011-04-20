@@ -5,18 +5,15 @@
 require dirname(dirname(__FILE__)).'/includes/form-validation.php';
 NSEvent_FormValidation::set_error_messages();
 
-if (!empty($_POST))
-{
+if (!empty($_POST)) {
 	NSEvent_FormValidation::add_rules(array(
 		'name' => 'trim|required'
 		));
 
-	if (NSEvent_FormValidation::validate())
-	{
+	if (NSEvent_FormValidation::validate()) {
 		$wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->prefix}nsevent_events (name, prereg_end) VALUES ( %s, %s )", trim($_POST['event_name']), strtotime($_POST['prereg_end'])));
 		
-		if (isset($_POST['set_current_event']))
-		{
+		if (isset($_POST['set_current_event'])) {
 			$options = array_merge(self::$default_options, get_option('nsevent'));
 			$options['current_event_id'] = $wpdb->insert_id;
 			update_option('nsevent', $options);
@@ -26,12 +23,12 @@ if (!empty($_POST))
 		return;
 	}
 }
-elseif (isset($event))
-{
+elseif (isset($event)) {
 	# Put values into POST so that form is pre-populated.
 	$reflection = new ReflectionObject($event);
-	foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property)
+	foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
 		$_POST[$property->getName()] = $property->getValue($event);
+	}
 }
 
 ?>

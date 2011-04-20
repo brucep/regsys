@@ -12,7 +12,7 @@
 				<th scope="row"><?php _e('Current Event', 'nsevent'); ?></th>
 				<td>
 					<select name="nsevent[current_event_id]" class="postform">
-<?php foreach($events as $event): ?>
+<?php foreach ($events as $event): ?>
 						<option class="level-0" value="<?php echo (int) $event->get_id(); ?>"<?php if (isset($options['current_event_id']) and $options['current_event_id'] == $event->get_id()) echo ' selected="selected"'; ?>><?php echo esc_attr($event->get_name()); ?></option>
 <?php endforeach; ?>
 					</select>

@@ -46,13 +46,13 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 								<div class="field-label"><?php _e('Position', 'nsevent'); ?></div>
 
 <?php if ($event->limit_per_position and $event->limit_per_position <= $event->count_dancers('position', 1)): ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 1, 'label' => __('(Registrations for leads are no longer being accepted.)', 'nsevent'), 'disabled' => True)); ?></div>
+								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 1, 'label' => __('(Registrations for leads are no longer being accepted.)', 'nsevent'), 'disabled' => true)); ?></div>
 <?php else: ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 1, 'label' => __('Lead', 'nsevent'), 'default' => True)); ?></div>								
+								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 1, 'label' => __('Lead', 'nsevent'), 'default' => true)); ?></div>								
 <?php endif; ?>
 
 <?php if ($event->limit_per_position and $event->limit_per_position <= $event->count_dancers('position', 2)): ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 2, 'label' => __('(Registrations for follows are no longer being accepted.)', 'nsevent'), 'disabled' => True)); ?></div>
+								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 2, 'label' => __('(Registrations for follows are no longer being accepted.)', 'nsevent'), 'disabled' => true)); ?></div>
 <?php else: ?>
 								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 2, 'label' => __('Follow', 'nsevent'))); ?></div>
 <?php endif; ?>
@@ -62,7 +62,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<?php echo NSEvent_FormValidation::get_error('level'), "\n"; ?>
 							<div class="field" id="level">
 								<div class="field-label">Level</div>
-<?php 	foreach($event->get_levels() as $level => $label): ?>
+<?php 	foreach ($event->get_levels() as $level => $label): ?>
 								<div class="radio"><?php NSEvent_FormInput::radio('level', array('value' => $level, 'label' => $label, 'default' => !($level - 1))); ?></div>
 <?php 	endforeach; ?>
 							</div>
@@ -78,7 +78,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 <?php 	if ($event->discount2): ?>
 								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 2, 'id' => 'discount2', 'label' => $event->discount2)); ?></div>
 <?php 	endif; ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 0, 'id' => 'discount0', 'label' => __('None of these apply to me.', 'nsevent'), 'default' => True)); ?></div>
+								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 0, 'id' => 'discount0', 'label' => __('None of these apply to me.', 'nsevent'), 'default' => true)); ?></div>
 <?php 	if ($event->discount_note):?>
 								<div class="caption">
 									<p><?php echo esc_html($event->discount_note); ?></p>
@@ -118,7 +118,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 									</tr>
 								</thead>
 								<tbody>
-<?php 	foreach($packages as $index => $item): if ($item->is_expired()) continue; ?>
+<?php 	foreach ($packages as $index => $item): if ($item->is_expired()) continue; ?>
 									<tr>
 										<td><?php NSEvent_FormInput::radio('package', array('value' => $item->get_id(), 'default' => !$index, 'label' => $item->get_name())); ?></td>
 <?php 		if (!$vip): ?>
@@ -169,7 +169,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 									</tr>
 								</thead>
 								<tbody>
-<?php 	foreach($competitions as $index => $item): if ($item->is_expired()) continue; ?>
+<?php 	foreach ($competitions as $index => $item): if ($item->is_expired()) continue; ?>
 <?php 		if ($item->count_openings()): ?>
 									<?php echo NSEvent_FormValidation::get_error('item_'.$item->get_id(), sprintf('<tr class="nsevent-validation-error"><td colspan="%d">', ($event->get_date_early_end()) ? 4 : 3), '</td></tr>'), "\n"; ?>
 									<tr>
@@ -278,7 +278,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 			// NSEvent_FormInput::select(sprintf('items[%d]', $item->get_id()), $options);
 ?>
 											<select name="<?php printf('items[%d]', $item->get_id()); ?>">
-												<option value="none"<?php echo NSEvent_FormInput::_set_select(sprintf('items[%d]', $item->get_id()), 'none', True); ?>><?php _e('None', 'nsevent'); ?></option>
+												<option value="none"<?php echo NSEvent_FormInput::_set_select(sprintf('items[%d]', $item->get_id()), 'none', true); ?>><?php _e('None', 'nsevent'); ?></option>
 												<optgroup label="<?php _e('Shirt Size', 'nsevent'); ?>">
 <?php 		foreach (explode(',', $item->get_description()) as $size): ?>
 													<option value="<?php echo esc_attr($size); ?>"<?php echo NSEvent_FormInput::_set_select(sprintf('items[%d]', $item->get_id()), esc_attr($size)); ?>><?php echo esc_html(ucfirst($size)); ?></option>
@@ -314,7 +314,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 						<fieldset id="housing_provider_fieldset">
 							<div id="housing_provider_fields" class="no_show">
 								<?php echo NSEvent_FormValidation::get_error('housing_provider_available'), "\n"; ?>
-								<div class="field"><?php printf(__('I can provide housing for %s person(s).', 'nsevent'), NSEvent_FormInput::text('housing_provider_available', array('size' => 2, 'placeholder' => '#'), False)); ?></div>
+								<div class="field"><?php printf(__('I can provide housing for %s person(s).', 'nsevent'), NSEvent_FormInput::text('housing_provider_available', array('size' => 2, 'placeholder' => '#'), false)); ?></div>
 
 								<div class="field">
 									<div class="field-label"><?php _e('I&hellip;', 'nsevent'); ?></div>
@@ -333,7 +333,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 								<?php echo NSEvent_FormValidation::get_error('housing_provider_gender'), "\n"; ?>
 								<div class="field">
 									<div class="field-label"><?php _e('I prefer to house&hellip;', 'nsevent'); ?></div>
-									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider_gender', array('value' => 3, 'label' => __('Boys and/or Girls', 'nsevent'), 'default' => True)); ?></div>
+									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider_gender', array('value' => 3, 'label' => __('Boys and/or Girls', 'nsevent'), 'default' => true)); ?></div>
 									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider_gender', array('value' => 1, 'label' => __('Boys only', 'nsevent'))); ?></div>
 									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider_gender', array('value' => 2, 'label' => __('Girls only', 'nsevent'))); ?></div>
 								</div>
@@ -367,7 +367,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 								<?php echo NSEvent_FormValidation::get_error('housing_needed_gender'), "\n"; ?>
 								<div class="field">
 									<div class="field-label"><?php _e('I prefer to be housed with&hellip;', 'nsevent'); ?></div>
-									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed_gender', array('value' => 3, 'label' => __('Boys and/or Girls', 'nsevent'), 'default' => True)); ?></div>
+									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed_gender', array('value' => 3, 'label' => __('Boys and/or Girls', 'nsevent'), 'default' => true)); ?></div>
 									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed_gender', array('value' => 1, 'label' => __('Boys only', 'nsevent'))); ?></div>
 									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed_gender', array('value' => 2, 'label' => __('Girls only', 'nsevent'))); ?></div>
 								</div>
@@ -388,7 +388,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<?php echo NSEvent_FormValidation::get_error('payment_method'), "\n"; ?>
 							<div class="field">
 								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'PayPal', 'label' => sprintf(__('PayPal%s', 'nsevent'), (empty($options['paypal_fee']) ? '' : sprintf(__(' ($%d processing fee)', 'nsevent'), $options['paypal_fee']))))); ?></div>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'Mail', 'default' => True, 'label' => sprintf(__('Mail (Check must be postmarked by %s.)', 'nsevent'), date('F jS', $event->get_date_postmark_by())))); ?></div>
+								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'Mail', 'default' => true, 'label' => sprintf(__('Mail (Check must be postmarked by %s.)', 'nsevent'), date('F jS', $event->get_date_postmark_by())))); ?></div>
 
 								<div class="caption">
 									<p><?php printf(__('(Refunds are not available after %s.)', 'nsevent'), $event->get_date_refund_end('F jS')); ?></p>

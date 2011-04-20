@@ -27,7 +27,7 @@
 		</tfoot>
 
 		<tbody>
-<?php 	foreach($volunteers as $dancer): ?>
+<?php 	foreach ($volunteers as $dancer): ?>
 			<tr class="vcard">
 				<td class="dancer-name fn"><?php echo esc_html($dancer->get_name_last_first()); ?></td>
 				<td class="tel"><?php echo esc_html($dancer->get_volunteer_phone()); ?></td>

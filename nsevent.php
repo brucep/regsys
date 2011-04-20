@@ -26,10 +26,10 @@ class NSEvent
 	static public $event, $vip, $validated_package_id = 0, $validated_items = array();
 	static private $default_options = array(
 		'current_event_id'           => '',
-		'registration_testing'       => False,
+		'registration_testing'       => false,
 		'paypal_business'            => '',
 		'paypal_fee'                 => 0,
-		'paypal_sandbox'             => False,
+		'paypal_sandbox'             => false,
 		'confirmation_email_address' => '',
 		'confirmation_email_bcc'     => '',
 		);
@@ -39,7 +39,7 @@ class NSEvent
 	
 	static public function admin_init()
 	{
-		load_plugin_textdomain('nsevent', False, basename(__FILE__, '.php').'/translations');
+		load_plugin_textdomain('nsevent', false, basename(__FILE__, '.php').'/translations');
 		register_setting('nsevent', 'nsevent', 'NSEvent::admin_validate_options');
 	}
 	
@@ -53,19 +53,19 @@ class NSEvent
 	static public function admin_print_styles()
 	{
 	    if (!isset($_GET['style']) or !in_array($_GET['style'], array('iPhone', 'print'))) {
-    		wp_enqueue_style('nsevent-admin',        sprintf('%s/%s/css/admin-screen.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), False, False, 'screen and (min-device-width: 481px)');
-    		wp_enqueue_style('nsevent-admin-iphone', sprintf('%s/%s/css/admin-iphone.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), False, False, 'only screen and (max-device-width: 480px)');
+    		wp_enqueue_style('nsevent-admin',        sprintf('%s/%s/css/admin-screen.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'screen and (min-device-width: 481px)');
+    		wp_enqueue_style('nsevent-admin-iphone', sprintf('%s/%s/css/admin-iphone.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'only screen and (max-device-width: 480px)');
 		}
         elseif ($_GET['style'] === 'iPhone') {
-            wp_enqueue_style('nsevent-admin-iphone', sprintf('%s/%s/css/admin-iphone.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), False, False, 'screen');
+            wp_enqueue_style('nsevent-admin-iphone', sprintf('%s/%s/css/admin-iphone.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'screen');
 		}
 		elseif ($_GET['style'] === 'print') {
-			wp_enqueue_style('nsevent-admin-iphone', sprintf('%s/%s/css/admin-print.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), False, False, 'screen');
+			wp_enqueue_style('nsevent-admin-iphone', sprintf('%s/%s/css/admin-print.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'screen');
 		}
-			
+		
         
-		wp_enqueue_style('nsevent-admin-print',      sprintf('%s/%s/css/admin-print.css',  WP_PLUGIN_URL, basename(__FILE__, '.php')), False, False, 'print');
-		wp_enqueue_style('nsevent-admin-despise-ie', sprintf('%s/%s/css/admin-screen.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), False, False, 'screen');
+		wp_enqueue_style('nsevent-admin-print',      sprintf('%s/%s/css/admin-print.css',  WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'print');
+		wp_enqueue_style('nsevent-admin-despise-ie', sprintf('%s/%s/css/admin-screen.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'screen');
 		# http://iamzed.com/2010/01/07/using-wordpress-wp_enqueue_style-with-conditionals/
 		global $wp_styles;
 		$wp_styles->add_data('nsevent-admin-despise-ie', 'conditional', 'lte IE 8');
@@ -74,29 +74,37 @@ class NSEvent
 		wp_enqueue_script('nsevent-tablesorter-init', sprintf('%s/%s/js/tablesorter-init.js',        WP_PLUGIN_URL, basename(__FILE__, '.php')), array('nsevent-tablesorter'));
 		echo '<meta name="viewport" content="initial-scale=1.0;" />';
 	}
-		
+	
 	static public function admin_validate_options($input)
 	{
 		$options = get_option('nsevent', array());
 		
-		if (isset($input['current_event_id'])) // TODO: Check if id exists
+		if (isset($input['current_event_id'])) {
+			// TODO: Check if id exists
 			$options['current_event_id'] = (int) $input['current_event_id'];
+		}
 		
-		if (isset($input['paypal_business']))
+		if (isset($input['paypal_business'])) {
 			$options['paypal_business'] = trim($input['paypal_business']);
+		}
 		
-		if (isset($input['paypal_fee']))
+		if (isset($input['paypal_fee'])) {
 			$options['paypal_fee'] = (int) $input['paypal_fee'];
+		}
 		
-		if (isset($input['confirmation_email_address']))
+		if (isset($input['confirmation_email_address'])) {
 			$options['confirmation_email_address'] = trim($input['confirmation_email_address']);
-		else
+		}
+		else {
 			$options['confirmation_email_address'] = get_option('admin_email');
+		}
 		
-		if (isset($input['confirmation_email_bcc']))
+		if (isset($input['confirmation_email_bcc'])) {
 			$options['confirmation_email_bcc'] = trim($input['confirmation_email_bcc']);
-		else
+		}
+		else {
 			$options['confirmation_email_bcc'] = '';
+		}
 		
 		$options['registration_testing']   = isset($input['registration_testing']);
 		
@@ -129,8 +137,9 @@ class NSEvent
 	
 	static public function page_options()
 	{
-		if (!current_user_can('administrator'))
-			return;
+		if (!current_user_can('administrator')) {
+			throw new Exception(__('Cheatin&#8217; uh?'));
+		}
 		
 		self::load_models();
 		NSEvent_Model::set_database(self::get_database_connection());
@@ -145,23 +154,19 @@ class NSEvent
 	{
 		global $wpdb;
 		
-		try
-		{
-			if (!current_user_can('edit_pages'))
-			{
+		try {
+			if (!current_user_can('edit_pages')) {
 				throw new Exception(__('Cheatin&#8217; uh?'));
 			}
 			
-			if (empty($_GET['request']))
-			{
+			if (empty($_GET['request'])) {
 				$_GET['request'] = 'index';
 			}
 			
 			self::load_models();
 			NSEvent_Model::set_database(self::get_database_connection());
 			
-			switch ($_GET['request'])
-			{
+			switch ($_GET['request']) {
 				# List of events
 				case 'index':
 					$file = 'reports/index.php';
@@ -172,25 +177,20 @@ class NSEvent
 				case 'dancer-edit':
 				case 'housing-delete':
 				case 'registration-add':
-					if (empty($_GET['dancer']))
-					{
+					if (empty($_GET['dancer'])) {
 						throw new Exception(__('Dancer ID not specified.', 'nsevent'));
 					}
-					if (!$dancer = $event->get_dancer($_GET['dancer']))
-					{
+					if (!$dancer = $event->get_dancer($_GET['dancer'])) {
 						throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['parameter']));
 					}
 				case 'event-edit':
-					if (!current_user_can('administrator'))
-					{
+					if (!current_user_can('administrator')) {
 						throw new Exception(__('Cheatin&#8217; uh?'));
 					}
-					if (empty($_GET['event_id']))
-					{
+					if (empty($_GET['event_id'])) {
 						throw new Exception(__('Event ID not specified.', 'nsevent'));
 					}
-				    if ($_GET['event_id'] !== 'add' and (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id'])))
-					{
+				    if ($_GET['event_id'] !== 'add' and (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id']))) {
 						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
 					}
 					require dirname(__FILE__).'/includes/form-input.php';
@@ -210,18 +210,19 @@ class NSEvent
 				case 'packet-printout':
 				case 'reg-list':
 				case 'volunteers':
-					if (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id']))
+					if (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id'])) {
 						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
-					if (!isset($file))
+					}
+					if (!isset($file)) {
 						$file = sprintf('reports/%s.php', $_GET['request']);
+					}
 					break;
 				
 				default:
 					throw new Exception(sprintf(__('Unable to handle page request: %s', 'nsevent'), esc_html($_GET['request'])));
 			}
 		}
-		catch (Exception $e)
-		{
+		catch (Exception $e) {
 			printf('<div id="nsevent-exception">%s</div>', $e->getMessage());
 		}
 		
@@ -243,13 +244,11 @@ class NSEvent
 			'housing_needed',
 			'housing_providers');
 		
-		foreach($tables as $table)
-		{
+		foreach ($tables as $table) {
 			$table_name = sprintf('%snsevent_%s', $wpdb->prefix, $table);
 			
 			# Create new database tables
-			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name)
-			{
+			if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
 				switch ($table):
 					case 'events':
 						$query = sprintf("CREATE TABLE `%s` (
@@ -374,13 +373,12 @@ class NSEvent
 	{
 		global $post;
 		
-		try
-		{
+		try {
 			# Define a constant for themes to use
-			define('NSEVENT_REGISTRATION_FORM', True);
+			define('NSEVENT_REGISTRATION_FORM', true);
 			
 			# Stop the `WP Super Cache` plugin from caching registration pages
-			define('DONOTCACHEPAGE', True);
+			define('DONOTCACHEPAGE', true);
 			
 			$options = get_option('nsevent');
 			$options = array_merge(self::$default_options, $options); # Make sure keys exists
@@ -394,8 +392,10 @@ class NSEvent
 			
 			# Find current event
 			$event = self::$event = NSEvent_Model_Event::get_event_by_id($options['current_event_id']);
-			if (!$event)
+			
+			if (!$event) {
 				throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $options['current_event_id']));
+			}
 			
 			$vip = self::$vip = ($event->has_vip() and (isset($_GET['vip']) or isset($_POST['vip'])));
 			
@@ -410,8 +410,9 @@ class NSEvent
 				require dirname(__FILE__).'/registration/at-the-door.php';
 				return;
 			}
-			elseif ($options['registration_testing'] and !current_user_can('edit_pages'))
+			elseif ($options['registration_testing'] and !current_user_can('edit_pages')) {
 				throw new Exception(__('Preregistration is currently unavailable; Check back soon&hellip;', 'nsevent'));
+			}
 			
 			
 			# Setup validation rules
@@ -429,35 +430,29 @@ class NSEvent
 					));
 				
 				# Level
-				if ($event->has_levels())
-				{
+				if ($event->has_levels()) {
 					NSEvent_FormValidation::add_rule('level', sprintf('intval|in[%s]',
 						implode(',', array_keys($event->get_levels()))));
 				}
-				else
-				{
+				else {
 					$_POST['level'] = 1;
 				}
 				
 				# Discount
-				if ($event->has_vip() and $vip === true)
-				{
+				if ($event->has_vip() and $vip === true) {
 					$_POST['payment_discount'] = 'vip';
 				}
-				elseif ($event->has_discount())
-				{
+				elseif ($event->has_discount()) {
 					NSEvent_FormValidation::add_rule('payment_discount', sprintf('intval|in[0%s%s]',
 						$event->has_discount(1) ? ',1' : '',
 						$event->has_discount(2) ? ',2' : ''));
 				}
-				else
-				{
+				else {
 					$_POST['payment_discount'] = 0;
 				}
 				
 				# Housing
-				if ($event->has_housing())
-				{
+				if ($event->has_housing()) 	{
 					NSEvent_FormValidation::add_rules(array(
 						'housing_provider_available' => 'if_set[housing_provider]|intval|greater_than[0]',
 						'housing_provider_smoking'   => 'if_set[housing_provider]|intval|in[0,1]',
@@ -476,12 +471,10 @@ class NSEvent
 			}
 			
 			# Determine appropriate file for current step
-			if (empty($_POST) or !NSEvent_FormValidation::validate())
-			{
+			if (empty($_POST) or !NSEvent_FormValidation::validate()) {
 				$file = 'form-reg-info';
 			}
-			else
-			{
+			else {
 				# Used for confirmation page and email
 				$package_cost      = (self::$validated_package_id === 0) ? 0 : self::$validated_items[self::$validated_package_id]->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird());
 				$competitions      = array();
@@ -490,44 +483,37 @@ class NSEvent
 				$shirts_cost       = 0;
 				$total_cost        = 0;
 				
-				foreach (self::$validated_items as $item)
-				{
+				foreach (self::$validated_items as $item) {
 					$total_cost += $item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird());;
 				}
 				
 				
-				if (!isset($_POST['confirmed']))
-				{
+				if (!isset($_POST['confirmed'])) {
 					$dancer = new NSEvent_Model_Dancer($_POST);
 					$file = 'form-confirm';
 				}
-				else
-				{
-					if ($options['registration_testing'])
-					{
+				else {
+					if ($options['registration_testing']) {
 						$_POST['note'] = __('TEST', 'nsevent');
 					}
 					
 					# Add dancer
 					$dancer = new NSEvent_Model_Dancer($_POST);
 					$dancer->add($event->get_id());
-					if (!$dancer)
-					{
+					
+					if (!$dancer) {
 						throw new Exception(__('Unable to add dancer to database.', 'nsevent'));
 					}
 					
 					# Add registrations				
-					foreach (self::$validated_items as $item)
-					{
+					foreach (self::$validated_items as $item) {
 						$item_price = $item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird());
 						
-						if ($item->get_type() == 'competition')
-						{
+						if ($item->get_type() == 'competition') {
 							$competitions[$item->get_id()] = $item;
 							$competitions_cost += $item_price;
 						}
-						elseif ($item->get_type() == 'shirt')
-						{
+						elseif ($item->get_type() == 'shirt') {
 							$shirts[$item->get_id()] = $item;
 							$shirts_cost += $item_price;
 						}
@@ -541,12 +527,10 @@ class NSEvent
 					}
 					
 					# Add housing info
-					if (isset($_POST['housing_needed']))
-					{
+					if (isset($_POST['housing_needed'])) {
 						$dancer->add_housing_needed($_POST, $event->get_id());
 					}
-					elseif (isset($_POST['housing_provider']))
-					{
+					elseif (isset($_POST['housing_provider'])) {
 						$dancer->add_housing_provider($_POST, $event->get_id());
 					}
 					
@@ -555,8 +539,7 @@ class NSEvent
 					
 					
 					# Confirmation email
-					if (!$options['registration_testing'])
-					{
+					if (!$options['registration_testing']) {
 						$confirmation_email = array(
 							'to_email' => $dancer->get_email(),
 							'to_name'  => $dancer->get_name(),
@@ -573,12 +556,10 @@ class NSEvent
 					}
 					
 					
-					if (isset($_POST['payment_method']) and $_POST['payment_method'] == 'PayPal')
-					{
+					if (isset($_POST['payment_method']) and $_POST['payment_method'] == 'PayPal') {
 						$file = 'form-accepted-paypal';
 					}
-					else
-					{
+					else {
 						$file = 'form-accepted-mail';
 					}
 				}
@@ -586,17 +567,14 @@ class NSEvent
 			
 			# Allow themes to provide their own files
 			# Otherwise, load appropriate file for current step
-			if (file_exists(sprintf('%s/%s/nsevent/%s.php', get_theme_root(), get_stylesheet(), $file)))
-			{
+			if (file_exists(sprintf('%s/%s/nsevent/%s.php', get_theme_root(), get_stylesheet(), $file))) {
 				require sprintf('%s/%s/nsevent/%s.php', get_theme_root(), get_stylesheet(), $file);
 			}
-			else
-			{
+			else {
 				require sprintf('%s/registration/%s.php', dirname(__FILE__), $file);
 			}
 		}
-		catch (Exception $e)
-		{
+		catch (Exception $e) {
 			if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); }
 			printf('<div id="nsevent-exception">%s</div>'."\n", $e->getMessage());
 			if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); }
@@ -615,8 +593,9 @@ class NSEvent
 		
 		# Check if the current theme has a stylesheet for the registration
 		$theme_stylesheet = sprintf('%s/%s/nsevent/registration.css', get_theme_root(), get_stylesheet());
-		if (file_exists($theme_stylesheet))
+		if (file_exists($theme_stylesheet)) {
 			wp_enqueue_style('nsevent-registration-theme', sprintf('%s/nsevent/registration.css', get_bloginfo('stylesheet_directory')));
+		}
 		
 		wp_enqueue_script('nsevent-reg-info', sprintf('%s/%s/js/reg-info.js', WP_PLUGIN_URL, basename(__FILE__, '.php')), array('jquery'));
 	}
@@ -640,8 +619,7 @@ class NSEvent
 			'body'     => '',
 			), $parameters);
 		
-		if (class_exists('SwiftMailerWP'))
-		{
+		if (class_exists('SwiftMailerWP')) {
 			$message = Swift_Message::newInstance()
 							->setSubject($parameters['subject'])
 							->setFrom($options['confirmation_email_address'])
@@ -649,20 +627,21 @@ class NSEvent
 							->addTo($parameters['to_email'], $parameters['to_name'])
 							->setBody($parameters['body']);
 			
-			if ($options['confirmation_email_bcc'])
+			if ($options['confirmation_email_bcc']) {
 				$message->setBcc($options['confirmation_email_bcc']);
+			}
 			
 			$headers = $message->getHeaders();
 			$headers->addTextHeader('X-Mailer', 'NSEvent Mailer');
 			
 			return SwiftMailerWP::get_instance()->get_mailer()->send($message);
 		}
-		else
-		{
+		else {
 			$headers = sprintf('From: %1$s'."\r\n".'Reply-To: %1$s'."\r\n".'X-Mailer: NSEvent Mailer'."\r\n", $options['confirmation_email_address']);
 			
-			if ($options['confirmation_email_bcc'])
+			if ($options['confirmation_email_bcc']) {
 				$headers .= sprintf('Bcc: %s'."\r\n", $options['confirmation_email_bcc']);
+			}
 			
 			return wp_mail(
 				$parameters['to_email'],
@@ -674,94 +653,95 @@ class NSEvent
 	
 	static public function validate_package($package_id)
 	{
-		if ($package_id === 0)
-			return True;
-		elseif (self::validate_items(array($package_id => $package_id)))
-		{
-			self::$validated_package_id = $package_id;
-			return True;
+		if ($package_id === 0) {
+			return true;
 		}
-		else
-			return False;
+		elseif (self::validate_items(array($package_id => $package_id))) {
+			self::$validated_package_id = $package_id;
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	
 	static public function validate_items($items)
 	{
-		if (empty($items))
-			return True; # skip
-		elseif (!is_array($items))
-			return False;
+		if (empty($items)) {
+			return true; # skip
+		}
+		elseif (!is_array($items)) {
+			return false;
+		}
 		
-		if (empty($_POST['item_meta']) or !is_array($_POST['item_meta']))
+		if (empty($_POST['item_meta']) or !is_array($_POST['item_meta'])) {
 			$_POST['item_meta'] = array();
+		}
 		
-		$items_did_validate = True;
-		foreach($items as $key => $value)
-		{
+		$items_did_validate = true;
+		
+		foreach ($items as $key => $value) {
 			$item = self::$event->get_item_by_id($key);
-			if (!$item)
-				continue;
 			
-			switch ($item->get_meta())
-			{
+			if (!$item) {
+				continue;
+			}
+			
+			switch ($item->get_meta()) {
 				# If position wasn't specified specifically for item, use dancer's position.
 				case 'position':
-					if (!isset($_POST['item_meta'][$item->get_id()]) or !in_array($_POST['item_meta'][$item->get_id()], array('lead', 'follow')))
-						if (!NSEvent_FormValidation::get_error('position'))
+					if (!isset($_POST['item_meta'][$item->get_id()]) or !in_array($_POST['item_meta'][$item->get_id()], array('lead', 'follow'))) {
+						if (!NSEvent_FormValidation::get_error('position')) {
 							$_POST['item_meta'][$item->get_id()] = ($_POST['position'] == 1) ? 'lead' : 'follow';
+						}
+					}
 					break;
 				
 				case 'partner_name':
-					if (empty($_POST['item_meta'][$item->get_id()]))
-					{
+					if (empty($_POST['item_meta'][$item->get_id()])) {
 						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Your partner\'s name must be specified for %s.', 'nsevent'), $item->name));
-						$items_did_validate = False;
+						$items_did_validate = false;
 						continue 2;
 					}
-					else
-					{
+					else {
 						$_POST['item_meta'][$item->get_id()] = trim($_POST['item_meta'][$item->get_id()]);
 						// TODO: Check if partner has already registered for this item.
 					}
 					break;
 				
 				case 'team_members':
-					if (empty($_POST['item_meta'][$item->get_id()]))
-					{
+					if (empty($_POST['item_meta'][$item->get_id()])) {
 						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Team members must be specified for %s.', 'nsevent'), $item->name));
-						$items_did_validate = False;
+						$items_did_validate = false;
 						continue 2;
 					}
-					else
-					{
+					else {
 						# Standarize formatting
 						$_POST['item_meta'][$item->get_id()] = ucwords(preg_replace(array("/[\r\n]+/", "/\n+/", "/\r+/", '/,([^ ])/', '/, , /'), ', $1', trim($_POST['item_meta'][$item->get_id()])));
 						
-						if (strlen($_POST['item_meta'][$item->get_id()]) > 65536)
-						{
+						if (strlen($_POST['item_meta'][$item->get_id()]) > 65536) {
 							NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('%s is too long.', 'nsevent'), sprintf(__('Team members list for %s', 'nsevent'), $item->name)));
-							$items_did_validate = False;
+							$items_did_validate = false;
 							continue 2;
 						}
 					}
 					break;
 				
 				case 'size':
-					if (!in_array($value, array_merge(array('none'), explode(',', $item->get_description()))))
-					{
+					if (!in_array($value, array_merge(array('none'), explode(',', $item->get_description())))) {
 						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('An invalid size was choosen for %s.', 'nsevent'), $item->get_name()));
-						$items_did_validate = False;
+						$items_did_validate = false;
 						continue 2;
 					}
-					elseif ($value === 'none')
+					elseif ($value === 'none') {
 						continue 2; # No size selected;
+					}
 					$_POST['item_meta'][$item->get_id()] = $value; # Populate `item_meta` for the confirmation and PayPal page
 					break;
 			}
 			
 			# Check openings again, in case they have filled since the form was first displayed to the user
-			if (($item->get_meta() != 'position' and !$item->count_openings()) or ($item->get_meta() == 'position' and !$item->get_openings($_POST['item_meta'][$item->get_id()])))
-			{
+			if (($item->get_meta() != 'position' and !$item->count_openings()) or ($item->get_meta() == 'position' and !$item->get_openings($_POST['item_meta'][$item->get_id()]))) {
 				NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('There are no longer any openings for %s.', 'nsevent'), $item->name));
 				$items_did_validate = false;
 				continue;
@@ -775,47 +755,52 @@ class NSEvent
 	
 	static public function validate_position($position)
 	{
-		if (self::$event->limit_per_position and self::$event->limit_per_position <= $event->count_dancers('position', $position))
-		{
+		if (self::$event->limit_per_position and self::$event->limit_per_position <= $event->count_dancers('position', $position)) {
 			NSEvent_FormValidation::set_error('position', __('Registrations are no longer being accepted for that position.', 'nsevent'));
-			return False;
+			return false;
 		}
-		else
-			return True;
+		else {
+			return true;
+		}
 	}
 	
 	static public function validate_status($status)
 	{
-		if (self::$vip === True)
+		if (self::$vip === true) {
 			return 2;
-		else if (self::$event->has_volunteers() and $_POST['status'] == '1')
-		{
+		}
+		elseif (self::$event->has_volunteers() and $_POST['status'] == '1') {
 			return 1;
 		}
-		else
+		else {
 			return 0;
+		}
 	}
 
 	static public function validate_housing_nights($nights)
 	{
 		// TODO: This could be a stricter check…
-		if (is_array($nights))
+		if (is_array($nights)) {
 			return array_sum($nights);
-		else
+		}
+		else {
 		 	return is_numeric($nights);
+		}
 	}
 	
 	static public function validate_volunteer_phone($phone_number)
 	{
-		if (self::$vip)
-			return True;
-		elseif (empty($phone_number))
-			return False;
+		if (self::$vip) {
+			return true;
+		}
+		elseif (empty($phone_number)) {
+			return false;
+		}
 		
 		preg_match('/^(?:\(?([0-9]{3})\)?)?[- \.]?([0-9]{3})[- \.]?([0-9]{4})/', $phone_number, $matches);
 		unset($matches[0]);
 		
-		return (!empty($matches)) ? implode('-', array_filter($matches)) : True;
+		return (!empty($matches)) ? implode('-', array_filter($matches)) : true;
 	}
 	
 	static public function paypal_href($dancer, $options, array $item_ids = array(), $notify_url = '')
@@ -828,12 +813,14 @@ class NSEvent
 			2);
 		
 		$i = 2;
+		
 		foreach ($dancer->get_registered_items($item_ids) as $item)
 		{
 			$href .= sprintf('&amp;item_name_%1$d=%2$s&amp;amount_%1$d=%3$s', $i, rawurlencode($item->get_name()), rawurlencode($item->get_registered_price()));
 			
-			if (!empty($reg->item_meta))
+			if (!empty($reg->item_meta)) {
 				$href .= sprintf('&amp;on0_%1$d=%2$s&amp;os0_%1$d=%3$s', $i, $item->get_meta_label(), ucfirst($item->registered_meta));
+			}
 			
 			$i++;
 		}

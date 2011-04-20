@@ -15,20 +15,23 @@ class NSEvent_CSVHelper
 	
 	static public function load_event()
 	{
-		if (isset($_GET['event_id']))
-		{
-			if (!self::$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id']))
+		if (isset($_GET['event_id'])) {
+			if (!self::$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id'])) {
 				throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
+			}
 		}
-		else
+		else {
 			throw new Exception('Event ID not specified.');
+		}
 	}
 	
 	static public function download(array $rows, $filename = '')
 	{
 		$output = fopen('php://output', 'w');
-		if (!$output)
+		
+		if (!$output) {
 			throw new Exception('Unable to open output file.');
+		}
 		
 		// if ($filename != '' and substr($filename, strlen($filename) - 1) != ' ')
 		// 	$filename .= ' '; # Add space after the prefix
@@ -40,8 +43,9 @@ class NSEvent_CSVHelper
 		header('Pragma: no-cache');
 		header('Expires: 0');
 		
-		foreach($rows as $row)
+		foreach ($rows as $row) {
 			fputcsv($output, $row);
+		}
 		
 		exit;
 	}

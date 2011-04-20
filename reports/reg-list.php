@@ -2,30 +2,23 @@
 
 require dirname(dirname(__FILE__)).'/includes/form-input.php';
 
-if (!isset($_GET['vip-only']))
-{
+if (!isset($_GET['vip-only'])) {
 	$dancers = $event->get_dancers();
 }
-else
-{
+else {
 	$dancers = $event->get_dancers_where(array(':status' => 2));
 }
 
 $database = self::get_database_connection();
 $item_ids = array('package' => null, 'competition' => null, 'shirt' => null);
-foreach ($item_ids as $key => &$value)
-{
+foreach ($item_ids as $key => &$value) {
 	$value = $database->query('SELECT id FROM %1$s_items WHERE event_id = :event_id AND type = :type', array(':event_id' => $event->get_id(), ':type' => $key))->fetchAll(PDO::FETCH_COLUMN, 0);
 }
 unset($key, $value);
 
-if (!empty($_POST))
-{
-	foreach ($dancers as $dancer)
-	{
-		if ((!isset($_GET['vip-only']) and $dancer->is_vip())
-			or (!isset($_POST['payment_owed'][$dancer->get_id()])))
-		{
+if (!empty($_POST)) {
+	foreach ($dancers as $dancer) {
+		if ((!isset($_GET['vip-only']) and $dancer->is_vip()) or (!isset($_POST['payment_owed'][$dancer->get_id()]))) {
 			continue;
 		}
 		
@@ -78,7 +71,7 @@ if (!empty($_POST))
 
 		<tbody>
 <?php 	$i = 1; ?>
-<?php 	foreach($dancers as $dancer): if (!isset($_GET['vip-only']) and $dancer->is_vip()) continue; ?>
+<?php 	foreach ($dancers as $dancer): if (!isset($_GET['vip-only']) and $dancer->is_vip()) continue; ?>
 			<tr<?php if (!($i % 2)) echo ' class="alternate"'; ?>>
 				<td class="column-title dancer-name"><?php if (current_user_can('administrator')): echo $event->get_request_link('dancer', $dancer->get_name_last_first(), array('dancer' => (int) $dancer->get_id())); else: echo esc_html($dancer->get_name_last_first()); endif; ?><?php if ($dancer->is_vip()) echo ' [VIP]'; ?></td>
 <?php

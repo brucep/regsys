@@ -12,13 +12,14 @@ if (!empty($_POST)):
 	NSEvent_FormValidation::add_rule('items', 'NSEvent::validate_items');
 
 	if (NSEvent_FormValidation::validate()):
-		foreach (NSEvent::$validated_items as $item)
+		foreach (NSEvent::$validated_items as $item) {
 			NSEvent_Registration::add(array(
 				'dancer_id' => $dancer->get_id(),
 				'item_id'   => $item->get_id(),
 				'price'     => $item->get_price_for_discount(($dancer->is_vip() ? 'vip' : (int) $dancer->payment_discount), $event->is_early_bird()),
 				'item_meta' => (!isset($_POST['item_meta'][$item->get_id()]) ? '' : $_POST['item_meta'][$item->get_id()]),
 				));
+		}
 
 ?>
 <div class="wrap" id="nsevent">
@@ -42,8 +43,10 @@ if (!empty($_POST)):
 endif;
 
 $dancer_item_ids = array();
-foreach ($dancer->registrations() as $reg)
+
+foreach ($dancer->registrations() as $reg) {
 	$dancer_item_ids[] = $reg->item_id;
+}
 ?>
 <div class="wrap" id="nsevent">
 	<h2><?php _e('Add Registrations for Dancer', 'nsevent'); ?></h2>

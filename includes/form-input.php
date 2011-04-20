@@ -4,22 +4,27 @@ class NSEvent_FormInput
 {
 	static public function checkbox($name, array $args = array())
 	{
-		if (!isset($args['value']))
+		if (!isset($args['value'])) {
 			$args['value'] = '1';
+		}
 		
-		if (!isset($args['checked']))
-			$args['checked'] = False;
+		if (!isset($args['checked'])) {
+			$args['checked'] = false;
+		}
 		
 		if (!isset($args['id']))
 		{
-		 	if (strpos($name, '[') !== False)
+		 	if (strpos($name, '[') !== false) {
 				$args['id'] = '';
-			else
+			}
+			else {
 				$args['id'] = $name;
+			}
 		}
 
-		if (isset($args['id']) and $args['id'] !== '')
+		if (isset($args['id']) and $args['id'] !== '') {
 			$args['id'] = sprintf(' id="%s"', htmlspecialchars($args['id'], ENT_QUOTES, 'UTF-8'));
+		}
 		
 		printf('%6$s<input type="checkbox" value="%3$s" name="%1$s" %2$s%4$s%5$s/>%7$s',
 			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
@@ -33,24 +38,28 @@ class NSEvent_FormInput
 	
 	static public function hidden($name, array $args = array())
 	{
-		if (!isset($args['value']))
+		if (!isset($args['value'])) {
 			$args['value'] = isset($_POST[$name]) ? $_POST[$name] : 1;
+		}
 		
-		if (isset($args['suffix']))
+		if (isset($args['suffix'])) {
 			$name .= '_'.$args['suffix'];
+		}
 		
 		printf('<input type="hidden" name="%1$s" value="%2$s" />',
 			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
 			htmlspecialchars($args['value'], ENT_QUOTES, 'UTF-8'));
 	}
 	
-	static public function number($name, array $args = array(), $print = True)
+	static public function number($name, array $args = array(), $print = true)
 	{
-		if (!isset($args['value']))
+		if (!isset($args['value'])) {
 			$args['value'] = '';
+		}
 		
-		if (!isset($args['default_value']))
+		if (!isset($args['default_value'])) {
 			$args['default_value'] = '';
+		}
 		
 		$result = sprintf('<input type="number" name="%1$s" value="%2$s"%3$s%4$s%5$s%6$s%7$s />',
 			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
@@ -67,10 +76,11 @@ class NSEvent_FormInput
 	
 	static public function radio($name, array $args = array())
 	{
-		if (!isset($args['value']))
+		if (!isset($args['value'])) {
 			$args['value'] = '';
+		}
 		
-		$args['default'] = (isset($args['default']) and $args['default'] === True);
+		$args['default'] = (isset($args['default']) and $args['default'] === true);
 		
 		printf('%5$s<input type="radio" name="%1$s" value="%2$s"%3$s%4$s%7$s />&nbsp;%6$s',
 			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
@@ -84,10 +94,12 @@ class NSEvent_FormInput
 	
 	// static public function select($name, array $options, array $args = array())
 	// {
-	// 	if (!isset($args['indent']))
+	// 	if (!isset($args['indent'])) {
 	// 		$args['indent'] = '';
-	// 	else
+	// 	}
+	// 	else {
 	// 		$args['indent'] = htmlspecialchars($args['indent'], ENT_QUOTES, 'UTF-8');
+	// 	}
 	// 	
 	// 	$result = sprintf('%2$s<select name="%1$s"%3$s%4$s>'."\n",
 	// 		htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
@@ -95,28 +107,28 @@ class NSEvent_FormInput
 	// 		!isset($args['id'])    ? '' : sprintf(' id="%s"', htmlspecialchars($args['id'], ENT_QUOTES, 'UTF-8')),
 	// 		!isset($args['class']) ? '' : sprintf(' class="%s"', htmlspecialchars($args['class'], ENT_QUOTES, 'UTF-8'));
 	// 	
-	// 	foreach ($options as $key => $value)
-	// 	{
+	// 	foreach ($options as $key => $value) {
 	// 		
 	// 	}
 	// 	
 	// 	echo $result, "\n", $args['indent'], '</select>'."\n";
 	// }
 	
-	static public function text($name, array $args = array(), $echo = True)
+	static public function text($name, array $args = array(), $echo = true)
 	{
-		if (isset($args['label']))
-		{
-			if ($args['label'] === True)
+		if (isset($args['label'])) {
+			if ($args['label'] === true) {
 				$args['label'] = ucwords(str_replace('_', ' ', $name));
+			}
 			
 			$args['label'] = sprintf('<label for="%2$s">%1$s</label>',
-				htmlspecialchars($args['label'], ENT_NOQUOTES, 'UTF-8', False),
+				htmlspecialchars($args['label'], ENT_NOQUOTES, 'UTF-8', false),
 				htmlspecialchars($name, ENT_QUOTES, 'UTF-8'));
 		}
 		
-		if (!isset($args['default_value']))
+		if (!isset($args['default_value'])) {
 			$args['default_value'] = '';
+		}
 		
 		$result = sprintf('%3$s<input type="%7$s" name="%1$s" id="%1$s" value="%2$s"%4$s%5$s%6$s%8$s />',
 			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
@@ -128,16 +140,19 @@ class NSEvent_FormInput
 			!isset($args['type'])        ? 'text' : $args['type'],
 			!isset($args['placeholder']) ? '' : sprintf(' placeholder="%s"', htmlspecialchars($args['placeholder'], ENT_QUOTES, 'UTF-8')));
 		
-		if ($echo)
+		if ($echo) {
 			echo $result;
-		else
+		}
+		else {
 			return $result;
+		}
 	}
 	
 	static public function textarea($name, array $args = array())
 	{
-		if (!isset($args['default']))
+		if (!isset($args['default'])) {
 			$args['default'] = '';
+		}
 		
 		printf('<textarea name="%1$s" id="%1$s" cols="%3$s" rows="%4$s"%5$s%6$s>%2$s</textarea>',
 			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
@@ -148,39 +163,46 @@ class NSEvent_FormInput
 			!isset($args['placeholder']) ? '' : sprintf(' placeholder="%s"', htmlspecialchars($args['placeholder'], ENT_QUOTES, 'UTF-8')));
 	}
 	
-	static public function _set_select($field, $value = '', $default = False)
+	static public function _set_select($field, $value = '', $default = false)
 	{
-		if (self::_set_radio_or_checkbox($field, $value, $default))
+		if (self::_set_radio_or_checkbox($field, $value, $default)) {
 			return ' selected="selected"';
-		else
+		}
+		else {
 			return '';
+		}
 	}
 	
-	static private function _set_radio_or_checkbox($field, $value = '', $default = False)
+	static private function _set_radio_or_checkbox($field, $value = '', $default = false)
 	{
-		if (strpos($field, '[') >= 1)
-		{
+		if (strpos($field, '[') >= 1) {
 			$field_key = explode('[', $field, 2);
 			$field = array_shift($field_key);
 			
 			$field_key = explode(']', current($field_key), 2);
 			$field_key = array_shift($field_key);
 			
-			if (!isset($_POST[$field]) or !isset($_POST[$field][$field_key]))
-				return ($default === True) ? ' checked="checked"' : '';
-			else if ($_POST[$field][$field_key] != $value)
+			if (!isset($_POST[$field]) or !isset($_POST[$field][$field_key])) {
+				return ($default === true) ? ' checked="checked"' : '';
+			}
+			elseif ($_POST[$field][$field_key] != $value) {
 				return '';
-			else
+			}
+			else {
 				return ' checked="checked"';
+			}
 		}
 		else
 		{
-			if (!isset($_POST[$field]))
-		 		return ($default === True) ? ' checked="checked"' : '';
-			else if (($field === '' or $value === '') or ($_POST[$field] != $value))
+			if (!isset($_POST[$field])) {
+		 		return ($default === true) ? ' checked="checked"' : '';
+			}
+			elseif (($field === '' or $value === '') or ($_POST[$field] != $value)) {
 				return '';
-			else
+			}
+			else {
 				return ' checked="checked"';
+			}
 		}
 	}
 
@@ -196,7 +218,8 @@ class NSEvent_FormInput
 			
 			return (isset($_POST[$field]) and isset($_POST[$field][$field_key])) ? $_POST[$field][$field_key] : $default;
 		}
-		else
+		else {
 			return isset($_POST[$field]) ? $_POST[$field] : $default;
+		}
 	}
 }

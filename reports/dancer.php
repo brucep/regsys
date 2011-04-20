@@ -48,7 +48,7 @@ $options = array_merge(self::$default_options, $options);
 </h4>
 <?php if ($dancer->get_registered_items()): ?>
 	<ul>
-<?php 	foreach($dancer->get_registered_items() as $item): ?>
+<?php 	foreach ($dancer->get_registered_items() as $item): ?>
 		<li><?php echo esc_html($item->get_name()); if ($item->get_registered_meta()) printf(' (%s)', esc_html(ucfirst($item->get_registered_meta()))); ?></li>
 <?php 	endforeach; ?>
 	</ul>

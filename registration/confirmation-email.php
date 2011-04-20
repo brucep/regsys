@@ -111,17 +111,19 @@ TOTALS
 
 <?php
 
-if (self::$validated_package_id)
+if (self::$validated_package_id) {
 	printf('- $%1$d :: Package'."\n", $package_cost);
+}
 
-if ($competitions)
+if ($competitions) {
 	printf('- $%1$d :: Competitions'."\n", $competitions_cost);
+}
 
-if ($shirts)
+if ($shirts) {
 	printf('- $%1$d :: Shirts'."\n", $shirts_cost);
+}
 
-if ($dancer->payment_method == 'PayPal' and !empty($options['paypal_fee']))
-{
+if ($dancer->payment_method == 'PayPal' and !empty($options['paypal_fee'])) {
 	printf('- $%1$d  :: PayPal Processing Fee'."\n", $options['paypal_fee']);
 	$total_cost = $total_cost + (int) $options['paypal_fee'];
 }

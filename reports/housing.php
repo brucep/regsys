@@ -1,19 +1,16 @@
 <?php
 
-if ($_GET['request'] === 'housing-needed')
-{
+if ($_GET['request'] === 'housing-needed') {
 	$dancers = $event->get_dancers_needing_housing();
 	$housing_count = count($dancers);
 	$housing_type = __('Housing Needed', 'nsevent');
 }
-elseif ($_GET['request'] === 'housing-providers')
-{
+elseif ($_GET['request'] === 'housing-providers') {
 	$dancers = $event->get_dancers_providing_housing();
 	$housing_count = count($dancers);
 	$housing_type = __('Housing Providers', 'nsevent');
 }
-else
-{
+else {
 	throw new Exception(__('Cheatin&#8217; uh?'));
 }
 
