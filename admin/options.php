@@ -35,6 +35,15 @@
 					</fieldset>
 				</td>
 			</tr>
+
+			<tr valign="top">
+				<th scope="row"><?php _e('Mailing Address', 'nsevent'); ?></th>
+				<td>
+					<fieldset>
+						<p><textarea name="nsevent[mailing_address]" rows="4" cols="50" class="large-text code"><?php if (isset($options['mailing_address'])) { echo esc_html($options['mailing_address']); } ?></textarea></p>
+					</fieldset>
+				</td>
+			</tr>
 		</table>
 
 		<h3><?php _e('PayPal', 'nsevent'); ?></h3>

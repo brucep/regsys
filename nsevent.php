@@ -32,6 +32,7 @@ class NSEvent
 		'paypal_sandbox'             => false,
 		'confirmation_email_address' => '',
 		'confirmation_email_bcc'     => '',
+		'mailing_address'            => '',
 		);
 	
 	private function __clone() {}
@@ -104,6 +105,10 @@ class NSEvent
 		}
 		else {
 			$options['confirmation_email_bcc'] = '';
+		}
+		
+		if (isset($input['mailing_address'])) {
+			$options['mailing_address'] = trim($input['mailing_address']);
 		}
 		
 		$options['registration_testing']   = isset($input['registration_testing']);
