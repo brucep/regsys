@@ -75,10 +75,9 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	
 	public function add_housing_needed(array $parameters, $event_id)
 	{
-		self::$database->query('INSERT %1$s_housing_needed VALUES (:event_id, :dancer_id, :car, :no_smoking, :no_pets, :gender, :nights, :comment)', array(
+		self::$database->query('INSERT %1$s_housing_needed VALUES (:event_id, :dancer_id, :no_smoking, :no_pets, :gender, :nights, :comment)', array(
 			':event_id'   => $event_id,
 			':dancer_id'  => $this->id,
-			':car'        => $parameters['housing_needed_car'],
 			':no_smoking' => $parameters['housing_needed_no_smoking'],
 			':no_pets'    => $parameters['housing_needed_no_pets'],
 			':gender'     => $parameters['housing_needed_gender'],
