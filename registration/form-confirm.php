@@ -52,7 +52,7 @@
 <?php if (isset($_POST['housing_needed'])): ?>
 						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); _e('Housing Needed', 'nsevent'); ?></div>
 						<?php NSEvent_FormInput::hidden('housing_needed'); echo "\n"; ?>
-<?php 	foreach(array('car', 'no_smoking', 'no_pets', 'nights', 'gender', 'comment') as $field): ?>
+<?php 	foreach(array('no_smoking', 'no_pets', 'nights', 'gender', 'comment') as $field): ?>
 						<?php NSEvent_FormInput::hidden('housing_needed_'.$field); echo "\n"; ?>
 <?php 	endforeach; ?>
 <?php elseif (isset($_POST['housing_provider'])): ?>
