@@ -119,7 +119,7 @@ class NSEvent_FormValidation
 					if (isset(self::$error_messages[$condition])) {
 						self::$errors[$key] = sprintf(self::$error_messages[$condition], htmlspecialchars(ucwords(str_replace('_', ' ', $key)), ENT_QUOTES, 'UTF-8'));
 					}
-					else {
+					elseif (!isset(self::$errors[$key])) {
 						self::$errors[$key] = sprintf(__('%s has an invalid value.', 'nsevent'), htmlspecialchars(ucwords(str_replace('_', ' ', $key)), ENT_QUOTES, 'UTF-8'));
 					}
 					break;
