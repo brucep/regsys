@@ -7,10 +7,10 @@
 						<div class="field"><span class="label"><?php _e('Name', 'nsevent'); ?>:</span> <?php echo esc_html($dancer->get_name()); ?></div>
 						<?php NSEvent_FormInput::hidden('first_name'); echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('last_name'); echo "\n"; ?>
-						
+
 						<div class="field"><span class="label"><?php _e('Email Address', 'nsevent'); ?>:</span> <?php echo esc_html($dancer->get_email()); ?></div>
 						<?php NSEvent_FormInput::hidden('email'); echo "\n"; ?>
-						
+
 						<div class="field"><span class="label"><?php _e('Position', 'nsevent'); ?>:</span> <?php echo esc_html($dancer->get_position()); ?></div>
 						<?php NSEvent_FormInput::hidden('position'); echo "\n"; ?>
 <?php if ($event->has_levels()): ?>
@@ -67,7 +67,7 @@
 						<div class="field"><span class="label"><?php _e('Total Amount', 'nsevent'); ?>:</span> <?php printf('$%d', $total_cost); ?></div>
 						<?php NSEvent_FormInput::hidden('payment_method'); echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('confirmed'); echo "\n"; ?>
-						
+
 						<div id="submit"><input type="submit" value="<?php _e('Confirm&hellip;', 'nsevent'); ?>" /></div>
 					</form>
 				</div>
