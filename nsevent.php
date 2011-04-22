@@ -788,7 +788,7 @@ class NSEvent
 			return array_sum($nights);
 		}
 		else {
-		 	return is_numeric($nights);
+			return (int) $nights;
 		}
 	}
 	
