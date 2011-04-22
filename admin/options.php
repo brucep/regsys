@@ -35,6 +35,17 @@
 					</fieldset>
 				</td>
 			</tr>
+		</table>
+
+		<h3><?php _e('Pay by Mail', 'nsevent'); ?></h3>
+
+		<table class="form-table">
+			<tr valign="top">
+				<th scope="row"><?php _e('Payable To', 'nsevent'); ?></th>
+				<td>
+					<input type="text" name="nsevent[payable_to]" value="<?php if (isset($options['payable_to'])) echo esc_attr($options['payable_to']); ?>" class="regular-text">
+				</td>
+			</tr>
 
 			<tr valign="top">
 				<th scope="row"><?php _e('Mailing Address', 'nsevent'); ?></th>

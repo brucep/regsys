@@ -146,6 +146,6 @@ EOD
 		, 'nsevent'),
 		$dancer->get_price_total(),
 		date('F jS', $event->get_date_postmark_by()),
-		'Naptown Stomp',
+		$options['payable_to'],
 		$options['mailing_address']);
 }

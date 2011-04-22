@@ -33,6 +33,7 @@ class NSEvent
 		'confirmation_email_address' => '',
 		'confirmation_email_bcc'     => '',
 		'mailing_address'            => '',
+		'payable_to'                 => '',
 		);
 	
 	private function __clone() {}
@@ -109,6 +110,10 @@ class NSEvent
 		
 		if (isset($input['mailing_address'])) {
 			$options['mailing_address'] = trim($input['mailing_address']);
+		}
+		
+		if (isset($input['payable_to'])) {
+			$options['payable_to'] = trim($input['payable_to']);
 		}
 		
 		$options['registration_testing']   = isset($input['registration_testing']);
