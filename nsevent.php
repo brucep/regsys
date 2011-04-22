@@ -465,7 +465,6 @@ class NSEvent
 						'housing_provider_gender'    => 'if_set[housing_provider]|intval|in[1,2,3]',
 						'housing_provider_nights'    => 'if_set[housing_provider]|NSEvent::validate_housing_nights',
 						'housing_provider_comment'   => 'if_set[housing_provider]|trim|max_length[65536]',
-						'housing_needed_car'         => 'if_set[housing_needed]|intval|in[0,1]',
 						'housing_needed_no_smoking'  => 'if_set[housing_needed]|intval|in[0,1]',
 						'housing_needed_no_pets'     => 'if_set[housing_needed]|intval|in[0,1]',
 						'housing_needed_gender'      => 'if_set[housing_needed]|intval|in[1,2,3]',
