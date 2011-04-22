@@ -10,6 +10,7 @@
 
 						<div class="field"><span class="label"><?php _e('Email Address', 'nsevent'); ?>:</span> <?php echo esc_html($dancer->get_email()); ?></div>
 						<?php NSEvent_FormInput::hidden('email'); echo "\n"; ?>
+						<?php NSEvent_FormInput::hidden('confirm_email'); echo "\n"; ?>
 
 						<div class="field"><span class="label"><?php _e('Position', 'nsevent'); ?>:</span> <?php echo esc_html($dancer->get_position()); ?></div>
 						<?php NSEvent_FormInput::hidden('position'); echo "\n"; ?>

@@ -430,7 +430,8 @@ class NSEvent
 				NSEvent_FormValidation::add_rules(array(
 					'first_name'      => 'trim|required|max_length[100]|ucfirst',
 					'last_name'       => 'trim|required|max_length[100]|ucfirst',
-					'email'           => 'trim|valid_email|max_length[100]',
+					'confirm_email'   => 'trim|valid_email|max_length[100]',
+					'email'           => 'trim|valid_email|max_length[100]|NSEvent::validate_email_address',
 					'position'        => 'intval|in[1,2]|NSEvent::validate_position',
 					'status'          => 'NSEvent::validate_status',
 					'volunteer_phone' => 'if_set[status]|trim|NSEvent::validate_volunteer_phone',
@@ -657,6 +658,17 @@ class NSEvent
 				$parameters['subject'],
 				$parameters['body'],
 				$headers);
+		}
+	}
+	
+	static public function validate_email_address($email)
+	{
+		if (isset($_POST['confirm_email']) and $_POST['confirm_email'] == $email) {
+			return true;
+		}
+		else {
+			NSEvent_FormValidation::set_error('email', __('Your email addresses do not match.', 'nsevent'));
+			return false;
 		}
 	}
 	

@@ -41,6 +41,9 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<?php echo NSEvent_FormValidation::get_error('email'), "\n"; ?>
 							<div class="field text"><?php NSEvent_FormInput::text('email',      array('maxlength' => 100, 'label' => __('Email Address', 'nsevent'), 'type' => 'email')); ?></div>
 
+							<?php echo NSEvent_FormValidation::get_error('confirm_email'), "\n"; ?>
+							<div class="field text" style='padding-bottom:1em'><?php NSEvent_FormInput::text('confirm_email', array('maxlength' => 100, 'label' => __('Confirm Email Address', 'nsevent'), 'type' => 'email')); ?></div>
+
 							<?php echo NSEvent_FormValidation::get_error('position'), "\n"; ?>
 							<div class="field" id="position">
 								<div class="field-label"><?php _e('Position', 'nsevent'); ?></div>
