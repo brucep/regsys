@@ -39,11 +39,6 @@ class NSEvent_FormValidation
 			}
 			
 			self::$validated[$key] = true;
-
-			if (!isset($_POST[$key])) {
-				$_POST[$key] = '';
-			}
-			
 			
 			foreach (explode('|', $conditions) as $condition) {
 				# Get parameter for rule (i.e., "rule|rule[parameter]|rule")
@@ -65,7 +60,6 @@ class NSEvent_FormValidation
 					$parameter = null;
 				}
 				
-				
 				if ($condition === 'if_set' or $condition === 'if_not_set') {
 					if ($parameter == null) {
 						throw new NSEvent_FormValidation_Exception(sprintf('%s rule must have a valid parameter.', $condition));
@@ -84,7 +78,7 @@ class NSEvent_FormValidation
 					
 					list($key, $value) = explode(',', $parameter, 2);
 					
-					if (($condition === 'if_key_value' and $_POST[$key] == $value) or ($condition === 'if_not_key_value' and $_POST[$key] != $value)) {
+					if (($condition === 'if_key_value' and isset($_POST[$key]) and $_POST[$key] == $value) or ($condition === 'if_not_key_value' and isset($_POST[$key]) and $_POST[$key] != $value)) {
 						continue;
 					}
 					else {
@@ -105,11 +99,11 @@ class NSEvent_FormValidation
 						$result = call_user_func($callable, $key);
 					}
 					else {
-						$result = call_user_func($callable, $_POST[$key]);
+						$result = call_user_func($callable, self::get_post_value($key));
 					}
 				}
 				else {
-					$result = call_user_func($callable, $_POST[$key], $parameter, $key);
+					$result = call_user_func($callable, self::get_post_value($key), $parameter, $key);
 				}
 				
 				if ($result === false) {
@@ -125,7 +119,7 @@ class NSEvent_FormValidation
 					break;
 				}
 				elseif ($result !== true) {
-					$_POST[$key] = $result;
+					self::set_post_value($key, $result);
 				}
 			}
 		}
@@ -193,6 +187,43 @@ class NSEvent_FormValidation
 		self::$groups = array();
 		self::$errors = array();
 		self::$validated = array();
+	}
+	
+	static protected function get_post_value($key)
+	{
+		if (strpos($key, '[') >= 1) {
+			$key = explode('[', $key, 2);
+			$parent_key = array_shift($key);
+			
+			$key = explode(']', current($key), 2);
+			$child_key = array_shift($key);
+			
+			if (isset($_POST[$parent_key]) and isset($_POST[$parent_key][$child_key])) {
+				return $_POST[$parent_key][$child_key];
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return isset($_POST[$key]) ? $_POST[$key] : false;
+		}
+	}
+	
+	static protected function set_post_value($key, $value)
+	{
+		if (strpos($key, '[') >= 1) {
+			$key = explode('[', $key, 2);
+			$parent_key = array_shift($key);
+			
+			$key = explode(']', current($key), 2);
+			$child_key = array_shift($key);
+			
+			$_POST[$parent_key][$child_key] = $value;
+		}
+		else {
+			$_POST[$key] = $value;
+		}
 	}
 	
 	#
