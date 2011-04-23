@@ -591,11 +591,6 @@ class NSEvent
 		}
 	}
 	
-	// static public function registration_send_email($event, $dancer)
-	// {
-	// 	
-	// }
-	
 	static public function registration_head()
 	{
 		add_action('wp_head', 'NSEvent::registration_wp_head');
