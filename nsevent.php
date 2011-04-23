@@ -785,7 +785,7 @@ class NSEvent
 		if (self::$vip === true) {
 			return 2;
 		}
-		elseif (self::$event->has_volunteers() and $_POST['status'] == '1') {
+		elseif (self::$event->has_volunteers() and isset($_POST['status']) and $_POST['status'] == '1') {
 			return 1;
 		}
 		else {
