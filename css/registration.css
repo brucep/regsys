@@ -13,7 +13,7 @@ border: 1px solid #d9d9d9;
 .nsevent-registration-form #submit input:hover {
 background-color: #ff7;
 }
-#nsevent-registration-form-info div.no_show {
+#nsevent-registration-form-info .no_show {
 display: none;
 }
 #nsevent-registration-form-info div.nsevent-validation-error {
