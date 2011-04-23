@@ -51,7 +51,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 			':date_registered'   => time(),
 			':payment_method'    => $this->payment_method,
 			':payment_discount'  => $this->payment_discount,
-			':volunteer_phone'   => $this->volunteer_phone,
+			':volunteer_phone'   => (string) $this->volunteer_phone,
 			':note'              => (string) $this->note,
 			));
 		
