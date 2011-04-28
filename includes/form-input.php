@@ -39,7 +39,7 @@ class NSEvent_FormInput
 	static public function hidden($name, array $args = array())
 	{
 		if (!isset($args['value'])) {
-			$args['value'] = isset($_POST[$name]) ? $_POST[$name] : 1;
+			$args['value'] = self::_set_value($name, 1);
 		}
 		
 		if (isset($args['suffix'])) {
