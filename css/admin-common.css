@@ -1,4 +1,4 @@
-#update-nag { display: none; }
+.update-nag { display: none; }
 
 #nsevent tr.current-event a.row-title {
   font-style: italic;
