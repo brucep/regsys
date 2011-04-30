@@ -110,12 +110,25 @@ class NSEvent_FormValidation
 					unset(self::$validated[$key]);
 					$did_validate = false;
 					
+					if (strpos($key, '[') >= 1) {
+						$displayable_key = explode('[', $key, 2);
+						array_shift($displayable_key);
+						$displayable_key = explode(']', current($displayable_key), 2);
+						$displayable_key = array_shift($displayable_key);
+					}
+					else {
+						$displayable_key = $key;
+					}
+					
+					$displayable_key = htmlspecialchars(ucwords(str_replace('_', ' ', $displayable_key)), ENT_QUOTES, 'UTF-8');
+					
 					if (isset(self::$error_messages[$condition])) {
-						self::$errors[$key] = sprintf(self::$error_messages[$condition], htmlspecialchars(ucwords(str_replace('_', ' ', $key)), ENT_QUOTES, 'UTF-8'));
+						self::$errors[$key] = sprintf(self::$error_messages[$condition], $displayable_key);
 					}
 					elseif (!isset(self::$errors[$key])) {
-						self::$errors[$key] = sprintf(__('%s has an invalid value.', 'nsevent'), htmlspecialchars(ucwords(str_replace('_', ' ', $key)), ENT_QUOTES, 'UTF-8'));
+						self::$errors[$key] = sprintf(__('%s has an invalid value.', 'nsevent'), $displayable_key);
 					}
+					
 					break;
 				}
 				elseif ($result !== true) {
