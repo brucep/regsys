@@ -94,13 +94,7 @@ class NSEvent_FormValidation
 				}
 				
 				if ($parameter == null) {
-					// if (in_array($callable, array( __CLASS__.'::_required') )))
-					if ($callable === __CLASS__.'::_required') {
-						$result = call_user_func($callable, $key);
-					}
-					else {
-						$result = call_user_func($callable, self::get_post_value($key));
-					}
+					$result = call_user_func($callable, self::get_post_value($key));
 				}
 				else {
 					$result = call_user_func($callable, self::get_post_value($key), $parameter, $key);
@@ -243,9 +237,9 @@ class NSEvent_FormValidation
 	# Validation conditions
 	#
 	
-	static protected function _required($key)
+	static protected function _required($string)
 	{
-		return !empty($_POST[$key]);
+		return !empty($string);
 	}
 	
 	static protected function _greater_than($number, $minimum)
