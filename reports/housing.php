@@ -1,13 +1,13 @@
 <?php
 
 if ($_GET['request'] === 'housing-needed') {
-	$dancers = $event->get_dancers_needing_housing();
+	$dancers = $event->get_dancers_where(array(':housing_type' => 1));
 	$housing_count = count($dancers);
 	$housing_type = __('Housing Needed', 'nsevent');
 }
 elseif ($_GET['request'] === 'housing-providers') {
-	$dancers = $event->get_dancers_providing_housing();
-	$housing_count = count($dancers);
+	$dancers = $event->get_dancers_where(array(':housing_type' => 2));
+	$housing_count = $event->count_housing_spots_available();
 	$housing_type = __('Housing Providers', 'nsevent');
 }
 else {
@@ -20,7 +20,7 @@ else {
 	<h2><?php echo $event->get_request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->get_name())); ?></h2>
 
 	<h3>
-		<?php echo $housing_type; if ($housing_count) printf(' (%d)', $housing_count); echo "\n"; ?>
+		<?php echo esc_html($housing_type); if ($housing_count) { printf(' '._n('(%d spots)', '(%d spots)', $housing_count, 'nsevent'), $housing_count); } echo "\n"; ?>
 <?php if ($dancers): ?>
 		<a href="<?php printf('%s/%s/reports/housing-csv.php?event_id=%d&amp;request=%s', WP_PLUGIN_URL, basename(dirname(dirname(__FILE__))), $event->get_id(), $_GET['request']); ?>" class="button add-new-h3"><?php _e('Download Housing Info', 'nsevent'); ?></a>
 <?php endif; ?>
@@ -30,21 +30,24 @@ else {
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
-				<th class="manage-column column-title" width="20%"><div><?php _e('Name', 'nsevent'); ?></div></th>
+				<th class="manage-column column-title" width="19%"><div><?php _e('Name', 'nsevent'); ?></div></th>
 <?php 	foreach ($event->get_housing_nights() as $night): ?>
 				<th class="manage-column"><div><?php echo esc_html($night); ?></div></th>
 <?php 	endforeach; ?>
-				<th class="manage-column" width="10%"><div><?php _e('Gender', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="9%"><div><?php _e('Gender', 'nsevent'); ?></div></th>
 <?php 	if ($_GET['request'] == 'housing-needed'): ?>
 				<th class="manage-column" width="6%"><div><?php _e('No Pets', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="9%"><div><?php _e('No Smoking', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="7%"><div><?php _e('No Smoke', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="9%"><div><?php _e('Bedtime', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="15%"><div><?php _e('From', 'nsevent'); ?></div></th>
 <?php 	else: ?>
-				<th class="manage-column" width="9%"><div><?php _e('Available', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="6%"><div><?php _e('Spots', 'nsevent'); ?></div></th>
 				<th class="manage-column" width="6%"><div><?php _e('Has Pets', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="8%"><div><?php _e('Smokes', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="7%"><div><?php _e('Smokes', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="9%"><div><?php _e('Bedtime', 'nsevent'); ?></div></th>
 <?php 	endif; ?>
-				<th class="manage-column" width="20%"><div><?php _e('Comment', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="20%"><div><?php _e('Date Registered', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="12%"><div><?php _e('Comment', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="18%"><div><?php _e('Date Registered', 'nsevent'); ?></div></th>
 			</tr>
 		</thead>
 
@@ -58,10 +61,13 @@ else {
 <?php 	if ($_GET['request'] == 'housing-needed'): ?>
 				<th class="manage-column"><?php _e('No Pets', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('No Smoking', 'nsevent'); ?></th>
+				<th class="manage-column"><div><?php _e('Bedtime', 'nsevent'); ?></div></th>
+				<th class="manage-column"><div><?php _e('From', 'nsevent'); ?></div></th>
 <?php 	else: ?>
-				<th class="manage-column"><?php _e('Available', 'nsevent'); ?></th>
+				<th class="manage-column"><?php _e('Spots', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('Has Pets', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('Smokes', 'nsevent'); ?></th>
+				<th class="manage-column"><div><?php _e('Bedtime', 'nsevent'); ?></div></th>
 <?php 	endif; ?>
 				<th class="manage-column"><?php _e('Comment', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('Date Registered', 'nsevent'); ?></th>
@@ -78,14 +84,17 @@ else {
 <?php 		endforeach; ?>
 				<td><?php echo esc_html($dancer->get_housing_gender()); ?></td>
 <?php 		if ($_GET['request'] == 'housing-needed'): ?>
-				<td><?php echo ($dancer->no_pets)    ? '&bull;' : ''; ?></td>
-				<td><?php echo ($dancer->no_smoking) ? '&bull;' : ''; ?></td>
+				<td><?php echo ($dancer->get_housing_prefers_no_pets())  ? '&bull;' : ''; ?></td>
+				<td><?php echo ($dancer->get_housing_prefers_no_smoke()) ? '&bull;' : ''; ?></td>
+				<td><?php echo esc_html($dancer->get_housing_bedtime()); ?></td>
+				<td><?php echo esc_html($dancer->get_housing_from_scene()); ?></td>
 <?php 		else: ?>
-				<td><?php echo (int) $dancer->available; ?></td>
-				<td><?php echo ($dancer->pets)    ? '&bull;' : ''; ?></td>
-				<td><?php echo ($dancer->smoking) ? '&bull;' : ''; ?></td>
+				<td><?php echo $dancer->get_housing_spots_available(); ?></td>
+				<td><?php echo ($dancer->get_housing_has_pets())  ? '&bull;' : ''; ?></td>
+				<td><?php echo ($dancer->get_housing_has_smoke()) ? '&bull;' : ''; ?></td>
+				<td><?php echo esc_html($dancer->get_housing_bedtime()); ?></td>
 <?php 		endif; ?>
-				<td><?php echo esc_html($dancer->comment); ?></td>
+				<td><?php echo esc_html($dancer->get_housing_comment()); ?></td>
 				<td style="font-family: monospace"><?php echo $dancer->get_date_registered('Y-m-d, h:i A'); ?></td>
 			</tr>
 <?php 	endforeach; ?>

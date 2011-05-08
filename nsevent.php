@@ -251,8 +251,7 @@ class NSEvent
 			'items',
 			'dancers',
 			'registrations',
-			'housing_needed',
-			'housing_providers');
+			'housing');
 		
 		foreach ($tables as $table) {
 			$table_name = sprintf('%snsevent_%s', $wpdb->prefix, $table);
@@ -342,30 +341,20 @@ class NSEvent
 							);", $table_name);
 						break;
 					
-					case 'housing_needed':
+					case 'housing':
 						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`   int(10) unsigned NOT NULL,
-							`dancer_id`  int(10) unsigned NOT NULL,
-							`no_smoking` tinyint(1) unsigned NOT NULL default '0',
-							`no_pets`    tinyint(1) unsigned NOT NULL default '0',
-							`gender`     tinyint(1) unsigned NOT NULL default '3',
-							`nights`     tinyint(2) unsigned NOT NULL default '1',
-							`comment`    text NOT NULL,
-							PRIMARY KEY  (`dancer_id`)
-							);", $table_name);
-						break;
-					
-					case 'housing_providers':
-						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`  int(10) unsigned NOT NULL,
-							`dancer_id` int(10) unsigned NOT NULL,
-							`available` tinyint(2) unsigned NOT NULL default '0',
-							`smoking`   tinyint(1) unsigned NOT NULL default '0',
-							`pets`      tinyint(1) unsigned NOT NULL default '0',
-							`gender`    tinyint(1) unsigned NOT NULL default '3',
-							`nights`    tinyint(2) unsigned NOT NULL default '1',
-							`comment`   text NOT NULL,
-							PRIMARY KEY  (`dancer_id`)
+							`event_id`                int(10) UNSIGNED NOT NULL,
+							`dancer_id`               int(10) UNSIGNED NOT NULL,
+							`housing_type`            tinyint(1) UNSIGNED NOT NULL DEFAULT '1',
+							`housing_spots_available` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+							`housing_nights`          tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+							`housing_gender`          tinyint(1) UNSIGNED NOT NULL DEFAULT '3',
+							`housing_bedtime`         tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+							`housing_pets`            tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+							`housing_smoke`           tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+							`housing_from_scene`      varchar(255) NOT NULL DEFAULT '',
+							`housing_comment`         text NOT NULL,
+							PRIMARY KEY (`event_id`,`dancer_id`)
 							);", $table_name);
 						break;
 				endswitch;
@@ -463,19 +452,22 @@ class NSEvent
 				}
 				
 				# Housing
-				if ($event->has_housing()) 	{
+				if ($event->has_housing()) {
 					NSEvent_FormValidation::add_rules(array(
-						'housing_provider_available' => 'if_set[housing_provider]|intval|greater_than[0]',
-						'housing_provider_smoking'   => 'if_set[housing_provider]|intval|in[0,1]',
-						'housing_provider_pets'      => 'if_set[housing_provider]|intval|in[0,1]',
-						'housing_provider_gender'    => 'if_set[housing_provider]|intval|in[1,2,3]',
-						'housing_provider_nights'    => 'if_set[housing_provider]|NSEvent::validate_housing_nights',
-						'housing_provider_comment'   => 'if_set[housing_provider]|trim|max_length[65536]',
-						'housing_needed_no_smoking'  => 'if_set[housing_needed]|intval|in[0,1]',
-						'housing_needed_no_pets'     => 'if_set[housing_needed]|intval|in[0,1]',
-						'housing_needed_gender'      => 'if_set[housing_needed]|intval|in[1,2,3]',
-						'housing_needed_nights'      => 'if_set[housing_needed]|NSEvent::validate_housing_nights',
-						'housing_needed_comment'     => 'if_set[housing_needed]|trim|max_length[65536]|stripslashes',
+						'housing_provider[housing_spots_available]' => 'if_set[housing_type_provider]|intval|greater_than[0]',
+						'housing_provider[housing_smoke]'           => 'if_set[housing_type_provider]|intval|in[0,1]',
+						'housing_provider[housing_pets]'            => 'if_set[housing_type_provider]|intval|in[0,1]',
+						'housing_provider[housing_gender]'          => 'if_set[housing_type_provider]|intval|in[1,2,3]',
+						'housing_provider[housing_bedtime]'         => 'if_set[housing_type_provider]|intval|in[0,1,2]',
+						'housing_provider[housing_nights]'          => 'if_set[housing_type_provider]|NSEvent::validate_housing_nights',
+						'housing_provider[housing_comment]'         => 'if_set[housing_type_provider]|trim|max_length[65536]',
+						'housing_needed[housing_from_scene]'        => 'if_set[housing_type_needed]|trim|required|max_length[255]|ucwords',
+						'housing_needed[housing_smoke]'             => 'if_set[housing_type_needed]|intval|in[0,1]',
+						'housing_needed[housing_pets]'              => 'if_set[housing_type_needed]|intval|in[0,1]',
+						'housing_needed[housing_gender]'            => 'if_set[housing_type_needed]|intval|in[1,2,3]',
+						'housing_needed[housing_bedtime]'           => 'if_set[housing_type_needed]|intval|in[0,1,2]',
+						'housing_needed[housing_nights]'            => 'if_set[housing_type_needed]|NSEvent::validate_housing_nights',
+						'housing_needed[housing_comment]'           => 'if_set[housing_type_needed]|trim|max_length[65536]',
 						));
 				}
 			}
@@ -498,21 +490,44 @@ class NSEvent
 				}
 				
 				
+				# Prep info before creating new dancer object
+				$dancer_data = $_POST;
+				unset($dancer_data['items'], $dancer_data['item_meta'], $dancer_data['confirmed'], $dancer_data['confirm_email']);
+				
+				if ($options['registration_testing']) {
+					$dancer_data['note'] = __('TEST', 'nsevent');
+				}
+				
+				if ($event->has_housing()) {
+					if (isset($dancer_data['housing_type_needed'])) {
+						$dancer_data = array_merge($dancer_data, $dancer_data['housing_needed']);
+						$dancer_data['housing_type'] = 1;
+					}
+					elseif (isset($dancer_data['housing_type_provider'])) {
+						$dancer_data = array_merge($dancer_data, $dancer_data['housing_provider']);
+						$dancer_data['housing_type'] = 2;
+					}
+					
+					unset($dancer_data['housing_type_needed'],$dancer_data['housing_needed'], $dancer_data['housing_type_provider'], $dancer_data['housing_provider']);
+				}
+				
+				$dancer = new NSEvent_Model_Dancer($dancer_data);
+				
+				
 				if (!isset($_POST['confirmed'])) {
-					$dancer = new NSEvent_Model_Dancer($_POST);
 					$file = 'form-confirm';
 				}
 				else {
-					if ($options['registration_testing']) {
-						$_POST['note'] = __('TEST', 'nsevent');
-					}
-					
 					# Add dancer
-					$dancer = new NSEvent_Model_Dancer($_POST);
 					$dancer->add($event->get_id());
 					
 					if (!$dancer) {
 						throw new Exception(__('Unable to add dancer to database.', 'nsevent'));
+					}
+					
+					# Add housing
+					if ($event->has_housing()) {
+						$dancer->add_housing();
 					}
 					
 					# Add registrations				
@@ -534,14 +549,6 @@ class NSEvent
 							'price'     => $item_price,
 							'item_meta' => (!isset($_POST['item_meta'][$item->get_id()]) ? '' : $_POST['item_meta'][$item->get_id()]),
 							));
-					}
-					
-					# Add housing info
-					if (isset($_POST['housing_needed'])) {
-						$dancer->add_housing_needed($_POST, $event->get_id());
-					}
-					elseif (isset($_POST['housing_provider'])) {
-						$dancer->add_housing_provider($_POST, $event->get_id());
 					}
 					
 					
@@ -792,15 +799,23 @@ class NSEvent
 			return 0;
 		}
 	}
-
+	
 	static public function validate_housing_nights($nights)
 	{
-		// TODO: This could be a stricter check…
 		if (is_array($nights)) {
-			return array_sum($nights);
+			$nights = array_sum($nights);
 		}
 		else {
-			return (int) $nights;
+			$nights = (int) $nights;
+		}
+		
+		if ($nights > 0) {
+			return $nights;
+		}
+		else {
+			$key = isset($_POST['housing_type_needed']) ? 'housing_needed[housing_nights]' : 'housing_provider[housing_nights]';
+			NSEvent_FormValidation::set_error($key, __('You must specify nights for housing.', 'nsevent'));
+			return false;
 		}
 	}
 	

@@ -8,8 +8,16 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	        $last_name,
 	        $email,
 	        $date_registered,
-	        $housing_nights_array,
 	        $housing_type,
+	        $housing_spots_available,
+	        $housing_nights,
+	        $housing_nights_array,
+	        $housing_gender,
+	        $housing_bedtime,
+	        $housing_pets,
+	        $housing_smoke,
+	        $housing_from_scene,
+	        $housing_comment,
 	        $level,
 	        $note,
 	        $position,
@@ -21,10 +29,6 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	        $registered_items,
 	    	$status,
 	        $volunteer_phone;
-	
-	public $available, $gender, $nights, $pets, $smoking, $no_pets, $no_smoking, $comment; # Housing
-	
-	public static $possible_housing_genders = array(1 => 'Boys', 2 => 'Girls');
 	
 	public function __construct(array $parameters = array())
 	{
@@ -57,6 +61,23 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		
 		$this->event_id = $event_id;
 		$this->id = self::$database->lastInsertID();
+	}
+	
+	public function add_housing()
+	{
+		self::$database->query('INSERT %1$s_housing VALUES (:event_id, :dancer_id, :housing_type, :housing_spots_available, :housing_nights, :housing_gender, :housing_bedtime, :housing_pets, :housing_smoke, :housing_from_scene, :housing_comment)', array(
+			':event_id'                => $this->event_id,
+			':dancer_id'               => $this->id,
+			':housing_type'            => (int) $this->housing_type,
+			':housing_spots_available' => (int) $this->housing_spots_available,
+			':housing_nights'          => (int) $this->housing_nights,
+			':housing_gender'          => (int) $this->housing_gender,
+			':housing_bedtime'         => (int) $this->housing_bedtime,
+			':housing_pets'            => (int) $this->housing_pets,
+			':housing_smoke'           => (int) $this->housing_smoke,
+			':housing_from_scene'      => (string) $this->housing_from_scene,
+			':housing_comment'         => (string) $this->housing_comment,
+			));
 	}
 	
 	public function add_housing_provider(array $parameters, $event_id)
@@ -147,28 +168,95 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return $this->email;
 	}
 	
-	public function get_housing_gender()
+	public function get_housing_bedtime()
 	{
-		return isset($this->gender) ? self::bit_field($this->gender, self::$possible_housing_genders, 'string') : false;
+		switch ($this->housing_bedtime) {
+			case 1:
+				return __('Early Bird', 'nsevent');
+			
+			case 2:
+				return __('Night Owl', 'nsevent');
+			
+			default:
+				return __('No Preference', 'nsevent');
+		}
+	}
+	
+	public function get_housing_comment()
+	{
+		return $this->housing_comment;
 	}
 	
 	public function get_housing_for_night_by_index($night_id)
 	{
 		if (!isset($this->housing_nights_array)) {
-			$this->housing_nights_array = array_filter(self::bit_field($this->nights, NSEvent_Model_Event::$possible_housing_nights, 'booleans'));
+			$this->housing_nights_array = array_filter(self::bit_field($this->housing_nights, NSEvent_Model_Event::$possible_housing_nights, 'booleans'));
 		}
 		
 		return isset($this->housing_nights_array[$night_id]) ? $this->housing_nights_array[$night_id] : false;
 	}
 	
+	public function get_housing_from_scene()
+	{
+		return $this->housing_from_scene;
+	}
+	
+	public function get_housing_gender()
+	{
+		switch ($this->housing_gender) {
+			case 1:
+				return __('Boys', 'nsevent');
+			
+			case 2:
+				return __('Girls', 'nsevent');
+			
+			default:
+				return __('Boys, Girls', 'nsevent');
+		}
+	}
+	
 	public function get_housing_nights(array $event_nights)
 	{
-		return isset($this->nights) ? self::bit_field($this->nights, $event_nights, 'string') : false;
+		return isset($this->housing_nights) ? self::bit_field($this->housing_nights, $event_nights, 'string') : false;
+	}
+	
+	public function get_housing_spots_available()
+	{
+		return (int) $this->housing_spots_available;
+	}
+	
+	public function get_housing_has_pets()
+	{
+		return ($this->housing_type == 2 and $this->housing_pets == 1);
+	}
+	
+	public function get_housing_has_smoke()
+	{
+		return ($this->housing_type == 2 and $this->housing_smoke == 1);
+	}
+	
+	public function get_housing_prefers_no_pets()
+	{
+		return ($this->housing_type == 1 and $this->housing_pets == 1);
+	}
+	
+	public function get_housing_prefers_no_smoke()
+	{
+		return ($this->housing_type == 1 and $this->housing_smoke == 1);
 	}
 	
 	public function get_housing_type()
 	{
-		return $this->housing_type;
+		switch ($this->housing_type) {
+			case 1:
+				return __('Housing Needed', 'nsevent');
+			
+			case 2:
+				return __('Housing Provider', 'nsevent');
+			
+			default:
+				return false;
+		}
 	}
 	
 	public function get_level()
@@ -264,6 +352,11 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return $this->volunteer_phone;
 	}
 	
+	public function is_housing_provider()
+	{
+		return ($this->housing_type == 2);
+	}
+	
 	public function is_volunteer()
 	{
 		return ($this->status === '1');
@@ -272,5 +365,10 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	public function is_vip()
 	{
 		return ($this->status === '2');
+	}
+	
+	public function needs_housing()
+	{
+		return ($this->housing_type == 1);
 	}
 }

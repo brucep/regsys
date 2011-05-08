@@ -3,7 +3,7 @@
 if (!isset($_GET['dancer'])) {
 	throw new Exception(__('Dancer ID not specified.', 'nsevent'));
 }
-elseif (!$dancer = $event->get_dancer_by_id_with_housing_info($_GET['dancer'])) {
+elseif (!$dancer = $event->get_dancer_by_id($_GET['dancer'])) {
 	throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['dancer']));
 }
 
@@ -56,7 +56,7 @@ $options = array_merge(self::$default_options, $options);
 	<p><?php _e('There are no registrations for this dancer.', 'nsevent'); ?></p>
 <?php endif; ?>
 
-<?php if ($dancer->get_housing_type()): ?>
+<?php if ($dancer->needs_housing() or $dancer->is_housing_provider()): ?>
 	<h4>
 		<?php echo esc_html($dancer->get_housing_type()); ?>
 <?php 	if (current_user_can('administrator')): ?>
@@ -65,25 +65,27 @@ $options = array_merge(self::$default_options, $options);
 	</h4>
 	
 	<ul>
-<?php 	if (isset($dancer->available)): ?>
-		<li><?php printf('Available: %d', $dancer->available); ?></li>
-<?php 		if ($dancer->smoking): ?>
+<?php 	if ($dancer->is_housing_provider()): ?>
+		<li><?php printf(__('Available spots: %d', 'nsevent'), $dancer->get_housing_spots_available()); ?></li>
+<?php 		if ($dancer->get_housing_has_smoke()): ?>
 		<li><?php _e('Smokes', 'nsevent'); ?></li>
 <?php 		endif; ?>
-<?php 		if ($dancer->pets): ?>
+<?php 		if ($dancer->get_housing_has_pets()): ?>
 		<li><?php _e('Has pets', 'nsevent'); ?></li>
 <?php 		endif; ?>
 <?php 	else: ?>
-<?php 		if ($dancer->no_smoking): ?>
+<?php 		if ($dancer->get_housing_prefers_no_smoke()): ?>
 		<li><?php _e('Prefers no smoking', 'nsevent'); ?></li>
 <?php 		endif; ?>
-<?php 		if ($dancer->no_pets): ?>
+<?php 		if ($dancer->get_housing_prefers_no_pets()): ?>
 		<li><?php _e('Prefers no pets', 'nsevent'); ?></li>
 <?php 		endif; ?>
 <?php 	endif; ?>
 		<li><?php echo esc_html($dancer->get_housing_gender()); ?></li>
 		<li><?php echo esc_html($dancer->get_housing_nights($event->get_housing_nights())); ?></li>
-		<li><?php echo esc_html($dancer->comment); ?></li>
+<?php 	if ($dancer->get_housing_comment()): ?>
+		<li><?php echo esc_html($dancer->get_housing_comment()); ?></li>
+<?php 	endif; ?>
 	</ul>
 <?php endif; ?>
 </div>

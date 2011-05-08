@@ -50,17 +50,17 @@
 <?php 	endif; ?>
 <?php endforeach; ?>
 
-<?php if (isset($_POST['housing_needed'])): ?>
+<?php if ($dancer->needs_housing()): ?>
 						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); _e('Housing Needed', 'nsevent'); ?></div>
-						<?php NSEvent_FormInput::hidden('housing_needed'); echo "\n"; ?>
-<?php 	foreach(array('no_smoking', 'no_pets', 'nights', 'gender', 'comment') as $field): ?>
-						<?php NSEvent_FormInput::hidden('housing_needed_'.$field); echo "\n"; ?>
+						<?php NSEvent_FormInput::hidden('housing_type_needed'); echo "\n"; ?>
+<?php 	foreach(array('from_scene', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment') as $field): ?>
+						<?php NSEvent_FormInput::hidden(sprintf('housing_needed[housing_%s]', $field)); echo "\n"; ?>
 <?php 	endforeach; ?>
-<?php elseif (isset($_POST['housing_provider'])): ?>
+<?php elseif ($dancer->is_housing_provider()): ?>
 						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); _e('Housing Provider', 'nsevent'); ?></div>
-						<?php NSEvent_FormInput::hidden('housing_provider'); echo "\n"; ?>
-<?php 	foreach(array('available', 'smoking', 'pets', 'nights', 'gender', 'comment') as $field): ?>
-						<?php NSEvent_FormInput::hidden('housing_provider_'.$field); echo "\n"; ?>
+						<?php NSEvent_FormInput::hidden('housing_type_provider'); echo "\n"; ?>
+<?php 	foreach(array('spots_available', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment') as $field): ?>
+						<?php NSEvent_FormInput::hidden(sprintf('housing_provider[housing_%s]', $field)); echo "\n"; ?>
 <?php 	endforeach; ?>
 <?php endif; ?>
 
@@ -70,7 +70,6 @@
 						<?php NSEvent_FormInput::hidden('confirmed'); echo "\n"; ?>
 
 						<div id="submit"><input type="submit" value="<?php _e('Confirm&hellip;', 'nsevent'); ?>" /></div>
-					</form>
 				</div>
 
 <?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); } ?>

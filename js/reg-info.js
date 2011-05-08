@@ -58,28 +58,28 @@ jQuery(document).ready(function($) {
 	});
 	
 	// Show fields when needed (for initial page load)
-	if ($('#housing_provider').attr('checked'))
-		$('#housing_provider_fields').removeClass('no_show');
+	if ($('#housing_type_provider').attr('checked'))
+		$('#housing_type_provider_fields').removeClass('no_show');
 	
 	// Show fields when needed
-	$('#housing_provider').click(function()
+	$('#housing_type_provider').click(function()
 	{
-		if ($('#housing_provider').attr('checked'))
-			$('#housing_provider_fields').removeClass('no_show');
+		if ($('#housing_type_provider').attr('checked'))
+			$('#housing_type_provider_fields').removeClass('no_show');
 		else
-			$('#housing_provider_fields').addClass('no_show');
+			$('#housing_type_provider_fields').addClass('no_show');
 	});
 
 	// Show fields when needed (for initial page load)
-	if ($('#housing_needed').attr('checked'))
-		$('#housing_needed_fields').removeClass('no_show');
+	if ($('#housing_type_needed').attr('checked'))
+		$('#housing_type_needed_fields').removeClass('no_show');
 
 	// Show fields when needed
-	$('#housing_needed').click(function()
+	$('#housing_type_needed').click(function()
 	{
-		if ($('#housing_needed').attr('checked'))
-			$('#housing_needed_fields').removeClass('no_show');
+		if ($('#housing_type_needed').attr('checked'))
+			$('#housing_type_needed_fields').removeClass('no_show');
 		else
-			$('#housing_needed_fields').addClass('no_show');
+			$('#housing_type_needed_fields').addClass('no_show');
 	});
 });

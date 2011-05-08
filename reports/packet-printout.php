@@ -1,4 +1,4 @@
-<?php $dancers = $event->get_dancer_ids(); ?>
+<?php $dancers = $event->get_dancers(); ?>
 
 <div class="wrap" id="nsevent"><div id="packet-printout">
 	<h2 class="no-print"><?php echo $event->get_request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->get_name())); ?></h2>
@@ -6,7 +6,7 @@
 	<h3 class="no-print" style="margin-bottom: 2em;"><?php _e('Packet Printouts', 'nsevent'); ?></h3>
 
 <?php if ($dancers): ?>
-<?php 	foreach ($dancers as $dancer_id): $dancer = $event->get_dancer_by_id_with_housing_info($dancer_id); ?>
+<?php 	foreach ($dancers as $dancer): ?>
 
 	<div class="dancer">
 		<h4>
@@ -39,13 +39,13 @@
 <?php 		else: ?>
 		<p><?php _e('There are no registrations for this dancer.', 'nsevent'); ?></p>
 <?php 		endif; ?>
-<?php 		if ($event->has_housing() and $dancer->get_housing_type() == __('Housing Needed', 'nsevent')): ?>
+<?php 		if ($event->has_housing() and $dancer->needs_housing()): ?>
 		<h5><?php echo esc_html($dancer->get_housing_type()); ?></h5>
 		<ul>
-<?php 			if ($dancer->no_smoking): ?>
+<?php 			if ($dancer->get_housing_prefers_no_smoke()): ?>
 			<li><?php _e('Prefers no smoking', 'nsevent'); ?></li>
 <?php 			endif; ?>
-<?php 			if ($dancer->no_pets): ?>
+<?php 			if ($dancer->get_housing_prefers_no_pets()): ?>
 			<li><?php _e('Prefers no pets', 'nsevent'); ?></li>
 <?php 			endif; ?>
 			<li><?php echo esc_html($dancer->get_housing_gender()); ?></li>

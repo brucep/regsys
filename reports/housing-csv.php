@@ -2,79 +2,71 @@
 
 require dirname(dirname(__FILE__)).'/prep-csv.php';
 
-if (!isset($_GET['request']) or !in_array($_GET['request'], array('housing-needed', 'housing-providers', 'housing-needed-email'))) {
-	throw new Exception('Bad request');
-}
-
-if ($_GET['request'] === 'housing-needed') {
-	$rows[0] = array_merge(
-		array(__('Last Name', 'nsevent'), __('First Name', 'nsevent')),
-		NSEvent_CSVHelper::$event->get_housing_nights(),
-		array(__('Gender', 'nsevent')));
-
-	$dancers_housing = NSEvent_CSVHelper::$event->get_dancers_needing_housing();
-	$housing_title = __('Housing Needed', 'nsevent');
-
+if (isset($_GET['request']) and $_GET['request'] === 'housing-needed') {
+	$rows[0] = array(__('Last Name', 'nsevent'), __('First Name', 'nsevent'), __('Email Address', 'nsevent'));
+	$rows[0] = array_merge($rows[0], NSEvent_CSVHelper::$event->get_housing_nights());
 	$rows[0] = array_merge($rows[0], array(
-		__('Has Car', 'nsevent'),
+		__('Gender', 'nsevent'),
 		__('No Pets', 'nsevent'),
-		__('No Smoking', 'nsevent'),
-		__('Comment', 'nsevent')));
+		__('No Smoke', 'nsevent'),
+		__('Bedtime', 'nsevent'),
+		__('From', 'nsevent'),
+		__('Comment', 'nsevent'),
+		__('Date Registered', 'nsevent')));
 	
-	foreach ($dancers_housing as $dancer) {
-		$row = array($dancer->get_last_name(), $dancer->get_first_name());
+	$dancers = NSEvent_CSVHelper::$event->get_dancers_where(array(':housing_type' => 1));
+	
+	foreach ($dancers as $dancer) {
+		$row = array($dancer->get_last_name(), $dancer->get_first_name(), $dancer->get_email());
 		
 		foreach (NSEvent_CSVHelper::$event->get_housing_nights() as $night) {
 			$row[] = ($dancer->get_housing_for_night_by_index($night)) ? '•' : '';
 		}
 		
 		$row[] = $dancer->get_housing_gender();
-		$row[] = ($dancer->no_pets)    ? '•' : '';
-		$row[] = ($dancer->no_smoking) ? '•' : '';
-		$row[] = $dancer->comment;
+		$row[] = $dancer->get_housing_prefers_no_pets()  ? '•' : '';
+		$row[] = $dancer->get_housing_prefers_no_smoke() ? '•' : '';
+		$row[] = $dancer->get_housing_bedtime();
+		$row[] = $dancer->get_housing_from_scene();
+		$row[] = $dancer->get_housing_comment();
+		$row[] = $dancer->get_date_registered('Y-m-d, h:i A');
 		
 		$rows[] = $row;
 	}
+	
+	NSEvent_CSVHelper::download($rows, sprintf(__('Housing Needed for %s -', 'nsevent'), NSEvent_CSVHelper::$event->get_name()));
 }
-elseif ($_GET['request'] === 'housing-providers') {
-	$rows[0] = array_merge(
-		array(__('Last Name', 'nsevent'), __('First Name', 'nsevent')),
-		NSEvent_CSVHelper::$event->get_housing_nights(),
-		array(__('Gender', 'nsevent')));
-
-	$dancers_housing = NSEvent_CSVHelper::$event->get_dancers_providing_housing();
-	$housing_title = __('Housing Providers', 'nsevent');
-	
+elseif (isset($_GET['request']) and $_GET['request'] === 'housing-providers') {
+	$rows[0] = array(__('Last Name', 'nsevent'), __('First Name', 'nsevent'), __('Email Address', 'nsevent'));
+	$rows[0] = array_merge($rows[0], NSEvent_CSVHelper::$event->get_housing_nights());
 	$rows[0] = array_merge($rows[0], array(
-		__('Available', 'nsevent'),
-		__('Pets', 'nsevent'),
-		__('Smoking', 'nsevent'),
-		__('Comment', 'nsevent')));
+		__('Gender', 'nsevent'),
+		__('Spots', 'nsevent'),
+		__('Has Pets', 'nsevent'),
+		__('Smokes', 'nsevent'),
+		__('Bedtime', 'nsevent'),
+		__('Comment', 'nsevent'),
+		__('Date Registered', 'nsevent')));
 	
-	foreach ($dancers_housing as $dancer) {
-		$row = array($dancer->get_last_name(), $dancer->get_first_name());
+	$dancers = NSEvent_CSVHelper::$event->get_dancers_where(array(':housing_type' => 2));
+	
+	foreach ($dancers as $dancer) {
+		$row = array($dancer->get_last_name(), $dancer->get_first_name(), $dancer->get_email());
 		
-		foreach (NSEvent_CSVHelper::$event->nights() as $night) {
+		foreach (NSEvent_CSVHelper::$event->get_housing_nights() as $night) {
 			$row[] = ($dancer->get_housing_for_night_by_index($night)) ? '1' : '';
 		}
 		
 		$row[] = $dancer->get_housing_gender();
-		$row[] = $dancer->available;
-		$row[] = ($dancer->pets)    ? '1' : '';
-		$row[] = ($dancer->smoking) ? '1' : '';
-		$row[] = $dancer->comment;
+		$row[] = $dancer->get_housing_spots_available();
+		$row[] = $dancer->get_housing_has_pets()  ? '•' : '';
+		$row[] = $dancer->get_housing_has_smoke() ? '•' : '';
+		$row[] = $dancer->get_housing_bedtime();
+		$row[] = $dancer->get_housing_comment();
+		$row[] = $dancer->get_date_registered('Y-m-d, h:i A');
 		
 		$rows[] = $row;
 	}
-}
-elseif ($_GET['request'] === 'housing-needed-email') {
-	$dancers_housing = NSEvent_CSVHelper::$event->get_dancers_needing_housing();
-	$housing_title = __('Housing Needed Emails', 'nsevent');
-	$rows[0] = array(__('Last Name', 'nsevent'), __('First Name', 'nsevent'), __('Email Address', 'nsevent'));
 	
-	foreach ($dancers_housing as $dancer) {
-		$rows[] = array($dancer->get_last_name(), $dancer->get_first_name(), $dancer->get_email());
-	}
+	NSEvent_CSVHelper::download($rows, sprintf(__('Housing Provider for %s -', 'nsevent'), NSEvent_CSVHelper::$event->get_name()));
 }
-
-NSEvent_CSVHelper::download($rows, $housing_title);

@@ -79,12 +79,12 @@ class NSEvent_Model_Event extends NSEvent_Model
 		
 	public function get_dancers()
 	{
-		return self::$database->query('SELECT * FROM %1$s_dancers WHERE event_id = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+		return self::$database->query('SELECT * FROM %1$s_dancers LEFT JOIN %1$s_housing ON %1$s_housing.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 	}
 		
 	public function get_dancers_where(array $where)
 	{
-		$query = array('`event_id` = :event_id');
+		$query = array('%1$s_dancers.`event_id` = :event_id');
 		
 		foreach ($where as $field => $value) {
 			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
@@ -93,7 +93,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 		$query = implode(' AND', $query);
 		$where[':event_id'] = $this->id;
 		
-		return self::$database->query('SELECT * FROM %1$s_dancers WHERE '.$query, $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+		return self::$database->query('SELECT * FROM %1$s_dancers LEFT JOIN %1$s_housing ON %1$s_housing.`dancer_id` = %1$s_dancers.`id` WHERE '.$query.' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 	}
 	
 	public function get_dancer_ids()
@@ -103,30 +103,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 		
 	public function get_dancer_by_id($dancer_id)
 	{
-		return self::$database->query('SELECT * FROM %1$s_dancers WHERE event_id = :event_id AND id = :id', array(':event_id' => $this->id, ':id' => $dancer_id))->fetchObject('NSEvent_Model_Dancer');
-	}
-	
-	public function get_dancer_by_id_with_housing_info($dancer_id)
-	{
-		if (self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_housing_needed WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->id, ':dancer_id' => $dancer_id))->fetchColumn()) {
-			return self::$database->query('SELECT %1$s_dancers.*, :housing_type as housing_type, %1$s_housing_needed.`no_smoking`, %1$s_housing_needed.`no_pets`, %1$s_housing_needed.`gender`, %1$s_housing_needed.`nights`, %1$s_housing_needed.`comment` FROM %1$s_dancers JOIN %1$s_housing_needed ON %1$s_dancers.`id` = %1$s_housing_needed.`dancer_id` WHERE  %1$s_dancers.`event_id` = :event_id AND id = :id', array(':event_id' => $this->id, ':id' => $dancer_id, ':housing_type' => __('Housing Needed', 'nsevent')))->fetchObject('NSEvent_Model_Dancer');
-		}
-		elseif (self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_housing_providers WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->id, ':dancer_id' => $dancer_id))->fetchColumn()) {
-			return self::$database->query('SELECT %1$s_dancers.*, :housing_type as housing_type, %1$s_housing_providers.`available`, %1$s_housing_providers.`smoking`, %1$s_housing_providers.`pets`, %1$s_housing_providers.`gender`, %1$s_housing_providers.`nights`, %1$s_housing_providers.`comment` FROM %1$s_dancers JOIN %1$s_housing_providers ON %1$s_dancers.`id` = %1$s_housing_providers.`dancer_id` WHERE  %1$s_dancers.`event_id` = :event_id AND id = :id', array(':event_id' => $this->id, ':id' => $dancer_id, ':housing_type' => __('Housing Provider', 'nsevent')))->fetchObject('NSEvent_Model_Dancer');
-		}
-		else {
-			return $this->get_dancer_by_id($dancer_id);
-		}
-	}
-	
-	public function get_dancers_needing_housing()
-	{
-		return self::$database->query('SELECT * FROM %1$s_housing_needed LEFT JOIN %1$s_dancers ON id = dancer_id WHERE %1$s_housing_needed.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC', array(':event_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
-	}
-	
-	public function get_dancers_providing_housing()
-	{
-		return self::$database->query('SELECT * FROM %1$s_housing_providers LEFT JOIN %1$s_dancers ON id = dancer_id WHERE %1$s_housing_providers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC', array(':event_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+		return self::$database->query('SELECT * FROM %1$s_dancers LEFT JOIN %1$s_housing ON %1$s_housing.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_dancers.`event_id` = :event_id AND id = :id', array(':event_id' => $this->id, ':id' => $dancer_id))->fetchObject('NSEvent_Model_Dancer');
 	}
 	
 	public function get_volunteers()
@@ -146,6 +123,12 @@ class NSEvent_Model_Event extends NSEvent_Model
 		$where[':event_id'] = $this->id;
 		
 		$result = self::$database->query('SELECT COUNT(id) FROM %1$s_dancers WHERE '.$query, $where)->fetchColumn();
+		return ($result !== false) ? (int) $result : false;
+	}
+	
+	public function count_housing_spots_available()
+	{
+		$result = self::$database->query('SELECT SUM(housing_spots_available) FROM %1$s_housing WHERE event_id = :event_id AND housing_type = 2', array(':event_id' => $this->id))->fetchColumn();
 		return ($result !== false) ? (int) $result : false;
 	}
 	

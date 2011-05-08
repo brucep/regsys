@@ -313,73 +313,90 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 
 <?php # HOUSING ######################################################## ?>
 <?php if ($event->has_housing()): ?>
-						<h2><?php NSEvent_FormInput::checkbox('housing_provider', array('label' => __('I Can Provide Housing', 'nsevent'))); ?>&nbsp;<span><?php _e('(Optional)', 'nsevent'); ?></span></h2>
-						<fieldset id="housing_provider_fieldset">
-							<div id="housing_provider_fields" class="no_show">
-								<?php echo NSEvent_FormValidation::get_error('housing_provider_available'), "\n"; ?>
-								<div class="field"><?php printf(__('I can provide housing for %s person(s).', 'nsevent'), NSEvent_FormInput::text('housing_provider_available', array('size' => 2, 'placeholder' => '#'), false)); ?></div>
+						<h2><?php NSEvent_FormInput::checkbox('housing_type_provider', array('label' => __('I Can Provide Housing', 'nsevent'))); ?>&nbsp;<span><?php _e('(Optional)', 'nsevent'); ?></span></h2>
+						<fieldset id="housing_type_provider_fields" class="no_show">
+							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_spots_available]'), "\n"; ?>
+							<div class="field"><?php printf(__('I can provide housing for %s person(s).', 'nsevent'), NSEvent_FormInput::text('housing_provider[housing_spots_available]', array('size' => 2, 'placeholder' => '#'), false)); ?></div>
 
-								<div class="field">
-									<div class="field-label"><?php _e('I&hellip;', 'nsevent'); ?></div>
-									<div class="checkbox"><?php NSEvent_FormInput::checkbox('housing_provider_smoking', array('label' => __('Smoke', 'nsevent'))); ?></div>
-									<div class="checkbox"><?php NSEvent_FormInput::checkbox('housing_provider_pets',    array('label' => __('Have Pets', 'nsevent'))); ?></div>
-								</div>
+							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_smoke]'), "\n"; ?>
+							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_pets]'), "\n"; ?>
+							<div class="field">
+								<div class="checkbox"><?php NSEvent_FormInput::checkbox('housing_provider[housing_smoke]', array('label' => __('I smoke.', 'nsevent'))); ?></div>
+								<div class="checkbox"><?php NSEvent_FormInput::checkbox('housing_provider[housing_pets]',  array('label' => __('I have pets.', 'nsevent'))); ?></div>
+							</div>
 
-								<?php echo NSEvent_FormValidation::get_error('housing_provider_nights'), "\n"; ?>
-								<div class="field">
-									<div class="field-label"><?php _e('I can providing housing on&hellip; (Select all that apply.)', 'nsevent'); ?></div>
+							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_nights]'), "\n"; ?>
+							<div class="field">
+								<div class="field-label"><?php _e('I can providing housing on:', 'nsevent'); ?></div>
 <?php 	foreach ($event->get_housing_nights() as $index => $night): ?>
-									<div class="checkbox"><?php NSEvent_FormInput::checkbox(sprintf('housing_provider_nights[%d]', $index), array('value' => $index, 'label' => __($night, 'nsevent'))); ?></div>
+								<div class="checkbox"><?php NSEvent_FormInput::checkbox(sprintf('housing_provider[housing_nights][%d]', $index), array('value' => $index, 'label' => __($night, 'nsevent'))); ?></div>
 <?php 	endforeach; ?>
-								</div>
+							</div>
 
-								<?php echo NSEvent_FormValidation::get_error('housing_provider_gender'), "\n"; ?>
-								<div class="field">
-									<div class="field-label"><?php _e('I prefer to house&hellip;', 'nsevent'); ?></div>
-									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider_gender', array('value' => 3, 'label' => __('Boys and/or Girls', 'nsevent'), 'default' => true)); ?></div>
-									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider_gender', array('value' => 1, 'label' => __('Boys only', 'nsevent'))); ?></div>
-									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider_gender', array('value' => 2, 'label' => __('Girls only', 'nsevent'))); ?></div>
-								</div>
+							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_gender]'), "\n"; ?>
+							<div class="field">
+								<div class="field-label"><?php _e('I prefer to house:', 'nsevent'); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider[housing_gender]', array('value' => 3, 'id' => 'housing_provider[housing_gender_3]', 'label' => __('Boys and/or Girls', 'nsevent'), 'default' => true)); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider[housing_gender]', array('value' => 1, 'id' => 'housing_provider[housing_gender_1]', 'label' => __('Boys only', 'nsevent'))); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider[housing_gender]', array('value' => 2, 'id' => 'housing_provider[housing_gender_2]', 'label' => __('Girls only', 'nsevent'))); ?></div>
+							</div>
 
-								<?php echo NSEvent_FormValidation::get_error('housing_provider_comment'), "\n"; ?>
-								<div class="field textarea">
-									<label for="housing_provider_comment"><?php _e('Comments:', 'nsevent'); ?></label><br />
-									<?php NSEvent_FormInput::textarea('housing_provider_comment', array('rows' => 6)); echo "\n"; ?>
-								</div>
+							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_bedtime]'), "\n"; ?>
+							<div class="field">
+								<div class="field-label"><?php _e('Bedtime preference:', 'nsevent'); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider[housing_bedtime]', array('value' => 0, 'id' => 'housing_provider[housing_bedtime_0]', 'label' => __('No Preference', 'nsevent'), 'default' => true)); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider[housing_bedtime]', array('value' => 1, 'id' => 'housing_provider[housing_bedtime_1]', 'label' => __('Early Bird', 'nsevent'))); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_provider[housing_bedtime]', array('value' => 2, 'id' => 'housing_provider[housing_bedtime_2]', 'label' => __('Night Owl', 'nsevent'))); ?></div>
+							</div>
+
+							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_comment]'), "\n"; ?>
+							<div class="field textarea">
+								<label for="housing_provider_comment"><?php _e('Comments:', 'nsevent'); ?></label><br />
+								<?php NSEvent_FormInput::textarea('housing_provider[housing_comment]', array('rows' => 6)); echo "\n"; ?>
 							</div>
 						</fieldset>
 
 
-						<h2><?php NSEvent_FormInput::checkbox('housing_needed', array('label' => __('I Need Housing', 'nsevent'))); ?>&nbsp;<span><?php _e('(Optional)', 'nsevent'); ?></span></h2>
-						<fieldset id="housing_needed_fieldset">
-							<div id="housing_needed_fields" class="no_show">
-								<div class="field">
-									<div class="field-label"><?php _e('I would prefer&hellip;', 'nsevent'); ?></div>
-									<div class="checkbox"><?php NSEvent_FormInput::checkbox('housing_needed_no_smoking', array('label' => __('No smoking', 'nsevent'))); ?></div>
-									<div class="checkbox"><?php NSEvent_FormInput::checkbox('housing_needed_no_pets',    array('label' => __('No pets', 'nsevent'))); ?></div>
-								</div>
+						<h2><?php NSEvent_FormInput::checkbox('housing_type_needed', array('label' => __('I Need Housing', 'nsevent'))); ?>&nbsp;<span><?php _e('(Optional)', 'nsevent'); ?></span></h2>
+						<fieldset id="housing_type_needed_fields" class="no_show">
+							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_from_scene]'), "\n"; ?>
+							<div class="field"><?php echo __('I am from: ', 'nsevent'), NSEvent_FormInput::text('housing_needed[housing_from_scene]', array('size' => 30, 'placeholder' => 'Scene, area, nearest major city, etc.'), false); ?></div>
 
-								<?php echo NSEvent_FormValidation::get_error('housing_needed_nights'), "\n"; ?>
-								<div class="field">
-									<div class="field-label"><?php _e('I need housing for&hellip; (Select all that apply.)', 'nsevent'); ?></div>
+							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_smoke]'), "\n"; ?>
+							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_pets]'), "\n"; ?>
+							<div class="field">
+								<div class="checkbox"><?php NSEvent_FormInput::checkbox('housing_needed[housing_smoke]', array('label' => __('I would prefer no smoking.', 'nsevent'))); ?></div>
+								<div class="checkbox"><?php NSEvent_FormInput::checkbox('housing_needed[housing_pets]',  array('label' => __('I would prefer no pets.', 'nsevent'))); ?></div>
+							</div>
+
+							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_nights]'), "\n"; ?>
+							<div class="field">
+								<div class="field-label"><?php _e('I need housing for:', 'nsevent'); ?></div>
 <?php 	foreach ($event->get_housing_nights() as $index => $night): ?>
-									<div class="checkbox"><?php NSEvent_FormInput::checkbox(sprintf('housing_needed_nights[%d]', $index), array('value' => $index, 'label' => __($night, 'nsevent'))); ?></div>
+								<div class="checkbox"><?php NSEvent_FormInput::checkbox(sprintf('housing_needed[housing_nights][%d]', $index), array('value' => $index, 'label' => __($night, 'nsevent'))); ?></div>
 <?php 	endforeach; ?>
-								</div>
+							</div>
 
-								<?php echo NSEvent_FormValidation::get_error('housing_needed_gender'), "\n"; ?>
-								<div class="field">
-									<div class="field-label"><?php _e('I prefer to be housed with&hellip;', 'nsevent'); ?></div>
-									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed_gender', array('value' => 3, 'label' => __('Boys and/or Girls', 'nsevent'), 'default' => true)); ?></div>
-									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed_gender', array('value' => 1, 'label' => __('Boys only', 'nsevent'))); ?></div>
-									<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed_gender', array('value' => 2, 'label' => __('Girls only', 'nsevent'))); ?></div>
-								</div>
+							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_gender]'), "\n"; ?>
+							<div class="field">
+								<div class="field-label"><?php _e('I prefer to be housed with:', 'nsevent'); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed[housing_gender]', array('value' => 3, 'id' => 'housing_needed[housing_gender_3]', 'label' => __('Boys and/or Girls', 'nsevent'), 'default' => true)); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed[housing_gender]', array('value' => 1, 'id' => 'housing_needed[housing_gender_1]', 'label' => __('Boys only', 'nsevent'))); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed[housing_gender]', array('value' => 2, 'id' => 'housing_needed[housing_gender_2]', 'label' => __('Girls only', 'nsevent'))); ?></div>
+							</div>
 
-								<?php echo NSEvent_FormValidation::get_error('housing_needed_comment'), "\n"; ?>
-								<div class="field textarea">
-									<label for="housing_needed_comment">Comments:</label><br />
-									<?php NSEvent_FormInput::textarea('housing_needed_comment', array('rows' => 6)); echo "\n"; ?>
-								</div>
+							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_bedtime]'), "\n"; ?>
+							<div class="field">
+								<div class="field-label"><?php _e('Bedtime preference:', 'nsevent'); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed[housing_bedtime]', array('value' => 0, 'id' => 'housing_needed[housing_bedtime_0]', 'label' => __('No Preference', 'nsevent'), 'default' => true)); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed[housing_bedtime]', array('value' => 1, 'id' => 'housing_needed[housing_bedtime_1]', 'label' => __('Early Bird', 'nsevent'))); ?></div>
+								<div class="radio"><label><?php NSEvent_FormInput::radio('housing_needed[housing_bedtime]', array('value' => 2, 'id' => 'housing_needed[housing_bedtime_2]', 'label' => __('Night Owl', 'nsevent'))); ?></div>
+							</div>
+
+							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_comment]'), "\n"; ?>
+							<div class="field textarea">
+								<label for="housing_needed_comment">Comments:</label><br />
+								<?php NSEvent_FormInput::textarea('housing_needed[housing_comment]', array('rows' => 6)); echo "\n"; ?>
 							</div>
 						</fieldset>
 <?php endif; # housing ?>
@@ -403,7 +420,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 						</fieldset>
 
 
-						<div id="submit"><input type="submit" value="<?php _e('Confirm&hellip;', 'nsevent'); ?>" /></div>
+						<div id="submit"><input id="nsevent-submit" type="submit" value="<?php _e('Confirm&hellip;', 'nsevent'); ?>" /></div>
 					</form>
 				</div>
 
