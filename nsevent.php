@@ -165,6 +165,8 @@ class NSEvent
 		global $wpdb;
 		
 		try {
+			@date_default_timezone_set(get_option('timezone_string'));
+			
 			if (!current_user_can('edit_pages')) {
 				throw new Exception(__('Cheatin&#8217; uh?'));
 			}
