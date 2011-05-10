@@ -12,6 +12,9 @@
 						<?php NSEvent_FormInput::hidden('email'); echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('confirm_email'); echo "\n"; ?>
 
+						<div class="field"><span class="label"><?php _e('Mobile Phone Number', 'nsevent'); ?>:</span> <?php echo esc_html($dancer->get_mobile_phone()); ?></div>
+						<?php NSEvent_FormInput::hidden('mobile_phone'); echo "\n"; ?>
+
 						<div class="field"><span class="label"><?php _e('Position', 'nsevent'); ?>:</span> <?php echo esc_html($dancer->get_position()); ?></div>
 						<?php NSEvent_FormInput::hidden('position'); echo "\n"; ?>
 <?php if ($event->has_levels()): ?>

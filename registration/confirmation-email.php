@@ -10,10 +10,11 @@ ABOUT YOU
 ---------
 
 - First Name: <?php echo $dancer->get_first_name(), "\n"; ?>
-- Last Name:  <?php echo $dancer->get_last_name(), "\n"; ?>
-- Position:   <?php echo $dancer->get_position(), "\n"; ?>
+- Last Name: <?php echo $dancer->get_last_name(), "\n"; ?>
+- Mobile Phone Number: <?php echo $dancer->get_mobile_phone(), "\n"; ?>
+- Position: <?php echo $dancer->get_position(), "\n"; ?>
 <?php if ($event->has_levels()): ?>
-- Level:      <?php echo $event->get_level_for_index($dancer->get_level()), "\n"; ?>
+- Level: <?php echo $event->get_level_for_index($dancer->get_level()), "\n"; ?>
 <?php endif; ?>
 <?php if ($vip): ?>
 - VIP

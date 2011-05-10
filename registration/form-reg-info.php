@@ -42,7 +42,10 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<div class="field text"><?php NSEvent_FormInput::text('email',      array('maxlength' => 100, 'label' => __('Email Address', 'nsevent'), 'type' => 'email')); ?></div>
 
 							<?php echo NSEvent_FormValidation::get_error('confirm_email'), "\n"; ?>
-							<div class="field text" style='padding-bottom:1em'><?php NSEvent_FormInput::text('confirm_email', array('maxlength' => 100, 'label' => __('Confirm Email Address', 'nsevent'), 'type' => 'email')); ?></div>
+							<div class="field text"><?php NSEvent_FormInput::text('confirm_email', array('maxlength' => 100, 'label' => __('Confirm Email Address', 'nsevent'), 'type' => 'email')); ?></div>
+
+							<?php echo NSEvent_FormValidation::get_error('mobile_phone'), "\n"; ?>
+							<div class="field text"><?php NSEvent_FormInput::text('mobile_phone', array('maxlength' => 30, 'label' => 'Mobile Phone Number', 'type' => 'tel')); ?></div>
 
 							<?php echo NSEvent_FormValidation::get_error('position'), "\n"; ?>
 							<div class="field" id="position">
@@ -92,8 +95,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 
 <?php if ($event->has_volunteers() and !$vip): ?>
 							<?php echo NSEvent_FormValidation::get_error('status'), "\n"; ?>
-							<?php echo NSEvent_FormValidation::get_error('volunteer_phone'), "\n"; ?>
-							<div class="field"><?php NSEvent_FormInput::checkbox('status', array('value' => 1, 'label' => sprintf(__("I'm interested in volunteering. (Volunteers will receive $%d for every (one hour) shift worked!)", 'nsevent'), 5))); ?><br /><?php NSEvent_FormInput::text('volunteer_phone', array('type' => 'tel', 'size' => 14, 'label' => 'Mobile Phone Number: ')); ?></div>
+							<div class="field"><?php NSEvent_FormInput::checkbox('status', array('value' => 1, 'label' => sprintf(__("I'm interested in volunteering. (Volunteers will receive $%d for every (one hour) shift worked!)", 'nsevent'), 5))); ?></div>
 <?php endif; # volunteers ?>
 <?php if ($vip): ?>
 							<?php NSEvent_FormInput::hidden('vip'); echo "\n"; ?>

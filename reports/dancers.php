@@ -14,11 +14,12 @@
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
-				<th class="manage-column column-title" width="20%"><div><?php _e('Name', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="30%"><div><?php _e('Email Address', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="10%"><div><?php _e('Position', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="20%"><div><?php _e('Level', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="20%"><div><?php _e('Date Registered', 'nsevent'); ?></div></th>
+				<th class="manage-column column-title" width="19%"><div><?php _e('Name', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="27%"><div><?php _e('Email Address', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="13%"><div><?php _e('Mobile Phone Number', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="8%"><div><?php _e('Position', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="15%"><div><?php _e('Level', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="18%"><div><?php _e('Date Registered', 'nsevent'); ?></div></th>
 			</tr>
 		</thead>
 
@@ -26,6 +27,7 @@
 			<tr>
 				<th class="manage-column column-title"><?php _e('Name', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('Email Address', 'nsevent'); ?></th>
+				<th class="manage-column"><?php _e('Mobile Phone Number', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('Position', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('Level', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('Date Registered', 'nsevent'); ?></th>
@@ -38,6 +40,7 @@
 			<tr class="vcard<?php if (!($i++ % 2)) echo ' alternate'; ?>">
 				<td class="column-title dancer-name"><?php if (current_user_can('administrator')): echo $event->get_request_link('dancer', $dancer->get_name_last_first(), array('dancer' => (int) $dancer->get_id())); else: echo esc_html($dancer->get_name_last_first()); endif; ?><?php if ($dancer->is_vip()) echo ' [VIP]'; ?></td>
 				<td><a href="mailto:<?php printf('%s <%s>?subject=%s', $dancer->get_name(), $dancer->get_email(), $event->get_name()); ?>"><span class="email"><?php echo esc_html($dancer->get_email()); ?></span></a></td>
+				<td><?php echo esc_html($dancer->get_mobile_phone()); ?></td>
 				<td><?php echo esc_html($dancer->get_position()); ?></td>
 				<td><?php echo ($event->get_level_for_index($dancer->get_level())) ? esc_html($event->get_level_for_index($dancer->get_level())) : '&mdash;'; ?></td>
 				<td style="font-family: monospace"><?php echo $dancer->get_date_registered('Y-m-d, h:i A'); ?></td>

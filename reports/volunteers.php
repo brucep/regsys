@@ -15,14 +15,14 @@
 		<thead>
 			<tr>
 				<th class="manage-column column-title"><div><?php _e('Name', 'nsevent'); ?></div></th>
-				<th class="manage-column"><div><?php _e('Phone Number', 'nsevent'); ?></div></th>
+				<th class="manage-column"><div><?php _e('Mobile Phone Number', 'nsevent'); ?></div></th>
 			</tr>
 		</thead>
 
 		<tfoot>
 			<tr>
 				<th class="manage-column column-title"><div><?php _e('Name', 'nsevent'); ?></div></th>
-				<th class="manage-column"><div><?php _e('Phone Number', 'nsevent'); ?></div></th>
+				<th class="manage-column"><div><?php _e('Mobile Phone Number', 'nsevent'); ?></div></th>
 			</tr>
 		</tfoot>
 
@@ -30,7 +30,7 @@
 <?php 	foreach ($volunteers as $dancer): ?>
 			<tr class="vcard">
 				<td class="dancer-name fn"><?php echo esc_html($dancer->get_name_last_first()); ?></td>
-				<td class="tel"><?php echo esc_html($dancer->get_volunteer_phone()); ?></td>
+				<td class="tel"><?php echo esc_html($dancer->get_mobile_phone()); ?></td>
 			</tr>
 <?php 	endforeach; ?>
 		</tbody>

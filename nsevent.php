@@ -326,7 +326,7 @@ class NSEvent
 							`payment_discount`  varchar(3) NOT NULL default '0',
 							`payment_confirmed` tinyint(1) unsigned NOT NULL default '0',
 							`payment_owed`      smallint(5) unsigned NOT NULL default '0',
-							`volunteer_phone`   varchar(255) NOT NULL,
+							`mobile_phone`      varchar(30) NOT NULL DEFAULT '',
 							`note`              varchar(255) NOT NULL,
 							PRIMARY KEY  (`id`)
 							);", $table_name);
@@ -423,9 +423,9 @@ class NSEvent
 					'last_name'       => 'trim|required|max_length[100]|ucfirst',
 					'confirm_email'   => 'trim|valid_email|max_length[100]',
 					'email'           => 'trim|valid_email|max_length[100]|NSEvent::validate_email_address',
+					'mobile_phone'    => 'trim|required|max_length[30]',
 					'position'        => 'intval|in[1,2]|NSEvent::validate_position',
 					'status'          => 'NSEvent::validate_status',
-					'volunteer_phone' => 'if_set[status]|trim|NSEvent::validate_volunteer_phone',
 					'package'         => 'intval|NSEvent::validate_package',
 					'items'           => 'NSEvent::validate_items',
 					'payment_method'  => 'in[Mail,PayPal]',
@@ -819,21 +819,6 @@ class NSEvent
 			NSEvent_FormValidation::set_error($key, __('You must specify nights for housing.', 'nsevent'));
 			return false;
 		}
-	}
-	
-	static public function validate_volunteer_phone($phone_number)
-	{
-		if (self::$vip) {
-			return true;
-		}
-		elseif (empty($phone_number)) {
-			return false;
-		}
-		
-		preg_match('/^(?:\(?([0-9]{3})\)?)?[- \.]?([0-9]{3})[- \.]?([0-9]{4})/', $phone_number, $matches);
-		unset($matches[0]);
-		
-		return (!empty($matches)) ? implode('-', array_filter($matches)) : true;
 	}
 	
 	static public function paypal_href($dancer, $options, array $item_ids = array(), $notify_url = '')

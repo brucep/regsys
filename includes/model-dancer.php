@@ -19,6 +19,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	        $housing_from_scene,
 	        $housing_comment,
 	        $level,
+	        $mobile_phone,
 	        $note,
 	        $position,
 	        $payment_confirmed,
@@ -27,8 +28,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	        $payment_owed,
 	        $price_total,
 	        $registered_items,
-	    	$status,
-	        $volunteer_phone;
+	    	$status;
 	
 	public function __construct(array $parameters = array())
 	{
@@ -44,7 +44,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		
 	public function add($event_id)
 	{
-		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level, :status, :date_registered, :payment_method, :payment_discount, DEFAULT, DEFAULT, :volunteer_phone, :note)', array(
+		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level, :status, :date_registered, :payment_method, :payment_discount, DEFAULT, DEFAULT, :mobile_phone, :note)', array(
 			':event_id'          => $event_id,
 			':first_name'        => $this->first_name,
 			':last_name'         => $this->last_name,
@@ -55,7 +55,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 			':date_registered'   => time(),
 			':payment_method'    => $this->payment_method,
 			':payment_discount'  => $this->payment_discount,
-			':volunteer_phone'   => (string) $this->volunteer_phone,
+			':mobile_phone'      => (string) $this->mobile_phone,
 			':note'              => (string) $this->note,
 			));
 		
@@ -264,6 +264,11 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return (int) $this->level;
 	}
 	
+	public function get_mobile_phone()
+	{
+		return $this->mobile_phone;
+	}
+	
 	public function get_payment_confirmed()
 	{
 		return (bool) $this->payment_confirmed;
@@ -345,11 +350,6 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		else {
 			return array();
 		}
-	}
-	
-	public function get_volunteer_phone()
-	{
-		return $this->volunteer_phone;
 	}
 	
 	public function is_housing_provider()

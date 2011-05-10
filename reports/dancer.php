@@ -26,6 +26,9 @@ $options = array_merge(self::$default_options, $options);
 
 	<ul>
 		<li><a href="mailto:<?php echo rawurlencode(sprintf('%s <%s>', $dancer->get_name(), $dancer->get_email())); ?>"><?php echo $dancer->get_email(); ?></a></li>
+<?php if ($dancer->get_mobile_phone()): ?>
+		<li><?php echo esc_html($dancer->get_mobile_phone()); ?></li>
+<?php endif; ?>
 		<li><strong><?php _e('Position:', 'nsevent'); ?></strong> <?php echo esc_html($dancer->get_position()); ?></li>
 <?php if ($event->has_levels()): ?>
 		<li><strong><?php _e('Level:', 'nsevent'); ?></strong> <?php echo esc_html($event->get_level_for_index($dancer->get_level())); ?></li>
