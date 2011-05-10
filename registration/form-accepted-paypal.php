@@ -26,10 +26,10 @@
 <?php endif; ?>
 <?php $i = (!empty($options['paypal_fee'])) ? 2 : 1; ?>
 <?php foreach (NSEvent::$validated_items as $item): ?>
-							<?php NSEvent_FormInput::hidden('item_name_'.$i, array('value' => $item->name)); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('amount_'.$i,    array('value' => $dancer->registrations($item->get_id())->price)); echo "\n"; ?>
+							<?php NSEvent_FormInput::hidden('item_name_'.$i, array('value' => $item->get_name())); echo "\n"; ?>
+							<?php NSEvent_FormInput::hidden('amount_'.$i,    array('value' => $dancer->get_price_for_registered_item($item->get_id()))); echo "\n"; ?>
 <?php 	if (isset($_POST['item_meta'][$item->get_id()])): ?>
-							<?php NSEvent_FormInput::hidden('on0_'.$i,      array('value' => $item->meta_label())); echo "\n"; ?>
+							<?php NSEvent_FormInput::hidden('on0_'.$i,      array('value' => $item->get_meta_label())); echo "\n"; ?>
 							<?php NSEvent_FormInput::hidden('os0_'.$i,      array('value' => ucfirst($_POST['item_meta'][$item->get_id()]))); echo "\n"; ?>
 <?php 	endif; ?>
 <?php $i++; ?>
