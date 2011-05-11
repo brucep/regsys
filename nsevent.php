@@ -23,7 +23,7 @@ Except as contained in this notice, the name of the author not be used in advert
 if (!class_exists('NSEvent')):
 class NSEvent
 {
-	static public $event, $vip, $validated_package_id = 0, $validated_items = array();
+	static private $event, $options, $vip, $validated_package_id = 0, $validated_items = array();
 	static private $default_options = array(
 		'current_event_id'           => '',
 		'registration_testing'       => false,
@@ -381,8 +381,7 @@ class NSEvent
 			# Stop the `WP Super Cache` plugin from caching registration pages
 			define('DONOTCACHEPAGE', true);
 			
-			$options = get_option('nsevent');
-			$options = array_merge(self::$default_options, $options); # Make sure keys exists
+			$options = self::$options = array_merge(self::$default_options, get_option('nsevent')); # Make sure keys exists
 			
 			require dirname(__FILE__).'/includes/form-input.php';
 			require dirname(__FILE__).'/includes/form-validation.php';
@@ -421,8 +420,8 @@ class NSEvent
 				NSEvent_FormValidation::add_rules(array(
 					'first_name'      => 'trim|required|max_length[100]|ucfirst',
 					'last_name'       => 'trim|required|max_length[100]|ucfirst',
-					'confirm_email'   => 'trim|valid_email|max_length[100]',
 					'email'           => 'trim|valid_email|max_length[100]|NSEvent::validate_email_address',
+					'confirm_email'   => 'trim|valid_email|max_length[100]',
 					'mobile_phone'    => 'trim|required|max_length[30]',
 					'position'        => 'intval|in[1,2]|NSEvent::validate_position',
 					'status'          => 'NSEvent::validate_status',
@@ -668,7 +667,16 @@ class NSEvent
 	static public function validate_email_address($email)
 	{
 		if (isset($_POST['confirm_email']) and $_POST['confirm_email'] == $email) {
-			return true;
+			if (self::$options['registration_testing'] or empty($_POST['first_name']) or empty($_POST['last_name'])) {
+				return true;
+			}
+			elseif (!self::$event->get_dancers_where(array(':first_name' => $_POST['first_name'], ':last_name' => $_POST['last_name'], ':email' => $email))) {
+				return true;
+			}
+			else {
+				NSEvent_FormValidation::set_error('email', sprintf(__('Someone has already registered with this information. If you have already registered and need to change your information, then please reply to your confirmation email. For any other concerns, email <a href="mailto:%1$s">%1$s</a>.', 'nsevent'), self::$options['confirmation_email_address']));
+				return false;
+			}
 		}
 		else {
 			NSEvent_FormValidation::set_error('email', __('Your email addresses do not match.', 'nsevent'));
