@@ -33,7 +33,7 @@ class NSEvent_FormInput
 			self::_set_radio_or_checkbox($name, $args['value'], $args['checked']),
 			(isset($args['disabled']) and $args['disabled']) ? ' disabled="disabled"' : '',
 			!isset($args['label']) ? '' : '<label>',
-			!isset($args['label']) ? '' : sprintf('&nbsp;%s</label>', htmlspecialchars($args['label'], ENT_NOQUOTES, 'UTF-8')));
+			!isset($args['label']) ? '' : sprintf('&nbsp;%s</label>', $args['label']));
 	}
 	
 	static public function hidden($name, array $args = array())
@@ -88,7 +88,7 @@ class NSEvent_FormInput
 			!isset($args['id']) ? '' : sprintf(' id="%s"', htmlspecialchars($args['id'], ENT_QUOTES, 'UTF-8')),
 			self::_set_radio_or_checkbox($name, $args['value'], $args['default']),
 			!isset($args['label']) ? '' : '<label>',
-			!isset($args['label']) ? '' : sprintf('%s</label>', htmlspecialchars($args['label'], ENT_NOQUOTES, 'UTF-8')),
+			!isset($args['label']) ? '' : sprintf('%s</label>', $args['label']),
 			(isset($args['disabled']) and $args['disabled']) ? ' disabled="disabled"' : '');
 	}
 	
@@ -118,11 +118,11 @@ class NSEvent_FormInput
 	{
 		if (isset($args['label'])) {
 			if ($args['label'] === true) {
-				$args['label'] = ucwords(str_replace('_', ' ', $name));
+				$args['label'] = htmlspecialchars(ucwords(str_replace('_', ' ', $name)), ENT_QUOTES, 'UTF-8');
 			}
 			
 			$args['label'] = sprintf('<label for="%2$s">%1$s</label>',
-				htmlspecialchars($args['label'], ENT_NOQUOTES, 'UTF-8', false),
+				$args['label'],
 				htmlspecialchars($name, ENT_QUOTES, 'UTF-8'));
 		}
 		
