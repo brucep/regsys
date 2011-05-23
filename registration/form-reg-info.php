@@ -211,45 +211,29 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<table cellspacing="0">
 								<thead>
 									<tr>
-										<th width="25%"><?php _e('Shirt Style', 'nsevent'); ?></th>
-<?php 	if (!$vip): ?>
-<?php 		if ($event->is_early_bird()): ?>
-										<th><?php _e('Early Bird', 'nsevent'); ?></th>
-<?php 		endif; ?>
-										<th><?php _e('Preregistered', 'nsevent'); ?></th>
-										<th><?php _e('At Door', 'nsevent'); ?></th>
-<?php 	else: ?>
-										<th><?php _e('Preregistered', 'nsevent'); ?></th>
-<?php 	endif; ?>
-										<th width="42%"><?php _e('Size', 'nsevent'); ?></th>
+										<th width="30%"><?php _e('Shirt Style', 'nsevent'); ?></th>
+										<th width="15%"><?php _e('Preregistered', 'nsevent'); ?></th>
+										<th width="10%"><?php _e('At Door', 'nsevent'); ?></th>
+										<th width="45%"><?php _e('Size', 'nsevent'); ?></th>
 									</tr>
 								</thead>
 								<tbody>
 <?php 	foreach ($shirts as $item):  if ($item->get_date_expires()) continue; ?>
-									<?php NSEvent_FormValidation::get_error('item_'.$item->get_id(), sprintf('<tr class="nsevent-validation-error"><td colspan="">', ($event->get_date_early_end()) ? 5 : 4), '</td></tr>'); echo "\n"; ?>
+									<?php NSEvent_FormValidation::get_error('item_'.$item->get_id(), '<tr class="nsevent-validation-error"><td colspan="4">', '</td></tr>'); echo "\n"; ?>
 									<tr>
 										<td><?php echo esc_html($item->get_name()); ?></td>
 <?php 			if (!$vip): ?>
-<?php 				if ($event->is_early_bird()): ?>
 										<td class="price">
-											<div class="price_early"><?php printf('$%d', $item->get_price_for_discount(false, true)); ?></div>
-											<div class="price_early_discount1 no_show"><?php printf('$%d', $item->get_price_for_discount(1, true)); ?></div>
-											<div class="price_early_discount2 no_show"><?php printf('$%d', $item->get_price_for_discount(2, true)); ?></div>
-										</td>
-<?php 				endif; ?>
-										<td class="price">
-											<div class="price_prereg"><?php printf('$%d', $item->get_price_for_discount(false)); ?></div>
-											<div class="price_prereg_discount1 no_show"><?php printf('$%d', $item->get_price_for_discount(1)); ?></div>
-											<div class="price_prereg_discount2 no_show"><?php printf('$%d', $item->get_price_for_discount(2)); ?></div>
+											<div class="price_prereg"><?php printf('$%d', $item->get_price_for_prereg()); ?></div>
+											<div class="price_prereg_discount no_show"><?php printf('$%d', $item->get_price_for_prereg(true)); ?></div>
 										</td>
 										<td class="price">
-											<div class="price_door"><?php echo ($item->get_price_for_discount(false, 'door')) ? sprintf('$%d', $item->get_price_for_discount(false, 'door')) : '&mdash;'; ?></div>
-											<div class="price_door_discount1 no_show"><?php echo ($item->get_price_for_discount(1, 'door')) ? sprintf('$%d', $item->get_price_for_discount(1, 'door')) : '&mdash;'; ?></div>
-											<div class="price_door_discount2 no_show"><?php echo ($item->get_price_for_discount(2, 'door')) ? sprintf('$%d', $item->get_price_for_discount(2, 'door')) : '&mdash;'; ?></div>
+											<div class="price_door"><?php echo ($item->get_price_at_door()) ? sprintf('$%d', $item->get_price_at_door()) : '&mdash;'; ?></div>
+											<div class="price_door_discount no_show"><?php echo ($item->get_price_at_door(true)) ? sprintf('$%d', $item->get_price_at_door(true)) : '&mdash;'; ?></div>
 										</td>
 <?php 			else: ?>
 										<td class="price">
-											<div class="price_vip">$<?php printf('$%d', $item->get_price_for_discount('vip')); ?></div>
+											<div class="price_vip">$<?php printf('$%d', $item->get_price_for_vip('vip')); ?></div>
 										</td>
 <?php 			endif; ?>
 										<td class="size">
