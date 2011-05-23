@@ -11,14 +11,14 @@ if ($event->has_levels()) {
 	$database = self::get_database_connection();
 	
 	foreach ($event->get_levels() as $index => $level) {
-		$lists['Levels (Total)'][$level] = $event->count_dancers(array(':level' => $index));
+		$lists['Levels (All Dancers)'][$level] = $event->count_dancers(array(':level' => $index));
 		
-		$lists['Levels (Class Balance)'][$level] = sprintf('%d leads, %d follows',
+		$lists['Levels (Dancers in Classes)'][$level] = sprintf('%d leads, %d follows',
 			$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`meta` = "count_for_classes"', array(':event_id' => $event->get_id(), ':level' => $index, ':position' => 1))->fetchColumn(),
 			$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`meta` = "count_for_classes"', array(':event_id' => $event->get_id(), ':level' => $index, ':position' => 2))->fetchColumn());
 	}
 	
-	$lists['Levels (Total)'] = array_filter($lists['Levels (Total)']);
+	$lists['Levels (All Dancers)'] = array_filter($lists['Levels (All Dancers)']);
 	unset($database);
 }
 
