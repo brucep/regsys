@@ -409,13 +409,10 @@ class NSEvent
 			$vip = self::$vip = ($event->has_vip() and (isset($_GET['vip']) or isset($_POST['vip'])));
 			
 			
-			# Don't allow registration for certain conditions
-			if (time() > $event->get_date_paypal_prereg_end() and time() > $event->get_date_mail_prereg_end() and !$vip) {
-				require dirname(__FILE__).'/registration/at-the-door.php';
+			# Display page content when registration is not available.
+			if ((time() > $event->get_date_paypal_prereg_end() and time() > $event->get_date_mail_prereg_end() and !$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
+				get_template_part('page');
 				return;
-			}
-			elseif ($options['registration_testing'] and !current_user_can('edit_pages')) {
-				throw new Exception(__('Preregistration is currently unavailable; Check back soon&hellip;', 'nsevent'));
 			}
 			
 			
