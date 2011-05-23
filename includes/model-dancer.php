@@ -44,22 +44,26 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		
 	public function add($event_id)
 	{
-		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level, :status, :date_registered, :payment_method, :payment_discount, DEFAULT, DEFAULT, :mobile_phone, :note)', array(
-			':event_id'          => $event_id,
+		$this->date_registered = time();
+		$this->event_id = $event_id;
+		
+		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level, :status, :date_registered, :payment_method, :payment_discount, :payment_confirmed, :payment_owed, :mobile_phone, :note)', array(
+			':event_id'          => $this->event_id,
 			':first_name'        => $this->first_name,
 			':last_name'         => $this->last_name,
 			':email'             => $this->email,
 			':position'          => $this->position,
 			':level'             => $this->level,
 			':status'            => $this->status,
-			':date_registered'   => time(),
+			':date_registered'   => $this->date_registered,
 			':payment_method'    => $this->payment_method,
 			':payment_discount'  => $this->payment_discount,
+			':payment_confirmed' => (int) $this->payment_confirmed,
+			':payment_owed'      => (int) $this->payment_owed,
 			':mobile_phone'      => (string) $this->mobile_phone,
 			':note'              => (string) $this->note,
 			));
 		
-		$this->event_id = $event_id;
 		$this->id = self::$database->lastInsertID();
 	}
 	
@@ -157,7 +161,30 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	{
 		return $this->last_name;
 	}
+	
+	public function get_date_mail_postmark_by($number_days, $format = false)
+	{
+		$timestamp = strtotime(sprintf('+%d days', $number_days), $this->date_registered);
 		
+		$day_of_week = date('N', $timestamp);
+		
+		if ($day_of_week == 7) {
+			$timestamp = strtotime('+1 day', $timestamp);
+		}
+		elseif ($day_of_week == 6) {
+			$timestamp = strtotime('+2 days', $timestamp);
+		}
+		
+		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
+	}
+	
+	public function get_date_paypal_payment_by($number_days, $format = false)
+	{
+		$timestamp = strtotime(sprintf('+%d days', $number_days), $this->date_registered);
+		
+		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
+	}
+	
 	public function get_date_registered($format = false)
 	{
 		return ($format === false) ? (int) $this->date_registered : date($format, $this->date_registered);
@@ -355,6 +382,16 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	public function is_housing_provider()
 	{
 		return ($this->housing_type == 2);
+	}
+	
+	public function is_student()
+	{
+		return ($this->status != 2 and $this->payment_discount == 1);
+	}
+	
+	public function is_member()
+	{
+		return ($this->status != 2 and $this->payment_discount == 2);
 	}
 	
 	public function is_volunteer()

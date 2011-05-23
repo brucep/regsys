@@ -27,12 +27,19 @@
 				<td>
 					<fieldset>
 						<legend class="screen-reader-text"><span><?php _e('Registration Testing', 'nsevent'); ?></span></legend>
-						<label for="enable_xmlrpc">
+						<label>
 							<input name="nsevent[registration_testing]" type="checkbox" value="1"<?php if (isset($options['registration_testing']) and $options['registration_testing']) echo ' checked="checked"'; ?>>
 							<?php _e('Only "capable" users will be able to access the registration form.', 'nsevent'); ?>
 						</label>
 						<br>
 					</fieldset>
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row"><?php _e('Postmark Within', 'nsevent'); ?></th>
+				<td>
+					<span>Payments must be postmarked within <input type="text" name="nsevent[postmark_within]" value="<?php echo (int) $options['postmark_within']; ?>" class="regular-text" style="width: 3em"> days.</span>
 				</td>
 			</tr>
 		</table>

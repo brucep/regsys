@@ -13,16 +13,11 @@ class NSEvent_Model_Item extends NSEvent_Model
 	        $note,
 	        $openings,
 	        $preregistration,
-	        $price_early,
-	        $price_early_discount1,
-	        $price_early_discount2,
 	        $price_prereg,
-	        $price_prereg_discount1,
-	        $price_prereg_discount2,
 	        $price_door,
-	        $price_door_discount1,
-	        $price_door_discount2,
+	        $price_discount,
 	        $price_vip,
+	        $price_scaled,
 	        $registered_dancers,
 	        $registered_meta,
 	        $registered_price,
@@ -88,51 +83,36 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 	}
 	
-	public function get_price_for_discount($discount = false, $early = false)
+	public function get_price_at_door()
 	{
-		if ($discount === 'vip') {
-			$price = $this->price_vip;
-		}
-		elseif ($early === true) {
-			if ($discount === 1) {
-				$price = $this->price_early_discount1;
-			}
-			elseif ($discount === 2) {
-				$price = $this->price_early_discount2;
-			}
-			else {
-				$price = $this->price_early;
-			}
-		}
-		elseif ($early === 'door') {
-			if ($discount === 1) {
-				$price = $this->price_door_discount1;
-			}
-			elseif ($discount === 2) {
-				$price = $this->price_door_discount2;
-			}
-			else {
-				$price = $this->price_door;
-			}
+		return (int) $this->price_door;
+	}
+	
+	public function get_price_for_prereg($discount = false)
+	{
+		if ($this->type != 'package') {
+			$price = $this->price_prereg;
 		}
 		else {
-			if ($discount === 1) {
-				$price = $this->price_prereg_discount1;
+			if (!isset($this->price_scaled)) {
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->id))->fetchColumn();
+				
+				$this->price_scaled = self::$database->query('SELECT scale_price FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers <= scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->id, ':number_dancers' => $number_dancers))->fetchColumn();
 			}
-			elseif ($discount === 2) {
-				$price = $this->price_prereg_discount2;
-			}
-			else {
-				$price = $this->price_prereg;
-			}
+			
+			$price = !empty($this->price_scaled) ? $this->price_scaled : $this->price_prereg;
 		}
 		
-		if (isset($price)) {
-		 	return (int) $price;
+		if ($discount) {
+			$price = $price - $this->price_discount;
 		}
-		else {
-		 	throw new Exception(__('Unable to get the price for the specified discount.', 'nsevent'));
-		}
+		
+		return (int) $price;
+	}
+	
+	public function get_price_for_vip()
+	{
+		return (int) $this->price_vip;
 	}
 	
 	public function get_registered_dancers()
@@ -215,26 +195,27 @@ class NSEvent_Model_Item extends NSEvent_Model
 	
 	private function count_registrations_where(array $where = array(), $join_table = false)
 	{
-		$where = array_merge(array(':event_id' => $this->event_id, ':item_id' => $this->id), $where);
-		$query = array();
+		$where[':item_id'] = $this->id;
+		$query = array('%1$s_registrations.`event_id` = :event_id');
 		
 		foreach ($where as $field => $value) {
 			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
 		}
 		
 		$query = ' WHERE '.implode(' AND', $query);
+		$where[':event_id'] = $this->event_id;
 		
 		switch ($join_table) {
 			case 'items':
-				$query = 'JOIN %1$s_items ON %1$s_items.`id` = %1$s_registrations.`item_id`'.$query;
+				$query = ' JOIN %1$s_items ON %1$s_items.`id` = %1$s_registrations.`item_id`'.$query;
 				break;
 			
 			case 'dancers':
-				$query = 'JOIN %1$s_dancers ON %1$s_dancers.`id` = %1$s_registrations.`dancer_id`'.$query;
+				$query = ' JOIN %1$s_dancers ON %1$s_dancers.`id` = %1$s_registrations.`dancer_id`'.$query;
 				break;
 		}
 		
-		$result = self::$database->query('SELECT COUNT(event_id) FROM %1$s_registrations '.$query, $where)->fetchColumn();
+		$result = self::$database->query('SELECT COUNT(*) FROM %1$s_registrations'.$query, $where)->fetchColumn();
 		return ($result !== false) ? (int) $result : false;
 	}
 }

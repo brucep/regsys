@@ -3,7 +3,7 @@
 				<div id="nsevent-registration-form-confirm" <?php post_class('nsevent-registration-form'); ?>>
 					<h1 class="entry-title"><?php printf(__('Confirm Registration for %s', 'nsevent'), esc_html($event->get_name())); ?></h1>
 
-					<form action="<?php echo get_permalink(); ?>" method="post" <form action="<?php echo get_permalink(); ?>" method="post" class="<?php echo $early_class; if ($vip) { echo ' vip'; } ?>">
+					<form action="<?php echo get_permalink(); ?>" method="post" <form action="<?php echo get_permalink(); ?>" method="post"<?php if ($vip) echo ' class="vip"'; ?>>
 						<div class="field"><span class="label"><?php _e('Name', 'nsevent'); ?>:</span> <?php echo esc_html($dancer->get_name()); ?></div>
 						<?php NSEvent_FormInput::hidden('first_name'); echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('last_name'); echo "\n"; ?>
@@ -22,12 +22,13 @@
 						<?php NSEvent_FormInput::hidden('level'); echo "\n"; ?>
 <?php endif; ?>
 
-<?php if ($event->has_discount() and !$vip): ?>
-<?php 	if ($_POST['payment_discount'] != 0): ?>
-						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); echo esc_html($event->get_discount_name($_POST['payment_discount'])); ?></div>
-<?php 	endif; ?>
+<?php if ($dancer->is_member()): ?>
+						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); printf('Member of %s.', $event->get_discount_org_name()); ?></div>
 						<?php NSEvent_FormInput::hidden('payment_discount'); echo "\n"; ?>
-<?php endif; ?>			
+<?php elseif ($dancer->is_student()): ?>
+						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); ?>Student</div>
+						<?php NSEvent_FormInput::hidden('payment_discount'); echo "\n"; ?>
+<?php endif; ?>
 
 <?php if ($event->has_volunteers() and $dancer->is_volunteer() and !$vip): ?>
 						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); _e("I'm interested in volunteering.", 'nsevent'); printf('&nbsp;(%s)', esc_html($_POST['volunteer_phone'])); ?></div>
@@ -67,7 +68,9 @@
 <?php 	endforeach; ?>
 <?php endif; ?>
 
+<?php if ($total_cost > 0): ?>
 						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); echo ($_POST['payment_method'] === 'PayPal') ? _e('PayPal', 'nsevent') : _e('Mail', 'nsevent'); ?></div>
+<?php endif; ?>
 						<div class="field"><span class="label"><?php _e('Total Amount', 'nsevent'); ?>:</span> <?php printf('$%d', $total_cost); ?></div>
 						<?php NSEvent_FormInput::hidden('payment_method'); echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('confirmed'); echo "\n"; ?>

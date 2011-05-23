@@ -34,6 +34,7 @@ class NSEvent
 		'confirmation_email_bcc'     => '',
 		'mailing_address'            => '',
 		'payable_to'                 => '',
+		'postmark_within'            => 7,
 		);
 	
 	private function __clone() {}
@@ -114,6 +115,13 @@ class NSEvent
 		
 		if (isset($input['payable_to'])) {
 			$options['payable_to'] = trim($input['payable_to']);
+		}
+		
+		if (isset($input['postmark_within'])) {
+			$options['postmark_within'] = (int) $input['postmark_within'];
+		}
+		else {
+			$options['postmark_within'] = 7;
 		}
 		
 		$options['registration_testing']   = isset($input['registration_testing']);
@@ -263,27 +271,26 @@ class NSEvent
 				switch ($table):
 					case 'events':
 						$query = sprintf("CREATE TABLE `%s` (
-							`id`                 int(10) unsigned NOT NULL auto_increment,
-							`name`               varchar(255) NOT NULL,
-							`date_early_end`     int(10) unsigned NOT NULL default '0',
-							`date_prereg_end`    int(10) unsigned NOT NULL default '0',
-							`date_refund_end`    int(10) unsigned NOT NULL default '0',
-							`date_payment_by`    int(10) unsigned NOT NULL default '0',
-							`discount1`          varchar(255) NOT NULL,
-							`discount2`          varchar(255) NOT NULL,
-							`discount_label`     varchar(255) NOT NULL,
-							`discount_note`      varchar(255) NOT NULL,
-							`has_vip`            tinyint(1) unsigned NOT NULL default '0',
-							`has_volunteers`     tinyint(1) unsigned NOT NULL default '0',
-							`has_housing`        tinyint(1) unsigned NOT NULL default '0',
-							`housing_nights`     tinyint(2) unsigned NOT NULL default '1',
-							`limit_per_position` smallint(5) unsigned NOT NULL default '0',
-							`levels`             varchar(255) NOT NULL,
-							`shirt_description`  text NOT NULL,
+							`id`                     int(10) unsigned NOT NULL auto_increment,
+							`name`                   varchar(255) NOT NULL,
+							`date_mail_prereg_end`   int(10) unsigned NOT NULL default '0',
+							`date_paypal_prereg_end` int(10) unsigned NOT NULL default '0',
+							`date_refund_end`        int(10) unsigned NOT NULL default '0',
+							`has_discount_member`    tinyint(1) unsigned NOT NULL DEFAULT '0',
+							`has_discount_student`   tinyint(1) unsigned NOT NULL DEFAULT '0',
+							`has_vip`                tinyint(1) unsigned NOT NULL default '0',
+							`has_volunteers`         tinyint(1) unsigned NOT NULL default '0',
+							`has_housing`            tinyint(1) unsigned NOT NULL default '0',
+							`housing_nights`         tinyint(2) unsigned NOT NULL default '1',
+							`limit_discount_student` tinyint(3) unsigned NOT NULL default '0',
+							`limit_per_position`     smallint(5) unsigned NOT NULL default '0',
+							`discount_org_name`      varchar(255) NOT NULL DEFAULT '',
+							`levels`                 varchar(255) NOT NULL,
+							`shirt_description`      text NOT NULL,
 							PRIMARY KEY  (`id`)
 							);", $table_name);
 						break;
-				
+					
 					case 'items':
 						$query = sprintf("CREATE TABLE `%s` (
 							`event_id`               int(10) unsigned NOT NULL,
@@ -381,6 +388,8 @@ class NSEvent
 			# Stop the `WP Super Cache` plugin from caching registration pages
 			define('DONOTCACHEPAGE', true);
 			
+			@date_default_timezone_set(get_option('timezone_string'));
+			
 			$options = self::$options = array_merge(self::$default_options, get_option('nsevent')); # Make sure keys exists
 			
 			require dirname(__FILE__).'/includes/form-input.php';
@@ -399,14 +408,9 @@ class NSEvent
 			
 			$vip = self::$vip = ($event->has_vip() and (isset($_GET['vip']) or isset($_POST['vip'])));
 			
-			$early_class = $event->is_early_bird() ? 'early-bird' : 'not-early-bird';
-			
-			
-			// TODO: How to handle dates? Specify times as a date and assume end of that day, or specify specific time in field?
-			// Idea: Specify specific time, and if (during event edit) time is 00:00:00, then automatically change to 11:59:59?
 			
 			# Don't allow registration for certain conditions
-			if (time() > $event->get_date_prereg_end() and !$vip) {
+			if (time() > $event->get_date_paypal_prereg_end() and time() > $event->get_date_mail_prereg_end() and !$vip) {
 				require dirname(__FILE__).'/registration/at-the-door.php';
 				return;
 			}
@@ -440,17 +444,9 @@ class NSEvent
 				}
 				
 				# Discount
-				if ($event->has_vip() and $vip === true) {
-					$_POST['payment_discount'] = 'vip';
-				}
-				elseif ($event->has_discount()) {
-					NSEvent_FormValidation::add_rule('payment_discount', sprintf('intval|in[0%s%s]',
-						$event->has_discount(1) ? ',1' : '',
-						$event->has_discount(2) ? ',2' : ''));
-				}
-				else {
-					$_POST['payment_discount'] = 0;
-				}
+				NSEvent_FormValidation::add_rule('payment_discount', sprintf('intval|in[0%s%s]',
+					($event->has_discount_student() and $event->has_discount_student_openings()) ? ',1' : '',
+					$event->has_discount_member() ? ',2' : ''));
 				
 				# Housing
 				if ($event->has_housing()) {
@@ -479,21 +475,43 @@ class NSEvent
 			}
 			else {
 				# Used for confirmation page and email
-				$package_cost      = (self::$validated_package_id === 0) ? 0 : self::$validated_items[self::$validated_package_id]->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird());
+				$package_cost      = 0;
 				$competitions      = array();
 				$competitions_cost = 0;
 				$shirts            = array();
 				$shirts_cost       = 0;
 				$total_cost        = 0;
 				
-				foreach (self::$validated_items as $item) {
-					$total_cost += $item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird());;
+				if ($vip) {
+					if (self::$validated_package_id !== 0) {
+						$package_cost = self::$validated_items[self::$validated_package_id]->get_price_for_vip();
+					}
+					
+					foreach (self::$validated_items as $item) {
+						$total_cost += $item->get_price_for_vip();
+					}
+				}
+				else {
+					if (self::$validated_package_id !== 0) {
+						$package_cost = self::$validated_items[self::$validated_package_id]->get_price_for_prereg($_POST['payment_discount']);
+					}
+					
+					foreach (self::$validated_items as $item) {
+						$total_cost += $item->get_price_for_prereg($_POST['payment_discount']);
+					}
+				}
+				
+				if ($total_cost == 0) {
+					$_POST['payment_method'] = 'Mail';
 				}
 				
 				
 				# Prep info before creating new dancer object
 				$dancer_data = $_POST;
 				unset($dancer_data['items'], $dancer_data['item_meta'], $dancer_data['confirmed'], $dancer_data['confirm_email']);
+				
+				$dancer_data['payment_owed'] = $total_cost;
+				$dancer_data['payment_confirmed'] = ($total_cost == 0) ? 1 : 0;
 				
 				if ($options['registration_testing']) {
 					$dancer_data['note'] = __('TEST', 'nsevent');
@@ -533,7 +551,12 @@ class NSEvent
 					
 					# Add registrations				
 					foreach (self::$validated_items as $item) {
-						$item_price = $item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird());
+						if ($vip) {
+							$item_price = $item->get_price_for_vip();
+						}
+						else {
+							$item_price = $item->get_price_for_prereg($_POST['payment_discount']);
+						}
 						
 						if ($item->get_type() == 'competition') {
 							$competitions[$item->get_id()] = $item;
@@ -732,7 +755,7 @@ class NSEvent
 				
 				case 'partner_name':
 					if (empty($_POST['item_meta'][$item->get_id()])) {
-						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Your partner\'s name must be specified for %s.', 'nsevent'), $item->name));
+						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Your partner\'s name must be specified for %s.', 'nsevent'), $item->get_name()));
 						$items_did_validate = false;
 						continue 2;
 					}
@@ -744,7 +767,7 @@ class NSEvent
 				
 				case 'team_members':
 					if (empty($_POST['item_meta'][$item->get_id()])) {
-						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Team members must be specified for %s.', 'nsevent'), $item->name));
+						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Team members must be specified for %s.', 'nsevent'), $item->get_name()));
 						$items_did_validate = false;
 						continue 2;
 					}
@@ -753,7 +776,7 @@ class NSEvent
 						$_POST['item_meta'][$item->get_id()] = ucwords(preg_replace(array("/[\r\n]+/", "/\n+/", "/\r+/", '/,([^ ])/', '/, , /'), ', $1', trim($_POST['item_meta'][$item->get_id()])));
 						
 						if (strlen($_POST['item_meta'][$item->get_id()]) > 65536) {
-							NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('%s is too long.', 'nsevent'), sprintf(__('Team members list for %s', 'nsevent'), $item->name)));
+							NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('%s is too long.', 'nsevent'), sprintf(__('Team members list for %s', 'nsevent'), $item->get_name())));
 							$items_did_validate = false;
 							continue 2;
 						}
@@ -774,7 +797,7 @@ class NSEvent
 			}
 			
 			# Check openings again, in case they have filled since the form was first displayed to the user
-			if (($item->get_meta() != 'position' and !$item->count_openings()) or ($item->get_meta() == 'position' and !$item->get_openings($_POST['item_meta'][$item->get_id()]))) {
+			if (($item->get_meta() != 'position' and !$item->count_openings()) or ($item->get_meta() == 'position' and !$item->count_openings($_POST['item_meta'][$item->get_id()]))) {
 				NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('There are no longer any openings for %s.', 'nsevent'), $item->name));
 				$items_did_validate = false;
 				continue;

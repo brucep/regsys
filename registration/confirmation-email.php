@@ -69,10 +69,9 @@ PACKAGE
 -------
 
 <?php
-printf('- $%1$d :: %2$s%3$s',
+printf('+ $%1$d :: %2$s',
 	$package_cost,
-	self::$validated_items[self::$validated_package_id]->get_name(),
-	($event->get_date_early_end() and $dancer->get_date_registered() <= $event->get_date_early_end()) ? ' [Early Bird]' : '');
+	self::$validated_items[self::$validated_package_id]->get_name());
 ?>
 
 
@@ -83,8 +82,8 @@ COMPETITIONS
 
 <?php
 	foreach ($competitions as $item) {
- 		printf('- $%1$d :: %2$s%3$s'."\n",
-			$item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird()),
+ 		printf('+ $%1$d :: %2$s%3$s'."\n",
+			$dancer->is_vip() ? $item->get_price_for_vip() : $item->get_price_for_prereg($_POST['payment_discount']),
 			$item->get_name(),
 			(isset($_POST['item_meta'][$item->get_id()])) ? sprintf(' (%s)', ucfirst($_POST['item_meta'][$item->get_id()])) : '');
  	}
@@ -98,8 +97,8 @@ SHIRTS
 
 <?php
 	foreach ($shirts as $item) {
- 		printf('- $%1$d :: %2$s%3$s'."\n",
-			$item->get_price_for_discount($_POST['payment_discount'], $event->is_early_bird()),
+ 		printf('+ $%1$d :: %2$s%3$s'."\n",
+			$dancer->is_vip() ? $item->get_price_for_vip() : $item->get_price_for_prereg($_POST['payment_discount']),
 			$item->get_name(),
 			(isset($_POST['item_meta'][$item->get_id()])) ? sprintf(' (%s)', ucfirst($_POST['item_meta'][$item->get_id()])) : '');
  	}
@@ -115,23 +114,23 @@ TOTALS
 <?php
 
 	if (self::$validated_package_id) {
-		printf('- $%1$d :: Package'."\n", $package_cost);
+		printf('+ $%1$d :: Package'."\n", $package_cost);
 	}
 
 	if ($competitions) {
-		printf('- $%1$d :: Competitions'."\n", $competitions_cost);
+		printf('+ $%1$d :: Competitions'."\n", $competitions_cost);
 	}
 
 	if ($shirts) {
-		printf('- $%1$d :: Shirts'."\n", $shirts_cost);
+		printf('+ $%1$d :: Shirts'."\n", $shirts_cost);
 	}
 
 	if ($dancer->get_payment_method() == 'PayPal' and !empty($options['paypal_fee'])) {
-		printf('- $%1$d  :: PayPal Processing Fee'."\n", $options['paypal_fee']);
+		printf('+ $%1$d  :: PayPal Processing Fee'."\n", $options['paypal_fee']);
 		$total_cost = $total_cost + (int) $options['paypal_fee'];
 	}
 
-	printf(' - $%1$d :: Grand Total', $total_cost);
+	printf('+ $%1$d :: Grand Total', $total_cost);
 
 
 	if ($dancer->get_payment_method() == 'Mail') {
@@ -144,12 +143,15 @@ You still need to write a check to "%3\$s" for $%1\$d for mail it to:
 
 %4\$s
 
-*REFUNDS ARE NOT ALLOWED AFTER %2\$s.*
+Your check must be postmarked by %2\$s.
+
+*REFUNDS ARE NOT ALLOWED AFTER %5\$s.*
 EOD
 			, 'nsevent'),
 			$dancer->get_price_total(),
-			date('F jS', $event->get_date_postmark_by()),
+			$dancer->get_date_mail_postmark_by($options['postmark_within'], 'F jS'),
 			$options['payable_to'],
-			$options['mailing_address']);
+			$options['mailing_address'],
+			$event->get_date_refund_end('F jS'));
 	}
 endif;

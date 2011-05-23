@@ -13,18 +13,19 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 						<?php the_content(); ?>
 					</div>
 
-					<form action="<?php echo get_permalink(); ?>" method="post" class="<?php echo $early_class; if ($vip) { echo ' vip'; } ?>">
+					<form action="<?php echo get_permalink(); ?>" method="post"<?php if ($vip) echo ' class="vip"'; ?>>
 <?php if (!$vip): ?>
 						<div id="pricing-dates">
-<?php 	if ($event->get_date_early_end()): ?>
-<?php   	if ($event->is_early_bird()): ?>
-								<?php printf(__('Early Bird prices end at %s on %s.', 'nsevent'), $event->get_date_early_end('h:i A (T)'), $event->get_date_early_end('F jS')); ?><br />
-<?php   	else: ?>
-								<?php _e('Early Bird prices are no longer available.', 'nsevent'); ?><br />
-<?php   	endif; ?>
+<?php 	if (time() <= $event->get_date_mail_prereg_end()): ?>
+							<div><?php printf(__('Preregistration by mail is available until %s on %s.', 'nsevent'), $event->get_date_mail_prereg_end('h:i A (T)'), $event->get_date_mail_prereg_end('F jS')); ?></div>
+<?php 	else: ?>
+							<div><?php _e('Preregistration by mail is no longer available.', 'nsevent'); ?></div>
 <?php 	endif; ?>
-							<?php printf(__('Preregistration prices end at %s on %s.', 'nsevent'), $event->get_date_prereg_end('h:i A (T)'), $event->get_date_prereg_end('F jS')); ?><br />
-							<?php printf(__('(Refunds are not available after %s.)', 'nsevent'), $event->get_date_refund_end('F jS')); ?>
+<?php 	if (time() <= $event->get_date_paypal_prereg_end()): ?>
+							<div><?php printf(__('Preregistration by PayPal is available until %s on %s.', 'nsevent'), $event->get_date_paypal_prereg_end('h:i A (T)'), $event->get_date_paypal_prereg_end('F jS')); ?></div>
+<?php 	else: ?>
+							<div><?php _e('Preregistration by PayPal is no longer available.', 'nsevent'); ?></div>
+<?php 	endif; ?>
 						</div>
 <?php endif; ?>
 
@@ -74,28 +75,27 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							</div>
 <?php endif; # levels ?>
 
-<?php if ($event->has_discount() and !$vip): ?>
+<?php if (($event->has_discount_member() or $event->has_discount_student()) and !$vip): ?>
 							<?php echo NSEvent_FormValidation::get_error('payment_discount'), "\n"; ?>
 							<div class="field" id="discount">
-								<div class="field-label"><?php if ($event->discount_label) echo esc_html($event->discount_label); else _e('Member or Student?', 'nsevent'); echo ' ', __('(Prices will adjust automatically.)', 'nsevent'); ?></div>
-<?php 	if ($event->discount1): ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 1, 'id' => 'discount1', 'label' => $event->discount1)); ?></div>
+								<div class="field-label">Discount<script type="text/javascript">document.write(' (preregistration prices will adjust automatically)');</script></div>
+<?php 	if ($event->has_discount_member()): ?>
+								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 2, 'id' => 'discount_member', 'label' => sprintf('I am a member of %s.', $event->get_discount_org_name()))); ?></div>
 <?php 	endif; ?>
-<?php 	if ($event->discount2): ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 2, 'id' => 'discount2', 'label' => $event->discount2)); ?></div>
+<?php 	if ($event->has_discount_student()): ?>
+<?php 		if ($event->has_discount_student_openings()): ?>
+								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 1, 'id' => 'discount_student', 'label' => 'I am a student.')); ?></div>
+<?php 		else: ?>
+								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 1, 'id' => 'discount_student', 'label' => '<strike>I am a student.</strike> All student discount openings have been filled.', 'disabled' => true)); ?></div>
+<?php 		endif; ?>
 <?php 	endif; ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 0, 'id' => 'discount0', 'label' => __('None of these apply to me.', 'nsevent'), 'default' => true)); ?></div>
-<?php 	if ($event->discount_note):?>
-								<div class="caption">
-									<p><?php echo esc_html($event->discount_note); ?></p>
-								</div>
-<?php 	endif; ?>
+								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 0, 'id' => 'discount_none', 'label' => __('N/A', 'nsevent'), 'default' => true)); ?></div>
 							</div>
 <?php endif; # discounts ?>
 
 <?php if ($event->has_volunteers() and !$vip): ?>
 							<?php echo NSEvent_FormValidation::get_error('status'), "\n"; ?>
-							<div class="field"><?php NSEvent_FormInput::checkbox('status', array('value' => 1, 'label' => sprintf(__("I'm interested in volunteering. (Volunteers will receive $%d for every (one hour) shift worked!)", 'nsevent'), 5))); ?></div>
+							<div class="field"><?php NSEvent_FormInput::checkbox('status', array('value' => 1, 'label' => __('I\'m interested in volunteering.', 'nsevent'))); echo ' ', sprintf(__('(Volunteers will receive $%d for every (one hour) shift worked!)', 'nsevnet'), 5); ?></div>
 <?php endif; # volunteers ?>
 <?php if ($vip): ?>
 							<?php NSEvent_FormInput::hidden('vip'); echo "\n"; ?>
@@ -111,15 +111,10 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<table cellspacing="0">
 								<thead>
 									<tr>		
-										<th width="25%">Event</th>
-<?php 	if (!$vip): ?>
-<?php 		if ($event->is_early_bird()): ?>
-										<th class="price">Early Bird</th>
-<?php 		endif; ?>
-										<th class="price">Preregistered</th>
-										<th class="price">At Door</th>
-<?php 	endif; ?>
-										<th width="42%">Description</th>
+										<th width="30%">Package</th>
+										<th width="15%" class="price">Preregistered</th>
+										<th width="10%" class="price">At Door</th>
+										<th width="45%">Description</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -127,29 +122,23 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 									<tr>
 										<td><?php NSEvent_FormInput::radio('package', array('value' => $item->get_id(), 'default' => !$index, 'label' => $item->get_name())); ?></td>
 <?php 		if (!$vip): ?>
-<?php 			if ($event->is_early_bird()): ?>
-										<td class="price <?php echo $early_class; ?>">
-											<div class="price_early"><?php printf('$%d', $item->get_price_for_discount(false, true)); ?></div>
-											<div class="price_early_discount1 no_show">$<?php printf('$%d', $item->get_price_for_discount(1, true)); ?></div>
-											<div class="price_early_discount2 no_show">$<?php printf('$%d', $item->get_price_for_discount(2, true)); ?></div>
-										</td>
-<?php 			endif; ?>
 										<td class="price">
-											<div class="price_prereg"><?php printf('$%d', $item->get_price_for_discount(false)); ?></div>
-											<div class="price_prereg_discount1 no_show">$<?php printf('$%d', $item->get_price_for_discount(1)); ?></div>
-											<div class="price_prereg_discount2 no_show">$<?php printf('$%d', $item->get_price_for_discount(2)); ?></div>
+											<div class="price_prereg"><?php printf('$%d', $item->get_price_for_prereg()); ?></div>
+											<div class="price_prereg_discount no_show"><?php printf('$%d', $item->get_price_for_prereg(true)); ?></div>
 										</td>
 										<td class="price">
-											<div class="price_door"><?php echo ($item->get_price_for_discount(false, 'door')) ? sprintf('$%d', $item->get_price_for_discount(false, 'door')) : '&mdash;'; ?></div>
-											<div class="price_door_discount1 no_show"><?php echo ($item->get_price_for_discount(1, 'door')) ? sprintf('$%d', $item->get_price_for_discount(1, 'door')) : '&mdash;'; ?></div>
-											<div class="price_door_discount2 no_show"><?php echo ($item->get_price_for_discount(2, 'door')) ? sprintf('$%d', $item->get_price_for_discount(2, 'door')) : '&mdash;'; ?></div>
+											<div class="price_door"><?php echo ($item->get_price_at_door()) ? sprintf('$%d', $item->get_price_at_door()) : '&mdash;'; ?></div>
+											<div class="price_door_discount no_show"><?php echo ($item->get_price_at_door(true)) ? sprintf('$%d', $item->get_price_at_door(true)) : '&mdash;'; ?></div>
 										</td>
+<?php 		else: ?>
+										<td class="price"><div class="price_vip"><?php echo ($item->get_price_for_vip()) ? sprintf('$%d', $item->get_price_for_vip) : '&mdash;'; ?></div></td>
+										<td class="price">&mdash;</td>
 <?php 		endif; ?>
 										<td class="description"><?php echo esc_html($item->get_description()); ?></td>
 									</tr>
 <?php 	endforeach; ?>
 									<tr>
-										<td colspan="<?php echo ($event->is_early_bird()) ? 4 : 3; ?>"><?php NSEvent_FormInput::radio('package', array('value' => 0, 'label' => 'N/A')); ?></td>
+										<td colspan="3"><?php NSEvent_FormInput::radio('package', array('value' => 0, 'label' => 'N/A')); ?></td>
 										<td class="description"><?php if ($vip) _e('<strong>VIPs:</strong> To help us track attendance, please choose the most suitable package for yourself.', 'nsevent'); ?></td>
 									</tr>
 								</tbody>
@@ -165,43 +154,31 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<table cellspacing="0">
 								<thead>
 									<tr>		
-										<th width="25%"><?php _e('Competition', 'nsevent'); ?></th>
-<?php 	if ($event->is_early_bird() and !$vip): ?>
-										<th class="price"><?php _e('Early Bird', 'nsevent'); ?></th>
-<?php 	endif; ?>
-										<th class="price"><?php _e('Preregistered', 'nsevent'); ?></th>
-										<th width="53%"><?php _e('Information', 'nsevent'); ?></th>
+										<th width="30%"><?php _e('Competition', 'nsevent'); ?></th>
+										<th width="25%" class="price"><?php _e('Preregistered', 'nsevent'); ?></th>
+										<th width="45%"><?php _e('Information', 'nsevent'); ?></th>
 									</tr>
 								</thead>
 								<tbody>
 <?php 	foreach ($competitions as $index => $item): if ($item->is_expired()) continue; ?>
 <?php 		if ($item->count_openings()): ?>
-									<?php echo NSEvent_FormValidation::get_error('item_'.$item->get_id(), sprintf('<tr class="nsevent-validation-error"><td colspan="%d">', ($event->get_date_early_end()) ? 4 : 3), '</td></tr>'), "\n"; ?>
+									<?php echo NSEvent_FormValidation::get_error('item_'.$item->get_id(), '<tr class="nsevent-validation-error"><td colspan="3">', '</td></tr>'), "\n"; ?>
 									<tr>
 										<td><?php NSEvent_FormInput::checkbox(sprintf('items[%d]', $item->get_id()), array('value' => $item->get_id(), 'default' => !$index, 'label' => $item->get_name())); ?></td>
 <?php 			if (!$vip): ?>
-<?php 				if ($event->is_early_bird()): ?>
-											<td class="price <?php echo $early_class; ?>">
-												<div class="price_early"><?php printf('$%d', $item->get_price_for_discount(false, true)); ?></div>
-												<div class="price_early_discount1 no_show">$<?php printf('$%d', $item->get_price_for_discount(1, true)); ?></div>
-												<div class="price_early_discount2 no_show">$<?php printf('$%d', $item->get_price_for_discount(2, true)); ?></div>
-											</td>
-<?php 				endif; ?>
-											<td class="price">
-												<div class="price_prereg"><?php printf('$%d', $item->get_price_for_discount(false)); ?></div>
-												<div class="price_prereg_discount1 no_show">$<?php printf('$%d', $item->get_price_for_discount(1)); ?></div>
-												<div class="price_prereg_discount2 no_show">$<?php printf('$%d', $item->get_price_for_discount(2)); ?></div>
-											</td>
+										<td class="price">
+											<div class="price_prereg"><?php printf('$%d', $item->get_price_for_prereg()); ?></div>
+										</td>
 <?php 			else: ?>
 										<td class="price">
-											<div class="price_vip">$<?php printf('$%d', $item->get_price_for_discount('vip')); ?></div>
+											<div class="price_vip"><?php printf('$%d', $item->get_price_for_vip()); ?></div>
 										</td>
 <?php 			endif; ?>
 										<td class="description">
 <?php 			if ($item->get_limit_total()): ?>
-											<?php printf(__('Openings: %1$d', 'nsevent'), $item->count_openings()); if ($item->get_meta() == 'partner_name') echo _n(' couple', ' couples', $item->count_openings(), 'nsevent'); ?><br />
+											<?php echo __('Openings:', 'nsevent'), ' ', (int) $item->count_openings(); if ($item->get_meta() == 'partner_name') { echo _n(' couple', ' couples', $item->count_openings(), 'nsevent'); } ?><br />
 <?php 			elseif ($item->get_limit_per_position()): ?>
-											<?php printf(__('Openings: %1$d lead(s), %2$d follow(s)', 'nsevent'), $item->count_openings(1), $item->count_openings(2)); ?><br />
+											<?php echo __('Openings:', 'nsevent'), ' ', sprintf(_n('%d lead', '%d leads', $item->count_openings(1)), $item->count_openings(1)), ', ', sprintf(_n('%d follow', '%d follows', $item->count_openings(2)), $item->count_openings(2)); ?><br />
 <?php 			endif; #limit ?>
 <?php 			if ($item->get_meta() == 'position'): ?>
 											<span class="inline_radio"><?php _e('Register as:', 'nsevent'); ?>&nbsp;<?php NSEvent_FormInput::radio(sprintf('item_meta[%d]', $item->get_id()), array('value' => 'lead', 'label' => __('Lead', 'nsevent'), 'disabled' => !$item->count_openings('lead'))); ?>&nbsp;<?php NSEvent_FormInput::radio(sprintf('item_meta[%d]', $item->get_id()), array('value' => 'follow', 'label' => __('Follow', 'nsevent'), 'disabled' => !$item->count_openings('follow'))); ?></span>
@@ -254,16 +231,16 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 										<td><?php echo esc_html($item->get_name()); ?></td>
 <?php 			if (!$vip): ?>
 <?php 				if ($event->is_early_bird()): ?>
-										<td class="price <?php echo $early_class; ?>">
+										<td class="price">
 											<div class="price_early"><?php printf('$%d', $item->get_price_for_discount(false, true)); ?></div>
-											<div class="price_early_discount1 no_show">$<?php printf('$%d', $item->get_price_for_discount(1, true)); ?></div>
-											<div class="price_early_discount2 no_show">$<?php printf('$%d', $item->get_price_for_discount(2, true)); ?></div>
+											<div class="price_early_discount1 no_show"><?php printf('$%d', $item->get_price_for_discount(1, true)); ?></div>
+											<div class="price_early_discount2 no_show"><?php printf('$%d', $item->get_price_for_discount(2, true)); ?></div>
 										</td>
 <?php 				endif; ?>
 										<td class="price">
 											<div class="price_prereg"><?php printf('$%d', $item->get_price_for_discount(false)); ?></div>
-											<div class="price_prereg_discount1 no_show">$<?php printf('$%d', $item->get_price_for_discount(1)); ?></div>
-											<div class="price_prereg_discount2 no_show">$<?php printf('$%d', $item->get_price_for_discount(2)); ?></div>
+											<div class="price_prereg_discount1 no_show"><?php printf('$%d', $item->get_price_for_discount(1)); ?></div>
+											<div class="price_prereg_discount2 no_show"><?php printf('$%d', $item->get_price_for_discount(2)); ?></div>
 										</td>
 										<td class="price">
 											<div class="price_door"><?php echo ($item->get_price_for_discount(false, 'door')) ? sprintf('$%d', $item->get_price_for_discount(false, 'door')) : '&mdash;'; ?></div>
@@ -409,14 +386,11 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 						<fieldset id="payment">
 							<?php echo NSEvent_FormValidation::get_error('payment_method'), "\n"; ?>
 							<div class="field">
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'PayPal', 'label' => sprintf(__('PayPal%s', 'nsevent'), (empty($options['paypal_fee']) ? '' : sprintf(__(' ($%d processing fee)', 'nsevent'), $options['paypal_fee']))))); ?></div>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'Mail', 'default' => true, 'label' => sprintf(__('Mail (Check must be postmarked by %s.)', 'nsevent'), date('F jS', $event->get_date_postmark_by())))); ?></div>
+								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'PayPal', 'default' => true, 'label' => sprintf(__('PayPal%s', 'nsevent'), (empty($options['paypal_fee']) ? '' : sprintf(__(' ($%d processing fee)', 'nsevent'), $options['paypal_fee']))))); ?></div>
+								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'Mail', 'label' => __('Mail', 'nsevent'))); ?> (Check must be postmarked by <?php echo esc_html($event->get_date_mail_postmark_by($options['postmark_within'], 'F jS')); ?>.)</div>
 
 								<div class="caption">
 									<p><?php printf(__('(Refunds are not available after %s.)', 'nsevent'), $event->get_date_refund_end('F jS')); ?></p>
-<?php if (!empty($event->payment_note)): ?>
-									<p><?php echo esc_html($event->payment_note); ?></p>
-<?php endif; ?>
 								</div>
 							</div>
 						</fieldset>

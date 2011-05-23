@@ -4,19 +4,17 @@ class NSEvent_Model_Event extends NSEvent_Model
 {
 	private $id,
 	        $name,
-	        $date_early_end,
-	        $date_prereg_end,
+	        $date_mail_prereg_end,
+	        $date_paypal_prereg_end,
 	    	$date_refund_end,
-	    	$date_payment_by,
-	        $discount1,
-	        $discount2,
 	        $discount_label,
+	        $discount_name,
 	        $discount_note,
+	        $has_discount,
 	        $has_housing,
 	        $has_vip,
 	        $has_volunteers,
 	        $housing_nights,
-	        $is_early_bird,
 	        $levels,
 	        $shirt_description;
 	
@@ -34,8 +32,6 @@ class NSEvent_Model_Event extends NSEvent_Model
 		if (is_string($this->levels)) {
 			$this->levels = unserialize($this->levels);
 		}
-		
-		$this->is_early_bird = ($this->date_early_end and time() < $this->date_early_end);
 	}
 	
 	public function __toString()
@@ -45,7 +41,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	static public function get_events()
 	{
-		return self::$database->query('SELECT * FROM %1$s_events ORDER BY date_prereg_end DESC')->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Event');
+		return self::$database->query('SELECT * FROM %1$s_events ORDER BY date_paypal_prereg_end DESC')->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Event');
 	}
 	
 	static public function get_event_by_id($event_id)
@@ -132,28 +128,29 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return ($result !== false) ? (int) $result : false;
 	}
 	
-	public function count_registrations_where(array $where, $join_table = false)
+	public function count_registrations_where(array $where, array $join_tables = array())
 	{
-		$where = array_merge(array(':event_id' => $this->id), $where);
-		$query = array();
+		$where_query = array('%1$s_registrations.`event_id` = :event_id');
 		
 		foreach ($where as $field => $value) {
-			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
+			$where_query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
 		}
 		
-		$query = ' WHERE '.implode(' AND', $query);
+		$where_query = ' WHERE '.implode(' AND', $where_query);
 		
-		switch ($join_table) {
-			case 'items':
-				$query = 'JOIN %1$s_items ON %1$s_items.`id` = %1$s_registrations.`item_id`'.$query;
-				break;
-			
-			case 'dancers':
-				$query = 'JOIN %1$s_dancers ON %1$s_dancers.`id` = %1$s_registrations.`dancer_id`'.$query;
-				break;
+		$where[':event_id'] = $this->id;
+		
+		$join_query = '';
+		
+		if (in_array('items', $join_tables)) {
+			$join_query .= ' JOIN %1$s_items ON %1$s_items.`id` = %1$s_registrations.`item_id`';
 		}
 		
-		$result = self::$database->query('SELECT COUNT(event_id) FROM %1$s_registrations '.$query, $where)->fetchColumn();
+		if (in_array('dancers', $join_tables)) {
+			$join_query .= ' JOIN %1$s_dancers ON %1$s_dancers.`id` = %1$s_registrations.`dancer_id`';
+		}
+		
+		$result = self::$database->query('SELECT COUNT(*) FROM %1$s_registrations'.$join_query.$where_query, $where)->fetchColumn();
 		return ($result !== false) ? (int) $result : false;
 	}
 	
@@ -180,27 +177,19 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return $this->name;
 	}
 	
-	public function get_date_early_end($format = false)
+	public function get_date_mail_prereg_end($format = false)
 	{
-		return ($format === false) ? (int) $this->date_early_end : date($format, $this->date_early_end);
+		return ($format === false) ? (int) $this->date_mail_prereg_end : date($format, $this->date_mail_prereg_end);
 	}
 	
-	public function get_date_prereg_end($format = false)
+	public function get_date_paypal_prereg_end($format = false)
 	{
-		return ($format === false) ? (int) $this->date_prereg_end : date($format, $this->date_prereg_end);
+		return ($format === false) ? (int) $this->date_paypal_prereg_end : date($format, $this->date_paypal_prereg_end);
 	}
 	
-	public function get_date_postmark_by($format = false)
+	public function get_date_mail_postmark_by($number_days, $format = false)
 	{
-		if (!empty($this->date_postmark_by)) {
-			$timestamp = $this->date_postmark_by;
-		}
-		elseif ($this->is_early_bird()) {
-			$timestamp = $this->date_early_end;
-		}
-		else {
-			$timestamp = $this->date_prereg_end;
-		}
+		$timestamp = strtotime(sprintf('+%d days', $number_days), time());
 		
 		$day_of_week = date('N', $timestamp);
 		
@@ -216,36 +205,21 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function get_date_refund_end($format = false)
 	{
-		$timestamp = !empty($this->date_refund_end) ? $this->date_refund_end : $this->date_prereg_end;
-		
-		$day_of_week = date('N', $timestamp);
-		
-		if ($day_of_week == 7) {
-			$timestamp = strtotime('+1 day', $timestamp);
+		if ($this->date_refund_end) {
+			$timestamp = $this->date_refund_end;
 		}
-		elseif ($day_of_week == 6) {
-			$timestamp = strtotime('+2 days', $timestamp);
+		else {
+			$timestamp = $this->date_paypal_prereg_end;
 		}
 		
 		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
 	}
-	
-	public function get_discount_label()
+		
+	public function get_discount_org_name()
 	{
-		return $this->discount_label;
+		return $this->discount_org_name;
 	}
-	
-	public function get_discount_name($key)
-	{
-		$key = 'discount'.$key;
-		return isset($this->$key) ? $this->$key : false;
-	}
-	
-	public function get_discount_note()
-	{
-		return $this->discount_note;
-	}
-	
+		
 	public function get_housing_nights()
 	{
 		return $this->has_housing ? self::bit_field($this->housing_nights, self::$possible_housing_nights) : array();
@@ -260,7 +234,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	{
 		return isset($this->levels[$index]) ? $this->levels[$index] : $default;
 	}
-	
+		
 	public function get_request_href($request, array $parameters = array())
 	{
 		$href = sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=%s',
@@ -294,17 +268,21 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id', array(':event_id' => $this->id))->fetchColumn();
 	}
 	
-	public function has_discount($key = false)
+	public function has_discount_member()
 	{
-		if ($key === false) {
-			return ($this->discount1 or $this->discount2);
-		}
-		else {
-			$key = 'discount'.$key;
-			return (isset($this->$key) and $this->$key === true);
-		}
+		return (bool) $this->has_discount_member;
 	}
-
+	
+	public function has_discount_student()
+	{
+		return (bool) $this->has_discount_student;
+	}
+	
+	public function has_discount_student_openings()
+	{
+		return $this->limit_discount_student > $this->count_registrations_where(array(':type' => 'package', ':payment_discount' => 1), array('items', 'dancers'));
+	}
+	
 	public function has_housing()
 	{
 		return (bool) $this->has_housing;
@@ -323,10 +301,5 @@ class NSEvent_Model_Event extends NSEvent_Model
 	public function has_volunteers()
 	{
 		return (bool) $this->has_volunteers;
-	}
-	
-	public function is_early_bird()
-	{
-		return $this->is_early_bird;
 	}
 }
