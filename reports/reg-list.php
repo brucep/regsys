@@ -95,7 +95,11 @@ if (!empty($_POST)) {
 		</tbody>
 	</table>
 <?php else: ?>
+<?php 	if (!isset($_GET['vip-only'])): ?>
 		<p><?php _e('There are no registered dancers for this event&hellip;', 'nsevent'); ?></p>
+<?php 	else: ?>
+		<p><?php _e('There are no registered VIPs for this event&hellip;', 'nsevent'); ?></p>
+<?php 	endif; ?>
 <?php endif; ?>
 	</form>
 </div>
