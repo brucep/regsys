@@ -139,7 +139,11 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 <?php 	endforeach; ?>
 									<tr>
 										<td colspan="3"><?php NSEvent_FormInput::radio('package', array('value' => 0, 'label' => 'N/A')); ?></td>
-										<td class="description"><?php if ($vip) _e('<strong>VIPs:</strong> To help us track attendance, please choose the most suitable package for yourself.', 'nsevent'); ?></td>
+<?php 	if (!$vip): ?>
+										<td class="description">(Use this option if you only want to request/provide housing or buy a shirt.)</td>
+<?php 	else: ?>
+										<td class="description"><strong>VIPs:</strong> To help us track attendance, please choose the most suitable package for yourself.</td>
+<?php 	endif; ?>
 									</tr>
 								</tbody>
 							</table>
