@@ -19,8 +19,8 @@
 <?php		else: ?>
 		<?php
 		 		printf(' (%3$d %1$s, %4$d %2$s)'."\n",
-					_n('lead', 'leads', $event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'lead'), 'nsevent')),
-					_n('follow', 'follows', $event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'follow'), 'nsevent')),
+					_n('lead', 'leads', $event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'lead')), 'nsevent'),
+					_n('follow', 'follows', $event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'follow')), 'nsevent'),
 					$event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'lead')),
 					$event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'follow'))); ?>
 <?php		endif; ?>
