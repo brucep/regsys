@@ -282,7 +282,6 @@ class NSEvent
 							`has_housing`            tinyint(1) unsigned NOT NULL default '0',
 							`housing_nights`         tinyint(2) unsigned NOT NULL default '1',
 							`limit_discount`         tinyint(3) unsigned NOT NULL default '0',
-							`limit_per_position`     smallint(5) unsigned NOT NULL default '0',
 							`discount_org_name`      varchar(255) NOT NULL DEFAULT '',
 							`levels`                 varchar(255) NOT NULL,
 							`shirt_description`      text NOT NULL,
@@ -416,7 +415,7 @@ class NSEvent
 					'email'           => 'trim|valid_email|max_length[100]|NSEvent::validate_email_address',
 					'confirm_email'   => 'trim|valid_email|max_length[100]',
 					'mobile_phone'    => 'trim|required|max_length[30]',
-					'position'        => 'intval|in[1,2]|NSEvent::validate_position',
+					'position'        => 'intval|in[1,2]',
 					'status'          => 'NSEvent::validate_status',
 					'package'         => 'intval|NSEvent::validate_package',
 					'items'           => 'NSEvent::validate_items',
@@ -799,17 +798,6 @@ class NSEvent
 		}
 		
 		return $items_did_validate;
-	}
-	
-	static public function validate_position($position)
-	{
-		if (self::$event->limit_per_position and self::$event->limit_per_position <= $event->count_dancers('position', $position)) {
-			NSEvent_FormValidation::set_error('position', __('Registrations are no longer being accepted for that position.', 'nsevent'));
-			return false;
-		}
-		else {
-			return true;
-		}
 	}
 	
 	static public function validate_status($status)

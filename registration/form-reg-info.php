@@ -51,18 +51,8 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<?php echo NSEvent_FormValidation::get_error('position'), "\n"; ?>
 							<div class="field" id="position">
 								<div class="field-label"><?php _e('Position', 'nsevent'); ?></div>
-
-<?php if ($event->limit_per_position and $event->limit_per_position <= $event->count_dancers('position', 1)): ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 1, 'label' => __('(Registrations for leads are no longer being accepted.)', 'nsevent'), 'disabled' => true)); ?></div>
-<?php else: ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 1, 'label' => __('Lead', 'nsevent'), 'default' => true)); ?></div>								
-<?php endif; ?>
-
-<?php if ($event->limit_per_position and $event->limit_per_position <= $event->count_dancers('position', 2)): ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 2, 'label' => __('(Registrations for follows are no longer being accepted.)', 'nsevent'), 'disabled' => true)); ?></div>
-<?php else: ?>
+								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 1, 'label' => __('Lead', 'nsevent'), 'default' => true)); ?></div>
 								<div class="radio"><?php NSEvent_FormInput::radio('position', array('value' => 2, 'label' => __('Follow', 'nsevent'))); ?></div>
-<?php endif; ?>
 							</div>
 
 <?php if ($event->has_levels()): ?>
