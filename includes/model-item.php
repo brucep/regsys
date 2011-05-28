@@ -10,7 +10,6 @@ class NSEvent_Model_Item extends NSEvent_Model
 	        $limit_per_position,
 	        $limit_total,
 	        $meta,
-	        $note,
 	        $openings,
 	        $preregistration,
 	        $price_prereg,

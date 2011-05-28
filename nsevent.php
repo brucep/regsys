@@ -293,27 +293,20 @@ class NSEvent
 					case 'items':
 						$query = sprintf("CREATE TABLE `%s` (
 							`event_id`               int(10) unsigned NOT NULL,
-							`id`                     int(10) unsigned NOT NULL auto_increment,
+							`id`                     int(10) unsigned NOT NULL AUTO_INCREMENT,
 							`name`                   varchar(200) NOT NULL,
 							`type`                   varchar(11) NOT NULL,
-							`preregistration`        tinyint(1) unsigned NOT NULL default '1',
-							`price_early`            tinyint(3) unsigned NOT NULL default '0',
-							`price_early_discount1`  tinyint(3) unsigned NOT NULL default '0',
-							`price_early_discount2`  tinyint(3) unsigned NOT NULL default '0',
-							`price_prereg`           tinyint(3) unsigned NOT NULL default '0',
-							`price_prereg_discount1` tinyint(3) unsigned NOT NULL default '0',
-							`price_prereg_discount2` tinyint(3) unsigned NOT NULL default '0',
-							`price_door`             tinyint(3) unsigned NOT NULL default '0',
-							`price_door_discount1`   tinyint(3) unsigned NOT NULL default '0',
-							`price_door_discount2`   tinyint(3) unsigned NOT NULL default '0',
-							`price_vip`              tinyint(3) unsigned NOT NULL default '0',
-							`limit_total`            smallint(5) unsigned NOT NULL default '0',
-							`limit_per_position`     smallint(5) unsigned NOT NULL default '0',
-							`date_expires`           int(10) unsigned NOT NULL default '0',
-							`meta`                   varchar(20) NOT NULL,
-							`description`            varchar(255) NOT NULL,
-							`note`                   varchar(255) NOT NULL,
-							PRIMARY KEY  (`id`)
+							`preregistration`        tinyint(1) unsigned NOT NULL DEFAULT '1',
+							`price_prereg`           tinyint(3) unsigned NOT NULL DEFAULT '0',
+							`price_door`             tinyint(3) unsigned NOT NULL DEFAULT '0',
+							`price_discount`         tinyint(3) unsigned NOT NULL DEFAULT '0',
+							`price_vip`              tinyint(3) unsigned NOT NULL DEFAULT '0',
+							`limit_total`            smallint(5) unsigned NOT NULL DEFAULT '0',
+							`limit_per_position`     smallint(5) unsigned NOT NULL DEFAULT '0',
+							`date_expires`           int(10) unsigned NOT NULL DEFAULT '0',
+							`meta`                   varchar(20) NOT NULL DEFAULT '',
+							`description`            varchar(255) NOT NULL DEFAULT '',
+							PRIMARY KEY (`id`)
 							);", $table_name);
 						break;
 					
