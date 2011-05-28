@@ -60,7 +60,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<div class="field" id="level">
 								<div class="field-label">Level</div>
 <?php 	foreach ($event->get_levels() as $level => $label): ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('level', array('value' => $level, 'label' => $label, 'default' => !($level - 1))); ?></div>
+								<div class="radio"><?php NSEvent_FormInput::radio('level', array('value' => $level, 'label' => $label, 'default' => ($level == 1))); ?></div>
 <?php 	endforeach; ?>
 							</div>
 <?php endif; # levels ?>
