@@ -188,8 +188,8 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 									</tr>
 <?php 		else: ?>
 									<tr class="limit-reached">
-										<td><?php echo esc_html($item->name); ?></td>
-										<td class="description" colspan="<?php echo ($event->get_date_early_end()) ? 3 : 2; ?>"><?php _e('There are no more openings for this competition.', 'nsevent'); ?></td>
+										<td><?php echo esc_html($item->get_name()); ?></td>
+										<td class="description" colspan="2"><?php _e('There are no more openings for this competition.', 'nsevent'); ?></td>
 									</tr>
 <?php 		endif; ?>
 <?php 	endforeach; ?>
