@@ -64,7 +64,7 @@
 			</tr>
 <?php 			endforeach; ?>
 <?php 		else: ?>
-			<tr><td colspan="2"><?php _e('There are no registered dancers for this competition&hellip;', 'nsevent'); ?></td></tr>
+			<tr><td<?php if ($item->get_meta()) { echo ' colspan="2"'; } ?>><?php _e('There are no registered dancers for this competition&hellip;', 'nsevent'); ?></td></tr>
 <?php 		endif; ?>
 		</tbody>
 	</table>
