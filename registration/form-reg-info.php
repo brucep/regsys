@@ -378,7 +378,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'Mail', 'label' => __('Mail', 'nsevent'))); if ($options['postmark_within']): ?> (Check must be postmarked within <?php echo (int) $options['postmark_within']; ?> days from date of registration.)<?php endif; ?></div>
 
 								<div class="caption">
-									<p><?php printf(__('(Refunds are not available after %s.)', 'nsevent'), $event->get_date_refund_end('F jS')); ?></p>
+									<p><?php printf(__('Refunds are available until %s at the discretion of %s.', 'nsevent'), $event->get_date_refund_end('F jS'), $options['payable_to']); ?></p>
 								</div>
 							</div>
 						</fieldset>
