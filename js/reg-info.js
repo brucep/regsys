@@ -7,23 +7,18 @@ jQuery(document).ready(function($) {
         return false;
     });
 
-	$('#discount_member, #discount_student').click(function()
+	// Show appropriate prices
+	$('#payment_discount').click(function()
 	{
-		$('#packages .price_prereg').addClass('no_show');
-		$('#packages .price_prereg_discount').removeClass('no_show');
-
-		// $('.price_door').addClass('no_show');
-		// $('.price_door_discount').removeClass('no_show');
+		if ($('#payment_discount').attr('checked')) {
+			$('#packages .price_prereg').addClass('no_show');
+			$('#packages .price_prereg_discount').removeClass('no_show');
+		}
+		else {
+			$('#packages .price_prereg').removeClass('no_show');
+			$('#packages .price_prereg_discount').addClass('no_show');
+		}
 	});
-	
-	$('#discount_none').click(function()
-	{
-		$('#packages .price_prereg').removeClass('no_show');
-		$('#packages .price_prereg_discount').addClass('no_show');
-
-		$('#packages .price_door').removeClass('no_show');
-		$('#packages .price_door_discount').addClass('no_show');
-	})
 	
 	// Show fields when needed (for initial page load)
 	if ($('#housing_type_provider').attr('checked'))

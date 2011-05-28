@@ -276,13 +276,12 @@ class NSEvent
 							`date_mail_prereg_end`   int(10) unsigned NOT NULL default '0',
 							`date_paypal_prereg_end` int(10) unsigned NOT NULL default '0',
 							`date_refund_end`        int(10) unsigned NOT NULL default '0',
-							`has_discount_member`    tinyint(1) unsigned NOT NULL DEFAULT '0',
-							`has_discount_student`   tinyint(1) unsigned NOT NULL DEFAULT '0',
+							`has_discount`           tinyint(1) unsigned NOT NULL DEFAULT '0',
 							`has_vip`                tinyint(1) unsigned NOT NULL default '0',
 							`has_volunteers`         tinyint(1) unsigned NOT NULL default '0',
 							`has_housing`            tinyint(1) unsigned NOT NULL default '0',
 							`housing_nights`         tinyint(2) unsigned NOT NULL default '1',
-							`limit_discount_student` tinyint(3) unsigned NOT NULL default '0',
+							`limit_discount`         tinyint(3) unsigned NOT NULL default '0',
 							`limit_per_position`     smallint(5) unsigned NOT NULL default '0',
 							`discount_org_name`      varchar(255) NOT NULL DEFAULT '',
 							`levels`                 varchar(255) NOT NULL,
@@ -441,9 +440,12 @@ class NSEvent
 				}
 				
 				# Discount
-				NSEvent_FormValidation::add_rule('payment_discount', sprintf('intval|in[0%s%s]',
-					($event->has_discount_student() and $event->has_discount_student_openings()) ? ',1' : '',
-					$event->has_discount_member() ? ',2' : ''));
+				if ($event->has_discount() and $event->has_discount_openings()) {
+					NSEvent_FormValidation::add_rule('payment_discount', 'intval|in[0,1]');
+				}
+				else {
+					$_POST['payment_discount'] = 0;
+				}
 				
 				# Housing
 				if ($event->has_housing()) {

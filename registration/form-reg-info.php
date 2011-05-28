@@ -75,22 +75,13 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							</div>
 <?php endif; # levels ?>
 
-<?php if (($event->has_discount_member() or $event->has_discount_student()) and !$vip): ?>
+<?php if ($event->has_discount() and !$vip): ?>
 							<?php echo NSEvent_FormValidation::get_error('payment_discount'), "\n"; ?>
-							<div class="field" id="discount">
-								<div class="field-label">Discount<script type="text/javascript">document.write(' (preregistration prices will adjust automatically)');</script></div>
-<?php 	if ($event->has_discount_member()): ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 2, 'id' => 'discount_member', 'label' => sprintf('I am a member of %s.', $event->get_discount_org_name()))); ?></div>
+<?php 	if ($event->has_discount_openings()): ?>
+							<div class="field"><?php NSEvent_FormInput::checkbox('payment_discount', array('value' => 1, 'label' => sprintf(__('I\'m a student or a member of %s.', 'nsevent'), $event->get_discount_org_name()))); ?></div>
+<?php 	else: ?>
+							<div class="field"><?php NSEvent_FormInput::checkbox('payment_discount', array('value' => 1, 'label' => sprintf('<strike>'.__('I\'m a student or a member of %s.', 'nsevent').'</strike', $event->get_discount_org_name()), 'disabled' => true)); echo ' ', __('Sorry, there are no more discounts available.', 'nsevent'); ?></div>
 <?php 	endif; ?>
-<?php 	if ($event->has_discount_student()): ?>
-<?php 		if ($event->has_discount_student_openings()): ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 1, 'id' => 'discount_student', 'label' => 'I am a student.')); ?></div>
-<?php 		else: ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 1, 'id' => 'discount_student', 'label' => '<strike>I am a student.</strike> All student discount openings have been filled.', 'disabled' => true)); ?></div>
-<?php 		endif; ?>
-<?php 	endif; ?>
-								<div class="radio"><?php NSEvent_FormInput::radio('payment_discount', array('value' => 0, 'id' => 'discount_none', 'label' => __('N/A', 'nsevent'), 'default' => true)); ?></div>
-							</div>
 <?php endif; # discounts ?>
 
 <?php if ($event->has_volunteers() and !$vip): ?>

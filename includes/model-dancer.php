@@ -384,16 +384,6 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return ($this->housing_type == 2);
 	}
 	
-	public function is_student()
-	{
-		return ($this->status != 2 and $this->payment_discount == 1);
-	}
-	
-	public function is_member()
-	{
-		return ($this->status != 2 and $this->payment_discount == 2);
-	}
-	
 	public function is_volunteer()
 	{
 		return ($this->status === '1');
@@ -407,5 +397,10 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	public function needs_housing()
 	{
 		return ($this->housing_type == 1);
+	}
+	
+	public function received_discount()
+	{
+		return ($this->payment_discount == 1 and $this->status != 2);
 	}
 }

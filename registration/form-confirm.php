@@ -22,11 +22,8 @@
 						<?php NSEvent_FormInput::hidden('level'); echo "\n"; ?>
 <?php endif; ?>
 
-<?php if ($dancer->is_member()): ?>
-						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); printf('Member of %s.', $event->get_discount_org_name()); ?></div>
-						<?php NSEvent_FormInput::hidden('payment_discount'); echo "\n"; ?>
-<?php elseif ($dancer->is_student()): ?>
-						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); ?>Student</div>
+<?php if ($dancer->received_discount()): ?>
+						<div class="field"><?php _e('&#10004;&nbsp;', 'nsevent'); printf('Student or member of %s', $event->get_discount_org_name()); ?></div>
 						<?php NSEvent_FormInput::hidden('payment_discount'); echo "\n"; ?>
 <?php endif; ?>
 

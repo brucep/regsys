@@ -16,6 +16,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	        $has_volunteers,
 	        $housing_nights,
 	        $levels,
+	        $limit_discount,
 	        $shirt_description;
 	
 	public static $possible_housing_nights = array(
@@ -268,19 +269,14 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id', array(':event_id' => $this->id))->fetchColumn();
 	}
 	
-	public function has_discount_member()
+	public function has_discount()
 	{
-		return (bool) $this->has_discount_member;
+		return (bool) $this->has_discount;
 	}
 	
-	public function has_discount_student()
+	public function has_discount_openings()
 	{
-		return (bool) $this->has_discount_student;
-	}
-	
-	public function has_discount_student_openings()
-	{
-		return $this->limit_discount_student > $this->count_registrations_where(array(':type' => 'package', ':payment_discount' => 1), array('items', 'dancers'));
+		return $this->limit_discount > $this->count_registrations_where(array(':type' => 'package', ':payment_discount' => 1), array('items', 'dancers'));
 	}
 	
 	public function has_housing()
