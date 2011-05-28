@@ -262,7 +262,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 <?php # HOUSING ######################################################## ?>
 <?php if ($event->has_housing()): ?>
 						<h2><?php NSEvent_FormInput::checkbox('housing_type_provider', array('label' => __('I Can Provide Housing', 'nsevent'))); ?>&nbsp;<span><?php _e('(Optional)', 'nsevent'); ?></span></h2>
-						<fieldset id="housing_type_provider_fields" class="no_show">
+						<fieldset id="housing_type_provider_fields">
 							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_spots_available]'), "\n"; ?>
 							<div class="field"><?php printf(__('I can provide housing for %s person(s).', 'nsevent'), NSEvent_FormInput::text('housing_provider[housing_spots_available]', array('size' => 2, 'placeholder' => '#'), false)); ?></div>
 
@@ -306,7 +306,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 
 
 						<h2><?php NSEvent_FormInput::checkbox('housing_type_needed', array('label' => __('I Need Housing', 'nsevent'))); ?>&nbsp;<span><?php _e('(Optional)', 'nsevent'); ?></span></h2>
-						<fieldset id="housing_type_needed_fields" class="no_show">
+						<fieldset id="housing_type_needed_fields">
 							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_from_scene]'), "\n"; ?>
 							<div class="field"><?php echo __('I am from: ', 'nsevent'), NSEvent_FormInput::text('housing_needed[housing_from_scene]', array('size' => 30, 'placeholder' => 'Scene, area, nearest major city, etc.'), false); ?></div>
 

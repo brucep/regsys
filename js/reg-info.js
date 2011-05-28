@@ -19,8 +19,12 @@ jQuery(document).ready(function($) {
 		}
 	});
 
-	if ($('#housing_type_provider').attr('checked')) {
-		$('#housing_type_provider_fields').removeClass('no_show');
+	if (!$('#housing_type_provider').attr('checked')) {
+		$('#housing_type_provider_fields').addClass('no_show');
+	}
+
+	if (!$('#housing_type_needed').attr('checked')) {
+		$('#housing_type_needed_fields').addClass('no_show');
 	}
 
 	$('#housing_type_provider').click(function()
@@ -32,10 +36,6 @@ jQuery(document).ready(function($) {
 			$('#housing_type_provider_fields').addClass('no_show');
 		}
 	});
-
-	if ($('#housing_type_needed').attr('checked')) {
-		$('#housing_type_needed_fields').removeClass('no_show');
-	}
 
 	$('#housing_type_needed').click(function()
 	{
