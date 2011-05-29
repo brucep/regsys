@@ -365,7 +365,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 						</fieldset>
 
 
-						<div id="submit"><input id="nsevent-submit" type="submit" value="<?php _e('Confirm&hellip;', 'nsevent'); ?>" /></div>
+						<div id="submit"><input id="nsevent-submit" type="submit" value="<?php _e('Continue&hellip;', 'nsevent'); ?>" /></div>
 					</form>
 				</div>
 
