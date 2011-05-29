@@ -1,3 +1,6 @@
+.nsevent-registration-form p {
+margin: 1em;
+}
 .nsevent-registration-form div.field {
 margin-top: 1em;
 }
@@ -9,10 +12,13 @@ background-color: #fff;
 border: 1px solid #d9d9d9;
 -webkit-border-radius: 8px;
 -moz-border-radius: 8px;
+cursor: pointer;
 }
 .nsevent-registration-form #submit input:hover {
 background-color: #ff7;
 }
+
+
 #nsevent-registration-form-info .no_show {
 display: none;
 }
@@ -48,7 +54,7 @@ margin-left: 0.8em;
 #nsevent-registration-form-info fieldset p {
 margin: 1em 0 0 !important;
 }
-form.nsevent-registration-form fieldset div:first-child {
+#nsevent-registration-form-info fieldset div:first-child {
 margin-top: 0 !important;
 }
 #nsevent-registration-form-info div.text label {
@@ -73,7 +79,7 @@ background-color: #d1d1d1;
 #nsevent-registration-form-info tbody tr.limit_reached td:first-child {
 padding-left: 1em;
 }
-#nsevent-registration-form-info tbody td, div.nsevent-registration-form tbody td {
+#nsevent-registration-form-info tbody td {
 padding: 0.5em 0;
 border-top: 1px solid #b3b3b3;
 }
@@ -116,30 +122,27 @@ font-weight: bold;
 margin-top: 0.5em !important;
 margin-bottom: 1.5em !important;
 }
-#nsevent-registration-form-confirm div.field {
-clear: left;
-}
-#nsevent-registration-form-confirm div.field span.label {
-display: block;
-width: 10.5em;
-float: left;
-}
-#nsevent-registration-form-confirm div.field span.item-meta {
-padding-left: 1em;
-}
-#nsevent-registration-form-confirm #submit {
+
+
+#nsevent-registration-form-confirm table {
 margin-top: 2em;
 }
-div.nsevent-registration-form p, #nsevent-registration-form-confirmed-paypal p {
-margin: 1em;
+#nsevent-registration-form-confirm td.label {
+width: 30%;
 }
-div.nsevent-registration-form ol {
-margin: 1em 1em 1em 4em !important;
+#nsevent-registration-form-confirm td.value {
+width: 60%;
 }
-div.nsevent-registration-form ol li {
-margin-bottom: 0.5em !important;
+#nsevent-registration-form-confirm td.price {
+width: 10%;
+text-align: right;
 }
-div#nsevent-accepted-paypal input#paypal-button {
+#nsevent-registration-form-confirm #submit {
+margin: 2em 0 1em;
+}
+
+
+#nsevent-accepted-paypal input#paypal-button {
 display: block;
 margin: 2em auto 1em;
 }

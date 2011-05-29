@@ -3,7 +3,7 @@
 				<div id="nsevent-registration-form-accepted-paypal" <?php post_class('nsevent-registration-form'); ?>>
 					<h1 class="entry-title"><?php printf(__('Registration Accepted for %s', 'nsevent'), esc_html($event->get_name())); ?></h1>
 
-					<div id="accepted" class="nsevent-registration<?php if ($vip) echo ' vip'; ?>">
+					<div id="accepted"<?php if ($vip) echo ' class="vip"'; ?>>
 						<p>Your registration has been recorded. Your payment must be received by <?php echo esc_html($dancer->get_date_paypal_payment_by($options['postmark_within'], 'F jS')); ?>.</p>
 
 						<form action="<?php echo (!$options['paypal_sandbox']) ? 'https://www.paypal.com/cgi-bin/webscr' : 'https://www.sandbox.paypal.com/cgi-bin/webscr' ?>" method="post">
