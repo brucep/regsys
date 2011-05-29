@@ -41,7 +41,7 @@ $options = get_option('nsevent');
 <?php 	foreach ($events as $event): ?>
 			<tr class="<?php if (!($i++ % 2)) echo 'alternate'; if (isset($options['current_event_id']) and $options['current_event_id'] == $event->get_id()) echo ' current-event'; ?>">
 				<td class="column-title"><strong><a class="row-title" href="<?php echo $event->get_request_href('index-event'); ?>"><?php echo esc_html($event->get_name()); ?></a><strong></td>
-				<td style="font-family: monospace"><?php echo $event->get_date_mail_prereg_end('Y-m-d, h:i A'); ?></td>
+				<td style="font-family: monospace"><?php if ($event->get_date_mail_prereg_end()) { echo $event->get_date_mail_prereg_end('Y-m-d, h:i A'); } else { echo '&mdash;'; } ?></td>
 				<td style="font-family: monospace"><?php echo $event->get_date_paypal_prereg_end('Y-m-d, h:i A'); ?></td>
 				<td style="font-family: monospace"><?php echo $event->get_date_refund_end('Y-m-d, h:i A'); ?></td>
 <?php 		if (current_user_can('administrator')): ?>
