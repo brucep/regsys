@@ -386,12 +386,12 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	
 	public function is_volunteer()
 	{
-		return ($this->status === '1');
+		return ($this->status == 1);
 	}
 	
 	public function is_vip()
 	{
-		return ($this->status === '2');
+		return ($this->status == 2);
 	}
 	
 	public function needs_housing()
