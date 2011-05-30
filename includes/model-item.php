@@ -15,8 +15,9 @@ class NSEvent_Model_Item extends NSEvent_Model
 	        $price_prereg,
 	        $price_door,
 	        $price_discount,
-	        $price_vip,
 	        $price_scaled,
+	        $price_tier,
+	        $price_vip,
 	        $registered_dancers,
 	        $registered_meta,
 	        $registered_price,
@@ -112,6 +113,22 @@ class NSEvent_Model_Item extends NSEvent_Model
 	public function get_price_for_vip()
 	{
 		return (int) $this->price_vip;
+	}
+	
+	public function get_price_tier()
+	{
+		if ($this->type != 'package') {
+			return false;
+		}
+		else {
+			if (!isset($this->price_tier)) {
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->id))->fetchColumn();
+				
+				$this->price_tier = (int) self::$database->query('SELECT scale_count FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers <= scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->id, ':number_dancers' => $number_dancers))->fetchColumn();
+			}
+			
+			return $this->price_tier;
+		}
 	}
 	
 	public function get_registered_dancers()

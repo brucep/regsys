@@ -23,6 +23,7 @@
 <?php foreach (NSEvent::$validated_items as $key => $item): ?>
 <?php 	if ($key == NSEvent::$validated_package_id): ?>
 						<?php NSEvent_FormInput::hidden('package', array('value' => $key)); echo "\n"; ?>
+						<?php NSEvent_FormInput::hidden(sprintf('package_tier[%d]', $key), array('value' => $item->get_price_tier())); echo "\n"; ?>
 <?php 	else: ?>
 						<?php NSEvent_FormInput::hidden(sprintf('items[%d]', $key), array('value' => $_POST['items'][$key])); echo "\n"; ?>
 <?php 	endif; ?>

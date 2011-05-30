@@ -716,8 +716,16 @@ class NSEvent
 			return true;
 		}
 		elseif (self::validate_items(array($package_id => $package_id))) {
-			self::$validated_package_id = $package_id;
-			return true;
+			$item = self::$event->get_item_by_id($package_id);
+			
+			if (isset($_POST['package_tier'][$package_id]) and $_POST['package_tier'][$package_id] != $item->get_price_tier()) {
+				NSEvent_FormValidation::set_error('package', 'The price has changed on this package. Review the price before continuing with your registration.');
+				return false;
+			}
+			else {
+				self::$validated_package_id = $package_id;
+				return true;
+			}
 		}
 		else {
 			return false;

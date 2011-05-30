@@ -128,6 +128,10 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 									</tr>
 								</tbody>
 							</table>
+
+<?php 	foreach ($packages as $index => $item): if ($item->is_expired()) continue; ?>
+							<?php NSEvent_FormInput::hidden(sprintf('package_tier[%d]', $item->get_id()), array('value' => $item->get_price_tier())); echo "\n"; ?>
+<?php 	endforeach; ?>
 						</fieldset>
 <?php endif; # packages ?>
 
