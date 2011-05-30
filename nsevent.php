@@ -432,8 +432,8 @@ class NSEvent
 				}
 				
 				# Discount
-				if ($event->has_discount() and $event->has_discount_openings()) {
-					NSEvent_FormValidation::add_rule('payment_discount', 'intval|in[0,1]');
+				if ($event->has_discount()) {
+					NSEvent_FormValidation::add_rule('payment_discount', 'intval|in[0,1]|NSEvent::validate_discount');
 				}
 				else {
 					$_POST['payment_discount'] = 0;
@@ -675,6 +675,18 @@ class NSEvent
 				$parameters['subject'],
 				$parameters['body'],
 				$headers);
+		}
+	}
+	
+	static public function validate_discount($payment_discount)
+	{
+		if ($payment_discount == 1 and !self::$event->has_discount_openings()) {
+			$_POST['payment_discount'] = 0; // Change the value so that the checkbox won't appear checked.
+			NSEvent_FormValidation::set_error('payment_discount', 'There are no more discount openings available. Review the prices before continuing with your registration.');
+			return false;
+		}
+		else {
+			return true;
 		}
 	}
 	
