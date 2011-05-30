@@ -3,7 +3,7 @@
 				<div id="nsevent-registration-form-confirm" <?php post_class('nsevent-registration-form'); ?>>
 					<h1 class="entry-title"><?php printf(__('Confirm Registration for %s', 'nsevent'), esc_html($event->get_name())); ?></h1>
 
-					<form action="<?php echo get_permalink(); ?>" method="post"<?php if ($vip) echo ' class="vip"'; ?>
+					<form action="<?php echo get_permalink(); ?>" method="post"<?php if ($vip) echo ' class="vip"'; ?>>
 						<?php NSEvent_FormInput::hidden('first_name');       echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('last_name');        echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('email');            echo "\n"; ?>
