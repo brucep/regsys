@@ -397,7 +397,7 @@ class NSEvent
 				throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $options['current_event_id']));
 			}
 			
-			$vip = self::$vip = ($event->has_vip() and (isset($_GET['vip']) or isset($_POST['vip'])));
+			$vip = self::$vip = ($event->has_vip() and isset($_GET['vip']));
 			
 			
 			# Display page content when registration is not available.

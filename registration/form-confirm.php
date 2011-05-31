@@ -3,7 +3,7 @@
 				<div id="nsevent-registration-form-confirm" <?php post_class('nsevent-registration-form'); ?>>
 					<h1 class="entry-title"><?php printf(__('Confirm Registration for %s', 'nsevent'), esc_html($event->get_name())); ?></h1>
 
-					<form action="<?php echo get_permalink(); ?>" method="post"<?php if ($vip) echo ' class="vip"'; ?>>
+					<form action="<?php echo get_permalink(); if ($vip) { echo'?vip'; } ?>" method="post"<?php if ($vip) echo ' class="vip"'; ?>>
 						<?php NSEvent_FormInput::hidden('first_name');       echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('last_name');        echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('email');            echo "\n"; ?>
@@ -16,9 +16,6 @@
 						<?php NSEvent_FormInput::hidden('volunteer_phone');  echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('payment_method');   echo "\n"; ?>
 						<?php NSEvent_FormInput::hidden('confirmed');        echo "\n"; ?>
-<?php if ($vip): ?>
-						<?php NSEvent_FormInput::hidden('vip'); echo "\n"; ?>
-<?php endif; ?>
 
 <?php foreach (NSEvent::$validated_items as $key => $item): ?>
 <?php 	if ($key == NSEvent::$validated_package_id): ?>
@@ -48,7 +45,7 @@
 							<tr>
 								<td class="label">Name</td>
 								<td class="value"><?php echo esc_html($dancer->get_name()); ?></td>
-								<td class="price"><?php if ($vip) { echo 'VIP'; } ?></td>
+								<td class="price"><?php if ($vip) { echo '<strong>VIP</strong>'; } ?></td>
 							</tr>
 							<tr>
 								<td class="label">Email Address</td>
@@ -103,7 +100,7 @@
 							<tr>
 								<td class="label"><?php echo esc_html($item->get_name()); ?></td>
 								<td class="value"><?php if (isset($_POST['item_meta'][$key])) { echo esc_html(ucfirst($_POST['item_meta'][$key])); } ?></td>
-								<td class="price"><?php printf('$%d', $item->get_price_for_prereg($_POST['payment_discount'])); ?></td>
+								<td class="price"><?php if (!$vip) { printf('$%d', $item->get_price_for_prereg($_POST['payment_discount'])); } else { printf('$%d', $item->get_price_for_vip()); } ?></td>
 							</tr>
 <?php endforeach; ?>
 							<tr>

@@ -13,7 +13,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 						<?php the_content(); ?>
 					</div>
 
-					<form action="<?php echo get_permalink(); ?>" method="post"<?php if ($vip) echo ' class="vip"'; ?>>
+					<form action="<?php echo get_permalink(); if ($vip) { echo'?vip'; } ?>" method="post"<?php if ($vip) { echo ' class="vip"'; } ?>>
 <?php if (!$vip): ?>
 						<div id="pricing-dates">
 <?php 	if (time() <= $event->get_date_mail_prereg_end()): ?>
@@ -78,9 +78,6 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<?php echo NSEvent_FormValidation::get_error('status'), "\n"; ?>
 							<div class="field"><?php NSEvent_FormInput::checkbox('status', array('value' => 1, 'label' => __('I\'m interested in volunteering.', 'nsevent'))); echo ' ', sprintf(__('(Volunteers will receive $%d for every (one hour) shift worked!)', 'nsevnet'), 5); ?></div>
 <?php endif; # volunteers ?>
-<?php if ($vip): ?>
-							<?php NSEvent_FormInput::hidden('vip'); echo "\n"; ?>
-<?php endif; # vip ?>
 						</fieldset>
 
 
@@ -222,7 +219,10 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 										</td>
 <?php 			else: ?>
 										<td class="price">
-											<div class="price_vip">$<?php printf('$%d', $item->get_price_for_vip('vip')); ?></div>
+											<div class="price_vip"><?php printf('$%d', $item->get_price_for_vip()); ?></div>
+										</td>
+										<td class="price">
+											<div class="price_vip"><?php printf('$%d', $item->get_price_for_vip()); ?></div>
 										</td>
 <?php 			endif; ?>
 										<td class="size">
