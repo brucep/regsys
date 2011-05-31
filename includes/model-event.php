@@ -188,22 +188,6 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return ($format === false) ? (int) $this->date_paypal_prereg_end : date($format, $this->date_paypal_prereg_end);
 	}
 	
-	public function get_date_mail_postmark_by($number_days, $format = false)
-	{
-		$timestamp = strtotime(sprintf('+%d days', $number_days), time());
-		
-		$day_of_week = date('N', $timestamp);
-		
-		if ($day_of_week == 7) {
-			$timestamp = strtotime('+1 day', $timestamp);
-		}
-		elseif ($day_of_week == 6) {
-			$timestamp = strtotime('+2 days', $timestamp);
-		}
-		
-		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
-	}
-	
 	public function get_date_refund_end($format = false)
 	{
 		if ($this->date_refund_end) {
