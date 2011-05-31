@@ -87,7 +87,7 @@ if (!empty($_POST)) {
 				<td><?php echo esc_html($event->get_level_for_index($dancer->get_level(), '&mdash;')); ?></td>
 				<td class="total-cost"><?php printf('$%d', $dancer->get_price_total()); ?></td>
 				<td class="paid"><?php NSEvent_FormInput::checkbox(sprintf('payment_confirmed[%d]', $dancer->get_id()), array('value' => 1, 'checked' => (bool) $dancer->get_payment_confirmed())); ?></td>
-				<td class="owed"><?php NSEvent_FormInput::text(sprintf('payment_owed[%d]', $dancer->get_id()), array('value' => (int) $dancer->get_payment_owed(), 'size' => 3)); ?></td>
+				<td class="owed"><?php NSEvent_FormInput::text(sprintf('payment_owed[%d]', $dancer->get_id()), array('value' => (int) $dancer->get_payment_owed(), 'size' => 3, 'class' => ($dancer->is_overdue_for_payment() ? 'overdue' : ''))); ?></td>
 				<td class="no-print"><?php echo $dancer->get_payment_method(); ?></td>
 			</tr>
 <?php 		$i++; ?>

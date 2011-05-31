@@ -37,6 +37,10 @@ div.nsevent-exception {margin:2em 1em;}
   text-align: center;
 }
 
+#nsevent #reg-list .overdue {
+	background-color: #fcc;
+}
+
 #nsevent table.report tr:hover td {
   background-color: #ff9;
 }

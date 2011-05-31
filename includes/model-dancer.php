@@ -384,6 +384,11 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return ($this->housing_type == 2);
 	}
 	
+	public function is_overdue_for_payment()
+	{
+		return (self::$options['postmark_within'] and !$this->payment_confirmed and  time() > strtotime(sprintf('+%d days', self::$options['postmark_within']), $this->date_registered));
+	}
+	
 	public function is_volunteer()
 	{
 		return ($this->status == 1);
