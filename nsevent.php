@@ -159,7 +159,7 @@ class NSEvent
 			throw new Exception(__('Cheatin&#8217; uh?'));
 		}
 		
-		$options = get_option('nsevent', array());
+		$options = array_merge(self::$default_options, get_option('nsevent', array()));
 		
 		self::load_models();
 		NSEvent_Model::set_database(self::get_database_connection());
@@ -184,6 +184,8 @@ class NSEvent
 			if (empty($_GET['request'])) {
 				$_GET['request'] = 'index';
 			}
+			
+			$options = array_merge(self::$default_options, get_option('nsevent', array()));
 			
 			self::load_models();
 			NSEvent_Model::set_database(self::get_database_connection());
@@ -384,7 +386,7 @@ class NSEvent
 			
 			@date_default_timezone_set(get_option('timezone_string'));
 			
-			$options = self::$options = array_merge(self::$default_options, get_option('nsevent')); # Make sure keys exists
+			$options = self::$options = array_merge(self::$default_options, get_option('nsevent', array()));
 			
 			require dirname(__FILE__).'/includes/form-input.php';
 			require dirname(__FILE__).'/includes/form-validation.php';

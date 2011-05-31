@@ -5,7 +5,6 @@
 
 	<form method="post" action="options.php">
 		<?php settings_fields('nsevent' ); ?>
-		<?php $options = get_option('nsevent'); ?>
 
 		<h3><?php _e('Registration', 'nsevent'); ?></h3>
 
