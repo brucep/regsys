@@ -4,7 +4,7 @@
 					<h1 class="entry-title"><?php printf(__('Registration Accepted for %s', 'nsevent'), esc_html($event->get_name())); ?></h1>
 
 					<div id="accepted"<?php if ($vip) echo ' class="vip"'; ?>>
-						<p>Your registration has been recorded. Your payment must be received by <?php echo esc_html($dancer->get_date_paypal_payment_by($options['postmark_within'], 'F jS')); ?>.</p>
+						<p>Your registration has been recorded. Your payment must be received by <?php echo esc_html($dancer->get_date_postmark_by('F jS')); ?>.</p>
 
 						<form action="<?php echo (!$options['paypal_sandbox']) ? 'https://www.paypal.com/cgi-bin/webscr' : 'https://www.sandbox.paypal.com/cgi-bin/webscr' ?>" method="post">
 							<input type="image" id="paypal-button" src="https://www.paypal.com/en_US/i/btn/x-click-but6.gif" name="submit" alt="<?php _e('Make payments with PayPal - it\'s fast, free and secure!', 'nsevent'); ?>" />

@@ -149,7 +149,7 @@ Your check must be postmarked by %2\$s.
 EOD
 			, 'nsevent'),
 			$dancer->get_price_total(),
-			$dancer->get_date_mail_postmark_by($options['postmark_within'], 'F jS'),
+			$dancer->get_date_postmark_by('F jS'),
 			$options['payable_to'],
 			$options['mailing_address'],
 			$event->get_date_refund_end('F jS'));

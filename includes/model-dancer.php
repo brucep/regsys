@@ -161,26 +161,10 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	{
 		return $this->last_name;
 	}
-	
-	public function get_date_mail_postmark_by($number_days, $format = false)
+		
+	public function get_date_postmark_by($format = false)
 	{
-		$timestamp = strtotime(sprintf('+%d days', $number_days), $this->date_registered);
-		
-		$day_of_week = date('N', $timestamp);
-		
-		if ($day_of_week == 7) {
-			$timestamp = strtotime('+1 day', $timestamp);
-		}
-		elseif ($day_of_week == 6) {
-			$timestamp = strtotime('+2 days', $timestamp);
-		}
-		
-		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
-	}
-	
-	public function get_date_paypal_payment_by($number_days, $format = false)
-	{
-		$timestamp = strtotime(sprintf('+%d days', $number_days), $this->date_registered);
+		$timestamp = strtotime(sprintf('+%d days', self::$options['postmark_within']), $this->date_registered);
 		
 		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
 	}
