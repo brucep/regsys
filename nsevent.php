@@ -159,11 +159,13 @@ class NSEvent
 			throw new Exception(__('Cheatin&#8217; uh?'));
 		}
 		
+		$options = get_option('nsevent', array());
+		
 		self::load_models();
 		NSEvent_Model::set_database(self::get_database_connection());
+		NSEvent_Model::set_options($options);
 		
 		$events = NSEvent_Model_Event::get_events();
-		$options = get_option('nsevent', array());
 		
 		require dirname(__FILE__).'/admin/options.php';
 	}
@@ -185,6 +187,7 @@ class NSEvent
 			
 			self::load_models();
 			NSEvent_Model::set_database(self::get_database_connection());
+			NSEvent_Model::set_options($options);
 			
 			switch ($_GET['request']) {
 				# List of events
@@ -389,6 +392,7 @@ class NSEvent
 			
 			self::load_models();
 			NSEvent_Model::set_database(self::get_database_connection());
+			NSEvent_Model::set_options($options);
 			
 			# Find current event
 			$event = self::$event = NSEvent_Model_Event::get_event_by_id($options['current_event_id']);
