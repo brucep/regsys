@@ -28,11 +28,11 @@
 <?php foreach (NSEvent::$validated_items as $item): if ($dancer->get_price_for_registered_item($item->get_id()) == 0) { continue; } ?>
 							<?php NSEvent_FormInput::hidden('item_name_'.$i, array('value' => $item->get_name())); echo "\n"; ?>
 							<?php NSEvent_FormInput::hidden('amount_'.$i,    array('value' => $dancer->get_price_for_registered_item($item->get_id()))); echo "\n"; ?>
-<?php 	if (isset($_POST['item_meta'][$item->get_id()])): ?>
+<?php 	if ($item->get_meta() == 'size' and isset($_POST['item_meta'][$item->get_id()])): ?>
 							<?php NSEvent_FormInput::hidden('on0_'.$i,      array('value' => $item->get_meta_label())); echo "\n"; ?>
 							<?php NSEvent_FormInput::hidden('os0_'.$i,      array('value' => ucfirst($_POST['item_meta'][$item->get_id()]))); echo "\n"; ?>
 <?php 	endif; ?>
-<?php $i++; ?>
+<?php 	$i++; ?>
 <?php endforeach; ?>
 						</form>
 					</div>
