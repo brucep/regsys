@@ -25,7 +25,7 @@
 
 <?php endif; ?>
 <?php $i = (!empty($options['paypal_fee'])) ? 2 : 1; ?>
-<?php foreach (NSEvent::$validated_items as $item): ?>
+<?php foreach (NSEvent::$validated_items as $item): if ($dancer->get_price_for_registered_item($item->get_id()) == 0) { continue; } ?>
 							<?php NSEvent_FormInput::hidden('item_name_'.$i, array('value' => $item->get_name())); echo "\n"; ?>
 							<?php NSEvent_FormInput::hidden('amount_'.$i,    array('value' => $dancer->get_price_for_registered_item($item->get_id()))); echo "\n"; ?>
 <?php 	if (isset($_POST['item_meta'][$item->get_id()])): ?>
