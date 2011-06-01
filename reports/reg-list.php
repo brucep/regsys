@@ -43,11 +43,12 @@ if (!empty($_POST)) {
 	<table class="widefat page fixed report" id="reg-list-table">
 		<thead>
 			<tr>
-				<th class="manage-column column-title" width="20%"><div><?php _e('Name', 'nsevent'); ?></div></th>
+				<th class="manage-column column-title" width="19%"><div><?php _e('Name', 'nsevent'); ?></div></th>
 				<th class="manage-column"><div><?php _e('Package', 'nsevent'); ?></div></th>
 				<th class="manage-column"><div><?php _e('Competitions', 'nsevent'); ?></div></th>
 				<th class="manage-column"><div><?php _e('Shirts', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="12%"><div><?php _e('Level', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="17%"><div><?php _e('Level', 'nsevent'); ?></div></th>
+				<th class="manage-column" width="11%"><div><?php _e('Date Registered', 'nsevent'); ?></div></th>
 				<th class="manage-column total-cost" width="6%"><div><?php _e('Total', 'nsevent'); ?></div></th>
 				<th class="manage-column paid" width="6%"><div><?php _e('Paid?', 'nsevent'); ?></div></th>
 				<th class="manage-column owed" width="9%"><div><?php _e('Owed', 'nsevent'); ?></div></th>
@@ -62,6 +63,7 @@ if (!empty($_POST)) {
 				<th class="manage-column"><?php _e('Competitions', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('Shirts', 'nsevent'); ?></th>
 				<th class="manage-column"><?php _e('Level', 'nsevent'); ?></th>
+				<th class="manage-column"><div><?php _e('Date Registered', 'nsevent'); ?></div></th>
 				<th class="manage-column total-cost"><?php _e('Total Cost', 'nsevent'); ?></th>
 				<th class="manage-column paid"><?php _e('Paid?', 'nsevent'); ?></th>
 				<th class="manage-column owed"><?php _e('Owed', 'nsevent'); ?></th>
@@ -85,6 +87,7 @@ if (!empty($_POST)) {
 			endforeach;
 ?>
 				<td><?php echo esc_html($event->get_level_for_index($dancer->get_level(), '&mdash;')); ?></td>
+				<td><?php echo $dancer->get_date_registered('Y-m-d, g:i A'); ?></td>
 				<td class="total-cost"><?php printf('$%d', $dancer->get_price_total()); ?></td>
 				<td class="paid"><?php NSEvent_FormInput::checkbox(sprintf('payment_confirmed[%d]', $dancer->get_id()), array('value' => 1, 'checked' => (bool) $dancer->get_payment_confirmed())); ?></td>
 				<td class="owed"><?php NSEvent_FormInput::text(sprintf('payment_owed[%d]', $dancer->get_id()), array('value' => (int) $dancer->get_payment_owed(), 'size' => 3, 'class' => ($dancer->is_overdue_for_payment() ? 'overdue' : ''))); ?></td>
