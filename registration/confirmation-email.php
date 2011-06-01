@@ -16,20 +16,14 @@ ABOUT YOU
 <?php if ($event->has_levels()): ?>
 - Level: <?php echo $event->get_level_for_index($dancer->get_level()), "\n"; ?>
 <?php endif; ?>
+<?php if ($dancer->is_volunteer()): ?>
+- Volunteer (Thanks for volunteering!)
+<?php endif; ?>
 <?php if ($vip): ?>
 - VIP
 <?php endif; ?>
 
 
-<?php if ($dancer->is_volunteer()): ?>
-VOLUNTEER
----------
-
-- Thanks for volunteering!
-- Your phone number: <?php echo $dancer->get_volunteer_phone(), "\n"; ?>
-
-
-<?php endif; ?>
 <?php if ($dancer->needs_housing()): ?>
 HOUSING NEEDED
 --------------
