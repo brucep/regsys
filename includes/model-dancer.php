@@ -28,6 +28,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	        $payment_owed,
 	        $price_total,
 	        $registered_items,
+	        $registered_package_id,
 	    	$status;
 	
 	public function __construct(array $parameters = array())
@@ -366,6 +367,15 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		else {
 			return array();
 		}
+	}
+	
+	public function get_registered_package_id()
+	{
+		if (!isset($this->registered_package_id)) {
+			$this->registered_package_id = self::$database->query('SELECT %1$s_registrations.`item_id` FROM %1$s_registrations LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id AND %1$s_items.`type` = "package"', array(':event_id' => $this->event_id, ':dancer_id' => $this->id))->fetchColumn();
+		}
+		
+		return ($this->registered_package_id !== false) ? (int) $this->registered_package_id : false;
 	}
 	
 	public function is_housing_provider()
