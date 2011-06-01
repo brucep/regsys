@@ -285,6 +285,11 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return (bool) $this->payment_confirmed;
 	}
 	
+	public function get_payment_discount()
+	{
+		return (int) $this->payment_discount;
+	}
+	
 	public function get_payment_method()
 	{
 		return $this->payment_method;
