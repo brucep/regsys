@@ -542,7 +542,7 @@ class NSEvent
 					}
 					
 					# Add housing
-					if ($event->has_housing()) {
+					if ($event->has_housing() and ($dancer->needs_housing() or $dancer->is_housing_provider())) {
 						$dancer->add_housing();
 					}
 					
