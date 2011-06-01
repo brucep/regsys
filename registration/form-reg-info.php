@@ -204,7 +204,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 									</tr>
 								</thead>
 								<tbody>
-<?php 	foreach ($shirts as $item):  if ($item->get_date_expires()) continue; ?>
+<?php 	foreach ($shirts as $item):  if ($item->is_expired()) continue; ?>
 									<?php NSEvent_FormValidation::get_error('item_'.$item->get_id(), '<tr class="nsevent-validation-error"><td colspan="4">', '</td></tr>'); echo "\n"; ?>
 									<tr>
 										<td><?php echo esc_html($item->get_name()); ?></td>

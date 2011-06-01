@@ -165,7 +165,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 	
 	public function is_expired()
 	{
-		return ($this->date_expires and $this->date_expires <= time());
+		return (!empty($this->date_expires) and time() > $this->date_expires);
 	}
 	
 	public function count_openings($position = false)
