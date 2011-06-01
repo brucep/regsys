@@ -47,6 +47,7 @@ $options = array_merge(self::$default_options, $options);
 <?php 		if ($dancer->get_payment_method() == 'PayPal'): ?>
 		<a href="<?php echo NSEvent::paypal_href($dancer, $options); ?>" class="button add-new-h4"><?php _e('PayPal Link', 'nsevent'); ?></a>
 <?php 		endif; ?>
+		<a href="<?php echo $event->get_request_href('resend-confirmation-email', array('dancer' => (int) $dancer->get_id())); ?>" class="button add-new-h4"><?php _e('Resend Confirmation Email', 'nsevent'); ?></a>
 <?php 	endif; ?>
 </h4>
 <?php if ($dancer->get_registered_items()): ?>

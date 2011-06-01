@@ -202,12 +202,26 @@ class NSEvent
 				case 'dancer-edit':
 				case 'housing-delete':
 				case 'registration-add':
+				case 'resend-confirmation-email':
+					if (!current_user_can('administrator')) {
+						throw new Exception(__('Cheatin&#8217; uh?'));
+					}
+					if (empty($_GET['event_id'])) {
+						throw new Exception(__('Event ID not specified.', 'nsevent'));
+					}
+				    if ($_GET['event_id'] !== 'add' and (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id']))) {
+						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
+					}
 					if (empty($_GET['dancer'])) {
 						throw new Exception(__('Dancer ID not specified.', 'nsevent'));
 					}
-					if (!$dancer = $event->get_dancer($_GET['dancer'])) {
+					if (!$dancer = $event->get_dancer_by_id($_GET['dancer'])) {
 						throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['parameter']));
 					}
+					require dirname(__FILE__).'/includes/form-input.php';
+					$file = sprintf('admin/%s.php', $_GET['request']);
+					break;
+				
 				case 'event-edit':
 					if (!current_user_can('administrator')) {
 						throw new Exception(__('Cheatin&#8217; uh?'));

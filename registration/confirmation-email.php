@@ -19,7 +19,7 @@ ABOUT YOU
 <?php if ($dancer->is_volunteer()): ?>
 - Volunteer (Thanks for volunteering!)
 <?php endif; ?>
-<?php if ($vip): ?>
+<?php if ($dancer->is_vip()): ?>
 - VIP
 <?php endif; ?>
 
