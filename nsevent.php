@@ -872,23 +872,25 @@ class NSEvent
 		}
 	}
 	
-	static public function paypal_href($dancer, $options, array $item_ids = array(), $notify_url = '')
+	static public function paypal_href($dancer, array $items, array $options, $include_paypal_fee = true)
 	{
-		$href = sprintf('https://www.paypal.com/cgi-bin/webscr?cmd=_cart&amp;upload=1&amp;no_shipping=1&amp;%1$sbusiness=%2$s&amp;custom=%3$d&amp;item_name_1=%4$s&amp;amount_1=%5$d',
-			!empty($notify_url) ? sprintf('notify_url=%1$s&amp;', rawurlencode($notify_url)) : '',
+		$href = sprintf('https://www.paypal.com/cgi-bin/webscr?cmd=_cart&amp;upload=1&amp;no_shipping=1&amp;business=%1$s&amp;custom=%2$d',
 			rawurlencode($options['paypal_business']),
-			$dancer->get_id(),
-			__('Processing Fee', 'nsevent'),
-			2);
+			$dancer->get_id());
 		
-		$i = 2;
+		if ($include_paypal_fee and !empty($options['paypal_fee'])) {
+			$href .= sprintf('&amp;item_name_1=%1$s&amp;amount_1=%2$s', 'Processing Fee', $options['paypal_fee']);
+			$i = 2;
+		}
+		else {
+			$i = 1;
+		}
 		
-		foreach ($dancer->get_registered_items($item_ids) as $item)
-		{
+		foreach ($items as $item) {
 			$href .= sprintf('&amp;item_name_%1$d=%2$s&amp;amount_%1$d=%3$s', $i, rawurlencode($item->get_name()), rawurlencode($item->get_registered_price()));
 			
-			if (!empty($reg->item_meta)) {
-				$href .= sprintf('&amp;on0_%1$d=%2$s&amp;os0_%1$d=%3$s', $i, $item->get_meta_label(), ucfirst($item->registered_meta));
+			if ($item->get_meta() == 'size') {
+				$href .= sprintf('&amp;on0_%1$d=%2$s&amp;os0_%1$d=%3$s', $i, $item->get_meta_label(), ucfirst($item->get_registered_meta()));
 			}
 			
 			$i++;

@@ -33,7 +33,7 @@ if (!empty($_POST)):
 <?php endforeach; ?>
 	</ul>
 
-	<p><strong><a href="<?php echo NSEvent::paypal_href($dancer, $options, array_keys(NSEvent::$validated_items)); ?>"><?php _e('PayPal Link', 'nsevent'); ?></a><strong></p>
+	<p><strong><a href="<?php echo NSEvent::paypal_href($dancer, $dancer->get_registered_items(array_keys(NSEvent::$validated_items)), $options, false); ?>"><?php _e('PayPal Link', 'nsevent'); ?></a><strong></p>
 
     <p><a href="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->get_id(); ?>&amp;request=dancer&amp;parameter=<?php echo $dancer->get_id(); ?>"><?php printf(__('Back to "%s"', 'nsevent'), $dancer->get_name()); ?></a></p>
 </div>
