@@ -35,7 +35,7 @@ if (!empty($_POST)) {
 
 	<form action="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->get_id(); ?>&amp;request=reg-list<?php if (isset($_GET['vip-only'])) echo '&amp;vip-only'; ?>" method="post">
 <?php if ($dancers): ?>
-		<input type="submit" value="<?php _e('Save Payment Info', 'nsevent'); ?>" class="no-print" style="float: right; margin: 0 0 1em;" />
+		<input type="submit" value="<?php _e('Save Payment Info', 'nsevent'); ?>" class="no-print" style="float: right; margin: 0 0 1em; cursor: pointer" />
 <?php endif; ?>
 		<h3><?php echo !isset($_GET['vip-only'])? _e('Registration List', 'nsevent') : _e('VIP Payment Confirmation', 'nsevent'); echo "\n"; ?></h3>
 
