@@ -260,12 +260,12 @@ class NSEvent
 				default:
 					throw new Exception(sprintf(__('Unable to handle page request: %s', 'nsevent'), esc_html($_GET['request'])));
 			}
+			
+			require dirname(__FILE__)."/$file";
 		}
 		catch (Exception $e) {
 			printf('<div id="nsevent-exception">%s</div>', $e->getMessage());
 		}
-		
-		require dirname(__FILE__)."/$file";
 	}
 	
 	static public function plugin_activate()
