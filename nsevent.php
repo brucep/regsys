@@ -604,7 +604,12 @@ class NSEvent
 						$confirmation_email['body'] = preg_replace("/^(- .+\n)\n+-/m", '$1-', ob_get_contents());
 						ob_end_clean();
 						
-						self::send_confirmation_email($confirmation_email);
+						try {
+							self::send_confirmation_email($confirmation_email);
+						}
+						catch (Exception $e) {
+							$confirmation_email_failed_to_send = $e;
+						}
 					}
 					
 					

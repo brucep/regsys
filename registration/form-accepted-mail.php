@@ -10,6 +10,9 @@
 
 						<address style="font-weight: bold;"><?php echo nl2br(esc_html($options['mailing_address'])); ?></address>
 <?php endif; ?>
+<?php if (isset($confirmation_email_failed_to_send)): ?>
+						<p style="background-color: #fcc;">It appears your confirmation email failed to send. Please email <?php printf('<a href="mailto:%1$s">%1$s</a>', $options['confirmation_email_address']); ?> to request that your confirmation email be resent.<br /><br />Reason: <?php echo esc_html($e->getMessage()); ?></p>
+<?php endif; ?>
 					</div>
 				</div>
 
