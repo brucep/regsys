@@ -10,6 +10,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	        $discount_label,
 	        $discount_name,
 	        $discount_note,
+	        $discounts_used,
 	        $has_discount,
 	        $has_housing,
 	        $has_vip,
@@ -123,6 +124,15 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return ($result !== false) ? (int) $result : false;
 	}
 	
+	public function count_discounts_used()
+	{
+		if (!isset($this->discounts_used)) {
+			$this->discounts_used = $this->count_registrations_where(array(':type' => 'package', ':payment_discount' => 1), array('items', 'dancers'));
+		}
+		
+		return $this->discounts_used;
+	}
+	
 	public function count_housing_spots_available()
 	{
 		$result = self::$database->query('SELECT SUM(housing_spots_available) FROM %1$s_housing WHERE event_id = :event_id AND housing_type = 2', array(':event_id' => $this->id))->fetchColumn();
@@ -199,12 +209,17 @@ class NSEvent_Model_Event extends NSEvent_Model
 		
 		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
 	}
-		
+	
+	public function get_discount_limit()
+	{
+		return (int) $this->limit_discount;
+	}
+	
 	public function get_discount_org_name()
 	{
 		return $this->discount_org_name;
 	}
-		
+	
 	public function get_housing_nights()
 	{
 		return $this->has_housing ? self::bit_field($this->housing_nights, self::$possible_housing_nights) : array();
@@ -260,7 +275,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function has_discount_openings()
 	{
-		return $this->limit_discount > $this->count_registrations_where(array(':type' => 'package', ':payment_discount' => 1), array('items', 'dancers'));
+		return ($this->limit_discount > $this->count_discounts_used());
 	}
 	
 	public function has_housing()
