@@ -6,6 +6,14 @@ $lists['Dancers']['Leads']   = $event->count_dancers(array(':position' => 1));
 $lists['Dancers']['Follows'] = $event->count_dancers(array(':position' => 2));
 $lists['Dancers']['Ratio']   = @round($lists['Dancers']['Follows'] / $lists['Dancers']['Leads'], 2);
 
+if ($event->has_discount()) {
+	$lists['Dancers']['Discounts'] = sprintf('%d of %d', $event->count_discounts_used(), $event->get_discount_limit());
+	
+	if ($event->has_discount_openings()) {
+		$lists['Dancers']['Discounts'] .= sprintf(' (%d remaining)', $event->get_discount_limit() - $event->count_discounts_used());
+	}
+}
+
 # Levels
 if ($event->has_levels()) {
 	$database = self::get_database_connection();
