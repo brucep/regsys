@@ -78,6 +78,9 @@ $options = array_merge(self::$default_options, $options);
 		<li><?php _e('Has pets', 'nsevent'); ?></li>
 <?php 		endif; ?>
 <?php 	else: ?>
+<?php 		if ($dancer->get_housing_from_scene()): ?>
+		<li><?php echo 'From Scene: ', esc_html($dancer->get_housing_from_scene()); ?></li>
+<?php 		endif; ?>
 <?php 		if ($dancer->get_housing_prefers_no_smoke()): ?>
 		<li><?php _e('Prefers no smoking', 'nsevent'); ?></li>
 <?php 		endif; ?>
