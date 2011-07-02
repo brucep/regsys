@@ -26,7 +26,7 @@ class NSEvent_FormInput
 			$args['id'] = sprintf(' id="%s"', htmlspecialchars($args['id'], ENT_QUOTES, 'UTF-8'));
 		}
 		
-		printf('%6$s<input type="checkbox" value="%3$s" name="%1$s" %2$s%4$s%5$s/>%7$s',
+		printf('%6$s<input type="checkbox"%4$s value="%3$s" name="%1$s" %2$s%5$s/>%7$s',
 			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
 			$args['id'],
 			htmlspecialchars($args['value'], ENT_QUOTES, 'UTF-8'),
@@ -130,7 +130,7 @@ class NSEvent_FormInput
 			$args['default_value'] = '';
 		}
 		
-		$result = sprintf('%3$s<input type="%7$s" name="%1$s" id="%1$s" value="%2$s"%4$s%5$s%6$s%8$s />',
+		$result = sprintf('%3$s<input type="%7$s" value="%2$s" name="%1$s" id="%1$s"%4$s%5$s%6$s%8$s />',
 			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
 			htmlspecialchars((!isset($args['value']) ? self::_set_value($name, $args['default_value']) : $args['value']), ENT_QUOTES, 'UTF-8'),
 			!isset($args['label'])       ? '' : $args['label'],
