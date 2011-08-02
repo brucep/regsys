@@ -359,8 +359,12 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 						<fieldset id="payment">
 							<?php echo NSEvent_FormValidation::get_error('payment_method'), "\n"; ?>
 							<div class="field">
+<?php if (time() <= $event->get_date_paypal_prereg_end()): ?>
 								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'PayPal', 'default' => true, 'label' => sprintf(__('PayPal%s', 'nsevent'), (empty($options['paypal_fee']) ? '' : sprintf(__(' ($%d processing fee)', 'nsevent'), $options['paypal_fee']))))); ?></div>
+<?php endif; ?>
+<?php if (time() <= $event->get_date_mail_prereg_end()): ?>								
 								<div class="radio"><?php NSEvent_FormInput::radio('payment_method', array('value' => 'Mail', 'label' => __('Mail', 'nsevent'))); if ($options['postmark_within']): ?> (Check must be postmarked within <?php echo (int) $options['postmark_within']; ?> days from date of registration.)<?php endif; ?></div>
+<?php endif; ?>
 
 								<div class="caption">
 									<p><?php printf(__('Refunds are available until %s at the discretion of %s.', 'nsevent'), $event->get_date_refund_end('F jS'), $options['payable_to']); ?></p>
