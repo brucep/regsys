@@ -70,7 +70,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 <?php 	if ($event->has_discount_openings()): ?>
 							<div class="field"><?php NSEvent_FormInput::checkbox('payment_discount', array('value' => 1, 'label' => sprintf(__('I\'m a student or a member of %s.', 'nsevent'), $event->get_discount_org_name()))); ?></div>
 <?php 	else: ?>
-							<div class="field"><?php NSEvent_FormInput::checkbox('payment_discount', array('value' => 1, 'label' => sprintf('<strike>'.__('I\'m a student or a member of %s.', 'nsevent').'</strike', $event->get_discount_org_name()), 'disabled' => true)); echo ' ', __('Sorry, there are no more discounts available.', 'nsevent'); ?></div>
+							<div class="field"><?php NSEvent_FormInput::checkbox('payment_discount', array('value' => 1, 'label' => sprintf('<del>' . __('I\'m a student or a member of %s.', 'nsevent') . '</del>', $event->get_discount_org_name()), 'disabled' => true)); echo ' ', __('Sorry, there are no more discounts available.', 'nsevent'); ?></div>
 <?php 	endif; ?>
 <?php endif; # discounts ?>
 
