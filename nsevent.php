@@ -885,7 +885,7 @@ class NSEvent
 			$dancer->get_id());
 		
 		if ($include_paypal_fee and !empty($options['paypal_fee'])) {
-			$href .= sprintf('&amp;item_name_1=%1$s&amp;amount_1=%2$s', 'Processing Fee', $options['paypal_fee']);
+			$href .= sprintf('&amp;item_name_1=%1$s&amp;amount_1=%2$s', 'Processing%20Fee', $options['paypal_fee']);
 			$i = 2;
 		}
 		else {
