@@ -140,14 +140,25 @@ You still need to write a check to "%3\$s" for $%1\$d for mail it to:
 %4\$s
 
 Your check must be postmarked by %2\$s.
-
-*REFUNDS ARE NOT ALLOWED AFTER %5\$s.*
 EOD
 			, 'nsevent'),
 			$dancer->get_price_total(),
 			$dancer->get_date_postmark_by('F jS'),
 			$options['payable_to'],
-			$options['mailing_address'],
-			$event->get_date_refund_end('F jS'));
+			$options['mailing_address']);
 	}
-endif;
+	elseif ($dancer->get_payment_method() == 'PayPal') {
+		printf(<<<EOD
+
+
+If you haven't already paid via PayPal, you may use this link to do so:
+
+%s
+EOD
+			, str_replace('&amp;', '&', self::paypal_href($dancer, $dancer->get_registered_items(), $options)));
+	}
+?>
+
+
+REFUNDS ARE NOT ALLOWED AFTER: <?php echo $event->get_date_refund_end('F jS'); ?>.
+<?php endif; ?>
