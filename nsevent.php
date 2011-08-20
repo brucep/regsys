@@ -609,6 +609,7 @@ class NSEvent
 						}
 						catch (Exception $e) {
 							$confirmation_email_failed_to_send = $e;
+							error_log('Error sending confirmation email: ' . $e->getMessage());
 						}
 					}
 					
