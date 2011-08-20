@@ -265,6 +265,7 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 
 <?php # HOUSING ######################################################## ?>
 <?php if ($event->has_housing()): ?>
+<?php 	if ($event->has_housing_enabled()): ?>
 						<h2><?php NSEvent_FormInput::checkbox('housing_type_provider', array('label' => __('I Can Provide Housing', 'nsevent'))); ?>&nbsp;<span><?php _e('(Optional)', 'nsevent'); ?></span></h2>
 						<fieldset id="housing_type_provider_fields">
 							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_spots_available]'), "\n"; ?>
@@ -280,9 +281,9 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_nights]'), "\n"; ?>
 							<div class="field">
 								<div class="field-label"><?php _e('I can providing housing on:', 'nsevent'); ?></div>
-<?php 	foreach ($event->get_housing_nights() as $index => $night): ?>
+<?php 		foreach ($event->get_housing_nights() as $index => $night): ?>
 								<div class="checkbox"><?php NSEvent_FormInput::checkbox(sprintf('housing_provider[housing_nights][%d]', $index), array('value' => $index, 'label' => __($night, 'nsevent'))); ?></div>
-<?php 	endforeach; ?>
+<?php 		endforeach; ?>
 							</div>
 
 							<?php echo NSEvent_FormValidation::get_error('housing_provider[housing_gender]'), "\n"; ?>
@@ -324,9 +325,9 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_nights]'), "\n"; ?>
 							<div class="field">
 								<div class="field-label"><?php _e('I need housing for:', 'nsevent'); ?></div>
-<?php 	foreach ($event->get_housing_nights() as $index => $night): ?>
+<?php 		foreach ($event->get_housing_nights() as $index => $night): ?>
 								<div class="checkbox"><?php NSEvent_FormInput::checkbox(sprintf('housing_needed[housing_nights][%d]', $index), array('value' => $index, 'label' => __($night, 'nsevent'))); ?></div>
-<?php 	endforeach; ?>
+<?php 		endforeach; ?>
 							</div>
 
 							<?php echo NSEvent_FormValidation::get_error('housing_needed[housing_gender]'), "\n"; ?>
@@ -351,6 +352,11 @@ $shirts       = $event->get_items_where(array(':preregistration' => 1, ':type' =
 								<?php NSEvent_FormInput::textarea('housing_needed[housing_comment]', array('rows' => 6)); echo "\n"; ?>
 							</div>
 						</fieldset>
+<?php 	else: ?>
+						<fieldset>
+							<div class="field">Housing is no longer available for this event.</div>
+						</fieldset>
+<?php 	endif; ?>
 <?php endif; # housing ?>
 
 

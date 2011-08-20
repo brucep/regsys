@@ -460,7 +460,7 @@ class NSEvent
 				}
 				
 				# Housing
-				if ($event->has_housing()) {
+				if ($event->has_housing_enabled()) {
 					NSEvent_FormValidation::add_rules(array(
 						'housing_provider[housing_spots_available]' => 'if_set[housing_type_provider]|intval|greater_than[0]',
 						'housing_provider[housing_smoke]'           => 'if_set[housing_type_provider]|intval|in[0,1]',
@@ -528,7 +528,7 @@ class NSEvent
 					$dancer_data['note'] = __('TEST', 'nsevent');
 				}
 				
-				if ($event->has_housing()) {
+				if ($event->has_housing_enabled()) {
 					if (isset($dancer_data['housing_type_needed'])) {
 						$dancer_data = array_merge($dancer_data, $dancer_data['housing_needed']);
 						$dancer_data['housing_type'] = 1;
@@ -556,7 +556,7 @@ class NSEvent
 					}
 					
 					# Add housing
-					if ($event->has_housing() and ($dancer->needs_housing() or $dancer->is_housing_provider())) {
+					if ($event->has_housing_enabled() and ($dancer->needs_housing() or $dancer->is_housing_provider())) {
 						$dancer->add_housing();
 					}
 					

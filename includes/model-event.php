@@ -280,7 +280,12 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function has_housing()
 	{
-		return (bool) $this->has_housing;
+		return ($this->has_housing == 2 or $this->has_housing == 1);
+	}
+	
+	public function has_housing_enabled()
+	{
+		return ($this->has_housing == 2);
 	}
 	
 	public function has_levels()

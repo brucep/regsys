@@ -24,39 +24,41 @@ ABOUT YOU
 <?php endif; ?>
 
 
-<?php if ($dancer->needs_housing()): ?>
+<?php if ($event->has_housing_enabled()): ?>
+<?php 	if ($dancer->needs_housing()): ?>
 HOUSING NEEDED
 --------------
 
-<?php 	if ($dancer->get_housing_prefers_no_smoke()): ?>
+<?php 		if ($dancer->get_housing_prefers_no_smoke()): ?>
 - I would prefer no smoking.
-<?php 	endif; ?>
-<?php 	if ($dancer->get_housing_prefers_no_pets()): ?>
+<?php 		endif; ?>
+<?php 		if ($dancer->get_housing_prefers_no_pets()): ?>
 - I would prefer no pets.
-<?php 	endif; ?>
+<?php 		endif; ?>
 - I would prefer to be housed with: <?php echo $dancer->get_housing_gender(), "\n"; ?>
 - I will need housing for: <?php echo $dancer->get_housing_nights($event->get_housing_nights()), "\n"; ?>
-<?php 	if ($dancer->get_housing_comment()): ?>
-<?php echo "\n", $dancer->get_housing_comment(), "\n"; ?>
-<?php endif; ?>
+<?php 		if ($dancer->get_housing_comment()): ?>
+<?php 			echo "\n", $dancer->get_housing_comment(), "\n"; ?>
+<?php 		endif; ?>
 
-<?php elseif ($dancer->is_housing_provider()): ?>
+<?php 	elseif ($dancer->is_housing_provider()): ?>
 HOUSING PROVIDER
 ----------------
 
-<?php echo '- ', sprintf(_n('I have room for %d person.', 'I have room for %d persons.', $dancer->get_housing_spots_available(), 'nsevent'), $dancer->get_housing_spots_available()), "\n"; ?>
-<?php 	if ($dancer->get_housing_has_smoke()): ?>
+- <?php printf(_n('I have room for %d person.', 'I have room for %d persons.', $dancer->get_housing_spots_available(), 'nsevent'), $dancer->get_housing_spots_available()); echo "\n"; ?>
+<?php 		if ($dancer->get_housing_has_smoke()): ?>
 - I smoke.
-<?php 	endif; ?>
-<?php 	if ($dancer->get_housing_has_pets()): ?>
+<?php 		endif; ?>
+<?php 		if ($dancer->get_housing_has_pets()): ?>
 - I have pets.
-<?php 	endif; ?>
+<?php 		endif; ?>
 - I will house: <?php echo $dancer->get_housing_gender(), "\n"; ?>
 - I will provide housing for: <?php echo $dancer->get_housing_nights($event->get_housing_nights()), "\n"; ?>
-<?php 	if ($dancer->get_housing_comment()): ?>
-<?php echo "\n", $dancer->get_housing_comment(), "\n"; ?>
-<?php endif; ?>
+<?php 		if ($dancer->get_housing_comment()): ?>
+<?php 			echo "\n", $dancer->get_housing_comment(), "\n"; ?>
+<?php 		endif; ?>
 
+<?php 	endif; ?>
 <?php endif; ?>
 <?php if (self::$validated_package_id): ?>
 PACKAGE

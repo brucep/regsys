@@ -29,16 +29,18 @@
 <?php 	endif; ?>
 <?php endforeach; ?>
 
-<?php if ($dancer->needs_housing()): ?>
+<?php if ($event->has_housing_enabled()): ?>
+<?php 	if ($dancer->needs_housing()): ?>
 						<?php NSEvent_FormInput::hidden('housing_type_needed'); echo "\n"; ?>
-<?php 	foreach(array('from_scene', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment') as $field): ?>
+<?php 		foreach(array('from_scene', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment') as $field): ?>
 						<?php NSEvent_FormInput::hidden(sprintf('housing_needed[housing_%s]', $field)); echo "\n"; ?>
-<?php 	endforeach; ?>
-<?php elseif ($dancer->is_housing_provider()): ?>
+<?php 		endforeach; ?>
+<?php 	elseif ($dancer->is_housing_provider()): ?>
 						<?php NSEvent_FormInput::hidden('housing_type_provider'); echo "\n"; ?>
-<?php 	foreach(array('spots_available', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment') as $field): ?>
+<?php 		foreach(array('spots_available', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment') as $field): ?>
 						<?php NSEvent_FormInput::hidden(sprintf('housing_provider[housing_%s]', $field)); echo "\n"; ?>
-<?php 	endforeach; ?>
+<?php 		endforeach; ?>
+<?php 	endif; ?>
 <?php endif; ?>
 
 						<table>

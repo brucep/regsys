@@ -8,7 +8,7 @@
 		<li><a href="<?php echo $event->get_request_href('numbers');           ?>"><strong><?php _e('Attendance&nbsp;/&nbsp;Numbers', 'nsevent'); ?></strong></a></li>
 		<li><a href="<?php echo $event->get_request_href('competitions');      ?>"><strong><?php _e('Competitions',      'nsevent'); ?></strong></a></li>
 		<li><a href="<?php echo $event->get_request_href('dancers');           ?>"><strong><?php _e('Dancers',           'nsevent'); ?></strong></a></li>
-<?php if ($event->get_housing_nights()): ?>
+<?php if ($event->has_housing()): ?>
 		<li><a href="<?php echo $event->get_request_href('housing-needed');    ?>"><strong><?php _e('Housing Needed',    'nsevent'); ?></strong></a></li>
 		<li><a href="<?php echo $event->get_request_href('housing-providers'); ?>"><strong><?php _e('Housing Providers', 'nsevent'); ?></strong></a></li>
 <?php endif; ?>
