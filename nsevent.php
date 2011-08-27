@@ -893,6 +893,10 @@ class NSEvent
 		}
 		
 		foreach ($items as $item) {
+			if ($item->get_registered_price() == 0) {
+				continue;
+			}
+			
 			$href .= sprintf('&amp;item_name_%1$d=%2$s&amp;amount_%1$d=%3$s', $i, rawurlencode($item->get_name()), rawurlencode($item->get_registered_price()));
 			
 			if ($item->get_meta() == 'size') {
