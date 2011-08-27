@@ -114,18 +114,15 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	
 	public function delete()
 	{
-	    $statement = self::$database->query('DELETE FROM %1$s_dancers WHERE event_id = :event_id AND id = :id LIMIT 1', array(':event_id' => self::$event->get_id(), ':id' => $this->id));
+	    $statement = self::$database->query('DELETE FROM %1$s_dancers WHERE event_id = :event_id AND id = :id LIMIT 1', array(':event_id' => $this->event_id, ':id' => $this->id));
 	    $counts['dancer'] = $statement->rowCount();
 	    
-	    $statement = self::$database->query('DELETE FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => self::$event->get_id(), ':dancer_id' => $this->id));
+	    $statement = self::$database->query('DELETE FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->id));
 	    $counts['registrations'] = $statement->rowCount();
 	    
-	    $statement = self::$database->query('DELETE FROM %1$s_housing_needed WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => self::$event->get_id(), ':dancer_id' => $this->id));
-	    $counts['housing_needed'] = $statement->rowCount();
-	    
-	    $statement = self::$database->query('DELETE FROM %1$s_housing_providers WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => self::$event->get_id(), ':dancer_id' => $this->id));
-	    $counts['housing_provider'] = $statement->rowCount();
-	    
+	    $statement = self::$database->query('DELETE FROM %1$s_housing WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $this->event_id, ':dancer_id' => $this->id));
+	    $counts['housing'] = $statement->rowCount();
+	    	    
 	    return $counts;
 	}
 	
