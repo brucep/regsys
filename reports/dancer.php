@@ -44,9 +44,7 @@ $options = array_merge(self::$default_options, $options);
 <?php _e('Registrations', 'nsevent'); ?>
 <?php 	if (current_user_can('administrator')): ?>
 		<a href="<?php echo $event->get_request_href('registration-add', array('dancer' => (int) $dancer->get_id())); ?>" class="button add-new-h4"><?php _e('Add Registration', 'nsevent'); ?></a>
-<?php 		if ($dancer->get_payment_method() == 'PayPal'): ?>
 		<a href="<?php echo NSEvent::paypal_href($dancer, $dancer->get_registered_items(), $options); ?>" class="button add-new-h4"><?php _e('PayPal Link', 'nsevent'); ?></a>
-<?php 		endif; ?>
 		<a href="<?php echo $event->get_request_href('resend-confirmation-email', array('dancer' => (int) $dancer->get_id())); ?>" class="button add-new-h4"><?php _e('Resend Confirmation Email', 'nsevent'); ?></a>
 <?php 	endif; ?>
 </h4>
