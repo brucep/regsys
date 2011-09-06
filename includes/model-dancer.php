@@ -337,7 +337,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		{
 			$this->registered_items = array();
 			
-			$registered_items = self::$database->query('SELECT %1$s_items.*, %1$s_registrations.`price` as registered_price, %1$s_registrations.`item_meta` as registered_meta FROM %1$s_registrations LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
+			$registered_items = self::$database->query('SELECT %1$s_items.*, %1$s_registrations.`price` as registered_price, %1$s_registrations.`item_meta` as registered_meta FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
 			
 			foreach ($registered_items as $item) {
 				$this->registered_items[$item->get_id()] = $item;
@@ -369,7 +369,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	public function get_registered_package_id()
 	{
 		if (!isset($this->registered_package_id)) {
-			$this->registered_package_id = self::$database->query('SELECT %1$s_registrations.`item_id` FROM %1$s_registrations LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id AND %1$s_items.`type` = "package"', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchColumn();
+			$this->registered_package_id = self::$database->query('SELECT %1$s_registrations.`item_id` FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id AND %1$s_items.`type` = "package"', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchColumn();
 		}
 		
 		return ($this->registered_package_id !== false) ? (int) $this->registered_package_id : false;

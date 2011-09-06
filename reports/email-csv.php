@@ -13,7 +13,7 @@ elseif ($_GET['request'] == 'volunteers') {
 	$dancers = NSEvent_CSVHelper::$event->get_dancers_where(array(':status' => 1));
 }
 else {
-	$dancers = NSEvent_CSVHelper::$database->query('SELECT DISTINCT %1$s_dancers.`id` as id, last_name, first_name, email FROM %1$s_registrations LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`type` = "competition" ORDER BY %1$s_dancers.`last_name` ASC, %1$s_dancers.`first_name` ASC', array(':event_id' => NSEvent_CSVHelper::$event->get_id()))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+	$dancers = NSEvent_CSVHelper::$database->query('SELECT DISTINCT %1$s_dancers.`id` as id, last_name, first_name, email FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`type` = "competition" ORDER BY %1$s_dancers.`last_name` ASC, %1$s_dancers.`first_name` ASC', array(':event_id' => NSEvent_CSVHelper::$event->get_id()))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 }
 
 $rows[0] = array(

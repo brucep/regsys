@@ -22,8 +22,8 @@ if ($event->has_levels()) {
 		$lists['Levels (All Dancers)'][$level] = $event->count_dancers(array(':level' => $index));
 		
 		$lists['Levels (Dancers in Classes)'][$level] = sprintf('%d leads, %d follows',
-			$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`meta` = "count_for_classes"', array(':event_id' => $event->get_id(), ':level' => $index, ':position' => 1))->fetchColumn(),
-			$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`meta` = "count_for_classes"', array(':event_id' => $event->get_id(), ':level' => $index, ':position' => 2))->fetchColumn());
+			$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`meta` = "count_for_classes"', array(':event_id' => $event->get_id(), ':level' => $index, ':position' => 1))->fetchColumn(),
+			$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level` = :level AND %1$s_dancers.`position` = :position AND %1$s_items.`meta` = "count_for_classes"', array(':event_id' => $event->get_id(), ':level' => $index, ':position' => 2))->fetchColumn());
 	}
 	
 	$lists['Levels (All Dancers)'] = array_filter($lists['Levels (All Dancers)']);
@@ -33,10 +33,10 @@ if ($event->has_levels()) {
 $lists['Packages'] = array();
 $packages = $event->get_items_where(array(':preregistration' => 1, ':type' => 'package'));
 foreach ($packages as $item) {
-	$lists['Packages'][$item->get_name()] = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` != 2', array(':item_id' => $item->get_id()))->fetchColumn();
+	$lists['Packages'][$item->get_name()] = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` != 2', array(':item_id' => $item->get_id()))->fetchColumn();
 	
 	if ($event->has_vip()) {
-		$vip_count = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` = 2', array(':item_id' => $item->get_id()))->fetchColumn();
+		$vip_count = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` = 2', array(':item_id' => $item->get_id()))->fetchColumn();
 		
 		if ($vip_count) {
 			$lists['Packages'][$item->get_name()] .= sprintf(' (+%d %s)', $vip_count, _n('VIP', 'VIPs', $vip_count, 'nsevent'));

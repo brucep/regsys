@@ -95,7 +95,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 		else {
 			if (!isset($this->price_scaled)) {
-				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`item_id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items USING(item_id) JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
 				
 				$this->price_scaled = self::$database->query('SELECT scale_price FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers <= scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->item_id, ':number_dancers' => $number_dancers))->fetchColumn();
 			}
@@ -122,7 +122,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 		else {
 			if (!isset($this->price_tier)) {
-				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items USING(item_id) JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
 				
 				$this->price_tier = (int) self::$database->query('SELECT scale_count FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers < scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->item_id, ':number_dancers' => $number_dancers))->fetchColumn();
 			}
@@ -137,7 +137,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 			$order_by = ($this->meta != 'position') ? '' : 'item_meta DESC, ';
 			$order_by .= 'last_name ASC, first_name ASC';
 			
-			$this->registered_dancers = self::$database->query('SELECT %1$s_dancers.*, %1$s_registrations.`item_meta` FROM %1$s_registrations LEFT JOIN %1$s_dancers ON id = dancer_id WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id ORDER BY '.$order_by, array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+			$this->registered_dancers = self::$database->query('SELECT %1$s_dancers.*, %1$s_registrations.`item_meta` FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id ORDER BY '.$order_by, array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 		}
 		
 		return $this->registered_dancers;
@@ -223,11 +223,11 @@ class NSEvent_Model_Item extends NSEvent_Model
 		
 		switch ($join_table) {
 			case 'items':
-				$query = ' JOIN %1$s_items ON %1$s_items.`id` = %1$s_registrations.`item_id`'.$query;
+				$query = ' JOIN %1$s_items USING(item_id)'.$query;
 				break;
 			
 			case 'dancers':
-				$query = ' JOIN %1$s_dancers ON %1$s_dancers.`id` = %1$s_registrations.`dancer_id`'.$query;
+				$query = ' JOIN %1$s_dancers USING(dancer_id)'.$query;
 				break;
 		}
 		
