@@ -12,7 +12,7 @@ else {
 $database = self::get_database_connection();
 $item_ids = array('package' => null, 'competition' => null, 'shirt' => null);
 foreach ($item_ids as $key => &$value) {
-	$value = $database->query('SELECT id FROM %1$s_items WHERE event_id = :event_id AND type = :type', array(':event_id' => $event->get_id(), ':type' => $key))->fetchAll(PDO::FETCH_COLUMN, 0);
+	$value = $database->query('SELECT item_id FROM %1$s_items WHERE event_id = :event_id AND type = :type', array(':event_id' => $event->get_id(), ':type' => $key))->fetchAll(PDO::FETCH_COLUMN, 0);
 }
 unset($key, $value);
 
