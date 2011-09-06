@@ -95,7 +95,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 		else {
 			if (!isset($this->price_scaled)) {
-				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items USING(item_id) JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items USING(item_id) JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`item_id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
 				
 				$this->price_scaled = self::$database->query('SELECT scale_price FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers <= scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->item_id, ':number_dancers' => $number_dancers))->fetchColumn();
 			}
@@ -122,7 +122,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 		else {
 			if (!isset($this->price_tier)) {
-				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items USING(item_id) JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items USING(item_id) JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`item_id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
 				
 				$this->price_tier = (int) self::$database->query('SELECT scale_count FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers < scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->item_id, ':number_dancers' => $number_dancers))->fetchColumn();
 			}
