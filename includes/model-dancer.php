@@ -3,7 +3,7 @@
 class NSEvent_Model_Dancer extends NSEvent_Model
 {
 	private $event_id,
-	        $id,
+	        $dancer_id,
 	        $first_name,
 	        $last_name,
 	        $email,
@@ -40,7 +40,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	
 	public function __toString()
 	{
-		return sprintf('%s %s [#%d]', $this->first_name, $this->last_name, $this->id);
+		return sprintf('%s %s [#%d]', $this->first_name, $this->last_name, $this->dancer_id);
 	}
 		
 	public function add($event_id)
@@ -65,14 +65,14 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 			':note'              => (string) $this->note,
 			));
 		
-		$this->id = self::$database->lastInsertID();
+		$this->dancer_id = self::$database->lastInsertID();
 	}
 	
 	public function add_housing()
 	{
 		self::$database->query('INSERT %1$s_housing VALUES (:event_id, :dancer_id, :housing_type, :housing_spots_available, :housing_nights, :housing_gender, :housing_bedtime, :housing_pets, :housing_smoke, :housing_from_scene, :housing_comment)', array(
 			':event_id'                => $this->event_id,
-			':dancer_id'               => $this->id,
+			':dancer_id'               => $this->dancer_id,
 			':housing_type'            => (int) $this->housing_type,
 			':housing_spots_available' => (int) $this->housing_spots_available,
 			':housing_nights'          => (int) $this->housing_nights,
@@ -89,7 +89,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	{
 		self::$database->query('INSERT %1$s_housing_providers VALUES (:event_id, :dancer_id, :available, :smoking, :pets, :gender, :nights, :comment)', array(
 			':event_id'  => $event_id,
-			':dancer_id' => $this->id,
+			':dancer_id' => $this->dancer_id,
 			':available' => $parameters['housing_provider_available'],
 			':smoking'   => $parameters['housing_provider_smoking'],
 			':pets'      => $parameters['housing_provider_pets'],
@@ -103,7 +103,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	{
 		self::$database->query('INSERT %1$s_housing_needed VALUES (:event_id, :dancer_id, :no_smoking, :no_pets, :gender, :nights, :comment)', array(
 			':event_id'   => $event_id,
-			':dancer_id'  => $this->id,
+			':dancer_id'  => $this->dancer_id,
 			':no_smoking' => $parameters['housing_needed_no_smoking'],
 			':no_pets'    => $parameters['housing_needed_no_pets'],
 			':gender'     => $parameters['housing_needed_gender'],
@@ -114,13 +114,13 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	
 	public function delete()
 	{
-	    $statement = self::$database->query('DELETE FROM %1$s_dancers WHERE event_id = :event_id AND id = :id LIMIT 1', array(':event_id' => $this->event_id, ':id' => $this->id));
+	    $statement = self::$database->query('DELETE FROM %1$s_dancers WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id));
 	    $counts['dancer'] = $statement->rowCount();
 	    
-	    $statement = self::$database->query('DELETE FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->id));
+	    $statement = self::$database->query('DELETE FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id));
 	    $counts['registrations'] = $statement->rowCount();
 	    
-	    $statement = self::$database->query('DELETE FROM %1$s_housing WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $this->event_id, ':dancer_id' => $this->id));
+	    $statement = self::$database->query('DELETE FROM %1$s_housing WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id));
 	    $counts['housing'] = $statement->rowCount();
 	    	    
 	    return $counts;
@@ -131,13 +131,13 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		$this->payment_confirmed = $payment_confirmed;
 		$this->payment_owed = $payment_owed;
 		
-		$statement = self::$database->query('UPDATE %1$s_dancers SET payment_confirmed = :payment_confirmed, payment_owed = :payment_owed WHERE event_id = :event_id AND id = :id LIMIT 1', array(':event_id' => $this->event_id, ':id' => $this->id, ':payment_confirmed' => $payment_confirmed, ':payment_owed' => $payment_owed));
+		$statement = self::$database->query('UPDATE %1$s_dancers SET payment_confirmed = :payment_confirmed, payment_owed = :payment_owed WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id, ':payment_confirmed' => $payment_confirmed, ':payment_owed' => $payment_owed));
 		return (bool) $statement->rowCount();
 	}
 	
 	public function get_id()
 	{
-		return (int) $this->id;
+		return (int) $this->dancer_id;
 	}
 	
 	public function get_name()
@@ -325,7 +325,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	public function get_price_total()
 	{
 		if (!isset($this->price_total)) {
-			$this->price_total = self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->id))->fetchColumn();
+			$this->price_total = self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchColumn();
 		}
 		
 		return ($this->price_total !== false) ? (int) $this->price_total : false;
@@ -337,7 +337,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		{
 			$this->registered_items = array();
 			
-			$registered_items = self::$database->query('SELECT %1$s_items.*, %1$s_registrations.`price` as registered_price, %1$s_registrations.`item_meta` as registered_meta FROM %1$s_registrations LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
+			$registered_items = self::$database->query('SELECT %1$s_items.*, %1$s_registrations.`price` as registered_price, %1$s_registrations.`item_meta` as registered_meta FROM %1$s_registrations LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
 			
 			foreach ($registered_items as $item) {
 				$this->registered_items[$item->get_id()] = $item;
@@ -369,7 +369,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	public function get_registered_package_id()
 	{
 		if (!isset($this->registered_package_id)) {
-			$this->registered_package_id = self::$database->query('SELECT %1$s_registrations.`item_id` FROM %1$s_registrations LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id AND %1$s_items.`type` = "package"', array(':event_id' => $this->event_id, ':dancer_id' => $this->id))->fetchColumn();
+			$this->registered_package_id = self::$database->query('SELECT %1$s_registrations.`item_id` FROM %1$s_registrations LEFT JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id AND %1$s_items.`type` = "package"', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchColumn();
 		}
 		
 		return ($this->registered_package_id !== false) ? (int) $this->registered_package_id : false;

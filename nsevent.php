@@ -290,7 +290,7 @@ class NSEvent
 				switch ($table):
 					case 'events':
 						$query = sprintf("CREATE TABLE `%s` (
-							`id`                     int(10) unsigned NOT NULL auto_increment,
+							`event_id`               int(10) unsigned NOT NULL auto_increment,
 							`name`                   varchar(255) NOT NULL,
 							`date_mail_prereg_end`   int(10) unsigned NOT NULL default '0',
 							`date_paypal_prereg_end` int(10) unsigned NOT NULL default '0',
@@ -311,7 +311,7 @@ class NSEvent
 					case 'items':
 						$query = sprintf("CREATE TABLE `%s` (
 							`event_id`               int(10) unsigned NOT NULL,
-							`id`                     int(10) unsigned NOT NULL AUTO_INCREMENT,
+							`item_id`                int(10) unsigned NOT NULL AUTO_INCREMENT,
 							`name`                   varchar(200) NOT NULL,
 							`type`                   varchar(11) NOT NULL,
 							`preregistration`        tinyint(1) unsigned NOT NULL DEFAULT '1',
@@ -331,7 +331,7 @@ class NSEvent
 					case 'dancers':
 						$query = sprintf("CREATE TABLE `%s` (
 							`event_id`          int(10) unsigned NOT NULL,
-							`id`                int(10) unsigned NOT NULL auto_increment,
+							`dancer_id`         int(10) unsigned NOT NULL auto_increment,
 							`first_name`        varchar(100) NOT NULL,
 							`last_name`         varchar(100) NOT NULL,
 							`email`             varchar(100) NOT NULL,

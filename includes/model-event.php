@@ -2,7 +2,7 @@
 
 class NSEvent_Model_Event extends NSEvent_Model
 {
-	private $id,
+	private $event_id,
 	        $name,
 	        $date_mail_prereg_end,
 	        $date_paypal_prereg_end,
@@ -38,7 +38,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function __toString()
 	{
-		return sprintf('%s [#%d]', $this->name, $this->id);
+		return sprintf('%s [#%d]', $this->name, $this->event_id);
 	}
 	
 	static public function get_events()
@@ -48,12 +48,12 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	static public function get_event_by_id($event_id)
 	{
-		return self::$database->query('SELECT * FROM %1$s_events WHERE id = :id', array(':id' => $event_id))->fetchObject('NSEvent_Model_Event');
+		return self::$database->query('SELECT * FROM %1$s_events WHERE event_id = :event_id', array(':event_id' => $event_id))->fetchObject('NSEvent_Model_Event');
 	}
 		
 	public function get_items()
 	{
-		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
+		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
 	}
 	
 	public function get_items_where(array $where)
@@ -65,19 +65,19 @@ class NSEvent_Model_Event extends NSEvent_Model
 		}
 		
 		$query = implode(' AND', $query);
-		$where[':event_id'] = $this->id;
+		$where[':event_id'] = $this->event_id;
 		
 		return self::$database->query('SELECT * FROM %1$s_items WHERE '.$query, $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
 	}
 	
 	public function get_item_by_id($item_id)
 	{
-		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id AND id = :id', array(':event_id' => $this->id, ':id' => $item_id))->fetchObject('NSEvent_Model_Item');
+		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $item_id))->fetchObject('NSEvent_Model_Item');
 	}
 		
 	public function get_dancers()
 	{
-		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing ON %1$s_housing.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing ON %1$s_housing.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 	}
 		
 	public function get_dancers_where(array $where)
@@ -89,24 +89,24 @@ class NSEvent_Model_Event extends NSEvent_Model
 		}
 		
 		$query = implode(' AND', $query);
-		$where[':event_id'] = $this->id;
+		$where[':event_id'] = $this->event_id;
 		
 		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing ON %1$s_housing.`dancer_id` = %1$s_dancers.`id` WHERE '.$query.' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 	}
 	
 	public function get_dancer_ids()
 	{
-		return self::$database->query('SELECT id FROM %1$s_dancers WHERE event_id = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->id))->fetchAll(PDO::FETCH_COLUMN, 0);
+		return self::$database->query('SELECT dancer_id FROM %1$s_dancers WHERE event_id = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_COLUMN, 0);
 	}
 		
 	public function get_dancer_by_id($dancer_id)
 	{
-		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing ON %1$s_housing.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_dancers.`event_id` = :event_id AND id = :id', array(':event_id' => $this->id, ':id' => $dancer_id))->fetchObject('NSEvent_Model_Dancer');
+		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing ON %1$s_housing.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_dancers.`event_id` = :event_id AND %1$s_dancers.`dancer_id` = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $dancer_id))->fetchObject('NSEvent_Model_Dancer');
 	}
 	
 	public function get_volunteers()
 	{
-		return ($this->has_volunteers()) ? self::$database->query('SELECT * FROM %1$s_dancers WHERE event_id = :event_id AND status = 1 ORDER BY last_name ASC, first_name ASC', array(':event_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer') : array();
+		return ($this->has_volunteers()) ? self::$database->query('SELECT * FROM %1$s_dancers WHERE event_id = :event_id AND status = 1 ORDER BY last_name ASC, first_name ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer') : array();
 	}
 	
 	public function count_dancers(array $where = array())
@@ -118,9 +118,9 @@ class NSEvent_Model_Event extends NSEvent_Model
 		}
 		
 		$query = implode(' AND', $query);
-		$where[':event_id'] = $this->id;
+		$where[':event_id'] = $this->event_id;
 		
-		$result = self::$database->query('SELECT COUNT(id) FROM %1$s_dancers WHERE '.$query, $where)->fetchColumn();
+		$result = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_dancers WHERE '.$query, $where)->fetchColumn();
 		return ($result !== false) ? (int) $result : false;
 	}
 	
@@ -135,7 +135,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function count_housing_spots_available()
 	{
-		$result = self::$database->query('SELECT SUM(housing_spots_available) FROM %1$s_housing WHERE event_id = :event_id AND housing_type = 2', array(':event_id' => $this->id))->fetchColumn();
+		$result = self::$database->query('SELECT SUM(housing_spots_available) FROM %1$s_housing WHERE event_id = :event_id AND housing_type = 2', array(':event_id' => $this->event_id))->fetchColumn();
 		return ($result !== false) ? (int) $result : false;
 	}
 	
@@ -149,7 +149,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 		
 		$where_query = ' WHERE '.implode(' AND', $where_query);
 		
-		$where[':event_id'] = $this->id;
+		$where[':event_id'] = $this->event_id;
 		
 		$join_query = '';
 		
@@ -168,7 +168,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	public function add_registration($parameters)
 	{
 		$statement = self::$database->query('INSERT %1$s_registrations VALUES (:event_id, :dancer_id, :item_id, :price, :item_meta)', array(
-			':event_id'  => $this->id,
+			':event_id'  => $this->event_id,
 			':dancer_id' => $parameters['dancer_id'],
 			':item_id'   => $parameters['item_id'],
 			':price'     => $parameters['price'],
@@ -180,7 +180,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function get_id()
 	{
-		return (int) $this->id;
+		return (int) $this->event_id;
 	}
 	
 	public function get_name()
@@ -239,7 +239,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	{
 		$href = sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=%s',
 			get_bloginfo('wpurl'),
-			$this->id,
+			$this->event_id,
 			rawurlencode($request));
 		
 		foreach ($parameters as $key => $value) {
@@ -265,7 +265,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function get_total_money_from_registrations()
 	{
-		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id', array(':event_id' => $this->id))->fetchColumn();
+		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id', array(':event_id' => $this->event_id))->fetchColumn();
 	}
 	
 	public function has_discount()

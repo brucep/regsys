@@ -3,7 +3,7 @@
 class NSEvent_Model_Item extends NSEvent_Model
 {
 	private $event_id,
-	        $id,
+	        $item_id,
 	        $name,
 	        $date_expires,
 	        $description,
@@ -25,12 +25,12 @@ class NSEvent_Model_Item extends NSEvent_Model
 		
 	public function __toString()
 	{
-		return sprintf('%s [#%d]', $this->name, $this->id);
+		return sprintf('%s [#%d]', $this->name, $this->item_id);
 	}
 	
 	public function get_id()
 	{
-		return (int) $this->id;
+		return (int) $this->item_id;
 	}
 	
 	public function get_name()
@@ -95,9 +95,9 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 		else {
 			if (!isset($this->price_scaled)) {
-				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->id))->fetchColumn();
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`item_id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
 				
-				$this->price_scaled = self::$database->query('SELECT scale_price FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers <= scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->id, ':number_dancers' => $number_dancers))->fetchColumn();
+				$this->price_scaled = self::$database->query('SELECT scale_price FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers <= scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->item_id, ':number_dancers' => $number_dancers))->fetchColumn();
 			}
 			
 			$price = !empty($this->price_scaled) ? $this->price_scaled : $this->price_prereg;
@@ -122,9 +122,9 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 		else {
 			if (!isset($this->price_tier)) {
-				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->id))->fetchColumn();
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations JOIN %1$s_items ON %1$s_registrations.`item_id` = %1$s_items.`id` JOIN %1$s_dancers ON %1$s_registrations.`dancer_id` = %1$s_dancers.`id` WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`id` = :item_id AND %1$s_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
 				
-				$this->price_tier = (int) self::$database->query('SELECT scale_count FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers < scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->id, ':number_dancers' => $number_dancers))->fetchColumn();
+				$this->price_tier = (int) self::$database->query('SELECT scale_count FROM %1$s_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers < scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->item_id, ':number_dancers' => $number_dancers))->fetchColumn();
 			}
 			
 			return $this->price_tier;
@@ -137,7 +137,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 			$order_by = ($this->meta != 'position') ? '' : 'item_meta DESC, ';
 			$order_by .= 'last_name ASC, first_name ASC';
 			
-			$this->registered_dancers = self::$database->query('SELECT %1$s_dancers.*, %1$s_registrations.`item_meta` FROM %1$s_registrations LEFT JOIN %1$s_dancers ON id = dancer_id WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id ORDER BY '.$order_by, array(':event_id' => $this->event_id, ':item_id' => $this->id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+			$this->registered_dancers = self::$database->query('SELECT %1$s_dancers.*, %1$s_registrations.`item_meta` FROM %1$s_registrations LEFT JOIN %1$s_dancers ON id = dancer_id WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id ORDER BY '.$order_by, array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 		}
 		
 		return $this->registered_dancers;
@@ -155,7 +155,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 	
 	public function get_total_money_from_registrations()
 	{
-		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $this->id))->fetchColumn();
+		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
 	}
 	
 	public function get_type()
@@ -177,15 +177,15 @@ class NSEvent_Model_Item extends NSEvent_Model
 			else {
 				if ($this->limit_total) {
 					$limit = $this->limit_total;
-					$number_dancers = $this->count_registrations_where(array(':item_id' => $this->id));
+					$number_dancers = $this->count_registrations_where(array(':item_id' => $this->item_id));
 				}
 				elseif ($position === false) {
 					$limit = $this->limit_per_position * 2;
-					return $limit - $this->count_registrations_where(array(':item_id' => $this->id));
+					return $limit - $this->count_registrations_where(array(':item_id' => $this->item_id));
 				}
 				else {
 					$limit = $this->limit_per_position;
-					$number_dancers = $this->count_registrations_where(array(':item_id' => $this->id, ':position' => $position), 'dancers');
+					$number_dancers = $this->count_registrations_where(array(':item_id' => $this->item_id, ':position' => $position), 'dancers');
 				}
 			
 				if ($number_dancers !== false) {
@@ -211,7 +211,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 	
 	private function count_registrations_where(array $where = array(), $join_table = false)
 	{
-		$where[':item_id'] = $this->id;
+		$where[':item_id'] = $this->item_id;
 		$query = array('%1$s_registrations.`event_id` = :event_id');
 		
 		foreach ($where as $field => $value) {
