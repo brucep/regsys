@@ -51,12 +51,12 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return self::$database->query('SELECT * FROM %1$s_events WHERE event_id = :event_id', array(':event_id' => $event_id))->fetchObject('NSEvent_Model_Event');
 	}
 		
-	public function get_items()
+	public function items()
 	{
 		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
 	}
 	
-	public function get_items_where(array $where)
+	public function items_where(array $where)
 	{
 		$query = array('`event_id` = :event_id');
 		
@@ -70,17 +70,17 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return self::$database->query('SELECT * FROM %1$s_items WHERE '.$query, $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
 	}
 	
-	public function get_item_by_id($item_id)
+	public function item_by_id($item_id)
 	{
 		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $item_id))->fetchObject('NSEvent_Model_Item');
 	}
 		
-	public function get_dancers()
+	public function dancers()
 	{
 		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 	}
 		
-	public function get_dancers_where(array $where)
+	public function dancers_where(array $where)
 	{
 		$query = array('%1$s_dancers.`event_id` = :event_id');
 		
@@ -94,12 +94,12 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing USING(dancer_id) WHERE '.$query.' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 	}
 	
-	public function get_dancer_by_id($dancer_id)
+	public function dancer_by_id($dancer_id)
 	{
 		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id AND %1$s_dancers.`dancer_id` = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $dancer_id))->fetchObject('NSEvent_Model_Dancer');
 	}
 	
-	public function get_volunteers()
+	public function volunteers()
 	{
 		return ($this->has_volunteers()) ? self::$database->query('SELECT * FROM %1$s_dancers WHERE event_id = :event_id AND status = 1 ORDER BY last_name ASC, first_name ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer') : array();
 	}
@@ -173,27 +173,27 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return $statement->rowCount();
 	}
 	
-	public function get_id()
+	public function id()
 	{
 		return (int) $this->event_id;
 	}
 	
-	public function get_name()
+	public function name()
 	{
 		return $this->name;
 	}
 	
-	public function get_date_mail_prereg_end($format = false)
+	public function date_mail_prereg_end($format = false)
 	{
 		return ($format === false) ? (int) $this->date_mail_prereg_end : date($format, $this->date_mail_prereg_end);
 	}
 	
-	public function get_date_paypal_prereg_end($format = false)
+	public function date_paypal_prereg_end($format = false)
 	{
 		return ($format === false) ? (int) $this->date_paypal_prereg_end : date($format, $this->date_paypal_prereg_end);
 	}
 	
-	public function get_date_refund_end($format = false)
+	public function date_refund_end($format = false)
 	{
 		if ($this->date_refund_end) {
 			$timestamp = $this->date_refund_end;
@@ -205,32 +205,32 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
 	}
 	
-	public function get_discount_limit()
+	public function discount_limit()
 	{
 		return (int) $this->limit_discount;
 	}
 	
-	public function get_discount_org_name()
+	public function discount_org_name()
 	{
 		return $this->discount_org_name;
 	}
 	
-	public function get_housing_nights()
+	public function housing_nights()
 	{
 		return $this->has_housing ? self::bit_field($this->housing_nights, self::$possible_housing_nights) : array();
 	}
 	
-	public function get_levels()
+	public function levels()
 	{
 		return $this->levels;
 	}
 	
-	public function get_level_for_index($index, $default = false)
+	public function level_for_index($index, $default = false)
 	{
 		return isset($this->levels[$index]) ? $this->levels[$index] : $default;
 	}
 		
-	public function get_request_href($request, array $parameters = array())
+	public function request_href($request, array $parameters = array())
 	{
 		$href = sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=%s',
 			get_bloginfo('wpurl'),
@@ -244,21 +244,21 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return $href;
 	}
 	
-	public function get_request_link($request, $label, array $parameters = array(), $class = '', $format = '')
+	public function request_link($request, $label, array $parameters = array(), $class = '', $format = '')
 	{
 		return sprintf('<a href="%1$s%4$s"%3$s>%2$s</a>',
-			$this->get_request_href($request, $parameters),
+			$this->request_href($request, $parameters),
 			esc_html($label),
 			empty($class)  ? '' : sprintf(' class="%s"', esc_attr($class)),
 			empty($format) ? '' : sprintf('&amp;format=%s', rawurlencode($format)));
 	}
 	
-	public function get_shirt_description()
+	public function shirt_description()
 	{
 		return $this->shirt_description;
 	}
 	
-	public function get_total_money_from_registrations()
+	public function total_money_from_registrations()
 	{
 		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id', array(':event_id' => $this->event_id))->fetchColumn();
 	}

@@ -28,42 +28,42 @@ class NSEvent_Model_Item extends NSEvent_Model
 		return sprintf('%s [#%d]', $this->name, $this->item_id);
 	}
 	
-	public function get_id()
+	public function id()
 	{
 		return (int) $this->item_id;
 	}
 	
-	public function get_name()
+	public function name()
 	{
 		return $this->name;
 	}
 	
-	public function get_description()
+	public function description()
 	{
 		return $this->description;
 	}
 	
-	public function get_date_expires($format = false)
+	public function date_expires($format = false)
 	{
 		return ($format === false) ? (int) $this->date_expires : date($format, $this->date_expires);
 	}
 	
-	public function get_limit_per_position()
+	public function limit_per_position()
 	{
 		return (int) $this->limit_per_position;
 	}
 	
-	public function get_limit_total()
+	public function limit_total()
 	{
 		return (int) $this->limit_total;
 	}
 	
-	public function get_meta()
+	public function meta()
 	{
 		return $this->meta;
 	}
 	
-	public function get_meta_label()
+	public function meta_label()
 	{
 		switch ($this->meta) {
 			case 'position':
@@ -83,12 +83,12 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 	}
 	
-	public function get_price_at_door()
+	public function price_at_door()
 	{
 		return (int) $this->price_door;
 	}
 	
-	public function get_price_for_prereg($discount = false)
+	public function price_for_prereg($discount = false)
 	{
 		if ($this->type != 'package') {
 			$price = $this->price_prereg;
@@ -110,12 +110,12 @@ class NSEvent_Model_Item extends NSEvent_Model
 		return (int) $price;
 	}
 	
-	public function get_price_for_vip()
+	public function price_for_vip()
 	{
 		return (int) $this->price_vip;
 	}
 	
-	public function get_price_tier()
+	public function price_tier()
 	{
 		if ($this->type != 'package') {
 			return false;
@@ -131,7 +131,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 	}
 	
-	public function get_registered_dancers()
+	public function registered_dancers()
 	{
 		if (!isset($this->registered_dancers)) {
 			$order_by = ($this->meta != 'position') ? '' : 'item_meta DESC, ';
@@ -143,22 +143,22 @@ class NSEvent_Model_Item extends NSEvent_Model
 		return $this->registered_dancers;
 	}
 	
-	public function get_registered_meta()
+	public function registered_meta()
 	{
 		return $this->registered_meta;
 	}
 	
-	public function get_registered_price()
+	public function registered_price()
 	{
 		return $this->registered_price;
 	}
 	
-	public function get_total_money_from_registrations()
+	public function total_money_from_registrations()
 	{
 		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
 	}
 	
-	public function get_type()
+	public function type()
 	{
 		return $this->type;
 	}

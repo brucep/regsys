@@ -135,49 +135,49 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return (bool) $statement->rowCount();
 	}
 	
-	public function get_id()
+	public function id()
 	{
 		return (int) $this->dancer_id;
 	}
 	
-	public function get_name()
+	public function name()
 	{
 		return sprintf('%s %s', $this->first_name, $this->last_name);
 	}
 	
-	public function get_name_last_first()
+	public function name_last_first()
 	{
 		return sprintf('%s, %s', $this->last_name, $this->first_name);
 	}
 	
-	public function get_first_name()
+	public function first_name()
 	{
 		return $this->first_name;
 	}
 	
-	public function get_last_name()
+	public function last_name()
 	{
 		return $this->last_name;
 	}
 		
-	public function get_date_postmark_by($format = false)
+	public function date_postmark_by($format = false)
 	{
 		$timestamp = strtotime(sprintf('+%d days', self::$options['postmark_within']), $this->date_registered);
 		
 		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
 	}
 	
-	public function get_date_registered($format = false)
+	public function date_registered($format = false)
 	{
 		return ($format === false) ? (int) $this->date_registered : date($format, $this->date_registered);
 	}
 	
-	public function get_email()
+	public function email()
 	{
 		return $this->email;
 	}
 	
-	public function get_housing_bedtime()
+	public function housing_bedtime()
 	{
 		switch ($this->housing_bedtime) {
 			case 1:
@@ -191,12 +191,12 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		}
 	}
 	
-	public function get_housing_comment()
+	public function housing_comment()
 	{
 		return $this->housing_comment;
 	}
 	
-	public function get_housing_for_night_by_index($night_id)
+	public function housing_for_night_by_index($night_id)
 	{
 		if (!isset($this->housing_nights_array)) {
 			$this->housing_nights_array = array_filter(self::bit_field($this->housing_nights, NSEvent_Model_Event::$possible_housing_nights, 'booleans'));
@@ -205,12 +205,12 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return isset($this->housing_nights_array[$night_id]) ? $this->housing_nights_array[$night_id] : false;
 	}
 	
-	public function get_housing_from_scene()
+	public function housing_from_scene()
 	{
 		return $this->housing_from_scene;
 	}
 	
-	public function get_housing_gender()
+	public function housing_gender()
 	{
 		switch ($this->housing_gender) {
 			case 1:
@@ -224,37 +224,37 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		}
 	}
 	
-	public function get_housing_nights(array $event_nights)
+	public function housing_nights(array $event_nights)
 	{
 		return isset($this->housing_nights) ? self::bit_field($this->housing_nights, $event_nights, 'string') : false;
 	}
 	
-	public function get_housing_spots_available()
+	public function housing_spots_available()
 	{
 		return (int) $this->housing_spots_available;
 	}
 	
-	public function get_housing_has_pets()
+	public function housing_has_pets()
 	{
 		return ($this->housing_type == 2 and $this->housing_pets == 1);
 	}
 	
-	public function get_housing_has_smoke()
+	public function housing_has_smoke()
 	{
 		return ($this->housing_type == 2 and $this->housing_smoke == 1);
 	}
 	
-	public function get_housing_prefers_no_pets()
+	public function housing_prefers_no_pets()
 	{
 		return ($this->housing_type == 1 and $this->housing_pets == 1);
 	}
 	
-	public function get_housing_prefers_no_smoke()
+	public function housing_prefers_no_smoke()
 	{
 		return ($this->housing_type == 1 and $this->housing_smoke == 1);
 	}
 	
-	public function get_housing_type()
+	public function housing_type()
 	{
 		switch ($this->housing_type) {
 			case 1:
@@ -268,37 +268,37 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		}
 	}
 	
-	public function get_level()
+	public function level()
 	{
 		return (int) $this->level;
 	}
 	
-	public function get_mobile_phone()
+	public function mobile_phone()
 	{
 		return $this->mobile_phone;
 	}
 	
-	public function get_payment_confirmed()
+	public function payment_confirmed()
 	{
 		return (bool) $this->payment_confirmed;
 	}
 	
-	public function get_payment_discount()
+	public function payment_discount()
 	{
 		return (int) $this->payment_discount;
 	}
 	
-	public function get_payment_method()
+	public function payment_method()
 	{
 		return $this->payment_method;
 	}
 	
-	public function get_payment_owed()
+	public function payment_owed()
 	{
 		return (int) $this->payment_owed;
 	}
 	
-	public function get_position()
+	public function position()
 	{
 		switch ($this->position) {
 			case 1:
@@ -312,17 +312,17 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		}
 	}
 	
-	public function get_price_for_registered_item($item_id)
+	public function price_for_registered_item($item_id)
 	{
 		if (!isset($this->registered_items)) {
-			$this->get_registered_items();
+			$this->registered_items();
 		}
 		
-		return array_key_exists($item_id, $this->registered_items) ? $this->registered_items[$item_id]->get_registered_price() : false;
+		return array_key_exists($item_id, $this->registered_items) ? $this->registered_items[$item_id]->registered_price() : false;
 	}
 	
 	
-	public function get_price_total()
+	public function price_total()
 	{
 		if (!isset($this->price_total)) {
 			$this->price_total = self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchColumn();
@@ -331,7 +331,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return ($this->price_total !== false) ? (int) $this->price_total : false;
 	}
 	
-	public function get_registered_items($item_id = false)
+	public function registered_items($item_id = false)
 	{
 		if (!isset($this->registered_items))
 		{
@@ -340,7 +340,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 			$registered_items = self::$database->query('SELECT %1$s_items.*, %1$s_registrations.`price` as registered_price, %1$s_registrations.`item_meta` as registered_meta FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
 			
 			foreach ($registered_items as $item) {
-				$this->registered_items[$item->get_id()] = $item;
+				$this->registered_items[$item->id()] = $item;
 			}
 		}
 		
@@ -348,8 +348,8 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 			$result = array();
 			
 			foreach ($this->registered_items as $item) {
-				if (in_array($item->get_id(), $item_id)) {
-					$result[$item->get_id()] = $item;
+				if (in_array($item->id(), $item_id)) {
+					$result[$item->id()] = $item;
 				}
 			}
 			
@@ -366,7 +366,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		}
 	}
 	
-	public function get_registered_package_id()
+	public function registered_package_id()
 	{
 		if (!isset($this->registered_package_id)) {
 			$this->registered_package_id = self::$database->query('SELECT %1$s_registrations.`item_id` FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id AND %1$s_items.`type` = "package"', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchColumn();
