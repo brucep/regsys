@@ -273,6 +273,11 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return (int) $this->level;
 	}
 	
+	public function mailto()
+	{
+		return 'mailto:' . rawurlencode(sprintf('%s %s <%s>', $this->first_name, $this->last_name, $this->email));
+	}
+	
 	public function mobile_phone()
 	{
 		return $this->mobile_phone;
@@ -296,6 +301,38 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	public function payment_owed()
 	{
 		return (int) $this->payment_owed;
+	}
+	
+	public function paypal_href()
+	{
+		$href = sprintf('https://%1$s/cgi-bin/webscr?cmd=_cart&upload=1&no_shipping=1&business=%2$s&custom=%3$d',
+			!self::$options['paypal_sandbox'] ? 'www.paypal.com' : 'www.sandbox.paypal.com',
+			rawurlencode(self::$options['paypal_business']),
+			$this->dancer_id);
+		
+		if (!empty($options['paypal_fee']) and !$dancer->is_vip()) {
+			$href .= sprintf('&item_name_1=%1$s&amount_1=%2$s', 'Processing%20Fee', $options['paypal_fee']);
+			$i = 2;
+		}
+		else {
+			$i = 1;
+		}
+		
+		foreach ($this->registered_items() as $item) {
+			if ($item->registered_price() == 0) {
+				continue;
+			}
+			
+			$href .= sprintf('&item_name_%1$d=%2$s&amount_%1$d=%3$s', $i, rawurlencode($item->name()), rawurlencode($item->registered_price()));
+			
+			if ($item->meta() == 'size') {
+				$href .= sprintf('&on0_%1$d=%2$s&os0_%1$d=%3$s', $i, $item->meta_label(), ucfirst($item->registered_meta()));
+			}
+			
+			$i++;
+		}
+		
+		return $href;
 	}
 	
 	public function position()
