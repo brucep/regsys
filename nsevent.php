@@ -238,6 +238,7 @@ class NSEvent
 			'events',
 			'event_levels',
 			'items',
+			'item_prices',
 			'dancers',
 			'registrations',
 			'housing');
@@ -296,6 +297,16 @@ class NSEvent
 							`description`            varchar(255) NOT NULL DEFAULT '',
 							PRIMARY KEY (`id`)
 							);", $table_name);
+						break;
+					
+					case 'item_prices':
+						$query = sprintf("CREATE TABLE `%s` (
+							`event_id`    int(10) unsigned NOT NULL,
+							`item_id`     int(10) unsigned NOT NULL,
+							`scale_count` smallint(5) unsigned NOT NULL,
+							`scale_price` smallint(5) unsigned NOT NULL,
+							PRIMARY KEY (`event_id`,`item_id`,`scale_count`)
+						);", $table_name);
 						break;
 					
 					case 'dancers':
