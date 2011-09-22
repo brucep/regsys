@@ -13,6 +13,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	        $discounts_used,
 	        $has_discount,
 	        $has_housing,
+	        $has_levels,
 	        $has_vip,
 	        $has_volunteers,
 	        $housing_nights,
@@ -77,7 +78,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 		
 	public function dancers()
 	{
-		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 	}
 		
 	public function dancers_where(array $where)
@@ -91,12 +92,12 @@ class NSEvent_Model_Event extends NSEvent_Model
 		$query = implode(' AND', $query);
 		$where[':event_id'] = $this->event_id;
 		
-		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing USING(dancer_id) WHERE '.$query.' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE '.$query.' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 	}
 	
 	public function dancer_by_id($dancer_id)
 	{
-		return self::$database->query('SELECT *, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id AND %1$s_dancers.`dancer_id` = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $dancer_id))->fetchObject('NSEvent_Model_Dancer');
+		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id AND %1$s_dancers.`dancer_id` = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $dancer_id))->fetchObject('NSEvent_Model_Dancer');
 	}
 	
 	public function volunteers()
@@ -222,14 +223,13 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function levels()
 	{
+		if (!isset($this->levels)) {
+			$this->levels = self::$database->query('SELECT level_id, label, has_tryouts FROM %1$s_event_levels WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll();
+		}
+		
 		return $this->levels;
 	}
 	
-	public function level_for_index($index, $default = false)
-	{
-		return isset($this->levels[$index]) ? $this->levels[$index] : $default;
-	}
-		
 	public function request_href($request, array $parameters = array())
 	{
 		$href = sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=%s',
@@ -285,7 +285,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function has_levels()
 	{
-		return (!empty($this->levels));
+		return (bool) $this->has_levels;
 	}
 	
 	public function has_vip()

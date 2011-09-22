@@ -19,6 +19,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	        $housing_from_scene,
 	        $housing_comment,
 	        $level,
+	        $level_id,
 	        $mobile_phone,
 	        $note,
 	        $position,
@@ -270,7 +271,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	
 	public function level()
 	{
-		return (int) $this->level;
+		return $this->level;
 	}
 	
 	public function mailto()
