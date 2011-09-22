@@ -181,87 +181,46 @@ class NSEvent
 				throw new Exception(__('Cheatin&#8217; uh?'));
 			}
 			
-			if (empty($_GET['request'])) {
-				$_GET['request'] = 'index';
-			}
-			
-			$options = array_merge(self::$default_options, get_option('nsevent', array()));
-			
 			self::load_models();
 			NSEvent_Model::set_database(self::get_database_connection());
-			NSEvent_Model::set_options($options);
+			NSEvent_Model::set_options(array_merge(self::$default_options, get_option('nsevent', array())));
 			
-			switch ($_GET['request']) {
-				# List of events
-				case 'index':
-					$file = 'reports/index.php';
-					break;
-				
-				# Admin forms
-				case 'dancer-delete':
-				case 'dancer-edit':
-				case 'housing-delete':
-				case 'registration-add':
-				case 'resend-confirmation-email':
-					if (!current_user_can('administrator')) {
-						throw new Exception(__('Cheatin&#8217; uh?'));
-					}
-					if (empty($_GET['event_id'])) {
-						throw new Exception(__('Event ID not specified.', 'nsevent'));
-					}
-				    if ($_GET['event_id'] !== 'add' and (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id']))) {
-						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
-					}
-					if (empty($_GET['dancer'])) {
-						throw new Exception(__('Dancer ID not specified.', 'nsevent'));
-					}
-					if (!$dancer = $event->get_dancer_by_id($_GET['dancer'])) {
-						throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['parameter']));
-					}
-					require dirname(__FILE__).'/includes/form-input.php';
-					$file = sprintf('admin/%s.php', $_GET['request']);
-					break;
-				
-				case 'event-edit':
-					if (!current_user_can('administrator')) {
-						throw new Exception(__('Cheatin&#8217; uh?'));
-					}
-					if (empty($_GET['event_id'])) {
-						throw new Exception(__('Event ID not specified.', 'nsevent'));
-					}
-				    if ($_GET['event_id'] !== 'add' and (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id']))) {
-						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
-					}
-					require dirname(__FILE__).'/includes/form-input.php';
-					$file = sprintf('admin/%s.php', $_GET['request']);
-					break;
-				
-				# Reports
-				case 'housing-needed':
-				case 'housing-providers':
-					$file = 'reports/housing.php';
-				case 'index-event':
-				case 'competitions':
-				case 'dancer':
-				case 'dancers':
-				case 'money':
-				case 'numbers':
-				case 'packet-printout':
-				case 'reg-list':
-				case 'volunteers':
-					if (!$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id'])) {
-						throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $_GET['event_id']));
-					}
-					if (!isset($file)) {
-						$file = sprintf('reports/%s.php', $_GET['request']);
-					}
-					break;
-				
-				default:
-					throw new Exception(sprintf(__('Unable to handle page request: %s', 'nsevent'), esc_html($_GET['request'])));
+			require dirname(__FILE__) . '/includes/request-controller.php';
+			
+			if (empty($_GET['request'])) {
+				$_GET['request'] = 'report_index';
 			}
 			
-			require dirname(__FILE__)."/$file";
+			if (is_callable(array('NSEvent_RequestController', $_GET['request']))) {
+				if (substr($_GET['request'], 0, 6) == 'admin_' and !current_user_can('administrator')) {
+					throw new Exception(__('Cheatin&#8217; uh?'));
+				}
+				
+				$params = array();
+				
+				if (!in_array($_GET['request'], array('report_index'))) {
+					if (!$params['event'] = self::$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id'])) {
+						throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
+					}
+					
+					if (isset($_GET['dancer_id'])) {
+						if (!$params['dancer'] = self::$event->dancer_by_id($_GET['dancer_id'])) {
+							throw new Exception(sprintf('Dancer ID not found: %d', $_GET['dancer_id']));
+						}
+					}
+					
+					if (isset($_GET['item_id'])) {
+						if (!$params['item'] = self::$event->item_by_id($_GET['item_id'])) {
+							throw new Exception(sprintf('Item ID not found: %d', $_GET['dancer_id']));
+						}
+					}
+				}
+				
+				call_user_func_array(array('NSEvent_RequestController', $_GET['request']), $params);
+			}
+			else {
+				throw new Exception(sprintf('Unable to handle page request: %s', esc_html($_GET['request'])));
+			}
 		}
 		catch (Exception $e) {
 			printf('<div id="nsevent-exception">%s</div>', $e->getMessage());
