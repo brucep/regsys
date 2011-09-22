@@ -50,31 +50,19 @@ class NSEvent
 	{
 		$hookname = add_menu_page('Event Reports', 'Event Reports', 'edit_pages', 'nsevent', 'NSEvent::page_request');
 		add_submenu_page('nsevent', 'NSEvent Options', 'Options', 'administrator', 'nsevent-options', 'NSEvent::page_options');
+		add_action('admin_print_scripts-'.$hookname, 'NSEvent::admin_print_scripts');
 		add_action('admin_print_styles-'.$hookname, 'NSEvent::admin_print_styles');
 	}
-
+	
+	static public function admin_print_scripts()
+	{
+		wp_enqueue_script('nsevent-tablesorter',      plugins_url('js/jquery.tablesorter.min.js', __FILE__), array('jquery'));
+		wp_enqueue_script('nsevent-tablesorter-init', plugins_url('js/tablesorter-init.js', __FILE__), array('nsevent-tablesorter'));
+	}
+	
 	static public function admin_print_styles()
 	{
-	    if (!isset($_GET['style']) or !in_array($_GET['style'], array('iPhone', 'print'))) {
-    		wp_enqueue_style('nsevent-admin',        sprintf('%s/%s/css/admin-screen.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'screen and (min-device-width: 481px)');
-    		wp_enqueue_style('nsevent-admin-iphone', sprintf('%s/%s/css/admin-iphone.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'only screen and (max-device-width: 480px)');
-		}
-        elseif ($_GET['style'] === 'iPhone') {
-            wp_enqueue_style('nsevent-admin-iphone', sprintf('%s/%s/css/admin-iphone.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'screen');
-		}
-		elseif ($_GET['style'] === 'print') {
-			wp_enqueue_style('nsevent-admin-iphone', sprintf('%s/%s/css/admin-print.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'screen');
-		}
-		
-        
-		wp_enqueue_style('nsevent-admin-print',      sprintf('%s/%s/css/admin-print.css',  WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'print');
-		wp_enqueue_style('nsevent-admin-despise-ie', sprintf('%s/%s/css/admin-screen.css', WP_PLUGIN_URL, basename(__FILE__, '.php')), false, false, 'screen');
-		# http://iamzed.com/2010/01/07/using-wordpress-wp_enqueue_style-with-conditionals/
-		global $wp_styles;
-		$wp_styles->add_data('nsevent-admin-despise-ie', 'conditional', 'lte IE 8');
-		
-		wp_enqueue_script('nsevent-tablesorter',      sprintf('%s/%s/js/jquery.tablesorter.min.js',  WP_PLUGIN_URL, basename(__FILE__, '.php')), array('jquery'));
-		wp_enqueue_script('nsevent-tablesorter-init', sprintf('%s/%s/js/tablesorter-init.js',        WP_PLUGIN_URL, basename(__FILE__, '.php')), array('nsevent-tablesorter'));
+		wp_enqueue_style('nsevent-admin', plugins_url('css/admin.css', __FILE__));
 		echo '<meta name="viewport" content="initial-scale=1.0;" />';
 	}
 	
