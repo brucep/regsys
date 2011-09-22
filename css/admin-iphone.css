@@ -1,5 +1,3 @@
-@import "admin-common.css";
-
 /* Don't show the rest of the WordPress admin interface */
 #wphead, #adminmenuback, #adminmenuwrap, #screen-meta, #footer { display: none; }
 #wpcontent { margin-left: 4px; }
