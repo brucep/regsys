@@ -236,6 +236,7 @@ class NSEvent
 		
 		$tables = array(
 			'events',
+			'event_levels',
 			'items',
 			'dancers',
 			'registrations',
@@ -264,6 +265,16 @@ class NSEvent
 							`levels`                 varchar(255) NOT NULL,
 							`shirt_description`      text NOT NULL,
 							PRIMARY KEY  (`id`)
+							);", $table_name);
+						break;
+					
+					case 'event_levels':
+						$query = sprintf("CREATE TABLE `%s` (
+							`event_id`    int(10) unsigned NOT NULL,
+							`level_id`    tinyint(3) unsigned NOT NULL,
+							`label`       varchar(255) NOT NULL,
+							`has_tryouts` tinyint(1) unsigned NOT NULL DEFAULT '0',
+							PRIMARY KEY (`event_id`,`level_id`)
 							);", $table_name);
 						break;
 					
