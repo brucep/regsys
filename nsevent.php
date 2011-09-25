@@ -117,11 +117,17 @@ class NSEvent
 		return $options;
 	}
 	
+	static public function autoload($class)
+	{
+		if (substr($class, 0, 8) == 'NSEvent_') {
+			$class = implode('-', explode('_', strtolower(substr($class, 8))));
+			require dirname(__FILE__) . '/includes/' . $class . '.php';
+		}
+	}
+	
 	static public function get_database_connection()
 	{
 		global $wpdb;
-		
-		require_once dirname(__FILE__).'/includes/database.php';
 		
 		return new NSEvent_Database(array(
 			'host'     => DB_HOST,
@@ -133,14 +139,6 @@ class NSEvent
 			));
 	}
 	
-	static public function load_models()
-	{
-		require dirname(__FILE__).'/includes/model.php';
-		require dirname(__FILE__).'/includes/model-event.php';
-		require dirname(__FILE__).'/includes/model-item.php';
-		require dirname(__FILE__).'/includes/model-dancer.php';
-	}
-	
 	static public function page_options()
 	{
 		if (!current_user_can('administrator')) {
@@ -149,7 +147,6 @@ class NSEvent
 		
 		$options = array_merge(self::$default_options, get_option('nsevent', array()));
 		
-		self::load_models();
 		NSEvent_Model::set_database(self::get_database_connection());
 		NSEvent_Model::set_options($options);
 		
@@ -167,17 +164,14 @@ class NSEvent
 				throw new Exception(__('Cheatin&#8217; uh?'));
 			}
 			
-			self::load_models();
 			NSEvent_Model::set_database(self::get_database_connection());
 			NSEvent_Model::set_options(array_merge(self::$default_options, get_option('nsevent', array())));
-			
-			require dirname(__FILE__) . '/includes/request-controller.php';
 			
 			if (empty($_GET['request'])) {
 				$_GET['request'] = 'report_index';
 			}
 			
-			if (is_callable(array('NSEvent_RequestController', $_GET['request']))) {
+			if (is_callable(array('NSEvent_Request_Controller', $_GET['request']))) {
 				if (substr($_GET['request'], 0, 6) == 'admin_' and !current_user_can('administrator')) {
 					throw new Exception(__('Cheatin&#8217; uh?'));
 				}
@@ -202,7 +196,7 @@ class NSEvent
 					}
 				}
 				
-				call_user_func_array(array('NSEvent_RequestController', $_GET['request']), $params);
+				call_user_func_array(array('NSEvent_Request_Controller', $_GET['request']), $params);
 			}
 			else {
 				throw new Exception(sprintf('Unable to handle page request: %s', esc_html($_GET['request'])));
@@ -369,11 +363,8 @@ class NSEvent
 			
 			$options = self::$options = array_merge(self::$default_options, get_option('nsevent', array()));
 			
-			require dirname(__FILE__).'/includes/form-input.php';
-			require dirname(__FILE__).'/includes/form-validation.php';
 			NSEvent_FormValidation::set_error_messages();
 			
-			self::load_models();
 			NSEvent_Model::set_database(self::get_database_connection());
 			NSEvent_Model::set_options($options);
 			
@@ -886,7 +877,6 @@ class NSEvent
 				new Twig_Loader_Filesystem(dirname(__FILE__) . '/templates'),
 				array('debug' => WP_DEBUG));
 			
-			require dirname(__FILE__) . '/includes/form-controls.php';
 			self::$twig->addGlobal('form', new NSEvent_Form_Controls);
 		}
 		
@@ -913,4 +903,5 @@ class NSEvent
 add_action('admin_init', 'NSEvent::admin_init');
 add_action('admin_menu', 'NSEvent::admin_menu');
 register_activation_hook(__FILE__, 'NSEvent::plugin_activate');
+spl_autoload_register('NSEvent::autoload');
 endif;
