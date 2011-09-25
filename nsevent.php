@@ -23,7 +23,7 @@ Except as contained in this notice, the name of the author not be used in advert
 if (!class_exists('NSEvent')):
 class NSEvent
 {
-	static private $event, $options, $vip, $validated_package_id = 0, $validated_items = array();
+	static private $event, $options, $vip, $validated_package_id = 0, $validated_items = array(), $twig;
 	static private $default_options = array(
 		'current_event_id'           => '',
 		'registration_testing'       => false,
@@ -876,6 +876,39 @@ class NSEvent
 		}
 		
 		return $href;
+	}
+	
+	static public function render_template($file, array $context = array())
+	{
+		if (!isset(self::$twig)) {
+			require dirname(__FILE__) . '/includes/Twig/lib/Twig/Autoloader.php';
+			Twig_Autoloader::register();
+			
+			self::$twig = new Twig_Environment(
+				new Twig_Loader_Filesystem(dirname(__FILE__) . '/templates'),
+				array('debug' => WP_DEBUG));
+			
+			require dirname(__FILE__) . '/includes/form-controls.php';
+			self::$twig->addGlobal('form', new NSEvent_Form_Controls);
+		}
+		
+		$context['GET'] = $_GET;
+		$context['POST'] = $_POST;
+		$context['options'] = array_merge(self::$default_options, get_option('nsevent', array()));
+		
+		if (is_admin()) {
+			$context['admin'] = current_user_can('administrator');
+			
+			if (isset(self::$event)) {
+				$context['csv_href'] = plugins_url('download-csv.php', __FILE__) . sprintf('?event_id=%d&request=', self::$event->id());
+				$context['request_href'] = site_url('wp-admin/admin.php') . sprintf('?page=nsevent&event_id=%d&request=', self::$event->id());
+			}
+			else {
+				$context['request_href'] = site_url('wp-admin/admin.php') . '?page=nsevent&request=';
+			}
+		}
+		
+		return self::$twig->loadTemplate($file)->render($context);
 	}
 }
 
