@@ -160,8 +160,6 @@ class NSEvent
 	
 	static public function page_request()
 	{
-		global $wpdb;
-		
 		try {
 			@date_default_timezone_set(get_option('timezone_string'));
 			
