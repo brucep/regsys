@@ -369,7 +369,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return ($this->price_total !== false) ? (int) $this->price_total : false;
 	}
 	
-	public function registered_items($item_id = false)
+	public function registered_items()
 	{
 		if (!isset($this->registered_items))
 		{
@@ -382,26 +382,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 			}
 		}
 		
-		if (is_array($item_id)) {
-			$result = array();
-			
-			foreach ($this->registered_items as $item) {
-				if (in_array($item->id(), $item_id)) {
-					$result[$item->id()] = $item;
-				}
-			}
-			
-			return $result;
-		}
-		elseif ($item_id === false) {
-			return $this->registered_items;
-		}
-		elseif (array_key_exists($item_id, $this->registered_items)) {
-			return $this->registered_items[$item_id];
-		}
-		else {
-			return array();
-		}
+		return $this->registered_items;
 	}
 	
 	public function registered_package_id()
