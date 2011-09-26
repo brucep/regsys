@@ -218,7 +218,11 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	public function housing_nights()
 	{
-		return $this->has_housing ? self::bit_field($this->housing_nights, self::$possible_housing_nights) : array();
+		if (is_string($this->housing_nights)) {
+			$this->housing_nights = explode(',', $this->housing_nights);
+		}
+		
+		return $this->housing_nights;
 	}
 	
 	public function levels()

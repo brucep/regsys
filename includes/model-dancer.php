@@ -197,15 +197,6 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return $this->housing_comment;
 	}
 	
-	public function housing_for_night_by_index($night_id)
-	{
-		if (!isset($this->housing_nights_array)) {
-			$this->housing_nights_array = array_filter(self::bit_field($this->housing_nights, NSEvent_Model_Event::$possible_housing_nights, 'booleans'));
-		}
-		
-		return isset($this->housing_nights_array[$night_id]) ? $this->housing_nights_array[$night_id] : false;
-	}
-	
 	public function housing_from_scene()
 	{
 		return $this->housing_from_scene;
@@ -225,9 +216,13 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		}
 	}
 	
-	public function housing_nights(array $event_nights)
+	public function housing_nights()
 	{
-		return isset($this->housing_nights) ? self::bit_field($this->housing_nights, $event_nights, 'string') : false;
+		if (is_string($this->housing_nights)) {
+			$this->housing_nights = explode(',', $this->housing_nights);
+		}
+		
+		return $this->housing_nights;
 	}
 	
 	public function housing_spots_available()
