@@ -152,7 +152,7 @@ class NSEvent
 		
 		$events = NSEvent_Model_Event::get_events();
 		
-		require dirname(__FILE__).'/admin/options.php';
+		require dirname(__FILE__) . '/options.php';
 	}
 	
 	static public function page_request()
