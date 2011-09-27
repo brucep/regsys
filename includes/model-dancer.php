@@ -113,20 +113,6 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 			));
 	}
 	
-	public function delete()
-	{
-	    $statement = self::$database->query('DELETE FROM %1$s_dancers WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id));
-	    $counts['dancer'] = $statement->rowCount();
-	    
-	    $statement = self::$database->query('DELETE FROM %1$s_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id));
-	    $counts['registrations'] = $statement->rowCount();
-	    
-	    $statement = self::$database->query('DELETE FROM %1$s_housing WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id));
-	    $counts['housing'] = $statement->rowCount();
-	    	    
-	    return $counts;
-	}
-	
 	public function update_payment_confirmation($payment_confirmed, $payment_owed)
 	{
 		$this->payment_confirmed = $payment_confirmed;
