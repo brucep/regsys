@@ -878,6 +878,7 @@ class NSEvent
 				array('debug' => WP_DEBUG));
 			
 			self::$twig->addGlobal('form', new NSEvent_Form_Controls);
+			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
 		}
 		
 		$context['GET'] = $_GET;
