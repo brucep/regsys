@@ -68,7 +68,7 @@ class NSEvent
 	
 	static public function admin_validate_options($input)
 	{
-		$options = get_option('nsevent', array());
+		$options = array_merge(self::$default_options, get_option('nsevent', array()));
 		
 		if (isset($input['current_event_id'])) {
 			// TODO: Check if id exists
@@ -112,7 +112,7 @@ class NSEvent
 			$options['postmark_within'] = 7;
 		}
 		
-		$options['registration_testing']   = isset($input['registration_testing']);
+		$options['registration_testing'] = isset($input['registration_testing']);
 		
 		return $options;
 	}
@@ -145,14 +145,16 @@ class NSEvent
 			throw new Exception(__('Cheatin&#8217; uh?'));
 		}
 		
-		$options = array_merge(self::$default_options, get_option('nsevent', array()));
-		
 		NSEvent_Model::set_database(self::get_database_connection());
-		NSEvent_Model::set_options($options);
+		NSEvent_Model::set_options(array_merge(self::$default_options, get_option('nsevent', array())));
 		
-		$events = NSEvent_Model_Event::get_events();
+		$events = array();
 		
-		require dirname(__FILE__) . '/options.php';
+		foreach (NSEvent_Model_Event::get_events() as $event) {
+			$events[$event->id()] = $event->name();
+		}
+		
+		echo self::render_template('admin/options.html', array('events' => $events));
 	}
 	
 	static public function page_request()
@@ -879,6 +881,10 @@ class NSEvent
 			
 			self::$twig->addGlobal('form', new NSEvent_Form_Controls);
 			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
+			
+			if (is_admin() and $_GET['page'] == 'nsevent-options') {
+				self::$twig->addFunction('settings_fields', new Twig_Function_Function('settings_fields', array('is_safe' => array('html'))));
+			}
 		}
 		
 		$context['GET'] = $_GET;
