@@ -70,8 +70,9 @@ class NSEvent
 	{
 		$options = array_merge(self::$default_options, get_option('nsevent', array()));
 		
-		if (isset($input['current_event_id'])) {
-			// TODO: Check if id exists
+		NSEvent_Model::set_database(self::get_database_connection());
+		
+		if (isset($input['current_event_id']) and NSEvent_Model_Event::get_event_by_id($input['current_event_id'])) {
 			$options['current_event_id'] = (int) $input['current_event_id'];
 		}
 		
