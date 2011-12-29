@@ -655,6 +655,43 @@ class NSEvent
 		}
 	}
 	
+	static public function render_template($file, array $context = array())
+	{
+		if (!isset(self::$twig)) {
+			require dirname(__FILE__) . '/includes/Twig/lib/Twig/Autoloader.php';
+			Twig_Autoloader::register();
+			
+			self::$twig = new Twig_Environment(
+				new Twig_Loader_Filesystem(dirname(__FILE__) . '/templates'),
+				array('debug' => WP_DEBUG));
+			
+			self::$twig->addGlobal('form', new NSEvent_Form_Controls);
+			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
+			
+			if (is_admin() and $_GET['page'] == 'nsevent-options') {
+				self::$twig->addFunction('settings_fields', new Twig_Function_Function('settings_fields', array('is_safe' => array('html'))));
+			}
+		}
+		
+		$context['GET'] = $_GET;
+		$context['POST'] = $_POST;
+		$context['options'] = self::get_options();
+		
+		if (is_admin()) {
+			$context['admin'] = current_user_can('administrator');
+			
+			if (isset(self::$event)) {
+				$context['csv_href'] = plugins_url('download-csv.php', __FILE__) . sprintf('?event_id=%d&request=', self::$event->id());
+				$context['request_href'] = site_url('wp-admin/admin.php') . sprintf('?page=nsevent&event_id=%d&request=', self::$event->id());
+			}
+			else {
+				$context['request_href'] = site_url('wp-admin/admin.php') . '?page=nsevent&request=';
+			}
+		}
+		
+		return self::$twig->loadTemplate($file)->render($context);
+	}
+	
 	static public function send_confirmation_email(array $parameters)
 	{
 		$options = self::get_options();
@@ -870,43 +907,6 @@ class NSEvent
 			NSEvent_FormValidation::set_error($key, __('You must specify nights for housing.', 'nsevent'));
 			return false;
 		}
-	}
-	
-	static public function render_template($file, array $context = array())
-	{
-		if (!isset(self::$twig)) {
-			require dirname(__FILE__) . '/includes/Twig/lib/Twig/Autoloader.php';
-			Twig_Autoloader::register();
-			
-			self::$twig = new Twig_Environment(
-				new Twig_Loader_Filesystem(dirname(__FILE__) . '/templates'),
-				array('debug' => WP_DEBUG));
-			
-			self::$twig->addGlobal('form', new NSEvent_Form_Controls);
-			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
-			
-			if (is_admin() and $_GET['page'] == 'nsevent-options') {
-				self::$twig->addFunction('settings_fields', new Twig_Function_Function('settings_fields', array('is_safe' => array('html'))));
-			}
-		}
-		
-		$context['GET'] = $_GET;
-		$context['POST'] = $_POST;
-		$context['options'] = self::get_options();
-		
-		if (is_admin()) {
-			$context['admin'] = current_user_can('administrator');
-			
-			if (isset(self::$event)) {
-				$context['csv_href'] = plugins_url('download-csv.php', __FILE__) . sprintf('?event_id=%d&request=', self::$event->id());
-				$context['request_href'] = site_url('wp-admin/admin.php') . sprintf('?page=nsevent&event_id=%d&request=', self::$event->id());
-			}
-			else {
-				$context['request_href'] = site_url('wp-admin/admin.php') . '?page=nsevent&request=';
-			}
-		}
-		
-		return self::$twig->loadTemplate($file)->render($context);
 	}
 }
 
