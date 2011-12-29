@@ -73,7 +73,7 @@ class NSEvent
 	
 	static public function admin_validate_options($input)
 	{
-		$options = array_merge(self::$default_options, get_option('nsevent', array()));
+		$options = self::get_options();
 		
 		NSEvent_Model::set_database(self::get_database_connection());
 		
@@ -167,6 +167,11 @@ class NSEvent
 			));
 	}
 	
+	static public function get_options()
+	{
+		return array_merge(self::$default_options, get_option('nsevent', array()));
+	}
+	
 	static public function page_options()
 	{
 		if (!current_user_can('administrator')) {
@@ -174,7 +179,7 @@ class NSEvent
 		}
 		
 		NSEvent_Model::set_database(self::get_database_connection());
-		NSEvent_Model::set_options(array_merge(self::$default_options, get_option('nsevent', array())));
+		NSEvent_Model::set_options(self::get_options());
 		
 		$events = array();
 		
@@ -391,12 +396,12 @@ class NSEvent
 			
 			@date_default_timezone_set(get_option('timezone_string'));
 			
-			$options = self::$options = array_merge(self::$default_options, get_option('nsevent', array()));
+			self::$options = self::get_options();
 			
 			NSEvent_FormValidation::set_error_messages();
 			
 			NSEvent_Model::set_database(self::get_database_connection());
-			NSEvent_Model::set_options($options);
+			NSEvent_Model::set_options(self::get_options());
 			
 			# Find current event
 			$event = self::$event = NSEvent_Model_Event::get_event_by_id($options['current_event_id']);
@@ -651,7 +656,7 @@ class NSEvent
 	
 	static public function send_confirmation_email(array $parameters)
 	{
-		$options = get_option('nsevent');
+		$options = self::get_options();
 		
 		$parameters = array_merge(array(
 			'to_email' => '',
@@ -917,7 +922,7 @@ class NSEvent
 		
 		$context['GET'] = $_GET;
 		$context['POST'] = $_POST;
-		$context['options'] = array_merge(self::$default_options, get_option('nsevent', array()));
+		$context['options'] = self::get_options();
 		
 		if (is_admin()) {
 			$context['admin'] = current_user_can('administrator');
