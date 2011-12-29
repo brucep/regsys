@@ -48,7 +48,6 @@ class NSEvent
 	
 	static public function admin_init()
 	{
-		load_plugin_textdomain('nsevent', false, basename(__FILE__, '.php').'/translations');
 		register_setting('nsevent', 'nsevent', 'NSEvent::admin_validate_options');
 	}
 	
