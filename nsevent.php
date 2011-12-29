@@ -201,7 +201,7 @@ class NSEvent
 			}
 			
 			NSEvent_Model::set_database(self::get_database_connection());
-			NSEvent_Model::set_options(array_merge(self::$default_options, get_option('nsevent', array())));
+			NSEvent_Model::set_options(self::get_options());
 			
 			if (empty($_GET['request'])) {
 				$_GET['request'] = 'report_index';
