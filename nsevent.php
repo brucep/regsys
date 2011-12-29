@@ -53,10 +53,10 @@ class NSEvent
 	
 	static public function admin_menu()
 	{
-		$hookname = add_menu_page('Event Reports', 'Event Reports', 'edit_pages', 'nsevent', 'NSEvent::page_request');
-		add_submenu_page('nsevent', 'NSEvent Options', 'Options', 'administrator', 'nsevent-options', 'NSEvent::page_options');
+		$hookname = add_menu_page('Registration Reports', 'Registration Reports', 'edit_pages', 'nsevent', 'NSEvent::page_request');
+		add_submenu_page('nsevent', 'Registration Options', 'Registration Options', 'administrator', 'nsevent-options', 'NSEvent::page_options');
 		add_action('admin_print_scripts-'.$hookname, 'NSEvent::admin_print_scripts');
-		add_action('admin_print_styles-'.$hookname, 'NSEvent::admin_print_styles');
+		add_action('admin_print_styles-'.$hookname,  'NSEvent::admin_print_styles');
 	}
 	
 	static public function admin_print_scripts()
