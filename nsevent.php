@@ -650,7 +650,7 @@ class NSEvent
 	{
 		# Block search engines for this page if they are not blocked already
 		if (get_option('blog_public')) {
-			echo '<meta name=\'robots\' content=\'noindex,nofollow\' />'."\n";
+			echo "<meta name='robots' content='noindex,nofollow' />\n";
 		}
 	}
 	
