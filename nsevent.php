@@ -871,37 +871,6 @@ class NSEvent
 		}
 	}
 	
-	static public function paypal_href($dancer, array $items, array $options, $include_paypal_fee = true)
-	{
-		$href = sprintf('https://www.paypal.com/cgi-bin/webscr?cmd=_cart&amp;upload=1&amp;no_shipping=1&amp;business=%1$s&amp;custom=%2$d',
-			rawurlencode($options['paypal_business']),
-			$dancer->get_id());
-		
-		if ($include_paypal_fee and !empty($options['paypal_fee']) and !$dancer->is_vip()) {
-			$href .= sprintf('&amp;item_name_1=%1$s&amp;amount_1=%2$s', 'Processing%20Fee', $options['paypal_fee']);
-			$i = 2;
-		}
-		else {
-			$i = 1;
-		}
-		
-		foreach ($items as $item) {
-			if ($item->get_registered_price() == 0) {
-				continue;
-			}
-			
-			$href .= sprintf('&amp;item_name_%1$d=%2$s&amp;amount_%1$d=%3$s', $i, rawurlencode($item->get_name()), rawurlencode($item->get_registered_price()));
-			
-			if ($item->get_meta() == 'size') {
-				$href .= sprintf('&amp;on0_%1$d=%2$s&amp;os0_%1$d=%3$s', $i, $item->get_meta_label(), ucfirst($item->get_registered_meta()));
-			}
-			
-			$i++;
-		}
-		
-		return $href;
-	}
-	
 	static public function render_template($file, array $context = array())
 	{
 		if (!isset(self::$twig)) {
