@@ -6,15 +6,12 @@ class NSEvent_Database
 	
 	public function __construct(array $settings)
 	{
-		#
-		# Establish connection via PDO
-		#
 		try {
-			$this->pdo = new PDO(
+			$this->pdo = @new PDO(
 				sprintf('%s:host=%s;%sdbname=%s',
 					'mysql',
 					$settings['host'],
-					empty($settings['port']) ? '' : sprintf('port={%d};', $settings['port']),
+					!empty($settings['port']) ? sprintf('port=%d;', $settings['port']) : '',
 					$settings['name']),
 				$settings['user'],
 				$settings['password'],
@@ -22,22 +19,18 @@ class NSEvent_Database
 					PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));
 			
-			$this->pdo->query('SET NAMES "utf8";');
+			$this->pdo->exec('SET NAMES "utf8";');
 			
 			if (!empty($settings['prefix'])) {
 				$this->prefix = $settings['prefix'];
 			}
 		}
 		catch (PDOException $e) {
-			$message = preg_replace('/[A-Z]+\[[0-9]+\]: .+ [0-9]+ (.*?)/', '$1', $e->getMessage());
-			throw new Exception($message);
+			$message = preg_replace('/^[A-Z]+\[[A-Z0-9]+\]:? \[[0-9]+\] (.*?)/', '$1', $e->getMessage());
+			exit('<pre>' . $message . '</pre>');
 		}
 	}
 	
-	#
-	# Function: query
-	# Executes a SQL query.
-	#
 	public function query($query, array $params = array(), $use_prefix = true)
 	{
 		try {
@@ -55,7 +48,7 @@ class NSEvent_Database
 			$message = preg_replace("/[A-Z]+\[[0-9]+\]: .+ [0-9]+ (.*?)/", "\\1", $e->getMessage());
 			
 			if (defined('WP_DEBUG')) {
-				$message .= "</p>\n\n<pre>$query\n\n".print_r($params, true)."</pre>\n\n";
+				$message .= "</p>\n\n<pre>$query\n\n" . print_r($params, true) . "</pre>\n\n";
 			}
 			
 			throw new Exception($message);
@@ -64,21 +57,8 @@ class NSEvent_Database
 		return $statement;
 	}
 	
-	#
-	# Function: lastInsertID
-	# Returns the ID of the last inserted row.
-	#
 	public function lastInsertID($name = '')
 	{
 		return $this->pdo->lastInsertID($name);
-	}
-
-	#
-	# Function: quote
-	# Quotes a string for use in a query.
-	#
-	public function quote($string)
-	{
-		return $this->pdo->quote($string);
 	}
 }
