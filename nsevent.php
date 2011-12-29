@@ -170,7 +170,7 @@ class NSEvent
 			'name'     => DB_NAME,
 			'user'     => DB_USER,
 			'password' => DB_PASSWORD,
-			'prefix'   => $wpdb->prefix.'nsevent',
+			'prefix'   => $wpdb->prefix . 'nsevent',
 			));
 	}
 	
@@ -254,7 +254,7 @@ class NSEvent
 		global $wpdb;
 		
 		# Include `dbDelta` function
-		require_once ABSPATH.'wp-admin/includes/upgrade.php';
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		
 		$tables = array(
 			'events',
