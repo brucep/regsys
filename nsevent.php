@@ -54,15 +54,16 @@ class NSEvent
 	static public function admin_menu()
 	{
 		$hookname = add_menu_page('Registration Reports', 'Registration Reports', 'edit_pages', 'nsevent', 'NSEvent::page_request');
-		add_submenu_page('nsevent', 'Registration Options', 'Registration Options', 'administrator', 'nsevent-options', 'NSEvent::page_options');
-		add_action('admin_print_scripts-'.$hookname, 'NSEvent::admin_print_scripts');
-		add_action('admin_print_styles-'.$hookname,  'NSEvent::admin_print_styles');
+		add_submenu_page('nsevent', 'Registration Options', 'Registration Options', 'manage_options', 'nsevent-options', 'NSEvent::page_options');
+		
+		add_action('admin_print_scripts-' . $hookname, 'NSEvent::admin_print_scripts');
+		add_action('admin_print_styles-' . $hookname,  'NSEvent::admin_print_styles');
 	}
 	
 	static public function admin_print_scripts()
 	{
 		wp_enqueue_script('nsevent-tablesorter',      plugins_url('js/jquery.tablesorter.min.js', __FILE__), array('jquery'));
-		wp_enqueue_script('nsevent-tablesorter-init', plugins_url('js/tablesorter-init.js', __FILE__), array('nsevent-tablesorter'));
+		wp_enqueue_script('nsevent-tablesorter-init', plugins_url('js/tablesorter-init.js', __FILE__),       array('nsevent-tablesorter'));
 	}
 	
 	static public function admin_print_styles()
