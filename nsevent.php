@@ -692,49 +692,6 @@ class NSEvent
 		return self::$twig->loadTemplate($file)->render($context);
 	}
 	
-	static public function send_confirmation_email(array $parameters)
-	{
-		$options = self::get_options();
-		
-		$parameters = array_merge(array(
-			'to_email' => '',
-			'to_name'  => '',
-			'subject'  => '',
-			'body'     => '',
-			), $parameters);
-		
-		if (class_exists('SwiftMailerWP')) {
-			$message = Swift_Message::newInstance()
-							->setSubject($parameters['subject'])
-							->setFrom($options['confirmation_email_address'])
-							->setReplyTo($options['confirmation_email_address'])
-							->addTo($parameters['to_email'], $parameters['to_name'])
-							->setBody($parameters['body']);
-			
-			if ($options['confirmation_email_bcc']) {
-				$message->setBcc($options['confirmation_email_bcc']);
-			}
-			
-			$headers = $message->getHeaders();
-			$headers->addTextHeader('X-Mailer', 'NSEvent Mailer');
-			
-			return SwiftMailerWP::get_instance()->get_mailer()->send($message);
-		}
-		else {
-			$headers = sprintf('From: %1$s'."\r\n".'Reply-To: %1$s'."\r\n".'X-Mailer: NSEvent Mailer'."\r\n", $options['confirmation_email_address']);
-			
-			if ($options['confirmation_email_bcc']) {
-				$headers .= sprintf('Bcc: %s'."\r\n", $options['confirmation_email_bcc']);
-			}
-			
-			return wp_mail(
-				$parameters['to_email'],
-				$parameters['subject'],
-				$parameters['body'],
-				$headers);
-		}
-	}
-	
 	static public function validate_discount($payment_discount)
 	{
 		if ($payment_discount == 1 and !self::$event->has_discount_openings()) {

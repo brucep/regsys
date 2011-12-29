@@ -375,6 +375,55 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return ($this->registered_package_id !== false) ? (int) $this->registered_package_id : false;
 	}
 	
+	static public function send_confirmation_email($subject, $body, array $to, $override_bcc = false)
+	{
+		$body = NSEvent::render_template('registration/confirmation-email.txt', array(
+			'options' => self::$options,
+			'event'   => NSEvent_Model_Event::get_event_by_id($this->event_id),
+			'dancer'  => $this));
+		
+		require dirname(__FILE__) . '/includes/swiftmailer/lib/swift_required.php';
+		
+		if (self::$options['email_transport'] == 'smtp') {
+			$transport = Swift_SmtpTransport::newInstance(self::$options['email_smtp_host']);
+			
+			if (!empty(self::$options['email_smtp_port'])) {
+				$transport->setPort(self::$options['email_smtp_port']);
+			}
+			
+			if (!empty(self::$options['email_smtp_username'])) {
+				$transport->setUsername(self::$options['email_smtp_username']);
+			}
+			
+			if (!empty(self::$options['email_smtp_password'])) {
+				$transport->setPassword(self::$options['email_smtp_password']);
+			}
+			
+			if (in_array(self::$options['email_smtp_encryption'], array('ssl', 'tsl'))) {
+				$transport->setEncryption(self::$options['email_smtp_encryption']);
+			}
+		}
+		else {
+			$transport = Swift_MailTransport::newInstance();
+		}
+		
+		$message = Swift_Message::newInstance()
+			->setSubject($subject)
+			->setFrom(self::$options['email_from'])
+			->setReplyTo(self::$options['email_from'])
+			->addTo($this->email, $this->name())
+			->setBody($body);
+		
+		if (!empty(self::$options['email_bcc']) and !$override_bcc) {
+			$message->setBcc(self::$options['email_bcc']);
+		}
+		
+		$headers = $message->getHeaders();
+		$headers->addTextHeader('X-Mailer', 'NSEvent Mailer');
+		
+		return (bool) Swift_Mailer::newInstance($transport)->send($message);
+	}
+	
 	public function is_housing_provider()
 	{
 		return ($this->housing_type == 2);
