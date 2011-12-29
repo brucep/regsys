@@ -5,6 +5,8 @@ class NSEvent_Model_Item extends NSEvent_Model
 	private $event_id,
 	        $item_id,
 	        $name,
+	        $count_registrations,
+	        $count_registrations_by_position,
 	        $date_expires,
 	        $description,
 	        $limit_per_position,
@@ -207,6 +209,41 @@ class NSEvent_Model_Item extends NSEvent_Model
 		}
 		
 		return $this->openings;
+	}
+	
+	public function count_registrations()
+	{
+		if (!isset($this->count_registrations)) {
+			$this->count_registrations = (int) self::$database->query('SELECT COUNT(*) FROM %1$s_registrations WHERE item_id = :item_id', array(':item_id' => $this->item_id))->fetchColumn();
+		}
+		
+		return $this->count_registrations;
+	}
+	
+	public function count_registrations_by_position()
+	{
+		if (!isset($this->count_registrations_by_position)) {
+			$this->count_registrations_by_position = array();
+			
+			foreach (array('leads' => 1, 'follows' => 2) as $key => $value) {
+				$result = (int) self::$database->query('SELECT COUNT(*) FROM %1$s_registrations JOIN %1$s_dancers USING(dancer_id) WHERE item_id = :item_id AND position = :position', array(':item_id' => $this->item_id, ':position' => $value))->fetchColumn();
+				
+				$this->count_registrations_by_position[$key] = $result;
+			}
+		}
+		
+		return $this->count_registrations_by_position;
+	}
+	
+	public function registrations_by_position()
+	{
+		$result = $this->count_registrations_by_position();
+		
+		return sprintf('%1$d %3$s, %2$d %4$s',
+			$result['leads'],
+			$result['follows'],
+			_n('lead',   'leads',   $result['leads']),
+			_n('follow', 'follows', $result['follows']));
 	}
 	
 	private function count_registrations_where(array $where = array(), $join_table = false)
