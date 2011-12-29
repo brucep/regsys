@@ -1,5 +1,5 @@
-@import url('admin-wide.css')   screen and (min-device-width: 480px);
-@import url('admin-iphone.css') screen and (max-device-width: 480px);
-@import url('admin-print.css')  print;
+@import url('admin-large.css') screen and (min-device-width: 481px);
+@import url('admin-small.css') screen and (max-device-width: 480px);
+@import url('admin-print.css') print;
 
 .update-nag { display: none; }
