@@ -81,18 +81,70 @@
 
 		<table class="form-table">
 			<tr valign="top">
-				<th scope="row">Confirmation Email Address</th>
+				<th scope="row">Email From</th>
 				<td>
-					{{ form.text('confirmation_email_address', options.confirmation_email_address, {'class': 'regular-text'}) | raw }}
+					{{ form.text('email_from', options.email_from, {'class': 'regular-text'}) | raw }}
 					<span class="description">This email address will appear on confirmation emails.</span>
 				</td>
 			</tr>
 
 			<tr valign="top">
-				<th scope="row">Confirmation Email Bcc</th>
+				<th scope="row">Email Bcc</th>
 				<td>
-					{{ form.text('confirmation_email_bcc', options.confirmation_email_bcc, {'class': 'regular-text'}) | raw }}
+					{{ form.text('email_bcc', options.email_bcc, {'class': 'regular-text'}) | raw }}
 					<span class="description">The email address will receive a copy of confirmation emails.</span>
+				</td>
+			</tr>
+
+			<tr>
+				<th scope="row">Transport Type</th>
+				<td>
+					<fieldset>
+						<legend class="screen-reader-text"><span>Transport Type</span></legend>
+						<label style="margin-right: 1em">{{ form.radio('email_transport', (options.email_transport == 'smtp'), true,  'smtp') | raw }} <span><abbr title="Simple Mail Transfer Protocol">SMTP</abbr></span></label>
+						<label style="margin-right: 1em">{{ form.radio('email_transport', (options.email_transport == 'mail'), false, 'mail') | raw }} <span title="PHP's internal mail function">Mail</span></label>
+						<p>Specify the <a href="http://swiftmailer.org/docs/sending.html#transport-types">transport type to be used by Swift Mailer</a>.</p>
+					</fieldset>
+				</td>
+			</tr>
+
+			<tr valign="top" class="nsevent-smtp">
+				<th scope="row">SMTP Host</th>
+				<td>
+					{{ form.text('email_smtp_host', options.email_smtp_host, {'class': 'regular-text'}) | raw }}
+				</td>
+			</tr>
+
+			<tr valign="top" class="nsevent-smtp">
+				<th scope="row">SMTP Port</th>
+				<td>
+					{{ form.text('email_smtp_port', options.email_smtp_port, {'class': 'regular-text'}) | raw }}
+				</td>
+			</tr>
+
+			<tr valign="top" class="nsevent-smtp">
+				<th scope="row">SMTP Username</th>
+				<td>
+					{{ form.text('email_smtp_username', options.email_smtp_username, {'class': 'regular-text'}) | raw }}
+				</td>
+			</tr>
+
+			<tr valign="top" class="nsevent-smtp">
+				<th scope="row">SMTP Password</th>
+				<td>
+					{{ form.text('email_smtp_password', options.email_smtp_password, {'type': 'password', 'class': 'regular-text'}) | raw }}
+				</td>
+			</tr>
+
+			<tr>
+				<th scope="row">SMTP Encryption</th>
+				<td>
+					<fieldset>
+						<legend class="screen-reader-text"><span>SMTP Encryption</span></legend>
+						<label style="margin-right: 1em">{{ form.radio('email_smtp_encryption', (options.email_smtp_encryption == 'ssl'), true,   'ssl')  | raw }} <span><abbr title="Secure Sockets Layer">SSL</abbr></span></label>
+						<label style="margin-right: 1em">{{ form.radio('email_smtp_encryption', (options.email_smtp_encryption == 'tls'), false,  'tls')  | raw }} <span><abbr title="Transport Layer Security">TSL</abbr></span></label>
+						<label style="margin-right: 1em">{{ form.radio('email_smtp_encryption', (options.email_smtp_encryption == 'none'), false, 'none') | raw }} <span>None</span></label>
+					</fieldset>
 				</td>
 			</tr>
 		</table>

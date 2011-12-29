@@ -25,16 +25,22 @@ class NSEvent
 {
 	static private $event, $options, $vip, $validated_package_id = 0, $validated_items = array(), $twig;
 	static private $default_options = array(
-		'current_event_id'           => '',
-		'registration_testing'       => false,
-		'paypal_business'            => '',
-		'paypal_fee'                 => 0,
-		'paypal_sandbox'             => false,
-		'confirmation_email_address' => '',
-		'confirmation_email_bcc'     => '',
-		'mailing_address'            => '',
-		'payable_to'                 => '',
-		'postmark_within'            => 7,
+		'current_event_id'      => '',
+		'email_bcc'             => '',
+		'email_from'            => '',
+		'email_smtp_host'       => 'smtp.gmail.com',
+		'email_smtp_port'       => '465',
+		'email_smtp_username'   => '',
+		'email_smtp_password'   => '',
+		'email_smtp_encryption' => 'ssl',
+		'email_transport'       => 'mail',
+		'mailing_address'       => '',
+		'payable_to'            => '',
+		'paypal_business'       => '',
+		'paypal_fee'            => 0,
+		'paypal_sandbox'        => false,
+		'postmark_within'       => 7,
+		'registration_testing'  => false,
 		);
 	
 	private function __clone() {}
@@ -76,35 +82,7 @@ class NSEvent
 			$options['current_event_id'] = (int) $input['current_event_id'];
 		}
 		
-		if (isset($input['paypal_business'])) {
-			$options['paypal_business'] = trim($input['paypal_business']);
-		}
-		
-		if (isset($input['paypal_fee'])) {
-			$options['paypal_fee'] = (int) $input['paypal_fee'];
-		}
-		
-		if (isset($input['confirmation_email_address'])) {
-			$options['confirmation_email_address'] = trim($input['confirmation_email_address']);
-		}
-		else {
-			$options['confirmation_email_address'] = get_option('admin_email');
-		}
-		
-		if (isset($input['confirmation_email_bcc'])) {
-			$options['confirmation_email_bcc'] = trim($input['confirmation_email_bcc']);
-		}
-		else {
-			$options['confirmation_email_bcc'] = '';
-		}
-		
-		if (isset($input['mailing_address'])) {
-			$options['mailing_address'] = trim($input['mailing_address']);
-		}
-		
-		if (isset($input['payable_to'])) {
-			$options['payable_to'] = trim($input['payable_to']);
-		}
+		$options['registration_testing'] = isset($input['registration_testing']);
 		
 		if (isset($input['postmark_within'])) {
 			$options['postmark_within'] = (int) $input['postmark_within'];
@@ -113,7 +91,57 @@ class NSEvent
 			$options['postmark_within'] = 7;
 		}
 		
-		$options['registration_testing'] = isset($input['registration_testing']);
+		if (isset($input['payable_to'])) {
+			$options['payable_to'] = trim($input['payable_to']);
+		}
+		
+		if (isset($input['mailing_address'])) {
+			$options['mailing_address'] = trim($input['mailing_address']);
+		}
+		
+		if (isset($input['paypal_business'])) {
+			$options['paypal_business'] = trim($input['paypal_business']);
+		}
+		
+		if (isset($input['paypal_fee'])) {
+			$options['paypal_fee'] = (int) $input['paypal_fee'];
+		}
+		
+		if (isset($input['email_from'])) {
+			$options['email_from'] = trim($input['email_from']);
+		}
+		else {
+			$options['email_from'] = get_option('admin_email');
+		}
+		
+		if (isset($input['email_bcc'])) {
+			$options['email_bcc'] = trim($input['email_bcc']);
+		}
+		
+		if (isset($input['email_transport']) and in_array($input['email_transport'], array('smtp', 'mail'))) {
+			$options['email_transport'] = $input['email_transport'];
+		}
+		
+		if (!empty($input['email_smtp_port'])) {
+			if (is_numeric($input['email_smtp_port'])) {
+				$options['email_smtp_port'] = (int) $input['email_smtp_port'];
+			}
+		}
+		else {
+			$options['email_smtp_port'] = '';
+		}
+		
+		if (isset($input['email_smtp_username'])) {
+			$options['email_smtp_username'] = trim($input['email_smtp_username']);
+		}
+		
+		if (isset($input['email_smtp_password'])) {
+			$options['email_smtp_password'] = $input['email_smtp_password'];
+		}
+		
+		if (isset($input['email_smtp_encryption']) and in_array($input['email_smtp_encryption'], array('ssl', 'tsl', 'none'))) {
+			$options['email_smtp_encryption'] = $input['email_smtp_encryption'];
+		}
 		
 		return $options;
 	}
