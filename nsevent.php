@@ -58,6 +58,12 @@ class NSEvent
 		
 		add_action('admin_print_scripts-' . $hookname, 'NSEvent::admin_print_scripts');
 		add_action('admin_print_styles-' . $hookname,  'NSEvent::admin_print_styles');
+		add_action('admin_print_styles',               'NSEvent::admin_menu_hide_icon');
+	}
+	
+	static public function admin_menu_hide_icon()
+	{
+		echo '<style type="text/css">li#toplevel_page_nsevent div.wp-menu-image { display: none; } body.folded li#toplevel_page_nsevent div.wp-menu-image { display: inherit; }</style>';
 	}
 	
 	static public function admin_print_scripts()
