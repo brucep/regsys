@@ -70,3 +70,10 @@ div.nsevent-exception {margin:2em 1em;}
 	border-bottom: 1px dotted #000;
 }
 #nsevent #packet-printout div.dancer span.paid-owed { float: right; }
+
+#nsevent h2 a.delete {
+	margin-left: 2em;
+	color: #bc0b0b;
+	background-color: inherit;
+	text-decoration: underline;
+}
