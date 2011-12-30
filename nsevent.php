@@ -220,7 +220,7 @@ class NSEvent
 				
 				$params = array();
 				
-				if (!in_array($_GET['request'], array('report_index'))) {
+				if (!in_array($_GET['request'], array('report_index', 'admin_event_add'))) {
 					if (!$params['event'] = self::$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id'])) {
 						throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
 					}
