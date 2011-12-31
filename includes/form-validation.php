@@ -26,7 +26,7 @@ class NSEvent_Form_Validation
 		$did_validate = true;
 		
 		if (empty($this->rules)) {
-			throw new NSEvent_FormValidation_Exception('No rules to validate.');
+			throw new NSEvent_Form_Validation_Exception('No rules to validate.');
 		}
 		
 		foreach ($this->rules as $key => $conditions) {
@@ -58,7 +58,7 @@ class NSEvent_Form_Validation
 				
 				if ($condition === 'if_set' or $condition === 'if_not_set') {
 					if ($parameter == null) {
-						throw new NSEvent_FormValidation_Exception(sprintf('%s rule must have a valid parameter.', $condition));
+						throw new NSEvent_Form_Validation_Exception(sprintf('%s rule must have a valid parameter.', $condition));
 					}
 					elseif (($condition === 'if_set' and !empty($_POST[$parameter])) or ($condition === 'if_not_set' and empty($_POST[$parameter]))) {
 						continue;
@@ -69,7 +69,7 @@ class NSEvent_Form_Validation
 				}
 				elseif ($condition === 'if_key_value' or $condition === 'if_not_key_value') {
 					if ($parameter == null or strpos($parameter, ',') === false) {
-						throw new NSEvent_FormValidation_Exception(sprintf('%s rule must have a valid parameter.', $condition));
+						throw new NSEvent_Form_Validation_Exception(sprintf('%s rule must have a valid parameter.', $condition));
 					}
 					
 					list($key, $value) = explode(',', $parameter, 2);
@@ -86,7 +86,7 @@ class NSEvent_Form_Validation
 					$callable = array($this, "_$callable");
 				}
 				elseif (!is_callable($callable)) {
-					throw new NSEvent_FormValidation_Exception(sprintf('`%s` is not callable for rule `%s`.', $callable, $key));
+					throw new NSEvent_Form_Validation_Exception(sprintf('`%s` is not callable for rule `%s`.', $callable, $key));
 				}
 				
 				if ($parameter == null) {
