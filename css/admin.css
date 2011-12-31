@@ -77,3 +77,11 @@ div.nsevent-exception {margin:2em 1em;}
 	background-color: inherit;
 	text-decoration: underline;
 }
+
+#nsevent input.delete {
+	color: #fff;
+	background: none;
+	background-color: #bc0b0b;
+	border-color: inherit;
+	text-shadow: none;
+}
