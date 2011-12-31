@@ -1,44 +1,40 @@
 <?php
 
-class NSEvent_FormValidation
+class NSEvent_Form_Validation
 {
-	static protected $rules = array(),
+	protected $rules = array(),
 	          $errors = array(),
 	          $validated = array(),
 	          $error_messages = array(),
-	          $error_delimiter_prefix = '<div class="nsevent-validation-error">',
-	          $error_delimiter_suffix = '</div>';
+	          $error_delimiter_prefix = '<div class="error"><p><strong>',
+	          $error_delimiter_suffix = '</strong></p></div>';
 	
-	static public function set_error_messages(array $error_messages = array())
+	public function __construct(array $error_messages = array())
 	{
-		if (empty(self::$error_messages)) {
-			self::$error_messages = array(
-				'required'    => __('%s is a required field.', 'nsevent'),
-				'in'          => __('%s does not have an acceptable value.', 'nsevent'),
-				'max_length'  => __('%s is too long.', 'nsevent'),
-				'valid_email' => __('%s is not a valid email address.', 'nsevent'),
+		$this->error_messages = array(
+			'required'    => '%s is a required field.',
+			'in'          => '%s does not have an acceptable value.',
+			'max_length'  => '%s is too long.',
+			'valid_email' => '%s is not a valid email address.',
 			);
-		}
 		
-		if (!empty($error_messages)) {
-			self::$error_messages = array_merge(self::$error_messages, $error_messages);
-		}
+		$this->error_messages = array_merge($this->error_messages, $error_messages);
 	}
 	
-	static public function validate()
+	public function validate()
 	{
 		$did_validate = true;
 		
-		if (empty(self::$rules)) {
-			throw new NSEvent_FormValidation_Exception(__('No rules to validate.', 'nsevent'));
+		if (empty($this->rules)) {
+			throw new NSEvent_FormValidation_Exception('No rules to validate.');
 		}
 		
-		foreach (self::$rules as $key => $conditions) {
-			if (isset(self::$validated[$key])) {
+		foreach ($this->rules as $key => $conditions) {
+			if (isset($this->validated[$key])) {
 				continue;
 			}
 			
-			self::$validated[$key] = true;
+			$this->validated[$key] = true;
 			
 			foreach (explode('|', $conditions) as $condition) {
 				# Get parameter for rule (i.e., "rule|rule[parameter]|rule")
@@ -86,8 +82,8 @@ class NSEvent_FormValidation
 					}
 				}
 				
-				if (is_callable(__CLASS__.'::_'.$callable)) {
-					$callable = __CLASS__.'::_'.$callable;
+				if (is_callable(array($this, "_$callable"))) {
+					$callable = array($this, "_$callable");
 				}
 				elseif (!is_callable($callable)) {
 					throw new NSEvent_FormValidation_Exception(sprintf('`%s` is not callable for rule `%s`.', $callable, $key));
@@ -101,7 +97,7 @@ class NSEvent_FormValidation
 				}
 				
 				if ($result === false) {
-					unset(self::$validated[$key]);
+					unset($this->validated[$key]);
 					$did_validate = false;
 					
 					if (strpos($key, '[') >= 1) {
@@ -116,11 +112,11 @@ class NSEvent_FormValidation
 					
 					$displayable_key = htmlspecialchars(ucwords(str_replace('_', ' ', $displayable_key)), ENT_QUOTES, 'UTF-8');
 					
-					if (isset(self::$error_messages[$condition])) {
-						self::$errors[$key] = sprintf(self::$error_messages[$condition], $displayable_key);
+					if (isset($this->error_messages[$condition])) {
+						$this->errors[$key] = sprintf($this->error_messages[$condition], $displayable_key);
 					}
-					elseif (!isset(self::$errors[$key])) {
-						self::$errors[$key] = sprintf(__('%s has an invalid value.', 'nsevent'), $displayable_key);
+					elseif (!isset($this->errors[$key])) {
+						$this->errors[$key] = sprintf('%s has an invalid value.', $displayable_key);
 					}
 					
 					break;
@@ -134,69 +130,69 @@ class NSEvent_FormValidation
 		return $did_validate;
 	}
 	
-	static public function add_rules(array $rules)
+	public function add_rules(array $rules)
 	{
 		foreach ($rules as $name => $value) {
-			self::$rules[$name] = $value;
+			$this->rules[$name] = $value;
 		}
 	}
 	
-	static public function add_rule($name, $value)
+	public function add_rule($name, $value)
 	{
-		self::$rules[$name] = $value;
+		$this->rules[$name] = $value;
 	}
 	
-	static public function set_error_delimiters($prefix, $suffix)
+	public function set_error_delimiters($prefix, $suffix)
 	{
-		self::$error_delimiter_prefix = $prefix;
-		self::$error_delimiter_suffix = $suffix;
+		$this->error_delimiter_prefix = $prefix;
+		$this->error_delimiter_suffix = $suffix;
 	}
 	
-	static public function get_errors($prefix = null, $suffix = null, $escape = false)
+	public function get_errors($prefix = null, $suffix = null, $escape = false)
 	{
-		if (empty(self::$errors)) {
+		if (empty($this->errors)) {
 			return false;
 		}
 		
 		$output = array();
 		
-		foreach (self::$errors as $error) {
+		foreach ($this->errors as $error) {
 			$output[] = sprintf('%s%s%s',
-				!is_string($prefix) ? self::$error_delimiter_prefix : $prefix,
+				!is_string($prefix) ? $this->error_delimiter_prefix : $prefix,
 				$escape !== true ? $error : htmlspecialchars($error, ENT_QUOTES, 'UTF-8'),
-				!is_string($suffix) ? self::$error_delimiter_suffix : $suffix);
+				!is_string($suffix) ? $this->error_delimiter_suffix : $suffix);
 		}
 		
 		return implode("\n", $output);
 	}
 	
-	static public function set_error($rule, $string)
+	public function set_error($rule, $string)
 	{
-		self::$errors[$rule] = $string;
+		$this->errors[$rule] = $string;
 	}
 	
-	static public function get_error($rule, $prefix = null, $suffix = null, $escape = false)
+	public function get_error($rule, $prefix = null, $suffix = null, $escape = false)
 	{
-		if (isset(self::$errors[$rule])) {
+		if (isset($this->errors[$rule])) {
 			return sprintf('%s%s%s',
-				!is_string($prefix) ? self::$error_delimiter_prefix : $prefix,
-				$escape !== true ? self::$errors[$rule] : htmlspecialchars(self::$errors[$rule], ENT_QUOTES, 'UTF-8'),
-				!is_string($suffix) ? self::$error_delimiter_suffix : $suffix);
+				!is_string($prefix) ? $this->error_delimiter_prefix : $prefix,
+				$escape !== true ? $this->errors[$rule] : htmlspecialchars($this->errors[$rule], ENT_QUOTES, 'UTF-8'),
+				!is_string($suffix) ? $this->error_delimiter_suffix : $suffix);
 		}
 		else {
 			return '';
 		}
 	}
 	
-	static public function reset()
+	public function reset()
 	{
-		self::$rules = array();
-		self::$groups = array();
-		self::$errors = array();
-		self::$validated = array();
+		$this->rules = array();
+		$this->groups = array();
+		$this->errors = array();
+		$this->validated = array();
 	}
 	
-	static protected function get_post_value($key)
+	protected function get_post_value($key)
 	{
 		if (strpos($key, '[') >= 1) {
 			$key = explode('[', $key, 2);
@@ -217,7 +213,7 @@ class NSEvent_FormValidation
 		}
 	}
 	
-	static protected function set_post_value($key, $value)
+	protected function set_post_value($key, $value)
 	{
 		if (strpos($key, '[') >= 1) {
 			$key = explode('[', $key, 2);
@@ -237,30 +233,30 @@ class NSEvent_FormValidation
 	# Validation conditions
 	#
 	
-	static protected function _required($string)
+	protected function _required($string)
 	{
 		return !empty($string);
 	}
 	
-	static protected function _greater_than($number, $minimum)
+	protected function _greater_than($number, $minimum)
 	{
 		return ($number > $minimum);
 	}
 	
-	static protected function _in($needle, $haystack, $key)
+	protected function _in($needle, $haystack, $key)
 	{
 		return in_array($needle, explode(',', $haystack));
 	}
 	
-	static protected function _max_length($string, $max_length)
+	protected function _max_length($string, $max_length)
 	{
 		return (strlen($string) <= $max_length);
 	}
 	
-	static protected function _valid_email($string)
+	protected function _valid_email($string)
 	{
 		return (bool) preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $string);
 	}
 }
 
-class NSEvent_FormValidation_Exception extends Exception {}
+class NSEvent_Form_Validation_Exception extends Exception {}
