@@ -1,7 +1,10 @@
+{% from 'admin/_layout.html' import message as message %}
+{% from 'admin/_layout.html' import form_table_row as form_table_row %}
 
 <div id="nsevent-options" class="wrap">
 	<div id="icon-options-general" class="icon32"><br></div>
 	<h2>NSEvent Options</h2>
+	{% if GET['settings-updated'] == 'true' %}{{ message('Options saved.') }}{% endif %}
 
 	<form method="post" action="options.php">
 		{{ settings_fields('nsevent') }}{{ form.set_array_name('nsevent') }}
@@ -9,144 +12,101 @@
 		<h3>Registration</h3>
 
 		<table class="form-table">
-			<tr valign="top">
-				<th scope="row">Current Event</th>
-				<td>
-					{{ form.select('current_event_id', events, options.current_event_id, [], "\t\t\t\t\t") | raw }}
-					<span class="description">The event currently used by the registration form.</span>
-				</td>
-			</tr>
-
-			<tr valign="top">
-				<th scope="row">Registration Testing</th>
-				<td>
-					<fieldset>
-						<legend class="screen-reader-text"><span>Registration Testing</span></legend>
-						<label>
-							{{ form.checkbox('registration_testing', options.registration_testing) | raw }}
-							Only "capable" users will be able to access the registration form.
-						</label>
-						<br>
-					</fieldset>
-				</td>
-			</tr>
-
-			<tr valign="top">
-				<th scope="row">Postmark Within</th>
-				<td>
-					<span>Payments must be postmarked within {{ form.text('postmark_within', options.postmark_within, {'class': 'regulat-text', 'style': 'width: 3em'}) | raw }} days.</span>
-				</td>
-			</tr>
+			{{ form_table_row(
+				'Current Event',
+				form.select('current_event_id', events, options.current_event_id, [], "\t\t\t\t\t"),
+				'The event currently used by the registration form.'
+				) }}
+			{{ form_table_row(
+				'Registration Testing',
+				'<label>' ~ form.checkbox('registration_testing', options.registration_testing) | raw ~
+					' Only "capable" users will be able to access the registration form.</label>'
+				) }}
+			{{ form_table_row(
+				'Postmark Within',
+				'<span>Payments must be postmarked within ' ~ form.text('postmark_within', options.postmark_within, {'class': 'regulat-text', 'style': 'width: 3em'}) | raw ~ ' days.</span>'
+				) }}
 		</table>
 
 		<h3>Pay by Mail</h3>
 
 		<table class="form-table">
-			<tr valign="top">
-				<th scope="row">Payable To</th>
-				<td>{{ form.text('payable_to', options.payable_to, {'class': 'regular-text'}) | raw }}</td>
-			</tr>
-
-			<tr valign="top">
-				<th scope="row">Mailing Address</th>
-				<td>
-					<fieldset>
-						<p>{{ form.textarea('mailing_address', options.mailing_address, {'cols': 50, 'rows': 4, 'class': 'large-text code'}) | raw }}</p>
-					</fieldset>
-				</td>
-			</tr>
+			{{ form_table_row(
+				'Payable To',
+				form.text('payable_to', options.payable_to, {'class': 'regular-text'})
+				) }}
+			{{ form_table_row(
+				'Mailing Address',
+				'<p>' ~ form.textarea('mailing_address', options.mailing_address, {'cols': 50, 'rows': 4, 'class': 'large-text code'}) | raw  ~ '</p>'
+				) }}
 		</table>
 
 		<h3>PayPal</h3>
 
 		<table class="form-table">
-			<tr valign="top">
-				<th scope="row">PayPal Business Address</th>
-				<td>
-					{{ form.text('paypal_business', options.paypal_business, {'class': 'regular-text'}) | raw }}
-					<span class="description">The email address used to receive payments via PayPal.</span>
-				</td>
-			</tr>
-
-			<tr valign="top">
-				<th scope="row">PayPal Fee</th>
-				<td>
-					{{ form.text('paypal_fee', options.paypal_fee, {'class': 'regular-text'}) | raw }}
-					<span class="description">The processing fee, if any, for payments made via PayPal.</span>
-				</td>
-			</tr>
+			{{ form_table_row(
+				'PayPal Business Address',
+				form.text('paypal_business', options.paypal_business, {'class': 'regular-text'}) | raw,
+				'The email address used to receive payments via PayPal.'
+				) }}
+			{{ form_table_row(
+				'PayPal Fee',
+				form.text('paypal_fee', options.paypal_fee, {'class': 'regular-text'}) | raw,
+				'The processing fee, if any, for payments made via PayPal.'
+				) }}
 		</table>
 
 		<h3>Confirmation Email</h3>
 
 		<table class="form-table">
-			<tr valign="top">
-				<th scope="row">Email From</th>
-				<td>
-					{{ form.text('email_from', options.email_from, {'class': 'regular-text'}) | raw }}
-					<span class="description">This email address will appear on confirmation emails.</span>
-				</td>
-			</tr>
-
-			<tr valign="top">
-				<th scope="row">Email Bcc</th>
-				<td>
-					{{ form.text('email_bcc', options.email_bcc, {'class': 'regular-text'}) | raw }}
-					<span class="description">The email address will receive a copy of confirmation emails.</span>
-				</td>
-			</tr>
-
-			<tr>
-				<th scope="row">Transport Type</th>
-				<td>
-					<fieldset>
-						<legend class="screen-reader-text"><span>Transport Type</span></legend>
-						<label style="margin-right: 1em">{{ form.radio('email_transport', (options.email_transport == 'smtp'), true,  'smtp') | raw }} <span><abbr title="Simple Mail Transfer Protocol">SMTP</abbr></span></label>
-						<label style="margin-right: 1em">{{ form.radio('email_transport', (options.email_transport == 'mail'), false, 'mail') | raw }} <span title="PHP's internal mail function">Mail</span></label>
-						<p>Specify the <a href="http://swiftmailer.org/docs/sending.html#transport-types">transport type to be used by Swift Mailer</a>.</p>
-					</fieldset>
-				</td>
-			</tr>
-
-			<tr valign="top" class="nsevent-smtp">
-				<th scope="row">SMTP Host</th>
-				<td>
-					{{ form.text('email_smtp_host', options.email_smtp_host, {'class': 'regular-text'}) | raw }}
-				</td>
-			</tr>
-
-			<tr valign="top" class="nsevent-smtp">
-				<th scope="row">SMTP Port</th>
-				<td>
-					{{ form.text('email_smtp_port', options.email_smtp_port, {'class': 'regular-text'}) | raw }}
-				</td>
-			</tr>
-
-			<tr valign="top" class="nsevent-smtp">
-				<th scope="row">SMTP Username</th>
-				<td>
-					{{ form.text('email_smtp_username', options.email_smtp_username, {'class': 'regular-text'}) | raw }}
-				</td>
-			</tr>
-
-			<tr valign="top" class="nsevent-smtp">
-				<th scope="row">SMTP Password</th>
-				<td>
-					{{ form.text('email_smtp_password', options.email_smtp_password, {'type': 'password', 'class': 'regular-text'}) | raw }}
-				</td>
-			</tr>
-
-			<tr>
-				<th scope="row">SMTP Encryption</th>
-				<td>
-					<fieldset>
-						<legend class="screen-reader-text"><span>SMTP Encryption</span></legend>
-						<label style="margin-right: 1em">{{ form.radio('email_smtp_encryption', (options.email_smtp_encryption == 'ssl'), true,   'ssl')  | raw }} <span><abbr title="Secure Sockets Layer">SSL</abbr></span></label>
-						<label style="margin-right: 1em">{{ form.radio('email_smtp_encryption', (options.email_smtp_encryption == 'tls'), false,  'tls')  | raw }} <span><abbr title="Transport Layer Security">TSL</abbr></span></label>
-						<label style="margin-right: 1em">{{ form.radio('email_smtp_encryption', (options.email_smtp_encryption == 'none'), false, 'none') | raw }} <span>None</span></label>
-					</fieldset>
-				</td>
-			</tr>
+			{{ form_table_row(
+				'Email From',
+				form.text('email_from', options.email_from, {'class': 'regular-text'}),
+				'This email address will appear on confirmation emails.'
+				) }}
+			{{ form_table_row(
+				'Email Bcc',
+				form.text('email_bcc', options.email_bcc, {'class': 'regular-text'}),
+				'This email address will receive a copy of confirmation emails.'
+				) }}
+			{{ form_table_row(
+				'Transport Type',
+				'<label style="margin-right: 1em">'   ~ form.radio('email_transport', (options.email_transport == 'smtp'), true,  'smtp') ~ ' <span><abbr title="Simple Mail Transfer Protocol">SMTP</abbr></span></label>' ~
+					'<label style="margin-right: 1em">' ~ form.radio('email_transport', (options.email_transport == 'mail'), false, 'mail') ~ ' <span title="PHP&#39;s internal mail function">Mail</span></label>',
+				'Specify the <a href="http://swiftmailer.org/docs/sending.html#transport-types">transport type to be used by Swift Mailer</a>.'
+				) }}
+			{{ form_table_row(
+				'SMTP Host',
+				form.text('email_smtp_host', options.email_smtp_host, {'class': 'regular-text'}),
+				null,
+				'nsevent-options-smtp'
+				) }}
+			{{ form_table_row(
+				'SMTP Port',
+				form.text('email_smtp_port', options.email_smtp_port, {'class': 'regular-text'}),
+				null,
+				'nsevent-options-smtp'
+				) }}
+			{{ form_table_row(
+				'SMTP Username',
+				form.text('email_smtp_username', options.email_smtp_username, {'class': 'regular-text'}),
+				null,
+				'nsevent-options-smtp'
+				) }}
+			{{ form_table_row(
+				'SMTP Password',
+				form.text('email_smtp_password', options.email_smtp_password, {'type': 'password', 'class': 'regular-text'}),
+				null,
+				'nsevent-options-smtp'
+				) }}
+			{{ form_table_row(
+				'SMTP Encryption',
+				'<label style="margin-right: 1em">'   ~ form.radio('email_smtp_encryption', (options.email_smtp_encryption == 'ssl'), true,   'ssl')  ~ ' <span><abbr title="Secure Sockets Layer">SSL</abbr></span></label>' ~ 
+					'<label style="margin-right: 1em">' ~ form.radio('email_smtp_encryption', (options.email_smtp_encryption == 'tls'), false,  'tls')  ~ ' <span><abbr title="Transport Layer Security">TSL</abbr></span></label>' ~
+					'<label style="margin-right: 1em">' ~ form.radio('email_smtp_encryption', (options.email_smtp_encryption == 'none'), false, 'none') ~ ' <span>None</span></label>',				
+				null,
+				'nsevent-options-smtp'
+				)}}
 		</table>
 
 		<p class="submit"><input type="submit" class="button-primary" value="Save Changes"></p>
