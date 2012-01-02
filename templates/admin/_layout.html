@@ -1,0 +1,24 @@
+
+<div id="nsevent" class="wrap">
+<div id="{{ GET.request }}">
+
+{% block content %}{% endblock content %}
+
+</div>
+</div>
+
+{% macro message(text, class) %}{# Classes 'updated' and 'error' used by WordPress stylesheets #}
+<div class="{{ class | default('updated') }}"><p><strong>{{ text }}</strong></p></div>
+{% endmacro %}
+
+{% macro form_table_row(label, input, description, class) %}
+<tr valign="top" {%- if class %} class="{{ class }}"{% endif %}>
+				<th scope="row">{{ label }}</th>
+				<td>
+					{{ input | raw }}
+{% if description %}
+					<span class="description">{{ description | raw }}</span>
+{% endif %}
+				</td>
+			</tr>
+{% endmacro %}
