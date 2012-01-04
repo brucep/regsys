@@ -71,8 +71,10 @@ div.nsevent-exception {margin:2em 1em;}
 }
 #nsevent #packet-printout div.dancer span.paid-owed { float: right; }
 
-#nsevent h2 a.delete {
-	margin-left: 2em;
+#nsevent a.delete {
+	margin-left: 1em;
+	font-size: 12px;
+	font-weight: normal;
 	color: #bc0b0b;
 	background-color: inherit;
 	text-decoration: underline;
@@ -84,4 +86,8 @@ div.nsevent-exception {margin:2em 1em;}
 	background-color: #bc0b0b;
 	border-color: inherit;
 	text-shadow: none;
+}
+
+#nsevent a.button {
+	margin-left: 0.5em;
 }
