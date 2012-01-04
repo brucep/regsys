@@ -12,6 +12,13 @@
   list-style: disc inside;
 }
 
+#nsevent .ellipsis {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	-ms-text-overflow: ellipsis;
+}
+
 #nsevent td.date {
 	font-family: monospace;
 }
