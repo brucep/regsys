@@ -1,6 +1,9 @@
 {% extends 'reports/_layout.html' %}
 
+{% from 'admin/_layout.html' import message as message %}
+
 {% block content %}
+	{%- if POST %}{{ "\t" }}{{ message('Payment info updated.') }}{{ "\n" }}{% endif %}
 	<form action="{{ request_href ~ 'report_reg_list' }}{% if GET.vip_only == 'true' %}&amp;vip_only=true{% endif %}" method="post">
 {% if dancers %}
 		<input type="submit" value="Save Payment Info" class="no-print" style="float: right; margin: 0 0 1em; cursor: pointer" />
