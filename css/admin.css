@@ -72,16 +72,16 @@ div.nsevent-exception {margin:2em 1em;}
 	background: url('images/arrow-sort-up.png') right no-repeat;
 }
 
-#nsevent #reg-list td { vertical-align: middle; }
-#nsevent #reg-list td.paid { text-align: center; }
-#nsevent #reg-list td.owed input { text-align: right; }
+#nsevent #report_reg_list td { vertical-align: middle; }
+#nsevent #report_reg_list td.paid { text-align: center; }
+#nsevent #report_reg_list td.owed input { text-align: right; }
 
-#nsevent #packet-printout div.dancer {
+#nsevent #report_packet_printout div.dancer {
 	margin-bottom: 2em;
 	padding-bottom: 0.5em;
 	border-bottom: 1px dotted #000;
 }
-#nsevent #packet-printout div.dancer span.paid-owed { float: right; }
+#nsevent #report_packet_printout div.dancer span.paid-owed { float: right; }
 
 #nsevent a.delete {
 	margin-left: 1em;
