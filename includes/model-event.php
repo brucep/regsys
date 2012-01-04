@@ -134,12 +134,14 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id, event_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
 	}
 		
-	public function dancers_where(array $where)
+	public function dancers_where(array $where, $equal = true)
 	{
 		$query = array('%1$s_dancers.`event_id` = :event_id');
 		
 		foreach ($where as $field => $value) {
-			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
+			$query[] = sprintf(' `%1$s` %2$s :%1$s',
+				substr($field, 1),
+				$equal ? '=' : '!=');
 		}
 		
 		$query = implode(' AND', $query);
