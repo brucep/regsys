@@ -12,6 +12,10 @@
   list-style: disc inside;
 }
 
+#nsevent td.date {
+	font-family: monospace;
+}
+
 div.nsevent-exception {margin:2em 1em;}
 
 #nsevent form ul {
