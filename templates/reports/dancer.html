@@ -1,97 +1,78 @@
-<?php
+{% extends 'reports/_layout.html' %}
 
-if (!isset($_GET['dancer'])) {
-	throw new Exception(__('Dancer ID not specified.', 'nsevent'));
-}
-elseif (!$dancer = $event->get_dancer_by_id($_GET['dancer'])) {
-	throw new Exception(sprintf(__('Dancer ID not found: %d', 'nsevent'), $_GET['dancer']));
-}
-
-$options = get_option('nsevent');
-$options = array_merge(self::$default_options, $options);
-
-?>
-
-<div class="wrap" id="nsevent">
-<div id="dancer">
-	<h2><?php echo $event->get_request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->get_name())); ?></h2>
-
-	<h3>
-	    <?php echo esc_html($dancer->get_name()); ?>
-<?php if (current_user_can('administrator')): ?>
-		<?php echo $event->get_request_link('dancer-edit', __('Edit Dancer', 'nsevent'), array('dancer' => (int) $dancer->get_id()), 'button add-new-h3'); echo "\n"; ?>
-		<?php echo $event->get_request_link('dancer-delete', __('Delete Dancer', 'nsevent'), array('dancer' => (int) $dancer->get_id()), 'button add-new-h3'); echo "\n"; ?>
-<?php endif; ?>
-    </h3>
+{% block content %}
+	<div class="vcard">
+	<h3><span class="fn n"><span class="given-name">{{ dancer.first_name }}</span> <span class="family-name">{{ dancer.last_name }}</span></span>
+{% if admin %}
+		<a class="button" href="{{ request_href ~ 'admin_dancer_edit'   ~ '&dancer_id=' ~ dancer.id }}">Edit Dancer</a>
+		<a class="delete" href="{{ request_href ~ 'admin_dancer_delete' ~ '&dancer_id=' ~ dancer.id }}">Delete Dancer</a>
+{% endif %}
+	</h3>
 
 	<ul>
-		<li><a href="mailto:<?php echo rawurlencode(sprintf('%s <%s>', $dancer->get_name(), $dancer->get_email())); ?>"><?php echo $dancer->get_email(); ?></a></li>
-<?php if ($dancer->get_mobile_phone()): ?>
-		<li><?php echo esc_html($dancer->get_mobile_phone()); ?></li>
-<?php endif; ?>
-		<li><strong><?php _e('Position:', 'nsevent'); ?></strong> <?php echo esc_html($dancer->get_position()); ?></li>
-<?php if ($event->has_levels()): ?>
-		<li><strong><?php _e('Level:', 'nsevent'); ?></strong> <?php echo esc_html($event->get_level_for_index($dancer->get_level())); ?></li>
-<?php endif; ?>
-<?php if ($dancer->is_vip()): ?>
-		<li><strong><?php _e('VIP', 'nsevent'); ?></strong></li>
-<?php elseif ($dancer->is_volunteer()): ?>
-		<li><strong><?php _e('Volunteer', 'nsevent'); ?></strong></li>
-<?php endif; ?>
+		<li><a href="{{ dancer.mailto }}"><span class="email">{{ dancer.email }}</span></a></li>
+		<li class="tel">{{ dancer.mobile_phone }}</li>
+		<li><strong>Position:</strong> {{ dancer.position }}</li>
+{% if event.has_levels %}
+		<li><strong>Level:</strong> {{ dancer.level }}</li>
+{% endif %}
+{% if dancer.is_vip %}
+		<li><strong>VIP</strong></li>
+{% elseif dancer.is_volunteer %}
+		<li><strong>Volunteer</strong></li>
+{% endif %}
 	</ul>
+	</div> <!-- .vcard -->
 
-	<h4>
-<?php _e('Registrations', 'nsevent'); ?>
-<?php 	if (current_user_can('administrator')): ?>
-		<a href="<?php echo $event->get_request_href('registration-add', array('dancer' => (int) $dancer->get_id())); ?>" class="button add-new-h4"><?php _e('Add Registration', 'nsevent'); ?></a>
-		<a href="<?php echo NSEvent::paypal_href($dancer, $dancer->get_registered_items(), $options); ?>" class="button add-new-h4"><?php _e('PayPal Link', 'nsevent'); ?></a>
-		<a href="<?php echo $event->get_request_href('resend-confirmation-email', array('dancer' => (int) $dancer->get_id())); ?>" class="button add-new-h4"><?php _e('Resend Confirmation Email', 'nsevent'); ?></a>
-<?php 	endif; ?>
-</h4>
-<?php if ($dancer->get_registered_items()): ?>
-	<ul>
-<?php 	foreach ($dancer->get_registered_items() as $item): ?>
-		<li><?php echo esc_html($item->get_name()); if ($item->get_registered_meta()) printf(' (%s)', esc_html(ucfirst($item->get_registered_meta()))); ?></li>
-<?php 	endforeach; ?>
-	</ul>
-<?php else: ?>
-	<p><?php _e('There are no registrations for this dancer.', 'nsevent'); ?></p>
-<?php endif; ?>
-
-<?php if ($dancer->needs_housing() or $dancer->is_housing_provider()): ?>
-	<h4>
-		<?php echo esc_html($dancer->get_housing_type()); ?>
-<?php 	if (current_user_can('administrator')): ?>
-		<a href="<?php echo $event->get_request_href('housing-delete', array('dancer' => (int) $dancer->get_id())); ?>" class="button add-new-h4"><?php _e('Delete Housing Info', 'nsevent'); ?></a>
-<?php 	endif; ?>
+	<h4>Registrations
+{% if admin %}
+		<a class="button" href="{{ request_href ~ 'admin_dancer_registration_add' ~ '&dancer_id=' ~ dancer.id }}">Add Registration</a>
+		<a class="button" href="{{ dancer.paypal_href }}" >PayPal Link</a>
+		<a class="button" href="{{ request_href ~ 'admin_dancer_resend_confirmation_email' ~ '&dancer_id=' ~ dancer.id }}">Resend Confirmation Email</a>
+{% endif %}
 	</h4>
-	
+
 	<ul>
-<?php 	if ($dancer->is_housing_provider()): ?>
-		<li><?php printf(__('Available spots: %d', 'nsevent'), $dancer->get_housing_spots_available()); ?></li>
-<?php 		if ($dancer->get_housing_has_smoke()): ?>
-		<li><?php _e('Smokes', 'nsevent'); ?></li>
-<?php 		endif; ?>
-<?php 		if ($dancer->get_housing_has_pets()): ?>
-		<li><?php _e('Has pets', 'nsevent'); ?></li>
-<?php 		endif; ?>
-<?php 	else: ?>
-<?php 		if ($dancer->get_housing_from_scene()): ?>
-		<li><?php echo 'From Scene: ', esc_html($dancer->get_housing_from_scene()); ?></li>
-<?php 		endif; ?>
-<?php 		if ($dancer->get_housing_prefers_no_smoke()): ?>
-		<li><?php _e('Prefers no smoking', 'nsevent'); ?></li>
-<?php 		endif; ?>
-<?php 		if ($dancer->get_housing_prefers_no_pets()): ?>
-		<li><?php _e('Prefers no pets', 'nsevent'); ?></li>
-<?php 		endif; ?>
-<?php 	endif; ?>
-		<li><?php echo esc_html($dancer->get_housing_gender()); ?></li>
-		<li><?php echo esc_html($dancer->get_housing_nights($event->get_housing_nights())); ?></li>
-<?php 	if ($dancer->get_housing_comment()): ?>
-		<li><?php echo esc_html($dancer->get_housing_comment()); ?></li>
-<?php 	endif; ?>
+{% for item in dancer.registered_items %}
+		<li>{{ item.name }} {%- if item.registered_meta %}{{ ' (%s)' | format(item.registered_meta | capitalize) }}{% endif %}</li>
+{% else %}
+		<li>There are no registrations for this dancer.</li>
+{% endfor %}
 	</ul>
-<?php endif; ?>
-</div>
-</div>
+
+{% if dancer.needs_housing or dancer.is_housing_provider %}
+	<h4>
+		{{ dancer.housing_type }}
+{% if admin %}
+		<a href="{{ request_href ~ 'housing-delete' ~ '&dancer_id=' ~ dancer.id }}" class="button add-new-h4">Delete Housing Info</a>
+{%- endif %}
+	</h4>
+
+	<ul>
+{% if dancer.is_housing_provider %}
+		<li>Available spots: {{ dancer.housing_spots_available }}</li>
+{% if dancer.housing_has_smoke %}
+		<li>Smokes</li>
+{% endif %}
+{% if dancer.housing_has_pets %}
+		<li>Has pets</li>
+{% endif %}
+{% else %}
+{% if dancer.housing_from_scene %}
+		<li>From Scene: {{ dancer.housing_from_scene }}</li>
+{% endif %}
+{% if dancer.housing_prefers_no_smoke %}
+		<li>Prefers no smoking</li>
+{% endif %}
+{% if dancer.housing_prefers_no_pets %}
+		<li>Prefers no pets</li>
+{% endif %}
+{% endif %}
+		<li>{{ dancer.housing_gender }}</li>
+		<li>{{ dancer.housing_nights | join(', ') }}</li>
+{% if dancer.housing_comment %}
+		<li>{{ dancer.housing_comment }}</li>
+{% endif %}
+	</ul>
+{% endif %}
+{% endblock content %}

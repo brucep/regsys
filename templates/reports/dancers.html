@@ -1,54 +1,50 @@
-<?php $dancers = $event->get_dancers(); ?>
+{% extends 'reports/_layout.html' %}
 
-<div class="wrap" id="nsevent">
-	<h2><?php echo $event->get_request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->get_name())); ?></h2>
-
-	<h3>
-		<?php _e('Dancers', 'nsevent'); echo "\n"; ?>
-<?php if ($dancers): ?>
-		<a href="<?php printf('%s/%s/reports/email-csv.php?event_id=%d&amp;request=dancers', WP_PLUGIN_URL, basename(dirname(dirname(__FILE__))), $event->get_id()); ?>" class="button add-new-h3"><?php _e('Download Email Addresses', 'nsevent'); ?></a>
-<?php endif; ?>
+{% block content %}
+	<h3>Dancers
+{% if dancers %}
+		<a class="button" href="{{ csv_href ~ 'dancers' }}">Download Email Addresses</a>
+{% endif %}
 	</h3>
 
-<?php if ($dancers): ?>
+{% if dancers %}
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
-				<th class="manage-column column-title" width="19%"><div><?php _e('Name', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="27%"><div><?php _e('Email Address', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="13%"><div><?php _e('Mobile Phone Number', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="8%"><div><?php _e('Position', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="15%"><div><?php _e('Level', 'nsevent'); ?></div></th>
-				<th class="manage-column" width="18%"><div><?php _e('Date Registered', 'nsevent'); ?></div></th>
+				<th class="manage-column column-title" width="20%"><div>Name</div></th>
+				<th class="manage-column" width="26%"><div>Email Address</div></th>
+				<th class="manage-column" width="13%"><div>Mobile Phone Number</div></th>
+				<th class="manage-column" width="8%"><div>Position</div></th>
+				<th class="manage-column" width="15%"><div>Level</div></th>
+				<th class="manage-column" width="18%"><div>Date Registered</div></th>
 			</tr>
 		</thead>
 
 		<tfoot>
 			<tr>
-				<th class="manage-column column-title"><?php _e('Name', 'nsevent'); ?></th>
-				<th class="manage-column"><?php _e('Email Address', 'nsevent'); ?></th>
-				<th class="manage-column"><?php _e('Mobile Phone Number', 'nsevent'); ?></th>
-				<th class="manage-column"><?php _e('Position', 'nsevent'); ?></th>
-				<th class="manage-column"><?php _e('Level', 'nsevent'); ?></th>
-				<th class="manage-column"><?php _e('Date Registered', 'nsevent'); ?></th>
+				<th class="manage-column column-title"><div>Name</div></th>
+				<th class="manage-column"><div>Email Address</div></th>
+				<th class="manage-column"><div>Mobile Phone Number</div></th>
+				<th class="manage-column"><div>Position</div></th>
+				<th class="manage-column"><div>Level</div></th>
+				<th class="manage-column"><div>Date Registered</div></th>
 			</tr>
 		</tfoot>
 
 		<tbody>
-<?php 	$i = 1; ?>
-<?php 	foreach ($dancers as $dancer): ?>
-			<tr class="vcard<?php if (!($i++ % 2)) echo ' alternate'; ?>">
-				<td class="column-title dancer-name"><?php if (current_user_can('administrator')): echo $event->get_request_link('dancer', $dancer->get_name_last_first(), array('dancer' => (int) $dancer->get_id())); else: echo esc_html($dancer->get_name_last_first()); endif; ?><?php if ($dancer->is_vip()) echo ' [VIP]'; ?></td>
-				<td><a href="mailto:<?php printf('%s <%s>?subject=%s', $dancer->get_name(), $dancer->get_email(), $event->get_name()); ?>"><span class="email"><?php echo esc_html($dancer->get_email()); ?></span></a></td>
-				<td><?php echo esc_html($dancer->get_mobile_phone()); ?></td>
-				<td><?php echo esc_html($dancer->get_position()); ?></td>
-				<td><?php echo ($event->get_level_for_index($dancer->get_level())) ? esc_html($event->get_level_for_index($dancer->get_level())) : '&mdash;'; ?></td>
-				<td style="font-family: monospace"><?php echo $dancer->get_date_registered('Y-m-d, h:i A'); ?></td>
+{% for dancer in dancers %}
+			<tr class="vcard {{- cycle(['', ' alternate'], loop.index) }}">
+				<td class="column-title"><a class="n" href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}"><span class="family-name">{{ dancer.last_name }}</span>, <span class="given-name">{{ dancer.first_name }}</span></a>{% if dancer.is_vip %} [VIP]{% endif %}</td>
+				<td><a href="{{ dancer.mailto }}"><span class="email">{{ dancer.email }}</span></a></td>
+				<td>{{ dancer.mobile_phone }}</td>
+				<td>{{ dancer.position }}</td>
+				<td class="ellipsis">{{ dancer.level }}</td>
+				<td class="date">{{ dancer.date_registered | date('Y-m-d, h:i A') }}</td>
 			</tr>
-<?php 	endforeach; ?>
-			</tbody>
-		</table>
-<?php else: ?>
-	<p><?php _e('There are no registered dancers for this event&hellip;', 'nsevent'); ?><p>
-<?php endif; ?>
-</div>
+{% endfor %}
+		</tbody>
+	</table>
+{% else %}
+	<p>There are no registered dancers for this event.<p>
+{% endif %}
+{% endblock content %}

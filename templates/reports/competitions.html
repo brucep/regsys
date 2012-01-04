@@ -1,75 +1,63 @@
-<?php $items = $event->get_items_where(array(':type' => 'competition')); ?>
+{% extends 'reports/_layout.html' %}
 
-<div class="wrap" id="nsevent">
-	<h2><?php echo $event->get_request_link('index-event', sprintf(__('Reports for %s', 'nsevent'), $event->get_name())); ?></h2>
-
-	<h3>
-		<?php _e('Competitions', 'nsevent'); echo "\n"; ?>
-<?php if ($items): ?>
-		<a href="<?php printf('%s/%s/reports/email-csv.php?event_id=%d&amp;request=competitors', WP_PLUGIN_URL, basename(dirname(dirname(__FILE__))), $event->get_id()); ?>" class="button add-new-h3"><?php _e('Download Email Addresses', 'nsevent'); ?></a>
-<?php endif; ?>
+{% block content %}
+	<h3>Competitions
+{% if items %}
+		<a class="button" href="{{ csv_href ~ 'competitions' }}">Download Email Addresses</a>
+{% endif %}
 	</h3>
 
-<?php if ($items): ?>
-<?php 	foreach ($items as $item): ?>
-	<h4>
-		<?php echo esc_html($item->get_name()), "\n"; ?>
-<?php 		if ($item->get_meta() !== 'position'): ?>
-		<?php printf(' (%d)'."\n", $event->count_registrations_where(array(':item_id' => $item->get_id()))); ?>
-<?php		else: ?>
-		<?php
-		 		printf(' (%3$d %1$s, %4$d %2$s)'."\n",
-					_n('lead', 'leads', $event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'lead')), 'nsevent'),
-					_n('follow', 'follows', $event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'follow')), 'nsevent'),
-					$event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'lead')),
-					$event->count_registrations_where(array(':item_id' => $item->get_id(), ':item_meta' => 'follow'))); ?>
-<?php		endif; ?>
+{% for item in items %}
+
+	<h4>{{ item.name }}
+	{%- if item.meta != 'position' -%}
+		{{ ' (%d)' | format(item.count_registrations) }}
+	{%- else -%}
+		{{ ' (%s)' | format(item.registrations_by_position) }}
+	{%- endif -%}
 	</h4>
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
-				<th class="manage-column column-title"><div><?php _e('Name', 'nsevent'); ?></div></th>
-<?php 		if ($item->get_meta() == 'position'): ?>
-				<th class="manage-column"><div><?php _e('Position', 'nsevent'); ?></div></th>
-<?php 		elseif ($item->get_meta() == 'partner_name'): ?>
-				<th class="manage-column"><div><?php _e('Partner', 'nsevent'); ?></div></th>
-<?php 		elseif ($item->get_meta() == 'team_members'): ?>
-				<th class="manage-column"><div><?php _e('Team Members', 'nsevent'); ?></div></th>
-<?php 		endif; ?>
+				<th class="manage-column column-title"><div>Name</div></th>
+{% if item.meta == 'position' %}
+				<th class="manage-column"><div>Position</div></th>
+{% elseif item.meta == 'partner_name' %}
+				<th class="manage-column"><div>Partner</div></th>
+{% elseif item.meta == 'team_members' %}
+				<th class="manage-column"><div>Team Members</div></th>
+{% endif %}
 			</tr>
 		</thead>
 
 		<tfoot>
 			<tr>
-				<th class="manage-column column-title"><?php _e('Name', 'nsevent'); ?></th>
-<?php 		if ($item->get_meta() == 'position'): ?>
-				<th class="manage-column"><?php _e('Position', 'nsevent'); ?></th>
-<?php 		elseif ($item->get_meta() == 'partner_name'): ?>
-				<th class="manage-column"><?php _e('Partner', 'nsevent'); ?></th>
-<?php 		elseif ($item->get_meta() == 'team_members'): ?>
-				<th class="manage-column"><?php _e('Team Members', 'nsevent'); ?></th>
-<?php 		endif; ?>
+				<th class="manage-column column-title"><div>Name</div></th>
+{% if item.meta == 'position' %}
+				<th class="manage-column"><div>Position</div></th>
+{% elseif item.meta == 'partner_name' %}
+				<th class="manage-column"><div>Partner</div></th>
+{% elseif item.meta == 'team_members' %}
+				<th class="manage-column"><div>Team Members</div></th>
+{% endif %}
 			</tr>
 		</tfoot>
 
 		<tbody>
-<?php 		$registered_dancers = $item->get_registered_dancers(); ?>
-<?php 		if ($registered_dancers): $i = 1; ?>
-<?php 			foreach ($registered_dancers as $registered_dancer): ?>
-			<tr class="<?php if (!($i++ % 2)) echo ' alternate'; ?>">
-				<td class="column-title"><strong><?php echo $event->get_request_link('dancer', $registered_dancer->get_name(), array('dancer' => $registered_dancer->get_id())); ?><strong></td>
-<?php 				if (in_array($item->get_meta(), array('position', 'partner_name', 'team_members'))): ?>
-				<td><?php echo esc_html(ucwords($registered_dancer->item_meta)); ?></td>
-<?php 				endif; ?>			
+{% for dancer in item.registered_dancers %}
+			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
+				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name }}</a></td>
+{% if item.meta in ['position', 'partner_name', 'team_members'] %}
+				<td>{{ dancer.item_meta | title }}</td>
+{% endif %}
 			</tr>
-<?php 			endforeach; ?>
-<?php 		else: ?>
-			<tr><td<?php if ($item->get_meta()) { echo ' colspan="2"'; } ?>><?php _e('There are no registered dancers for this competition&hellip;', 'nsevent'); ?></td></tr>
-<?php 		endif; ?>
+
+{% else %}
+			<tr><td {%- if item.meta %} colspan="2" {%- endif %}>There are no registered dancers for this competition.</td></tr>
+{% endfor %}
 		</tbody>
 	</table>
-<?php 	endforeach; ?>
-<?php else: ?>
-	<p><?php _e('There aren\'t any competitions for this event&hellip;', 'nsevent'); ?></p>
-<?php endif; ?>
-</div>
+{% else %}
+	<p>There aren't any competitions for this event.</p>
+{% endfor %}
+{% endblock content %}

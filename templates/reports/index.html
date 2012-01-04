@@ -1,57 +1,60 @@
-<?php
+{% from 'admin/_layout.html' import message as message %}
 
-$events = NSEvent_Model_Event::get_events();
-$options = get_option('nsevent');
+<div id="nsevent" class="wrap">
+<div id="report_index">
+	<h2>Registration Reports
+{% if admin %}
+		<a class="button add-new-h2" href="{{ request_href ~ 'admin_event_add' }}">Add New Event</a>
+{% endif %}
+	</h2>
+	{%- if GET.deleted_event %}{{ "\n\t\t" ~ message('Deleted %s.' | format(GET.deleted_event), 'error') }}{% endif %}
 
-?>
 
-<div class="wrap" id="nsevent">
-	<h2><?php _e('Events', 'nsevent'); ?><?php if (current_user_can('administrator')): ?><a href="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=add&amp;request=event-edit" class="button add-new-h2"><?php _e('Add New Event', 'nsevent'); ?></a><?php endif; ?></h2>
+	<h3>Choose Event</h3>
 
-	<h3><?php _e('Choose Event', 'nsevent'); ?></h3>
-
-<?php if ($events): ?>
-	<table class="widefat page fixed">
+{% if events %}
+	<table class="widefat page fixed report">
 		<thead>
 			<tr>
-				<th class="manage-column column-title"><?php _e('Title'); ?></th>
-				<th class="manage-column" width="24%"><?php _e('Mail Preregistration End Date'); ?></th>
-				<th class="manage-column" width="24%"><?php _e('PayPal Preregistration End Date', 'nsevent'); ?></th>
-				<th class="manage-column" width="21%"><?php _e('No Refunds After ', 'nsevent'); ?></th>
-<?php if (current_user_can('administrator')): ?>
-				<th class="manage-column" width="10%"><?php _e('Edit Event', 'nsevent'); ?></th>
-<?php endif; ?>
+				<th class="manage-column column-title">Title</th>
+				<th class="manage-column" width="24%">Mail Preregistration End Date</th>
+				<th class="manage-column" width="24%">PayPal Preregistration End Date</th>
+				<th class="manage-column" width="21%">No Refunds After</th>
+{% if admin %}
+				<th class="manage-column" width="10%">Edit Event</th>
+{% endif %}
 			</tr>
 		</thead>
 
 		<tfoot>
 			<tr>
-				<th class="manage-column column-title"><?php _e('Title', 'nsevent'); ?></th>
-				<th class="manage-column"><?php _e('Mail Preregistration End Date', 'nsevent'); ?></th>
-				<th class="manage-column"><?php _e('PayPal Preregistration End Date', 'nsevent'); ?></th>
-				<th class="manage-column"><?php _e('No Refunds After ', 'nsevent'); ?></th>
-<?php 	if (current_user_can('administrator')): ?>
-				<th class="manage-column"><?php _e('Edit Event', 'nsevent'); ?></th>
-<?php 	endif; ?>
+				<th class="manage-column column-title">Title</th>
+				<th class="manage-column">Mail Preregistration End Date</th>
+				<th class="manage-column">PayPal Preregistration End Date</th>
+				<th class="manage-column">No Refunds After</th>
+{% if admin %}
+				<th class="manage-column" width="10%">Edit Event</th>
+{% endif %}
 			</tr>
 		</tfoot>
 
 		<tbody>
-<?php 	$i = 1; ?>
-<?php 	foreach ($events as $event): ?>
-			<tr class="<?php if (!($i++ % 2)) echo 'alternate'; if (isset($options['current_event_id']) and $options['current_event_id'] == $event->get_id()) echo ' current-event'; ?>">
-				<td class="column-title"><strong><a class="row-title" href="<?php echo $event->get_request_href('index-event'); ?>"><?php echo esc_html($event->get_name()); ?></a><strong></td>
-				<td style="font-family: monospace"><?php if ($event->get_date_mail_prereg_end()) { echo $event->get_date_mail_prereg_end('Y-m-d, h:i A'); } else { echo '&mdash;'; } ?></td>
-				<td style="font-family: monospace"><?php echo $event->get_date_paypal_prereg_end('Y-m-d, h:i A'); ?></td>
-				<td style="font-family: monospace"><?php echo $event->get_date_refund_end('Y-m-d, h:i A'); ?></td>
-<?php 		if (current_user_can('administrator')): ?>
-				<td class="manage-column"><?php echo $event->get_request_link('event-edit', __('Edit Event', 'nsevent')); ?></td>
-<?php 		endif; ?>
+{% for event in events %}
+			<tr class="{{ cycle(['', 'alternate'], loop.index) }}{% if options.current_event_id == event.id %} current-event{% endif %}">
+				<td class="column-title"><a href="{{ request_href ~ 'report_index_event' ~ '&event_id=' ~ event.id }}">{{ event.name }}</a></td>
+				<td class="date">{% if event.date_mail_prereg_end %}{{ event.date_mail_prereg_end | date('Y-m-d, h:i A') }}{% else %}&mdash;{% endif %}</td>
+				<td class="date">{{ event.date_paypal_prereg_end | date('Y-m-d, h:i A') }}</td>
+				<td class="date">{{ event.date_refund_end | date('Y-m-d, h:i A') }}</td>
+{% if admin %}
+				<td><a href="{{ request_href ~ 'admin_event_edit' ~ '&event_id=' ~ event.id }}">Edit Event</a></td>
+{% endif %}
 			</tr>
-<?php 	endforeach; ?>
+
+{% endfor %}
 		</tbody>
 	</table>
-<?php else: ?>
-	<p><?php _e('No events have been created yet&hellip;', 'nsevent'); ?><p>
-<?php endif; ?>
+{% else %}
+	<p>No events have been created yet.<p>
+{% endif %}
+</div>
 </div>
