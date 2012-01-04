@@ -46,12 +46,11 @@
 {% for dancer in dancers %}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
 				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}{% if dancer.is_vip %} [VIP]{% endif %}</td>
-{% for type, ids in item_ids %}
+{% for type in ['package', 'competition', 'shirt'] %}
 				<td>
-{% for item in dancer.registered_items if item.type == type %}
-						{%- if type != 'shirt' %}{{ item.name }}{% else %}{{ '%s (%s)' | format(item.name, item.registered_meta | capitalize) }}{% endif -%}
-						<br />{#- FIXME if not loop.last %}<br />{% endif -#}
-{% endfor %}
+{%- for item in dancer.registered_items if item.type == type %}
+					{%- if type != 'shirt' %}{{ item.name }}{% else %}{{ '%s (%s)' | format(item.name, item.registered_meta | capitalize) }}{% endif %}<br>
+{%- endfor -%}
 				</td>
 {% endfor %}
 				<td class="ellipsis">{{ dancer.level }}</td>
