@@ -2,224 +2,167 @@
 
 class NSEvent_Form_Controls
 {
-	public function checkbox($name, array $args = array())
+	private $array_name;
+	
+	public function input_checkbox($key, array $parameters = array(), $type = 'checkbox')
 	{
-		if (!isset($args['value'])) {
-			$args['value'] = '1';
-		}
+		$parameters = array_merge(array(
+			'checked' => null,
+			'default' => false,
+			'value'   => 1,
+			), $parameters);
 		
-		if (!isset($args['checked'])) {
-			$args['checked'] = false;
-		}
-		
-		if (!isset($args['id']))
-		{
-		 	if (strpos($name, '[') !== false) {
-				$args['id'] = '';
+		if ($parameters['checked'] == null) {
+			if ((is_null($this->array_name) and !isset($_POST[$key])) or
+			    !is_null($this->array_name) and !isset($_POST[$this->array_name][$key])) {
+				$parameters['checked'] = ($default === true);
 			}
 			else {
-				$args['id'] = $name;
+				if (is_null($this->array_name)) {
+					$parameters['checked'] = ($parameters['value'] == $_POST[$key]);
+				}
+				else {
+					$parameters['checked'] = ($parameters['value'] == $_POST[$this->array_name][$key]);
+				}
 			}
 		}
-
-		if (isset($args['id']) and $args['id'] !== '') {
-			$args['id'] = sprintf(' id="%s"', htmlspecialchars($args['id'], ENT_QUOTES, 'UTF-8'));
-		}
 		
-		printf('%6$s<input type="checkbox"%4$s value="%3$s" name="%1$s" %2$s%5$s/>%7$s',
-			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
-			$args['id'],
-			htmlspecialchars($args['value'], ENT_QUOTES, 'UTF-8'),
-			self::_set_radio_or_checkbox($name, $args['value'], $args['checked']),
-			(isset($args['disabled']) and $args['disabled']) ? ' disabled="disabled"' : '',
-			!isset($args['label']) ? '' : '<label>',
-			!isset($args['label']) ? '' : sprintf('&nbsp;%s</label>', $args['label']));
+		return sprintf('<input type="%1$s"%4$s value="%3$s" name="%2$s"%5$s>',
+			($type == 'radio') ? 'radio' : 'checkbox',
+			$this->name($key),
+			is_null($parameters['value']) ? esc_attr($this->post_value($key, '1')) : esc_attr($parameters['value']),
+			$parameters['checked'] ? ' checked="checked"' : '',
+			isset($parameters['attributes']) ? $this->attributes($attributes) : '');
 	}
 	
-	public function hidden($name, array $args = array())
+	public function input_hidden($key, $value = null)
 	{
-		if (!isset($args['value'])) {
-			$args['value'] = self::_set_value($name, 1);
-		}
-		
-		if (isset($args['suffix'])) {
-			$name .= '_'.$args['suffix'];
-		}
-		
-		printf('<input type="hidden" name="%1$s" value="%2$s" />',
-			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
-			htmlspecialchars($args['value'], ENT_QUOTES, 'UTF-8'));
+		return sprintf('<input type="hidden" name="%1$s" value="%2$s">',
+			$this->name($key),
+			is_null($value) ? esc_attr($this->post_value($key, '1')) : esc_attr($value));
 	}
 	
-	public function number($name, array $args = array(), $print = true)
+	public function input_radio($key, array $parameters = array())
 	{
-		if (!isset($args['value'])) {
-			$args['value'] = '';
-		}
-		
-		if (!isset($args['default_value'])) {
-			$args['default_value'] = '';
-		}
-		
-		$result = sprintf('<input type="number" name="%1$s" value="%2$s"%3$s%4$s%5$s%6$s%7$s />',
-			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
-			htmlspecialchars((!isset($args['value']) ? self::_set_value($name, $args['default_value']) : $value), ENT_QUOTES, 'UTF-8'),
-			!isset($args['id'])    ? '' : sprintf(' id="%s"',    htmlspecialchars($args['id'],    ENT_QUOTES, 'UTF-8')),
-			!isset($args['class']) ? '' : sprintf(' class="%s"', htmlspecialchars($args['class'], ENT_QUOTES, 'UTF-8')),
-			!isset($args['size'])  ? '' : sprintf(' size="%s"',  (int) $args['size']),
-			!isset($args['min'])   ? '' : sprintf(' min="%s"',   (int) $args['min']),
-			!isset($args['max'])   ? '' : sprintf(' max="%s"',   (int) $args['max']),
-			!isset($args['step'])  ? '' : sprintf(' step="%s"',  (int) $args['step']));
-		
-		return ($print) ? print $result : $result;
+		return $this->input_checkbox($key, $parameters, 'radio');
 	}
 	
-	public function radio($name, array $args = array())
+	public function input_select($key, array $options, array $parameters = array())
 	{
-		if (!isset($args['value'])) {
-			$args['value'] = '';
+		$parameters = array_merge(array(
+			'default_option' => null,
+			'indent' => '',
+			), $parameters);
+		
+		$result = sprintf('<select name="%1$s"%2$s>',
+			$this->name($key),
+			isset($parameters['attributes']) ? $this->attributes($attributes) : '');
+		
+		foreach ($options as $opt_value => $opt_label) {
+			$result .= sprintf("\n" . $parameters['indent'] . "\t" . '<option value="%2$s"%3$s>%1$s</option>',
+				esc_html($opt_label),
+				esc_attr($opt_value),
+				($this->post_value($key, $parameters['default_option']) == $opt_value) ? ' selected="selected"' : '');
 		}
 		
-		$args['default'] = (isset($args['default']) and $args['default'] === true);
-		
-		printf('%5$s<input type="radio" name="%1$s" value="%2$s"%3$s%4$s%7$s />&nbsp;%6$s',
-			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
-			htmlspecialchars($args['value'], ENT_QUOTES, 'UTF-8'),
-			!isset($args['id']) ? '' : sprintf(' id="%s"', htmlspecialchars($args['id'], ENT_QUOTES, 'UTF-8')),
-			self::_set_radio_or_checkbox($name, $args['value'], $args['default']),
-			!isset($args['label']) ? '' : '<label>',
-			!isset($args['label']) ? '' : sprintf('%s</label>', $args['label']),
-			(isset($args['disabled']) and $args['disabled']) ? ' disabled="disabled"' : '');
+		return $result . "\n" . $parameters['indent'] . '</select>';
 	}
 	
-	// public function select($name, array $options, array $args = array())
-	// {
-	// 	if (!isset($args['indent'])) {
-	// 		$args['indent'] = '';
-	// 	}
-	// 	else {
-	// 		$args['indent'] = htmlspecialchars($args['indent'], ENT_QUOTES, 'UTF-8');
-	// 	}
-	// 	
-	// 	$result = sprintf('%2$s<select name="%1$s"%3$s%4$s>'."\n",
-	// 		htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
-	// 		$args['indent'],
-	// 		!isset($args['id'])    ? '' : sprintf(' id="%s"', htmlspecialchars($args['id'], ENT_QUOTES, 'UTF-8')),
-	// 		!isset($args['class']) ? '' : sprintf(' class="%s"', htmlspecialchars($args['class'], ENT_QUOTES, 'UTF-8'));
-	// 	
-	// 	foreach ($options as $key => $value) {
-	// 		
-	// 	}
-	// 	
-	// 	echo $result, "\n", $args['indent'], '</select>'."\n";
-	// }
-	
-	public function text($name, array $args = array(), $echo = true)
+	public function input_text($key, $value = null, array $attributes = array())
 	{
-		if (isset($args['label'])) {
-			if ($args['label'] === true) {
-				$args['label'] = htmlspecialchars(ucwords(str_replace('_', ' ', $name)), ENT_QUOTES, 'UTF-8');
+		$attributes = array_merge(array('type' => 'text'), $attributes);
+		
+		$output = sprintf('<input value="%2$s" name="%1$s"%3$s>',
+			$this->name($key),
+			is_null($value) ? esc_attr($this->post_value($key, '')) : esc_attr($value),
+			$this->attributes($attributes));
+		
+		return $output;
+	}
+	
+	public function input_textarea($key, $value = null, array $attributes = array())
+	{
+		$attributes = array_merge(array('cols' => '40', 'rows' => '6'), $attributes);
+		
+		return sprintf('<textarea name="%1$s"%3$s>%2$s</textarea>',
+			$this->name($key),
+			is_null($value) ? esc_html($this->post_value($key, '')) : esc_html($value),
+			$this->attributes($attributes));
+	}
+	
+	public function message($text, $class = 'updated')
+	{
+		return sprintf('<div class="%s"><p><strong>%s</strong></p></div>',
+			esc_attr($class),
+			esc_html($text));
+	}
+	
+	public function set_array_name($array_name)
+	{
+		$this->array_name = $array_name;
+	}
+	
+	public function row($label, $input)
+	{
+		return sprintf("<tr valign=\"top\">\n\t\t\t\t<th scope=\"row\">%s</th>\n\t\t\t\t<td>%s\n\t\t\t\t</td>\n\t\t\t</tr>\n",
+			esc_html($label),
+			$input);
+	}
+	
+	public function row_radio($label, $key, array $options)
+	{
+		$input = '';
+		
+		foreach ($options as $option) {
+			$input .= sprintf("\n\t\t\t\t\t" . '<label class="radio">%s %s</label>', $this->input_radio($key, $option), $option['label']);
+		}
+		
+		return $this->row($label, $input);
+	}
+	
+	public function row_select($label, $key, array $options, array $parameters = array())
+	{
+		return $this->row($label, "\n\t\t\t\t\t" . $this->input_select($key, $options, array_merge(array('indent' => "\t\t\t\t\t"), $parameters)));
+	}
+	
+	public function row_text($label, $key, $value = null, array $attributes = array())
+	{
+		return $this->row($label, "\n\t\t\t\t\t" . $this->input_text($key, $value, $attributes));
+	}
+	
+	private function attributes(array $attributes)
+	{
+		if (!empty($attributes)) {
+			$result = '';
+			
+			foreach ($attributes as $key => $value) {
+				$result .= sprintf(' %s="%s"', esc_attr($key), esc_attr($value));
 			}
 			
-			$args['label'] = sprintf('<label for="%2$s">%1$s</label>',
-				$args['label'],
-				htmlspecialchars($name, ENT_QUOTES, 'UTF-8'));
-		}
-		
-		if (!isset($args['default_value'])) {
-			$args['default_value'] = '';
-		}
-		
-		$result = sprintf('%3$s<input type="%7$s" value="%2$s" name="%1$s" id="%1$s"%4$s%5$s%6$s%8$s />',
-			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
-			htmlspecialchars((!isset($args['value']) ? self::_set_value($name, $args['default_value']) : $args['value']), ENT_QUOTES, 'UTF-8'),
-			!isset($args['label'])       ? '' : $args['label'],
-			!isset($args['size'])        ? '' : sprintf(' size="%s"', (int) $args['size']),
-			!isset($args['maxlength'])   ? '' : sprintf(' maxlength="%s"', (int) $args['maxlength']),
-			!isset($args['class'])       ? '' : sprintf(' class="%s"', $args['class']),
-			!isset($args['type'])        ? 'text' : $args['type'],
-			!isset($args['placeholder']) ? '' : sprintf(' placeholder="%s"', htmlspecialchars($args['placeholder'], ENT_QUOTES, 'UTF-8')));
-		
-		if ($echo) {
-			echo $result;
-		}
-		else {
 			return $result;
-		}
-	}
-	
-	public function textarea($name, array $args = array())
-	{
-		if (!isset($args['default'])) {
-			$args['default'] = '';
-		}
-		
-		printf('<textarea name="%1$s" id="%1$s" cols="%3$s" rows="%4$s"%5$s%6$s>%2$s</textarea>',
-			htmlspecialchars($name, ENT_QUOTES, 'UTF-8'),
-			!isset($args['value'])       ? self::_set_value($name, $args['default']) : htmlspecialchars($args['value'], ENT_NOQUOTES, 'UTF-8'),
-			!isset($args['cols'])        ? '40' : (int) $args['cols'],
-			!isset($args['rows'])        ? '6'  : (int) $args['rows'],
-			!isset($args['class'])       ? '' : sprintf(' class="%s"', $args['class']),
-			!isset($args['placeholder']) ? '' : sprintf(' placeholder="%s"', htmlspecialchars($args['placeholder'], ENT_QUOTES, 'UTF-8')));
-	}
-	
-	public function _set_select($field, $value = '', $default = false)
-	{
-		if (self::_set_radio_or_checkbox($field, $value, $default)) {
-			return ' selected="selected"';
 		}
 		else {
 			return '';
 		}
 	}
 	
-	private function _set_radio_or_checkbox($field, $value = '', $default = false)
+	private function name($key)
 	{
-		if (strpos($field, '[') >= 1) {
-			$field_key = explode('[', $field, 2);
-			$field = array_shift($field_key);
-			
-			$field_key = explode(']', current($field_key), 2);
-			$field_key = array_shift($field_key);
-			
-			if (!isset($_POST[$field]) or !isset($_POST[$field][$field_key])) {
-				return ($default === true) ? ' checked="checked"' : '';
-			}
-			elseif ($_POST[$field][$field_key] != $value) {
-				return '';
-			}
-			else {
-				return ' checked="checked"';
-			}
-		}
-		else
-		{
-			if (!isset($_POST[$field])) {
-		 		return ($default === true) ? ' checked="checked"' : '';
-			}
-			elseif (($field === '' or $value === '') or ($_POST[$field] != $value)) {
-				return '';
-			}
-			else {
-				return ' checked="checked"';
-			}
-		}
-	}
-
-	private function _set_value($field, $default = '')
-	{
-		if (strpos($field, '[') >= 1)
-		{
-			$field_key = explode('[', $field, 2);
-			$field = array_shift($field_key);
-			
-			$field_key = explode(']', current($field_key), 2);
-			$field_key = array_shift($field_key);
-			
-			return (isset($_POST[$field]) and isset($_POST[$field][$field_key])) ? $_POST[$field][$field_key] : $default;
+		if (is_null($this->array_name)) {
+			return esc_attr($key);
 		}
 		else {
-			return isset($_POST[$field]) ? $_POST[$field] : $default;
+			return esc_attr(sprintf('%s[%s]', $this->array_name, $key));
+		}
+	}
+	
+	private function post_value($key, $default_value = '')
+	{
+		if (!is_null($this->array_name)) {
+			return isset($_POST[$this->array_name][$key]) ? $_POST[$this->array_name][$key] : $default_value;
+		}
+		else {
+			return isset($_POST[$key]) ? $_POST[$key] : $default_value;
 		}
 	}
 }
