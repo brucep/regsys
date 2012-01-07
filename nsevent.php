@@ -687,7 +687,6 @@ class NSEvent
 			$context['admin'] = current_user_can('administrator');
 			
 			if (isset(self::$event)) {
-				$context['csv_href'] = plugins_url('download-csv.php', __FILE__) . sprintf('?event_id=%d&request=', self::$event->id());
 				$context['request_href'] = site_url('wp-admin/admin.php') . sprintf('?page=nsevent&event_id=%d&request=', self::$event->id());
 			}
 			else {

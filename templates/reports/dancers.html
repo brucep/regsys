@@ -3,7 +3,7 @@
 {% block content %}
 	<h3>Dancers
 {% if dancers %}
-		<a class="button" href="{{ csv_href ~ 'dancers' }}">Download Email Addresses</a>
+		<a class="button" href="{{ request_href ~ 'report_download_csv' ~ '&noheader=true&data=dancers' }}">Download Email Addresses</a>
 {% endif %}
 	</h3>
 

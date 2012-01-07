@@ -4,7 +4,7 @@
 	<h3>{{ housing_type }}
 {%- if dancers -%}
 		{%- if housing_count %}{{ " (%d %s)\n" | format(housing_count, pluralize('spot', 'spots', housing_count)) }}{% endif %}
-		<a class="button" href="{{ csv_href ~ housing_href }}">Download Housing Info</a>
+		<a class="button" href="{{ request_href ~ 'report_download_csv' ~ '&noheader=true&data=' ~ housing_href }}">Download Housing Info</a>
 {% endif %}
 	</h3>
 
