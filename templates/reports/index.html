@@ -7,7 +7,7 @@
 		<a class="button add-new-h2" href="{{ request_href ~ 'admin_event_add' }}">Add New Event</a>
 {% endif %}
 	</h2>
-	{%- if GET.deleted_event %}{{ "\n\t\t" ~ message('Deleted %s.' | format(GET.deleted_event), 'error') }}{% endif %}
+	{%- if GET.deleted_event %}{{ "\n\t\t" }}{{ message('Deleted %s%s.' | format((GET.registrations_only == 'true' ? 'registrations for ' : ''), GET.deleted_event), 'error') }}{% endif %}
 
 
 	<h3>Choose Event</h3>

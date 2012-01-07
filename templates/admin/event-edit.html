@@ -1,48 +1,33 @@
-<?php
-# http://www.onextrapixel.com/2009/07/01/how-to-design-and-style-your-wordpress-plugin-admin-panel/
-# http://www.onextrapixel.com/2009/06/22/how-to-add-pagination-into-list-of-records-or-wordpress-plugin/
+{% extends 'admin/_layout.html' %}
 
-require dirname(dirname(__FILE__)).'/includes/form-validation.php';
-NSEvent_FormValidation::set_error_messages();
+{% from 'admin/_layout.html' import message as message %}
+{% from 'admin/_layout.html' import form_table_row as form_table_row %}
 
-if (!empty($_POST)) {
-	NSEvent_FormValidation::add_rules(array(
-		'name' => 'trim|required'
-		));
+{% block content %}
+{% if GET.request == 'admin_event_add' %}
+	<h2>Add New Event</h2>
+{% else %}
+	<h2>Edit Event
+		<a href="{{ request_href ~ 'admin_event_delete' }}" class="delete add-new-h2">Delete Event</a>
+		<a href="{{ request_href ~ 'admin_event_delete' ~ '&registrations_only=true' }}" class="delete add-new-h2">Delete Registrations</a>
+	</h2>
+{% endif %}
 
-	if (NSEvent_FormValidation::validate()) {
-		$wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->prefix}nsevent_events (name, prereg_end) VALUES ( %s, %s )", trim($_POST['event_name']), strtotime($_POST['prereg_end'])));
-		
-		if (isset($_POST['set_current_event'])) {
-			$options = array_merge(self::$default_options, get_option('nsevent'));
-			$options['current_event_id'] = $wpdb->insert_id;
-			update_option('nsevent', $options);
-		}
-		
-		printf('<div class="wrap"><h2>%s</h2></div><a href="%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=index-event">%s</a>', __('Add New Event', 'nsevent'), get_bloginfo('wpurl'), $wpdb->insert_id, __('Event Added', 'nsevent'));
-		return;
-	}
-}
-elseif (isset($event)) {
-	# Put values into POST so that form is pre-populated.
-	$reflection = new ReflectionObject($event);
-	foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-		$_POST[$property->getName()] = $property->getValue($event);
-	}
-}
+	{% if POST.submit and not validation.get_errors() %}{% if GET.added == 'true' %}{{ message('Event created.') }}{% else %}{{ message('Event updated.') }}{% endif %}{% endif %}
+	{{ validation.get_errors() | raw }}
 
-?>
+	<form action="{{ request_href ~ GET.request }}{% if GET.request == 'admin_event_add' %}&amp;noheader=true{% endif %}" method="post">
+		{{ form.hidden('event_id') | raw }}
 
-<div class="wrap" id="nsevent">
-	<h2><?php echo (isset($event)) ? __('Edit Event', 'nsevent') : __('Add New Event', 'nsevent'); ?></h2>
+		<h3>Event Information</h3>
 
-	<form action="<?php echo (isset($event)) ? $event->get_request_href('event-edit') : sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=add&amp;request=event-edit', get_bloginfo('wpurl')); ?>" method="post">
-		<ul>			
-			<li><?php NSEvent_FormInput::text('name', array('label' =>  __('Name', 'nsevent'))); ?></li>
-			<li><?php NSEvent_FormInput::text('prereg_end', array('label' => __('Preregistration End Date', 'nsevent'))); ?></li>
-			<li><?php NSEvent_FormInput::checkbox('set_current_event', array('label' => __('Use this event for the registration form.', 'nsevent'))); ?></li>
-		</ul>
+		<table class="form-table">
+			{{ form_table_row('Name',                           form.text('name')) }}
+			{{ form_table_row('Preregistration by Mail Ends',   form.text('date_mail_prereg_end')) }}
+			{{ form_table_row('Preregistration by PayPal Ends', form.text('date_paypal_prereg_end')) }}
+			{{ form_table_row('Refunds End',                    form.text('date_refund_end')) }}
+		</table>
 
-		<input type="submit" class="button-primary" value="<?php _e('Edit Event', 'nsevent'); ?>" />
+		<p class="submit"><input type="submit" class="button-primary" name="submit" value="{% if GET.request == 'admin_event_add' %}Add Event{% else %}Edit Event{% endif %}"></p>
 	</form>
-</div>
+{% endblock content %}

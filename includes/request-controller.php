@@ -2,6 +2,106 @@
 
 class NSEvent_Request_Controller
 {
+	static public function admin_event_add()
+	{
+		# Separate method used to avoid loading non-existent event
+		self::admin_event_edit(null);
+	}
+	
+	static public function admin_event_delete($event)
+	{
+		if (isset($_POST['confirmed'])) {
+			if (isset($_GET['registrations_only']) and $_GET['registrations_only'] == 'true')
+			{
+				$event->delete_registrations();
+				wp_redirect(site_url('wp-admin/admin.php') . '?page=nsevent&request=report_index&deleted_event=' . rawurlencode($event->name()) . '&registrations_only=true');
+				exit();
+			}
+			else {
+				$event->delete();
+				wp_redirect(site_url('wp-admin/admin.php') . '?page=nsevent&request=report_index&deleted_event=' . rawurlencode($event->name()));
+				exit();
+			}
+		}
+		
+		# Needed if the confirmation checkbox wasn't checked.
+		if (isset($_GET['noheader'])) {
+			require_once ABSPATH . 'wp-admin/admin-header.php';
+		}
+		
+		echo NSEvent::render_template('admin/event-delete.html', array('event' => $event));
+	}
+	
+	static public function admin_event_edit($event)
+	{
+		$validation = new NSEvent_Form_Validation;
+		
+		if (!empty($_POST)) {
+			$validation->add_rules(array(
+				'name'                   => 'trim|required',
+				'date_mail_prereg_end'   => 'required|strtotime',
+				'date_paypal_prereg_end' => 'required|strtotime',
+				'date_refund_end'        => 'if_set[date_refund_end]|strtotime',
+				));
+			
+			if ($validation->validate()) {
+				$event = new NSEvent_Model_Event($_POST);
+				
+				if ($_GET['request'] == 'admin_event_add') {
+					$event->add();
+					wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=nsevent&event_id=%d&request=admin_event_edit&added=true', $event->id()));
+					exit();
+				}
+				else {
+					$event->update();
+				}
+			}
+		}
+		elseif (isset($event)) {
+			# Put values into POST so that form is pre-populated.
+			$reflection = new ReflectionObject($event);
+			
+			if (version_compare(PHP_VERSION, '5.3', '>=')) {
+				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
+						$property->setAccessible(true);
+						$_POST[$property->getName()] = $property->getValue($event);
+				}
+			}
+			else {
+				$temp = (array) $event;
+				
+				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
+					$key = "\0NSEvent_Model_Event\0" . $property->getName();
+					$_POST[$property->getName()] = $temp[$key];
+				}
+				
+				unset($temp);
+			}
+		}
+		
+		# Format dates for display
+		foreach ($_POST as $key => $value) {
+			if (in_array($key, array('date_mail_prereg_end', 'date_paypal_prereg_end', 'date_refund_end'))) {
+				if (empty($value)) {
+					unset($_POST[$key]);
+				}
+				elseif (is_numeric($value)) {
+					$_POST[$key] = date('Y-m-d h:i A', $value);
+				}
+			}
+		}
+		unset($key, $value);
+		
+		# Needed if there are validations errors when adding an event.
+		if (isset($_GET['noheader'])) {
+			require_once ABSPATH . 'wp-admin/admin-header.php';
+		}
+		
+		echo NSEvent::render_template('admin/event-edit.html', array(
+			'event'      => $event,
+			'validation' => $validation));
+	}
+	
 	static public function report_competitions($event)
 	{
 		echo NSEvent::render_template('reports/competitions.html', array(
