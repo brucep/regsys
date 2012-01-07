@@ -13,8 +13,7 @@
 	</h2>
 {% endif %}
 
-	{% if POST.submit and not validation.get_errors() %}{% if GET.added == 'true' %}{{ message('Event created.') }}{% else %}{{ message('Event updated.') }}{% endif %}{% endif %}
-	{{ validation.get_errors() | raw }}
+	{% if validation.did_validate %}{% if GET.added == 'true' %}{{ message('Event created.') }}{% else %}{{ message('Event updated.') }}{% endif %}{% elseif %}{{ validation.get_errors | raw }}{% endif %}
 
 	<form action="{{ request_href ~ GET.request }}{% if GET.request == 'admin_event_add' %}&amp;noheader=true{% endif %}" method="post">
 		{{ form.hidden('event_id') | raw }}
