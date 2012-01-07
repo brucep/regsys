@@ -83,15 +83,46 @@ class NSEvent_Request_Controller
 				));
 			
 			if ($validation->validate()) {
+				$database = NSEvent::get_database_connection();
+				
 				$event = new NSEvent_Model_Event($_POST);
 				
 				if ($_GET['request'] == 'admin_event_add') {
-					$event->add();
-					wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=nsevent&event_id=%d&request=admin_event_edit&added=true', $event->id()));
+					$database->query('INSERT %s_events VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', array(
+						@(string) $_POST['name'],
+			 			@(int)    $_POST['date_mail_prereg_end'],
+			 			@(int)    $_POST['date_paypal_prereg_end'],
+			 			@(int)    $_POST['date_refund_end'],
+			 			@(int)    $_POST['has_discount'],
+			 			@(int)    $_POST['has_levels'],
+			 			@(int)    $_POST['has_vip'],
+			 			@(int)    $_POST['has_volunteers'],
+			 			@(int)    $_POST['has_housing'],
+			 			@(string) $_POST['housing_nights'],
+			 			@(int)    $_POST['limit_discount'],
+			 			@(int)    $_POST['limit_per_position'],
+			 			@(string) $_POST['discount_org_name'],
+						));
+					
+					wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=nsevent&event_id=%d&request=admin_event_edit&added=true', $database->lastInsertID()));
 					exit();
 				}
 				else {
-					$event->update();
+					$database->query('UPDATE %s_events SET `name` = ?, date_mail_prereg_end = ?, date_paypal_prereg_end = ?, date_refund_end = ?, has_discount = ?, has_levels = ?, has_vip = ?, has_volunteers = ?, has_housing = ?, housing_nights = ?, limit_discount = ?, limit_per_position = ?, discount_org_name = ? WHERE event_id = ?;', array(
+						@(string) $_POST['name'],
+			 			@(int)    $_POST['date_mail_prereg_end'],
+			 			@(int)    $_POST['date_paypal_prereg_end'],
+			 			@(int)    $_POST['date_refund_end'],
+			 			@(int)    $_POST['has_discount'],
+			 			@(int)    $_POST['has_levels'],
+			 			@(int)    $_POST['has_vip'],
+			 			@(int)    $_POST['has_volunteers'],
+			 			@(int)    $_POST['has_housing'],
+			 			@(string) $_POST['housing_nights'],
+			 			@(int)    $_POST['limit_discount'],
+			 			@(int)    $_POST['limit_per_position'],
+			 			@(string) $_POST['discount_org_name'],
+						$event->id()));
 				}
 			}
 		}

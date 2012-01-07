@@ -53,47 +53,6 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return self::$database->query('SELECT * FROM %1$s_events WHERE event_id = :event_id', array(':event_id' => $event_id))->fetchObject('NSEvent_Model_Event');
 	}
 	
-	public function add()
-	{
-		self::$database->query('INSERT %s_events VALUES (NULL, :name, :date_mail_prereg_end, :date_paypal_prereg_end, :date_refund_end, :has_discount, :has_levels, :has_vip, :has_volunteers, :has_housing, :housing_nights, :limit_discount, :limit_per_position, :discount_org_name);', array(
-			':name'                   => (string)$this->name,
- 			':date_mail_prereg_end'   => (int) $this->date_mail_prereg_end,
- 			':date_paypal_prereg_end' => (int) $this->date_paypal_prereg_end,
- 			':date_refund_end'        => (int) $this->date_refund_end,
- 			':has_discount'           => (int) $this->has_discount,
- 			':has_levels'             => (int) $this->has_levels,
- 			':has_vip'                => (int) $this->has_vip,
- 			':has_volunteers'         => (int) $this->has_volunteers,
- 			':has_housing'            => (int) $this->has_housing,
- 			':housing_nights'         => (string) $this->housing_nights,
- 			':limit_discount'         => (int) $this->limit_discount,
- 			':limit_per_position'     => (int) $this->limit_per_position,
- 			':discount_org_name'      => (string) $this->discount_org_name,
-			));
-		
-		$this->event_id = self::$database->lastInsertID();
-	}
-	
-	public function update()
-	{
-		self::$database->query('UPDATE %s_events SET `name` = :name, date_mail_prereg_end = :date_mail_prereg_end, date_paypal_prereg_end = :date_paypal_prereg_end, date_refund_end = :date_refund_end, has_discount = :has_discount, has_levels = :has_levels, has_vip = :has_vip, has_volunteers = :has_volunteers, has_housing = :has_housing, housing_nights = :housing_nights, limit_discount = :limit_discount, limit_per_position = :limit_per_position, discount_org_name = :discount_org_name WHERE event_id = :event_id;', array(
-			':name'                   => (string) $this->name,
- 			':date_mail_prereg_end'   => (int) $this->date_mail_prereg_end,
- 			':date_paypal_prereg_end' => (int) $this->date_paypal_prereg_end,
- 			':date_refund_end'        => (int) $this->date_refund_end,
- 			':has_discount'           => (int) $this->has_discount,
- 			':has_levels'             => (int) $this->has_levels,
- 			':has_vip'                => (int) $this->has_vip,
- 			':has_volunteers'         => (int) $this->has_volunteers,
- 			':has_housing'            => (int) $this->has_housing,
- 			':housing_nights'         => (string) $this->housing_nights,
- 			':limit_discount'         => (int) $this->limit_discount,
- 			':limit_per_position'     => (int) $this->limit_per_position,
- 			':discount_org_name'      => (string) $this->discount_org_name,
-			':event_id'               => $this->event_id,
-			));
-	}
-	
 	public function items()
 	{
 		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
