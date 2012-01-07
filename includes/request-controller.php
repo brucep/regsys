@@ -2,6 +2,13 @@
 
 class NSEvent_Request_Controller
 {
+	static public function admin_dancer_resend_confirmation_email($event, $dancer)
+	{
+		$dancer->send_confirmation_email();
+		wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=nsevent&request=report_dancer&event_id=%d&dancer_id=%d&confirmation_email=true', $event->id(), $dancer->id()));
+		exit();
+	}
+	
 	static public function admin_event_add()
 	{
 		# Separate method used to avoid loading non-existent event

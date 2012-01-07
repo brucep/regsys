@@ -375,14 +375,16 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		return ($this->registered_package_id !== false) ? (int) $this->registered_package_id : false;
 	}
 	
-	static public function send_confirmation_email($subject, $body, array $to, $override_bcc = false)
+	public function send_confirmation_email()
 	{
+		$event = NSEvent_Model_Event::get_event_by_id($this->event_id);
+		
 		$body = NSEvent::render_template('registration/confirmation-email.txt', array(
 			'options' => self::$options,
-			'event'   => NSEvent_Model_Event::get_event_by_id($this->event_id),
+			'event'   => $event,
 			'dancer'  => $this));
 		
-		require dirname(__FILE__) . '/includes/swiftmailer/lib/swift_required.php';
+		require dirname(__FILE__) . '/swiftmailer/lib/swift_required.php';
 		
 		if (self::$options['email_transport'] == 'smtp') {
 			$transport = Swift_SmtpTransport::newInstance(self::$options['email_smtp_host']);
@@ -408,13 +410,13 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		}
 		
 		$message = Swift_Message::newInstance()
-			->setSubject($subject)
+			->setSubject(sprintf('Registration for %s: %s', $event->name(), $this->name()))
 			->setFrom(self::$options['email_from'])
 			->setReplyTo(self::$options['email_from'])
 			->addTo($this->email, $this->name())
 			->setBody($body);
 		
-		if (!empty(self::$options['email_bcc']) and !$override_bcc) {
+		if (!empty(self::$options['email_bcc'])) {
 			$message->setBcc(self::$options['email_bcc']);
 		}
 		

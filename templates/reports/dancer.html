@@ -1,5 +1,7 @@
 {% extends 'reports/_layout.html' %}
 
+{% from 'admin/_layout.html' import message as message %}
+
 {% block content %}
 	<div class="vcard">
 	<h3><span class="fn n"><span class="given-name">{{ dancer.first_name }}</span> <span class="family-name">{{ dancer.last_name }}</span></span>
@@ -8,6 +10,7 @@
 		<a class="delete" href="{{ request_href ~ 'admin_dancer_delete' ~ '&dancer_id=' ~ dancer.id }}">Delete Dancer</a>
 {% endif %}
 	</h3>
+	{%- if GET.confirmation_email == 'true' %}{{ "\n\t\t" }}{{ message('Confirmation email sent.') }}{% endif %}
 
 	<ul>
 		<li><a href="{{ dancer.mailto }}"><span class="email">{{ dancer.email }}</span></a></li>
@@ -28,7 +31,7 @@
 {% if admin %}
 		<a class="button" href="{{ request_href ~ 'admin_dancer_registration_add' ~ '&dancer_id=' ~ dancer.id }}">Add Registration</a>
 		<a class="button" href="{{ dancer.paypal_href }}" >PayPal Link</a>
-		<a class="button" href="{{ request_href ~ 'admin_dancer_resend_confirmation_email' ~ '&dancer_id=' ~ dancer.id }}">Resend Confirmation Email</a>
+		<a class="button" href="{{ request_href ~ 'admin_dancer_resend_confirmation_email' ~ '&dancer_id=' ~ dancer.id ~ '&noheader=true' }}">Resend Confirmation Email</a>
 {% endif %}
 	</h4>
 
