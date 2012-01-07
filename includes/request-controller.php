@@ -29,11 +29,6 @@ class NSEvent_Request_Controller
 	{
 		$validation = new NSEvent_Form_Validation;
 		
-		$levels = array();
-		foreach ($event->levels() as $level) {
-			$levels[$level['level_id']] = $level['label'];
-		}
-		
 		if (!empty($_POST)) {
 			$validation->add_rules(array(
 				'first_name'      => 'trim|required|max_length[100]|ucfirst',
@@ -47,7 +42,7 @@ class NSEvent_Request_Controller
 			
 			if ($event->has_levels()) {
 				$validation->add_rule('level_id', sprintf('intval|in[%s]',
-					implode(',', array_keys($levels))));
+					implode(',', array_keys($event->levels_keyed_by_id()))));
 			}
 			else {
 				$_POST['level'] = 1;
@@ -96,7 +91,6 @@ class NSEvent_Request_Controller
 		echo NSEvent::render_template('admin/dancer-edit.html', array(
 			'event'      => $event,
 			'dancer'     => $dancer,
-			'levels'     => $levels,
 			'validation' => $validation));
 	}
 	

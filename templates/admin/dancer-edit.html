@@ -22,7 +22,7 @@
 				]) | raw }}
 
 {% if event.has_levels %}
-			{{ form.row_select('Level', 'level_id', levels) | raw }}
+			{{ form.row_select('Level', 'level_id', event.levels_keyed_by_id) | raw }}
 {% endif %}
 
 			{{ form.row_radio('Status', 'status', [

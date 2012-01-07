@@ -237,6 +237,17 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return $this->levels;
 	}
 	
+	public function levels_keyed_by_id()
+	{
+		$levels = array();
+		
+		foreach ($this->levels() as $level) {
+			$levels[$level['level_id']] = $level['label'];
+		}
+		
+		return $levels;
+	}
+	
 	public function request_href($request, array $parameters = array())
 	{
 		$href = sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=%s',
