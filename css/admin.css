@@ -30,6 +30,10 @@ div.nsevent-exception {margin:2em 1em;}
 	list-style-type: none;
 }
 
+#nsevent form label.radio {
+	margin-right: 2em;
+}
+
 #nsevent form input[type="submit"] {
 	margin-top: 2em;
 }
