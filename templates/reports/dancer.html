@@ -7,7 +7,6 @@
 	<h3><span class="fn n"><span class="given-name">{{ dancer.first_name }}</span> <span class="family-name">{{ dancer.last_name }}</span></span>
 {% if admin %}
 		<a class="button" href="{{ request_href ~ 'admin_dancer_edit'   ~ '&dancer_id=' ~ dancer.id }}">Edit Dancer</a>
-		<a class="delete" href="{{ request_href ~ 'admin_dancer_delete' ~ '&dancer_id=' ~ dancer.id }}">Delete Dancer</a>
 {% endif %}
 	</h3>
 	{%- if GET.confirmation_email == 'true' %}{{ "\n\t\t" }}{{ message('Confirmation email sent.') }}{% endif %}

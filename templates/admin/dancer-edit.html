@@ -1,7 +1,9 @@
 {% extends 'admin/_layout.html' %}
 
 {% block content %}
-	<h2>Edit Dancer</h2>
+	<h2>Edit Dancer
+		<a class="delete" href="{{ request_href ~ 'admin_dancer_delete' ~ '&dancer_id=' ~ dancer.id }}">Delete Dancer</a>
+	</h2>
 
 	{% if validation.did_validate %}{{ form.message('Dancer updated.') | raw }}{% else %}{{ validation.get_errors | raw }}{% endif %}
 
