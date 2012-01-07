@@ -1,0 +1,10 @@
+{% extends 'admin/_layout.html' %}
+
+{% block content %}
+	<h2>Delete Event</h2>
+
+	<form action="{{ request_href ~ 'admin_dancer_delete' ~ '&dancer_id=' ~ dancer.id ~ '&noheader=true' }}" method="post">
+		<p style="padding-top: 1.5em;">{{ form.checkbox('confirmed') | raw }} <strong>I'm sure I want to delete <em>all information</em> for {{ dancer.name }}.</strong><span style="margin-left: 1em">{{ '[%s] [#%s]' | format(dancer.email, dancer.id) }}</span></p>
+		<p class="submit"><input type="submit" class="delete" value="Delete Dancer"></p>
+	</form>
+{% endblock content %}

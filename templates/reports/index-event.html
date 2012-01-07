@@ -1,7 +1,9 @@
+{% from 'admin/_layout.html' import message as message %}
 
 <div id="nsevent" class="wrap">
 <div id="report_index_event">
 	<h2>Reports for {{ event.name }}</h2>
+	{%- if GET.deleted_dancer %}{{ "\n\t\t" }}{{ message('Deleted %s.' | format(GET.deleted_dancer), 'error') }}{% endif %}
 
 	<h3>Choose Report</h3>
 
