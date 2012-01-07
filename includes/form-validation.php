@@ -2,7 +2,8 @@
 
 class NSEvent_Form_Validation
 {
-	protected $rules = array(),
+	protected $did_validate = false,
+	          $rules = array(),
 	          $errors = array(),
 	          $validated = array(),
 	          $error_messages = array(),
@@ -21,9 +22,14 @@ class NSEvent_Form_Validation
 		$this->error_messages = array_merge($this->error_messages, $error_messages);
 	}
 	
+	public function did_validate()
+	{
+		return $this->did_validate;
+	}
+	
 	public function validate()
 	{
-		$did_validate = true;
+		$this->did_validate = true;
 		
 		if (empty($this->rules)) {
 			throw new NSEvent_Form_Validation_Exception('No rules to validate.');
@@ -98,7 +104,7 @@ class NSEvent_Form_Validation
 				
 				if ($result === false) {
 					unset($this->validated[$key]);
-					$did_validate = false;
+					$this->did_validate = false;
 					
 					if (strpos($key, '[') >= 1) {
 						$displayable_key = explode('[', $key, 2);
@@ -127,7 +133,7 @@ class NSEvent_Form_Validation
 			}
 		}
 		
-		return $did_validate;
+		return $this->did_validate;
 	}
 	
 	public function add_rules(array $rules)
