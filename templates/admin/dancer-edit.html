@@ -1,5 +1,42 @@
+{% extends 'admin/_layout.html' %}
 
-<div class="wrap">
-	<h2><?php _e('Edit Dancer', 'nsevent'); ?></h2>
-	
-</div>
+{% block content %}
+	<h2>Edit Dancer</h2>
+
+	{% if validation.did_validate %}{{ form.message('Dancer updated.') | raw }}{% else %}{{ validation.get_errors | raw }}{% endif %}
+
+	<form action="{{ request_href ~ 'admin_dancer_edit' ~ '&dancer_id=' ~ dancer.id }}" method="post">
+		<h3>Dancer Information</h3>
+
+		<table class="form-table">
+			{{ form.row_text('First Name',   'first_name'  ) | raw }}
+			{{ form.row_text('Last Name',    'last_name'   ) | raw }}
+			{{ form.row_text('Email',        'email'       ) | raw }}
+			{{ form.row_text('Mobile Phone', 'mobile_phone') | raw }}
+
+			{{ form.row_radio('Position', 'position', [
+				{ 'label': 'Lead',   'checked': (dancer.position == 'Lead'),   'value': 1, 'default': true },
+				{ 'label': 'Follow', 'checked': (dancer.position == 'Follow'), 'value': 2 },
+				]) | raw }}
+
+{% if event.has_levels %}
+			{{ form.row_select('Level', 'level_id', levels) | raw }}
+{% endif %}
+
+			{{ form.row_radio('Status', 'status', [
+				{ 'label': 'None',      'value': 0, 'default': true },
+				{ 'label': 'Volunteer', 'value': 1, 'checked': (dancer.is_volunteer) },
+				{ 'label': 'VIP',       'value': 2, 'checked': (dancer.is_vip) },
+				]) | raw }}
+			
+			{{ form.row_text('Date Registered', 'date_registered') | raw }}
+
+			{{ form.row_radio('Payment Method', 'payment_method', [
+				{ 'label': 'Mail',   'checked': (dancer.payment_method == 'Mail'),   'value': 'Mail', 'default': true },
+				{ 'label': 'PayPal', 'checked': (dancer.payment_method == 'PayPal'), 'value': 'PayPal' },
+				]) | raw }}
+		</table>
+
+		<p class="submit"><input type="submit" class="button-primary" value="Edit Dancer"></p>
+	</form>
+{% endblock content %}

@@ -25,6 +25,81 @@ class NSEvent_Request_Controller
 			'dancer' => $dancer));
 	}
 	
+	static public function admin_dancer_edit($event, $dancer)
+	{
+		$validation = new NSEvent_Form_Validation;
+		
+		$levels = array();
+		foreach ($event->levels() as $level) {
+			$levels[$level['level_id']] = $level['label'];
+		}
+		
+		if (!empty($_POST)) {
+			$validation->add_rules(array(
+				'first_name'      => 'trim|required|max_length[100]|ucfirst',
+				'last_name'       => 'trim|required|max_length[100]|ucfirst',
+				'email'           => 'trim|valid_email|max_length[100]', # TODO: Update NSEvent::validate_*
+				'mobile_phone'    => 'trim|required|max_length[30]',
+				'position'        => 'intval|in[1,2]',
+				'payment_method'  => 'in[Mail,PayPal]',
+				'date_registered' => 'required|strtomtime',
+				));
+			
+			if ($event->has_levels()) {
+				$validation->add_rule('level_id', sprintf('intval|in[%s]',
+					implode(',', array_keys($levels))));
+			}
+			else {
+				$_POST['level'] = 1;
+			}
+			
+			if ($validation->validate()) {
+				$database = NSEvent::get_database_connection();
+				
+				$database->query('UPDATE %s_dancers SET first_name = ?, last_name = ?, email = ?, position = ?, level_id = ?, status = ?, date_registered = ?, payment_method = ?, mobile_phone = ?, WHERE dancer_id = ?;', array(
+					@$_POST['first_name'],
+					@$_POST['last_name'],
+					@$_POST['email'],
+					@$_POST['position'],
+					@$_POST['level_id'],
+					@$_POST['status'],
+					@$_POST['date_registered'],
+					@$_POST['payment_method'],
+					@$_POST['mobile_phone'],
+					$dancer->id()));
+				
+				$dancer = $event->dancer_by_id($dancer->id());
+			}
+		}
+		else {
+			# Put values into POST so that form is pre-populated.
+			$reflection = new ReflectionObject($dancer);
+			
+			if (version_compare(PHP_VERSION, '5.3', '>=')) {
+				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
+						$property->setAccessible(true);
+						$_POST[$property->getName()] = $property->getValue($dancer);
+				}
+			}
+			else {
+				$temp = (array) $event;
+				
+				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
+					$key = "\0NSEvent_Model_Dancer\0" . $property->getName();
+					$_POST[$property->getName()] = $temp[$key];
+				}
+				
+				unset($temp);
+			}
+		}
+		
+		echo NSEvent::render_template('admin/dancer-edit.html', array(
+			'event'      => $event,
+			'dancer'     => $dancer,
+			'levels'     => $levels,
+			'validation' => $validation));
+	}
+	
 	static public function admin_dancer_resend_confirmation_email($event, $dancer)
 	{
 		$dancer->send_confirmation_email();
