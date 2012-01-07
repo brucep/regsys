@@ -94,22 +94,6 @@ class NSEvent_Model_Event extends NSEvent_Model
 			));
 	}
 	
-	public function delete()
-	{
-		$this->delete_registrations();
-		self::$database->query('DELETE FROM %s_item_prices   WHERE event_id = ?;', array($this->event_id));
-		self::$database->query('DELETE FROM %s_items         WHERE event_id = ?;', array($this->event_id));
-		self::$database->query('DELETE FROM %s_event_levels  WHERE event_id = ?;', array($this->event_id));
-		self::$database->query('DELETE FROM %s_events        WHERE event_id = ?;', array($this->event_id));
-	}
-	
-	public function delete_registrations()
-	{
-		self::$database->query('DELETE FROM %s_registrations WHERE event_id = ?;', array($this->event_id));
-		self::$database->query('DELETE FROM %s_housing       WHERE event_id = ?;', array($this->event_id));
-		self::$database->query('DELETE FROM %s_dancers       WHERE event_id = ?;', array($this->event_id));
-	}
-	
 	public function items()
 	{
 		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
