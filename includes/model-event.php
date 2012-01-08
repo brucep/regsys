@@ -58,7 +58,7 @@ class NSEvent_Model_Event extends NSEvent_Model
 		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
 	}
 	
-	public function items_where(array $where)
+	public function items_where(array $where, $exclude_expired = false)
 	{
 		$query = array('`event_id` = :event_id');
 		
@@ -68,6 +68,11 @@ class NSEvent_Model_Event extends NSEvent_Model
 		
 		$query = implode(' AND', $query);
 		$where[':event_id'] = $this->event_id;
+		
+		if ($exclude_expired) {
+			$query .= ' AND date_expires <= :date_expires';
+			$where[':date_expires'] = time();
+		}
 		
 		return self::$database->query('SELECT * FROM %1$s_items WHERE '.$query, $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
 	}
