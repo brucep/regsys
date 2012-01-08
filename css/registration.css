@@ -1,10 +1,12 @@
-.nsevent-registration-form p {
+.nsevent-reg-form p {
 margin: 1em;
 }
-.nsevent-registration-form div.field {
+
+.nsevent-reg-form div.field {
 margin-top: 1em;
 }
-.nsevent-registration-form #submit input {
+
+.nsevent-reg-form #submit input {
 display: block;
 margin: 0 auto;
 padding: 0.2em 0.5em;
@@ -14,32 +16,38 @@ border: 1px solid #d9d9d9;
 -moz-border-radius: 8px;
 cursor: pointer;
 }
-.nsevent-registration-form #submit input:hover {
+
+.nsevent-reg-form #submit input:hover {
 background-color: #ff7;
 }
 
 
-#nsevent-registration-form-info .no_show {
+#nsevent-reg-form-info .no_show {
 display: none;
 }
-#nsevent-registration-form-info div.nsevent-validation-error {
+
+#nsevent-reg-form-info div.nsevent-validation-error {
 margin: 1em -0.4em;
 padding: 0.4em;
 background-color: #fcc;
 }
-#nsevent-registration-form-info tr.nsevent-validation-error td {
+
+#nsevent-reg-form-info tr.nsevent-validation-error td {
 padding: 0.4em;
 background-color: #fcc;
 }
-#nsevent-registration-form-info div#pricing-dates {
+
+#nsevent-reg-form-info div#pricing-dates {
 margin-top: 1em;
 }
-form fieldset, div.nsevent-registration-form div.price_table {
+
+form fieldset, div.nsevent-reg-form div.price_table {
 margin-bottom: 3em;
 padding: 1em 1em;
 background-color: #d6e7f1;
 }
-#nsevent-registration-form-info h2, div.nsevent-registration-form div.price_table h2 {
+
+#nsevent-reg-form-info h2, div.nsevent-reg-form div.price_table h2 {
 margin: 1.5em 0 0;
 padding: 0.4em;
 font-weight: bold;
@@ -47,100 +55,118 @@ font-size: 1.1em;
 color: #fff;
 background-color: #1c90c7;
 }
-#nsevent-registration-form-info fieldset h2 span {
+
+#nsevent-reg-form-info fieldset h2 span {
 font-size: 0.8em;
 margin-left: 0.8em;
 }
-#nsevent-registration-form-info fieldset p {
+
+#nsevent-reg-form-info fieldset p {
 margin: 1em 0 0 !important;
 }
-#nsevent-registration-form-info fieldset div:first-child {
+
+#nsevent-reg-form-info fieldset div:first-child {
 margin-top: 0 !important;
 }
-#nsevent-registration-form-info div.text label {
+
+#nsevent-reg-form-info div.text label {
 display: block;
 width: 10.5em;
 float: left;
 }
-#nsevent-registration-form-info div.text input {
+
+#nsevent-reg-form-info div.text input {
 margin-top: -1px;
 }
-#nsevent-registration-form-info table, div.nsevent-registration-form table {
+
+#nsevent-reg-form-info table, div.nsevent-reg-form table {
 width: 100%;
 }
-#nsevent-registration-form-info thead th, div.nsevent-registration-form thead th {
+
+#nsevent-reg-form-info thead th, div.nsevent-reg-form thead th {
 font-size: 0.8em;
 text-align: left;
 background-color: #afd1e4;
 }
-#nsevent-registration-form-info tbody tr.limit_reached td {
+
+#nsevent-reg-form-info tbody tr.limit_reached td {
 background-color: #d1d1d1;
 }
-#nsevent-registration-form-info tbody tr.limit_reached td:first-child {
+
+#nsevent-reg-form-info tbody tr.limit_reached td:first-child {
 padding-left: 1em;
 }
-#nsevent-registration-form-info tbody td {
+
+#nsevent-reg-form-info tbody td {
 padding: 0.5em 0;
 border-top: 1px solid #b3b3b3;
 }
-#nsevent-registration-form-info td.not_early_bird {
+
+#nsevent-reg-form-info td.not_early_bird {
 text-decoration: line-through;
 }
-#nsevent-registration-form-info .still_early_bird #packages table th.price {
+
+#nsevent-reg-form-info .still_early_bird #packages table th.price {
 width: 11%;
 }
-#nsevent-registration-form-info .not_early_bird #packages table th.price {
+
+#nsevent-reg-form-info .not_early_bird #packages table th.price {
 width: 16%;
 }
-#nsevent-registration-form-info td.note input[type=text], #nsevent-registration-form-info textarea {
+
+#nsevent-reg-form-info td.note input[type=text], #nsevent-reg-form-info textarea {
 width: 100%;
 }
-#nsevent-registration-form-info td.note ul, #nsevent-registration-form-info td.note ul li {
+
+#nsevent-reg-form-info td.note ul, #nsevent-reg-form-info td.note ul li {
 margin: 0 !important;
 padding: 0 !important;
 list-style: inside circle;
 }
-#nsevent-registration-form-info fieldset#shirt table {
+
+#nsevent-reg-form-info fieldset#shirt table {
 width: 95%;
 }
-#nsevent-registration-form-info fieldset#shirt select {
+
+#nsevent-reg-form-info fieldset#shirt select {
 width: 100%;
 }
-#nsevent-registration-form-info div#shirt-description {
+
+#nsevent-reg-form-info div#shirt-description {
 margin-top: 1.5em;
 }
-#nsevent-registration-form-info div#shirt-description img {
+
+#nsevent-reg-form-info div#shirt-description img {
 float: left;
 clear: left;
 margin-right: 1em;
 }
-#nsevent-registration-form-info div#shirt-description h3 {
+
+#nsevent-reg-form-info div#shirt-description h3 {
 margin-top: 1em;
 font-weight: bold;
 }
-#nsevent-registration-form-info div#shirt-description h3 + p {
-margin-top: 0.5em !important;
-margin-bottom: 1.5em !important;
-}
 
-
-#nsevent-registration-form-confirm table {
+#nsevent-reg-form-confirm table {
 margin-top: 2em;
 }
-#nsevent-registration-form-confirm td.label {
+
+#nsevent-reg-form-confirm td.label {
 width: 30%;
 }
-#nsevent-registration-form-confirm td.value {
+
+#nsevent-reg-form-confirm td.value {
 width: 60%;
 }
-#nsevent-registration-form-confirm td.price {
+
+#nsevent-reg-form-confirm td.price {
 width: 10%;
 text-align: right;
 }
-#nsevent-registration-form-confirm #submit {
+
+#nsevent-reg-form-confirm #submit {
 margin: 2em 0 1em;
 }
-
 
 #nsevent-accepted-paypal input#paypal-button {
 display: block;
