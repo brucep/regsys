@@ -15,7 +15,7 @@ class NSEvent_Form_Controls
 		if ($parameters['checked'] == null) {
 			if ((is_null($this->array_name) and !isset($_POST[$key])) or
 			    !is_null($this->array_name) and !isset($_POST[$this->array_name][$key])) {
-				$parameters['checked'] = ($default === true);
+				$parameters['checked'] = ($parameters['default'] === true);
 			}
 			else {
 				if (is_null($this->array_name)) {
