@@ -82,7 +82,7 @@ class NSEvent_Form_Controls
 	
 	public function input_textarea($key, $value = null, array $attributes = array())
 	{
-		$attributes = array_merge(array('cols' => '40', 'rows' => '6'), $attributes);
+		$attributes = array_merge(array('cols' => '40', 'rows' => '4'), $attributes);
 		
 		return sprintf('<textarea name="%1$s"%3$s>%2$s</textarea>',
 			$this->name($key),
@@ -102,14 +102,32 @@ class NSEvent_Form_Controls
 		$this->array_name = $array_name;
 	}
 	
-	public function row($label, $input)
+	public function row($label, $input, $description = '', array $classes = array())
 	{
-		return sprintf("<tr valign=\"top\">\n\t\t\t\t<th scope=\"row\">%s</th>\n\t\t\t\t<td>%s\n\t\t\t\t</td>\n\t\t\t</tr>\n",
+		if ($description !== '') {
+			$description = "\n\t\t\t\t\t<span class=\"description\">$description</span>";
+		}
+		
+		if (!empty($classes)) {
+			$classes = sprintf(' class="%s"', implode(' ', array_map('esc_attr', $classes)));
+		}
+		else {
+			$classes = '';
+		}
+		
+		return sprintf("<tr valign=\"top\"%s>\n\t\t\t\t<th scope=\"row\">%s</th>\n\t\t\t\t<td>%s%s\n\t\t\t\t</td>\n\t\t\t</tr>\n",
+			$classes,
 			esc_html($label),
-			$input);
+			$input,
+			$description);
 	}
 	
-	public function row_radio($label, $key, array $options)
+	public function row_checkbox($label, $key, array $parameters = array(), $description = '', array $classes = array())
+	{
+		return $this->row($label, "\n\t\t\t\t\t" . sprintf('<label>%s %s</label>', $this->input_checkbox($key, $parameters), $description), '', $classes);
+	}
+	
+	public function row_radio($label, $key, array $options, $description = '', array $classes = array())
 	{
 		$input = '';
 		
@@ -117,17 +135,22 @@ class NSEvent_Form_Controls
 			$input .= sprintf("\n\t\t\t\t\t" . '<label class="radio">%s %s</label>', $this->input_radio($key, $option), $option['label']);
 		}
 		
-		return $this->row($label, $input);
+		return $this->row($label, $input, $description, $classes);
 	}
 	
-	public function row_select($label, $key, array $options, array $parameters = array())
+	public function row_select($label, $key, array $options, array $parameters = array(), $description = '', array $classes = array())
 	{
-		return $this->row($label, "\n\t\t\t\t\t" . $this->input_select($key, $options, array_merge(array('indent' => "\t\t\t\t\t"), $parameters)));
+		return $this->row($label, "\n\t\t\t\t\t" . $this->input_select($key, $options, array_merge(array('indent' => "\t\t\t\t\t"), $parameters)), $description, $classes);
 	}
 	
-	public function row_text($label, $key, $value = null, array $attributes = array())
+	public function row_text($label, $key, $value = null, array $attributes = array(), $description = '', array $classes = array())
 	{
-		return $this->row($label, "\n\t\t\t\t\t" . $this->input_text($key, $value, $attributes));
+		return $this->row($label, "\n\t\t\t\t\t" . $this->input_text($key, $value, $attributes), $description, $classes);
+	}
+	
+	public function row_textarea($label, $key, $value, array $attributes = array(), $description = '', array $classes = array())
+	{
+		return $this->row($label, "\n\t\t\t\t\t<p>" . $this->input_textarea($key, $value, $attributes) . '</p>', $description, $classes);
 	}
 	
 	private function attributes(array $attributes)
