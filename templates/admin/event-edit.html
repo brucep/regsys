@@ -31,7 +31,7 @@
 		<table class="form-table">
 			{{ form.row_checkbox('Has VIPs?',       'has_vip',        {}, 'This event supports VIP registrations.') | raw }}
 			{{ form.row_checkbox('Has Volunteers?', 'has_volunteers', {}, 'This event supports volunteer registrations.') | raw }}
-			{{ form.row_checkbox('Has Discount?',   'has_discount',   {}, 'This event offers a discounted price to certain dancers .') | raw }}
+			{{ form.row_checkbox('Has Discount?',   'has_discount',   {}, 'This event offers a discounted price to certain dancers.') | raw }}
 			{{ form.row('Discount Limit', '<span>Discount option is disabled after %s dancers register.</span>' | format(form.input_text('limit_discount', null, {'class': 'regulat-text', 'style': 'width: 3em'}))) | raw }}
 		</table>
 
