@@ -20,10 +20,10 @@
 		<h3>Event Information</h3>
 
 		<table class="form-table">
-			{{ form.row_text('Name',                           'name')                   | raw }}
-			{{ form.row_text('Preregistration by Mail Ends',   'date_mail_prereg_end')   | raw }}
-			{{ form.row_text('Preregistration by PayPal Ends', 'date_paypal_prereg_end') | raw }}
-			{{ form.row_text('Refunds End',                    'date_refund_end')        | raw }}
+			{{ form.row_text('Name',                           'name',                   null, {'class': 'regular-text'}) | raw }}
+			{{ form.row_text('Preregistration by Mail Ends',   'date_mail_prereg_end',   null, {'class': 'regular-text'}) | raw }}
+			{{ form.row_text('Preregistration by PayPal Ends', 'date_paypal_prereg_end', null, {'class': 'regular-text'}) | raw }}
+			{{ form.row_text('Refunds End',                    'date_refund_end',        null, {'class': 'regular-text'}) | raw }}
 		</table>
 
 		<h3>Event Options</h3>

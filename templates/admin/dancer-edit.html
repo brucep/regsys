@@ -11,10 +11,10 @@
 		<h3>Dancer Information</h3>
 
 		<table class="form-table">
-			{{ form.row_text('First Name',   'first_name'  ) | raw }}
-			{{ form.row_text('Last Name',    'last_name'   ) | raw }}
-			{{ form.row_text('Email',        'email'       ) | raw }}
-			{{ form.row_text('Mobile Phone', 'mobile_phone') | raw }}
+			{{ form.row_text('First Name',   'first_name',   null, {'class': 'regular-text'}) | raw }}
+			{{ form.row_text('Last Name',    'last_name',    null, {'class': 'regular-text'}) | raw }}
+			{{ form.row_text('Email',        'email',        null, {'class': 'regular-text'}) | raw }}
+			{{ form.row_text('Mobile Phone', 'mobile_phone', null, {'class': 'regular-text'}) | raw }}
 
 			{{ form.row_radio('Position', 'position', [
 				{ 'label': 'Lead',   'checked': (dancer.position == 'Lead'),   'value': 1, 'default': true },
@@ -31,7 +31,7 @@
 				{ 'label': 'VIP',       'value': 2, 'checked': (dancer.is_vip) },
 				]) | raw }}
 			
-			{{ form.row_text('Date Registered', 'date_registered') | raw }}
+			{{ form.row_text('Date Registered', 'date_registered', null, {'class': 'regular-text'}) | raw }}
 
 			{{ form.row_radio('Payment Method', 'payment_method', [
 				{ 'label': 'Mail',   'checked': (dancer.payment_method == 'Mail'),   'value': 'Mail', 'default': true },
