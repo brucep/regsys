@@ -15,7 +15,7 @@
 	{% if validation.did_validate and GET.added == 'true' %}{{ form.message('Event created.') | raw }}{% elseif validation.did_validate and GET.added != 'true' %}{{ form.message('Event updated.') | raw }}{% else %}{{ validation.get_errors | raw }}{% endif %}
 
 	<form action="{{ request_href ~ GET.request }}{% if GET.request == 'admin_event_add' %}&amp;noheader=true{% endif %}" method="post">
-		{{ form.hidden('event_id') | raw }}
+		{{ form.input_hidden('event_id') | raw }}
 
 		<h3>Event Information</h3>
 

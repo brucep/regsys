@@ -186,18 +186,18 @@ class NSEvent_Request_Controller
 					exit();
 				}
 				else {
-					$database->query('UPDATE %s_events SET `name` = ?, date_mail_prereg_end = ?, date_paypal_prereg_end = ?, date_refund_end = ?, has_discount = ?, has_levels = ?, has_vip = ?, has_volunteers = ?, has_housing = ?, housing_nights = ?, limit_discount = ?, limit_per_position = ?, discount_org_name = ? WHERE event_id = ?;', array(
-						@(string) $_POST['name'],
-			 			@(int)    $_POST['date_mail_prereg_end'],
-			 			@(int)    $_POST['date_paypal_prereg_end'],
-			 			@(int)    $_POST['date_refund_end'],
-			 			@(int)    $_POST['has_discount'],
-			 			@(int)    $_POST['has_levels'],
-			 			@(int)    $_POST['has_vip'],
-			 			@(int)    $_POST['has_volunteers'],
-			 			@(int)    $_POST['has_housing'],
+					$database->query('UPDATE %s_events SET `name` = ?, date_mail_prereg_end = ?, date_paypal_prereg_end = ?, date_refund_end = ?, has_discount = ?, has_levels = ?, has_vip = ?, has_volunteers = ?, has_housing = ?, housing_nights = ?, limit_discount = ?, limit_per_position = ?, discount_org_name = ? WHERE event_id = ?', array(
+						$_POST['name'],
+			 			$_POST['date_mail_prereg_end'],
+			 			$_POST['date_paypal_prereg_end'],
+			 			$_POST['date_refund_end'],
+			 			$_POST['has_discount'],
+			 			@(int) $_POST['has_levels'],
+			 			$_POST['has_vip'],
+			 			$_POST['has_volunteers'],
+			 			$_POST['has_housing'],
 			 			@(string) $_POST['housing_nights'],
-			 			@(int)    $_POST['limit_discount'],
+			 			$_POST['limit_discount'],
 			 			@(int)    $_POST['limit_per_position'],
 			 			@(string) $_POST['discount_org_name'],
 						$event->id()));
