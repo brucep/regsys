@@ -244,9 +244,14 @@ class NSEvent_Form_Validation
 		return !empty($string);
 	}
 	
-	protected function _greater_than($number, $minimum)
+	protected function _greater_than($number, $limit)
 	{
-		return ($number > $minimum);
+		return ($number > $limit);
+	}
+	
+	protected function _less_than($number, $limit)
+	{
+		return ($number < $limit);
 	}
 	
 	protected function _in($needle, $haystack, $key)
