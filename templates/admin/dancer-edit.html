@@ -39,6 +39,9 @@
 				]) | raw }}
 		</table>
 
-		<p class="submit"><input type="submit" class="button-primary" value="Edit Dancer"></p>
+		<p class="submit">
+			<input type="submit" class="button-primary" value="Edit Dancer">
+			<a style="margin-left: 2em" href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id  }}">Back to Dancer Report</a>
+		</p>
 	</form>
 {% endblock content %}

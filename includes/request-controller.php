@@ -88,6 +88,10 @@ class NSEvent_Request_Controller
 			}
 		}
 		
+		if (isset($_POST['date_registered']) and is_numeric($_POST['date_registered'])) {
+			$_POST['date_registered'] = date('Y-m-d h:i A', $_POST['date_registered']);
+		}
+		
 		echo NSEvent::render_template('admin/dancer-edit.html', array(
 			'event'      => $event,
 			'dancer'     => $dancer,
