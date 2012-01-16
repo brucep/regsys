@@ -1,6 +1,5 @@
 {% extends 'admin/_layout.html' %}
 
-{% from 'admin/_layout.html' import message as message %}
 {% from 'admin/_layout.html' import form_table_row as form_table_row %}
 
 {% block content %}
@@ -13,7 +12,7 @@
 	</h2>
 {% endif %}
 
-	{% if validation.did_validate %}{% if GET.added == 'true' %}{{ message('Event created.') }}{% else %}{{ message('Event updated.') }}{% endif %}{% elseif %}{{ validation.get_errors | raw }}{% endif %}
+	{% if validation.did_validate and GET.added == 'true' %}{{ form.message('Event created.') | raw }}{% elseif validation.did_validate and GET.added != 'true' %}{{ form.message('Event updated.') | raw }}{% else %}{{ validation.get_errors | raw }}{% endif %}
 
 	<form action="{{ request_href ~ GET.request }}{% if GET.request == 'admin_event_add' %}&amp;noheader=true{% endif %}" method="post">
 		{{ form.hidden('event_id') | raw }}
@@ -21,12 +20,32 @@
 		<h3>Event Information</h3>
 
 		<table class="form-table">
-			{{ form_table_row('Name',                           form.text('name')) }}
-			{{ form_table_row('Preregistration by Mail Ends',   form.text('date_mail_prereg_end')) }}
-			{{ form_table_row('Preregistration by PayPal Ends', form.text('date_paypal_prereg_end')) }}
-			{{ form_table_row('Refunds End',                    form.text('date_refund_end')) }}
+			{{ form.row_text('Name',                           'name')                   | raw }}
+			{{ form.row_text('Preregistration by Mail Ends',   'date_mail_prereg_end')   | raw }}
+			{{ form.row_text('Preregistration by PayPal Ends', 'date_paypal_prereg_end') | raw }}
+			{{ form.row_text('Refunds End',                    'date_refund_end')        | raw }}
 		</table>
 
-		<p class="submit"><input type="submit" class="button-primary" name="submit" value="{% if GET.request == 'admin_event_add' %}Add Event{% else %}Edit Event{% endif %}"></p>
+		<h3>Event Options</h3>
+
+		<table class="form-table">
+			{{ form.row_checkbox('Has VIPs?',       'has_vip',        {}, 'This event supports VIP registrations.') | raw }}
+			{{ form.row_checkbox('Has Volunteers?', 'has_volunteers', {}, 'This event supports volunteer registrations.') | raw }}
+			{{ form.row_checkbox('Has Discount?',   'has_discount',   {}, 'This event offers a discounted price to certain dancers .') | raw }}
+			{{ form.row('Discount Limit', '<span>Discount option is disabled after %s dancers register.</span>' | format(form.input_text('limit_discount', null, {'class': 'regulat-text', 'style': 'width: 3em'}))) | raw }}
+		</table>
+
+		<h3>Housing</h3>
+
+		<table class="form-table">
+			{{ form.row_radio('Housing Support',
+				'has_housing',
+				[{'label': 'None', 'value': 0, 'default': true},
+				 {'label': 'Support enabled and registrations enabled', 'value': 1},
+				 {'label': 'Support enabled but registrations disabled', 'value': 2}]
+				) | raw }}
+		</table>
+
+		<p class="submit"><input type="submit" class="button-primary" value="{% if GET.request == 'admin_event_add' %}Add Event{% else %}Edit Event{% endif %}"></p>
 	</form>
 {% endblock content %}

@@ -149,6 +149,11 @@ class NSEvent_Request_Controller
 				'date_mail_prereg_end'   => 'required|strtotime',
 				'date_paypal_prereg_end' => 'required|strtotime',
 				'date_refund_end'        => 'if_set[date_refund_end]|strtotime',
+				'has_vip'                => 'intval|in[0,1]',
+				'has_volunteers'         => 'intval|in[0,1]',
+				'has_discount'           => 'intval|in[0,1]',
+				'limit_discount'         => 'intval|less_than[256]|greater_than[-1]',
+				'has_housing'            => 'intval|in[0,1,2]',
 				));
 			
 			if ($validation->validate()) {
