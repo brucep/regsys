@@ -45,7 +45,7 @@ class NSEvent_Database
 			}
 		}
 		catch (PDOException $e) {
-			$message = preg_replace("/[A-Z]+\[[0-9]+\]: .+ [0-9]+ (.*?)/", "\\1", $e->getMessage());
+			$message = preg_replace("/^[A-Z]+\[[A-Z0-9]+\]:?(.+ [0-9]+)? (.+)$/", '$2', $e->getMessage());
 			
 			if (defined('WP_DEBUG')) {
 				$message .= "</p>\n\n<pre>$query\n\n" . print_r($params, true) . "</pre>\n\n";
