@@ -31,7 +31,7 @@ div.nsevent-exception {margin:2em 1em;}
 }
 
 #nsevent form label.radio {
-	margin-right: 2em;
+	display: block;
 }
 
 #nsevent form input[type="submit"] {
