@@ -32,7 +32,7 @@ class NSEvent_Form_Controls
 			$this->name($key),
 			is_null($parameters['value']) ? esc_attr($this->post_value($key, '1')) : esc_attr($parameters['value']),
 			$parameters['checked'] ? ' checked="checked"' : '',
-			isset($parameters['attributes']) ? $this->attributes($attributes) : '');
+			isset($parameters['attributes']) ? $this->attributes($parameters['attributes']) : '');
 	}
 	
 	public function input_hidden($key, $value = null)
