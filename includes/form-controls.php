@@ -47,7 +47,7 @@ class NSEvent_Form_Controls
 		return $this->input_checkbox($key, $parameters, 'radio');
 	}
 	
-	public function input_select($key, array $options, array $parameters = array())
+	public function input_select($key, $options, array $parameters = array())
 	{
 		$parameters = array_merge(array(
 			'default_option' => null,
@@ -57,6 +57,17 @@ class NSEvent_Form_Controls
 		$result = sprintf('<select name="%1$s"%2$s>',
 			$this->name($key),
 			isset($parameters['attributes']) ? $this->attributes($attributes) : '');
+		
+		if (is_string($options)) {
+			$temp = explode(',', $options);
+			$options = array();
+			
+			foreach ($temp as $value) {
+				$options[$value] = $value;
+			}
+			
+			unset($temp, $value);
+		}
 		
 		foreach ($options as $opt_value => $opt_label) {
 			$result .= sprintf("\n" . $parameters['indent'] . "\t" . '<option value="%2$s"%3$s>%1$s</option>',
