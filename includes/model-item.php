@@ -211,6 +211,18 @@ class NSEvent_Model_Item extends NSEvent_Model
 		return $this->openings;
 	}
 	
+	public function openings_by_position()
+	{
+		$leads   = $this->count_openings('lead');
+		$follows = $this->count_openings('follow');
+		
+		return sprintf('%1$d %3$s, %2$d %4$s',
+			$leads,
+			$follows,
+			_n('lead',   'leads',   $leads),
+			_n('follow', 'follows', $follows));
+	}
+	
 	public function count_registrations()
 	{
 		if (!isset($this->count_registrations)) {
