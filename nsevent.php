@@ -23,7 +23,8 @@ Except as contained in this notice, the name of the author not be used in advert
 if (!class_exists('NSEvent')):
 class NSEvent
 {
-	static private $event, $options, $vip, $validated_package_id = 0, $validated_items = array(), $twig;
+	static public $event, $validation; # Used by validation methods
+	static private $vip, $validated_package_id = 0, $validated_items = array(), $twig;
 	static private $default_options = array(
 		'current_event_id'      => '',
 		'email_bcc'             => '',
@@ -396,32 +397,32 @@ class NSEvent
 		
 		try {
 			# Define a constant for themes to use
-			define('NSEVENT_REGISTRATION_FORM', true);
+			define('REGISTRATION_FORM', true);
 			
 			# Stop the `WP Super Cache` plugin from caching registration pages
 			define('DONOTCACHEPAGE', true);
 			
+			# Don't mess with my timezone WordPress!
 			@date_default_timezone_set(get_option('timezone_string'));
-			
-			self::$options = self::get_options();
-			
-			NSEvent_FormValidation::set_error_messages();
 			
 			NSEvent_Model::set_database(self::get_database_connection());
 			NSEvent_Model::set_options(self::get_options());
+			
+			$options = self::get_options();
+			self::$validation = new NSEvent_Form_Validation;
+			
 			
 			# Find current event
 			$event = self::$event = NSEvent_Model_Event::get_event_by_id($options['current_event_id']);
 			
 			if (!$event) {
-				throw new Exception(sprintf(__('Event ID not found: %d', 'nsevent'), $options['current_event_id']));
+				throw new Exception(sprintf('Event ID not found: %d', $options['current_event_id']));
 			}
 			
-			$vip = self::$vip = ($event->has_vip() and isset($_GET['vip']));
-			
+			self::$vip = ($event->has_vip() and isset($_GET['vip']));
 			
 			# Display page content when registration is not available.
-			if ((time() > $event->get_date_paypal_prereg_end() and time() > $event->get_date_mail_prereg_end() and !$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
+			if ((time() > $event->date_paypal_prereg_end() and time() > $event->get_date_mail_prereg_end() and !$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
 				get_template_part('page');
 				return;
 			}
@@ -429,7 +430,7 @@ class NSEvent
 			
 			# Setup validation rules
 			if (!empty($_POST)) {
-				NSEvent_FormValidation::add_rules(array(
+				self::$validation->add_rules(array(
 					'first_name'      => 'trim|required|max_length[100]|ucfirst',
 					'last_name'       => 'trim|required|max_length[100]|ucfirst',
 					'email'           => 'trim|valid_email|max_length[100]|NSEvent::validate_email_address',
@@ -444,16 +445,16 @@ class NSEvent
 				
 				# Level
 				if ($event->has_levels()) {
-					NSEvent_FormValidation::add_rule('level', sprintf('intval|in[%s]',
-						implode(',', array_keys($event->get_levels()))));
+					self::$validation->add_rule('level_id', sprintf('intval|in[%s]',
+						implode(',', array_keys($event->levels_keyed_by_id()))));
 				}
 				else {
-					$_POST['level'] = 1;
+					$_POST['level_id'] = 1;
 				}
 				
 				# Discount
 				if ($event->has_discount()) {
-					NSEvent_FormValidation::add_rule('payment_discount', 'intval|in[0,1]|NSEvent::validate_discount');
+					self::$validation->add_rule('payment_discount', 'intval|in[0,1]|NSEvent::validate_discount');
 				}
 				else {
 					$_POST['payment_discount'] = 0;
@@ -461,7 +462,7 @@ class NSEvent
 				
 				# Housing
 				if ($event->has_housing_enabled()) {
-					NSEvent_FormValidation::add_rules(array(
+					self::$validation->add_rules(array(
 						'housing_provider[housing_spots_available]' => 'if_set[housing_type_provider]|intval|greater_than[0]',
 						'housing_provider[housing_smoke]'           => 'if_set[housing_type_provider]|intval|in[0,1]',
 						'housing_provider[housing_pets]'            => 'if_set[housing_type_provider]|intval|in[0,1]',
@@ -481,7 +482,7 @@ class NSEvent
 			}
 			
 			# Determine appropriate file for current step
-			if (empty($_POST) or !NSEvent_FormValidation::validate()) {
+			if (empty($_POST) or !self::$validation->validate()) {
 				$file = 'form-reg-info';
 			}
 			else {
@@ -493,22 +494,22 @@ class NSEvent
 				$shirts_cost       = 0;
 				$total_cost        = 0;
 				
-				if ($vip) {
+				if (self::$vip) {
 					if (self::$validated_package_id !== 0) {
-						$package_cost = self::$validated_items[self::$validated_package_id]->get_price_for_vip();
+						$package_cost = self::$validated_items[self::$validated_package_id]->price_for_vip();
 					}
 					
 					foreach (self::$validated_items as $item) {
-						$total_cost += $item->get_price_for_vip();
+						$total_cost += $item->price_for_vip();
 					}
 				}
 				else {
 					if (self::$validated_package_id !== 0) {
-						$package_cost = self::$validated_items[self::$validated_package_id]->get_price_for_prereg($_POST['payment_discount']);
+						$package_cost = self::$validated_items[self::$validated_package_id]->price_for_prereg($_POST['payment_discount']);
 					}
 					
 					foreach (self::$validated_items as $item) {
-						$total_cost += $item->get_price_for_prereg($_POST['payment_discount']);
+						$total_cost += $item->price_for_prereg($_POST['payment_discount']);
 					}
 				}
 				
@@ -525,7 +526,7 @@ class NSEvent
 				$dancer_data['payment_confirmed'] = ($total_cost == 0) ? 1 : 0;
 				
 				if ($options['registration_testing']) {
-					$dancer_data['note'] = __('TEST', 'nsevent');
+					$dancer_data['note'] = 'TEST';
 				}
 				
 				if ($event->has_housing_enabled()) {
@@ -549,10 +550,10 @@ class NSEvent
 				}
 				else {
 					# Add dancer
-					$dancer->add($event->get_id());
+					$dancer->add($event->id());
 					
 					if (!$dancer) {
-						throw new Exception(__('Unable to add dancer to database.', 'nsevent'));
+						throw new Exception('Unable to add dancer to database.');
 					}
 					
 					# Add housing
@@ -562,27 +563,27 @@ class NSEvent
 					
 					# Add registrations				
 					foreach (self::$validated_items as $item) {
-						if ($vip) {
-							$item_price = $item->get_price_for_vip();
+						if (self::$vip) {
+							$item_price = $item->price_for_vip();
 						}
 						else {
-							$item_price = $item->get_price_for_prereg($_POST['payment_discount']);
+							$item_price = $item->price_for_prereg($_POST['payment_discount']);
 						}
 						
-						if ($item->get_type() == 'competition') {
-							$competitions[$item->get_id()] = $item;
+						if ($item->type() == 'competition') {
+							$competitions[$item->id()] = $item;
 							$competitions_cost += $item_price;
 						}
-						elseif ($item->get_type() == 'shirt') {
-							$shirts[$item->get_id()] = $item;
+						elseif ($item->type() == 'shirt') {
+							$shirts[$item->id()] = $item;
 							$shirts_cost += $item_price;
 						}
 						
 						$event->add_registration(array(
-							'dancer_id' => $dancer->get_id(),
-							'item_id'   => $item->get_id(),
+							'dancer_id' => $dancer->id(),
+							'item_id'   => $item->id(),
 							'price'     => $item_price,
-							'item_meta' => (!isset($_POST['item_meta'][$item->get_id()]) ? '' : $_POST['item_meta'][$item->get_id()]),
+							'item_meta' => (!isset($_POST['item_meta'][$item->id()]) ? '' : $_POST['item_meta'][$item->id()]),
 							));
 					}
 					
@@ -591,46 +592,39 @@ class NSEvent
 					
 					
 					# Confirmation email
-					if (!$options['registration_testing']) {
-						$confirmation_email = array(
-							'to_email' => $dancer->get_email(),
-							'to_name'  => $dancer->get_name(),
-							'subject'  => sprintf(__('Registration for %s: %s', 'nsevent'), $event->get_name(), $dancer->get_name())
-							);
-						
-						# Get body of email message
-						ob_start();
-						require dirname(__FILE__).'/registration/confirmation-email.php';
-						$confirmation_email['body'] = preg_replace("/^(- .+\n)\n+-/m", '$1-', ob_get_contents());
-						ob_end_clean();
-						
-						try {
-							self::send_confirmation_email($confirmation_email);
-						}
-						catch (Exception $e) {
-							$confirmation_email_failed_to_send = $e;
-							error_log('Error sending confirmation email: ' . $e->getMessage());
-						}
-					}
+					// if (!$options['registration_testing']) {
+						// try {
+						// 	self::send_confirmation_email($confirmation_email);
+						// }
+						// catch (Exception $confirmation_email_failed) {
+						// 	error_log('Error sending confirmation email: ' . $confirmation_email_failed->getMessage());
+						// }
+					// }
 					
 					
-					if (isset($_POST['payment_method']) and $_POST['payment_method'] == 'PayPal') {
-						$file = 'form-accepted-paypal';
-					}
-					else {
-						$file = 'form-accepted-mail';
-					}
+					$file = 'form-accepted';
 				}
 			}
 			
-			# Allow themes to provide their own files
-			# Otherwise, load appropriate file for current step
-			if (file_exists(sprintf('%s/%s/nsevent/%s.php', get_theme_root(), get_stylesheet(), $file))) {
-				require sprintf('%s/%s/nsevent/%s.php', get_theme_root(), get_stylesheet(), $file);
-			}
-			else {
-				require sprintf('%s/registration/%s.php', dirname(__FILE__), $file);
-			}
+			
+			if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
+			
+			echo self::render_template(sprintf('registration/%s.html', $file), array(
+				'event'                     => $event,
+				'dancer'                    => isset($dancer) ? $dancer : null,
+				'packages'                  => $event->items_where(array(':type' => 'package'),     true),
+				'competitions'              => $event->items_where(array(':type' => 'competition'), true),
+				'shirts'                    => $event->items_where(array(':type' => 'shirt'),       true),
+				'time'                      => time(),
+				'vip'                       => self::$vip,
+				'permalink'                 => get_permalink(),
+				'the_content'               => get_the_content(),
+				'validation'                => self::$validation,
+				'validated_items'           => self::$validated_items,
+				'validated_package_id'      => self::$validated_package_id,
+				'confirmation_email_failed' => isset($confirmation_email_failed) ? $confirmation_email_failed : null));
+			
+			if (!get_post_meta($post->ID, 'registration_form', true)) { get_footer(); }
 		}
 		catch (Exception $e) {
 			if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); }
@@ -642,15 +636,15 @@ class NSEvent
 	static public function registration_head()
 	{
 		add_action('wp_head', 'NSEvent::registration_wp_head');
-		wp_enqueue_style('nsevent-registration', sprintf('%s/%s/css/registration.css', WP_PLUGIN_URL, basename(__FILE__, '.php')));
+		wp_enqueue_style('nsevent-registration', plugins_url('css/registration.css', __FILE__));
 		
 		# Check if the current theme has a stylesheet for the registration
-		$theme_stylesheet = sprintf('%s/%s/nsevent/registration.css', get_theme_root(), get_stylesheet());
+		$theme_stylesheet = sprintf('%s/%s/style-nsevent-registration.css', get_theme_root(), get_stylesheet());
 		if (file_exists($theme_stylesheet)) {
-			wp_enqueue_style('nsevent-registration-theme', sprintf('%s/nsevent/registration.css', get_bloginfo('stylesheet_directory')));
+			wp_enqueue_style('nsevent-registration-from-theme', get_stylesheet_directory_uri() . '/style-nsevent-registration.css');
 		}
 		
-		wp_enqueue_script('nsevent-reg-info', sprintf('%s/%s/js/reg-info.js', WP_PLUGIN_URL, basename(__FILE__, '.php')), array('jquery'));
+		wp_enqueue_script('nsevent-reg-info', plugins_url('js/reg-info.js', __FILE__), array('jquery'));
 	}
 	
 	static public function registration_wp_head()
@@ -670,6 +664,10 @@ class NSEvent
 			self::$twig = new Twig_Environment(
 				new Twig_Loader_Filesystem(dirname(__FILE__) . '/templates'),
 				array('debug' => WP_DEBUG));
+			
+			if (WP_DEBUG) {
+				self::$twig->addExtension(new Twig_Extension_Debug());
+			}
 			
 			self::$twig->addGlobal('form', new NSEvent_Form_Controls);
 			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
@@ -701,7 +699,7 @@ class NSEvent
 	{
 		if ($payment_discount == 1 and !self::$event->has_discount_openings()) {
 			$_POST['payment_discount'] = 0; // Change the value so that the checkbox won't appear checked.
-			NSEvent_FormValidation::set_error('payment_discount', 'There are no more discount openings available. Review the prices before continuing with your registration.');
+			self::$validation->set_error('payment_discount', 'There are no more discount openings available. Review the prices before continuing with your registration.');
 			return false;
 		}
 		else {
@@ -711,20 +709,22 @@ class NSEvent
 	
 	static public function validate_email_address($email)
 	{
+		$options = self::get_options();
+		
 		if (isset($_POST['confirm_email']) and $_POST['confirm_email'] == $email) {
-			if (self::$options['registration_testing'] or empty($_POST['first_name']) or empty($_POST['last_name'])) {
+			if ($options['registration_testing'] or empty($_POST['first_name']) or empty($_POST['last_name'])) {
 				return true;
 			}
-			elseif (!self::$event->get_dancers_where(array(':first_name' => $_POST['first_name'], ':last_name' => $_POST['last_name'], ':email' => $email))) {
+			elseif (!self::$event->dancers_where(array(':first_name' => $_POST['first_name'], ':last_name' => $_POST['last_name'], ':email' => $email))) {
 				return true;
 			}
 			else {
-				NSEvent_FormValidation::set_error('email', sprintf(__('Someone has already registered with this information. If you have already registered and need to change your information, then please reply to your confirmation email. For any other concerns, email <a href="mailto:%1$s">%1$s</a>.', 'nsevent'), self::$options['confirmation_email_address']));
+				self::$validation->set_error('email', sprintf('Someone has already registered with this information. If you have already registered and need to change your information, then please reply to your confirmation email. For any other concerns, email <a href="mailto:%1$s">%1$s</a>.', $options['confirmation_email_address']));
 				return false;
 			}
 		}
 		else {
-			NSEvent_FormValidation::set_error('email', __('Your email addresses do not match.', 'nsevent'));
+			self::$validation->set_error('email', 'Your email addresses do not match.');
 			return false;
 		}
 	}
@@ -735,10 +735,10 @@ class NSEvent
 			return true;
 		}
 		elseif (self::validate_items(array($package_id => $package_id))) {
-			$item = self::$event->get_item_by_id($package_id);
+			$item = self::$event->item_by_id($package_id);
 			
-			if (isset($_POST['package_tier'][$package_id]) and $_POST['package_tier'][$package_id] != $item->get_price_tier()) {
-				NSEvent_FormValidation::set_error('package', 'The price has changed on this package. Review the price before continuing with your registration.');
+			if (isset($_POST['package_tier'][$package_id]) and $_POST['package_tier'][$package_id] != $item->price_tier()) {
+				self::$validation->set_error('package', 'The price has changed on this package. Review the price before continuing with your registration.');
 				return false;
 			}
 			else {
@@ -767,46 +767,46 @@ class NSEvent
 		$items_did_validate = true;
 		
 		foreach ($items as $key => $value) {
-			$item = self::$event->get_item_by_id($key);
+			$item = self::$event->item_by_id($key);
 			
 			if (!$item) {
 				continue;
 			}
 			
-			switch ($item->get_meta()) {
+			switch ($item->meta()) {
 				# If position wasn't specified specifically for item, use dancer's position.
 				case 'position':
-					if (!isset($_POST['item_meta'][$item->get_id()]) or !in_array($_POST['item_meta'][$item->get_id()], array('lead', 'follow'))) {
-						if (!NSEvent_FormValidation::get_error('position')) {
-							$_POST['item_meta'][$item->get_id()] = ($_POST['position'] == 1) ? 'lead' : 'follow';
+					if (!isset($_POST['item_meta'][$item->id()]) or !in_array($_POST['item_meta'][$item->id()], array('lead', 'follow'))) {
+						if (!self::$validation->get_error('position')) {
+							$_POST['item_meta'][$item->id()] = ($_POST['position'] == 1) ? 'lead' : 'follow';
 						}
 					}
 					break;
 				
 				case 'partner_name':
-					if (empty($_POST['item_meta'][$item->get_id()])) {
-						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Your partner\'s name must be specified for %s.', 'nsevent'), $item->get_name()));
+					if (empty($_POST['item_meta'][$item->id()])) {
+						self::$validation->set_error('item_' . $item->id(), sprintf('Your partner\'s name must be specified for %s.', $item->name()));
 						$items_did_validate = false;
 						continue 2;
 					}
 					else {
-						$_POST['item_meta'][$item->get_id()] = trim($_POST['item_meta'][$item->get_id()]);
+						$_POST['item_meta'][$item->id()] = trim($_POST['item_meta'][$item->id()]);
 						// TODO: Check if partner has already registered for this item.
 					}
 					break;
 				
 				case 'team_members':
-					if (empty($_POST['item_meta'][$item->get_id()])) {
-						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('Team members must be specified for %s.', 'nsevent'), $item->get_name()));
+					if (empty($_POST['item_meta'][$item->id()])) {
+						self::$validation->set_error('item_' . $item->id(), sprintf('Team members must be specified for %s.', $item->name()));
 						$items_did_validate = false;
 						continue 2;
 					}
 					else {
 						# Standarize formatting
-						$_POST['item_meta'][$item->get_id()] = ucwords(preg_replace(array("/[\r\n]+/", "/\n+/", "/\r+/", '/,([^ ])/', '/, , /'), ', $1', trim($_POST['item_meta'][$item->get_id()])));
+						$_POST['item_meta'][$item->id()] = ucwords(preg_replace(array("/[\r\n]+/", "/\n+/", "/\r+/", '/,([^ ])/', '/, , /'), ', $1', trim($_POST['item_meta'][$item->id()])));
 						
-						if (strlen($_POST['item_meta'][$item->get_id()]) > 65536) {
-							NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('%s is too long.', 'nsevent'), sprintf(__('Team members list for %s', 'nsevent'), $item->get_name())));
+						if (strlen($_POST['item_meta'][$item->id()]) > 65536) {
+							self::$validation->set_error('item_' . $item->id(), sprintf('Team members list for %s is too long.', $item->name()));
 							$items_did_validate = false;
 							continue 2;
 						}
@@ -814,26 +814,26 @@ class NSEvent
 					break;
 				
 				case 'size':
-					if (!in_array($value, array_merge(array('none'), explode(',', $item->get_description())))) {
-						NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('An invalid size was choosen for %s.', 'nsevent'), $item->get_name()));
+					if (!in_array($value, array_merge(array('None'), explode(',', $item->description())))) {
+						self::$validation->set_error('item_' . $item->id(), sprintf('An invalid size was choosen for %s.', $item->name()));
 						$items_did_validate = false;
 						continue 2;
 					}
-					elseif ($value === 'none') {
+					elseif ($value === 'None') {
 						continue 2; # No size selected;
 					}
-					$_POST['item_meta'][$item->get_id()] = $value; # Populate `item_meta` for the confirmation and PayPal page
+					$_POST['item_meta'][$item->id()] = $value; # Populate `item_meta` for the confirmation and PayPal page
 					break;
 			}
 			
 			# Check openings again, in case they have filled since the form was first displayed to the user
-			if (($item->get_meta() != 'position' and !$item->count_openings()) or ($item->get_meta() == 'position' and !$item->count_openings($_POST['item_meta'][$item->get_id()]))) {
-				NSEvent_FormValidation::set_error('item_'.$item->get_id(), sprintf(__('There are no longer any openings for %s.', 'nsevent'), $item->name));
+			if (($item->meta() != 'position' and !$item->count_openings()) or ($item->meta() == 'position' and !$item->count_openings($_POST['item_meta'][$item->id()]))) {
+				self::$validation->set_error('item_' . $item->id(), sprintf('There are no longer any openings for %s.', $item->name()));
 				$items_did_validate = false;
 				continue;
 			}
 			
-			self::$validated_items[$item->get_id()] = $item;
+			self::$validated_items[$item->id()] = $item;
 		}
 		
 		return $items_did_validate;
@@ -866,7 +866,7 @@ class NSEvent
 		}
 		else {
 			$key = isset($_POST['housing_type_needed']) ? 'housing_needed[housing_nights]' : 'housing_provider[housing_nights]';
-			NSEvent_FormValidation::set_error($key, __('You must specify nights for housing.', 'nsevent'));
+			self::$validation->set_error($key, 'You must specify nights for housing.');
 			return false;
 		}
 	}
