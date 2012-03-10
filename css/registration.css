@@ -26,13 +26,17 @@ background-color: #ff7;
 display: none;
 }
 
-#nsevent-reg-form-info div.nsevent-validation-error {
-margin: 1em -0.4em;
-padding: 0.4em;
+#nsevent-reg-form-info div.error {
+margin: 1.5em -0.5em 1em;
+padding: 0.5em;
 background-color: #fcc;
 }
 
-#nsevent-reg-form-info tr.nsevent-validation-error td {
+#nsevent-reg-form-info div.error p {
+	margin: 0 !important;
+}
+
+#nsevent-reg-form-info tr.error td {
 padding: 0.4em;
 background-color: #fcc;
 }
@@ -71,8 +75,9 @@ margin-top: 0 !important;
 
 #nsevent-reg-form-info div.text label {
 display: block;
-width: 10.5em;
+width: 8.5em;
 float: left;
+clear: left;
 }
 
 #nsevent-reg-form-info div.text input {
@@ -168,7 +173,7 @@ text-align: right;
 margin: 2em 0 1em;
 }
 
-#nsevent-accepted-paypal input#paypal-button {
+input#paypal-button {
 display: block;
 margin: 2em auto 1em;
 }
