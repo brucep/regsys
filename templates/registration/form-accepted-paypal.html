@@ -1,44 +1,49 @@
-<?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); } ?>
+{% extends 'registration/_layout.html' %}
 
-				<div id="nsevent-registration-form-accepted-paypal" <?php post_class('nsevent-registration-form'); ?>>
-					<h1 class="entry-title"><?php printf(__('Registration Accepted for %s', 'nsevent'), esc_html($event->get_name())); ?></h1>
+{% block id %}nsevent-reg-form-accepted{% endblock %}
 
-					<div id="accepted"<?php if ($vip) echo ' class="vip"'; ?>>
-						<p>Your registration has been recorded. Your payment must be received by <?php echo esc_html($dancer->get_date_postmark_by('F jS')); ?>.</p>
+{% block title %}Registration Accepted for {{ event.name }}{% endblock %}
 
-						<form action="<?php echo (!$options['paypal_sandbox']) ? 'https://www.paypal.com/cgi-bin/webscr' : 'https://www.sandbox.paypal.com/cgi-bin/webscr' ?>" method="post">
-							<input type="image" id="paypal-button" src="https://www.paypal.com/en_US/i/btn/x-click-but6.gif" name="submit" alt="<?php _e('Make payments with PayPal - it\'s fast, free and secure!', 'nsevent'); ?>" />
+{% block content %}
+			<div id="accepted" {%- if vip %} class="vip"{% endif %}>
+				<p>Your registration has been recorded. Your payment must be {{ dancer.payment_method == 'Mail' ? 'postmarked' : 'received' }} by {{ dancer.date_postmark_by | date('F jS') }}.</p>
 
-							<?php NSEvent_FormInput::hidden('cmd',         array('value' => '_cart')); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('upload',      array('value' => 1)); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('no_shipping', array('value' => 1)); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('business',    array('value' => $options['paypal_business'])); echo "\n"; ?>
-							<?php // TODO: notify url for IPN ?>
+{% if dancer.payment_method == 'PayPal' %}
+				<form action="{{ options.paypal_sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr' }}" method="post">
+					<input type="image" id="paypal-button" src="https://www.paypal.com/en_US/i/btn/x-click-but6.gif" name="submit" alt="Send payment via PayPal">
 
-							<?php NSEvent_FormInput::hidden('custom', array('value' => $dancer->get_id())); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('first_name'); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('last_name');  echo "\n"; ?>
+					{{ form.input_hidden('cmd', '_cart') | raw }}
+					{{ form.input_hidden('upload')       | raw }}
+					{{ form.input_hidden('no_shipping')  | raw }}
+					{{ form.input_hidden('business', options.paypal_business) | raw }}
+					{# TODO: notify url for IPN #}
 
-<?php if ($options['paypal_fee']): ?>
-							<?php NSEvent_FormInput::hidden('item_name_1', array('value' => __('Processing Fee', 'nsevent'))); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('amount_1',    array('value' => (int) $options['paypal_fee'])); echo "\n"; ?>
+					{{ form.input_hidden('custom', dancer.id) | raw }}
+					{{ form.input_hidden('first_name') | raw }}
+					{{ form.input_hidden('last_name')  | raw }}
 
-<?php endif; ?>
-<?php $i = (!empty($options['paypal_fee'])) ? 2 : 1; ?>
-<?php foreach (NSEvent::$validated_items as $item): if ($dancer->get_price_for_registered_item($item->get_id()) == 0) { continue; } ?>
-							<?php NSEvent_FormInput::hidden('item_name_'.$i, array('value' => $item->get_name())); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('amount_'.$i,    array('value' => $dancer->get_price_for_registered_item($item->get_id()))); echo "\n"; ?>
-<?php 	if ($item->get_meta() == 'size' and isset($_POST['item_meta'][$item->get_id()])): ?>
-							<?php NSEvent_FormInput::hidden('on0_'.$i,      array('value' => $item->get_meta_label())); echo "\n"; ?>
-							<?php NSEvent_FormInput::hidden('os0_'.$i,      array('value' => ucfirst($_POST['item_meta'][$item->get_id()]))); echo "\n"; ?>
-<?php 	endif; ?>
-<?php 	$i++; ?>
-<?php endforeach; ?>
-						</form>						
-<?php if (isset($confirmation_email_failed_to_send)): ?>
-						<p style="background-color: #fcc;">It appears your confirmation email failed to send. Please email <?php printf('<a href="mailto:%1$s">%1$s</a>', $options['confirmation_email_address']); ?> to request that your confirmation email be resent.<br /><br />Reason: <?php echo esc_html($e->getMessage()); ?></p>
-<?php endif; ?>
-					</div>
-				</div>
+{% 	if options.paypal_fee %}
+					{{ form.input_hidden('item_name_1', 'Processing Fee')   | raw }}
+					{{ form.input_hidden('amount_1',    options.paypal_fee) | raw }}
 
-<?php if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); } ?>
+{% 	endif %}
+{% 	set i = options.paypal_fee ? 2 : 1 %}
+{% 	for item in validated_items if attribute(dancer, 'price_for_registered_item', [item.id]) != 0 %}
+					{{ form.input_hidden('item_name_' ~ i, item.name) | raw }}
+					{{ form.input_hidden('amount_' ~ i,    attribute(dancer, 'price_for_registered_item', [item.id])) | raw }}
+{% 		if item.meta == 'size' and attribute(POST.item_meta, item.id) %}
+					{{ form.input_hidden('on0_' ~ i, item.meta_label) | raw }}
+					{{ form.input_hidden('os0_' ~ i, attribute(POST.item_meta, item.id) | capitalize) | raw }}
+{% 		endif %}
+{% 		set i = i + 1 %}
+{% 	endfor %}
+				</form>
+{% elseif dancer.payment_method == 'Mail' and dancer.price_total > 0 %}
+						<p>Please mail your check for <strong>${{ dancer.price_total }}</strong> (made out to <em>{{ options.payable_to }}</em>), along with your name and email address, to:</p>
+						<p style="font-weight: bold;">{{ options.mailing_address | nl2br }}</p>
+{% endif %}
+{% if confirmation_email_failed %}
+				<p style="background-color: #fcc;">Your registration has been recorded, but it appears that your confirmation email failed to send. You may email {{ '<a href="mailto:%1$s">%1$s</a>' | format(options.confirmation_email_address) }} to request that your confirmation email be re-sent.<br /><br />Reason: {{ confirmation_email_failed.message }}</p>
+{% endif %}
+			</div>
+{% endblock %}
