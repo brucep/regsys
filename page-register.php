@@ -1,14 +1,8 @@
 <?php
-/*
-Template Name: NSEvent Registration Form
-*/
-
-if (!class_exists('NSEvent')) {
+if (!class_exists('RegistrationSystem')) {
 	@header('HTTP/1.1 500 Internal Server Error');
-	exit(__('NSEvent plugin is not active.', 'nsevent'));
+	exit('Registration System plugin is not active.');
 }
-
-NSEvent::registration_head();
-if (have_posts()) { the_post(); }
+RegistrationSystem::registration_head();
+RegistrationSystem::registration_form();
 ?>
-<?php NSEvent::registration_form(); ?>

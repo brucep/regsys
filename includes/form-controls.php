@@ -1,6 +1,6 @@
 <?php
 
-class NSEvent_Form_Controls
+class RegistrationSystem_Form_Controls
 {
 	private $array_name;
 	

@@ -1,11 +1,11 @@
 <?php
 
-class NSEvent_Request_Controller
+class RegistrationSystem_Request_Controller
 {
 	static public function admin_dancer_delete($event, $dancer)
 	{
 		if (isset($_POST['confirmed'])) {
-			$database = NSEvent::get_database_connection();
+			$database = RegistrationSystem::get_database_connection();
 			
 			$database->query('DELETE FROM %1$s_registrations WHERE event_id = ? AND dancer_id = ?',         array($event->id(), $dancer->id()));
 			$database->query('DELETE FROM %1$s_housing       WHERE event_id = ? AND dancer_id = ? LIMIT 1', array($event->id(), $dancer->id()));
@@ -20,20 +20,20 @@ class NSEvent_Request_Controller
 			require_once ABSPATH . 'wp-admin/admin-header.php';
 		}
 		
-		echo NSEvent::render_template('admin/dancer-delete.html', array(
+		echo RegistrationSystem::render_template('admin/dancer-delete.html', array(
 			'event'  => $event,
 			'dancer' => $dancer));
 	}
 	
 	static public function admin_dancer_edit($event, $dancer)
 	{
-		$validation = new NSEvent_Form_Validation;
+		$validation = new RegistrationSystem_Form_Validation;
 		
 		if (!empty($_POST)) {
 			$validation->add_rules(array(
 				'first_name'      => 'trim|required|max_length[100]|ucfirst',
 				'last_name'       => 'trim|required|max_length[100]|ucfirst',
-				'email'           => 'trim|valid_email|max_length[100]', # TODO: Update NSEvent::validate_*
+				'email'           => 'trim|valid_email|max_length[100]', # TODO: Update RegistrationSystem::validate_*
 				'mobile_phone'    => 'trim|required|max_length[30]',
 				'position'        => 'intval|in[1,2]',
 				'payment_method'  => 'in[Mail,PayPal]',
@@ -49,7 +49,7 @@ class NSEvent_Request_Controller
 			}
 			
 			if ($validation->validate()) {
-				$database = NSEvent::get_database_connection();
+				$database = RegistrationSystem::get_database_connection();
 				
 				$database->query('UPDATE %s_dancers SET first_name = ?, last_name = ?, email = ?, position = ?, level_id = ?, status = ?, date_registered = ?, payment_method = ?, mobile_phone = ? WHERE dancer_id = ?;', array(
 					@$_POST['first_name'],
@@ -80,7 +80,7 @@ class NSEvent_Request_Controller
 				$temp = (array) $event;
 				
 				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
-					$key = "\0NSEvent_Model_Dancer\0" . $property->getName();
+					$key = "\0RegistrationSystem_Model_Dancer\0" . $property->getName();
 					$_POST[$property->getName()] = $temp[$key];
 				}
 				
@@ -92,7 +92,7 @@ class NSEvent_Request_Controller
 			$_POST['date_registered'] = date('Y-m-d h:i A', $_POST['date_registered']);
 		}
 		
-		echo NSEvent::render_template('admin/dancer-edit.html', array(
+		echo RegistrationSystem::render_template('admin/dancer-edit.html', array(
 			'event'      => $event,
 			'dancer'     => $dancer,
 			'validation' => $validation));
@@ -114,7 +114,7 @@ class NSEvent_Request_Controller
 	static public function admin_event_delete($event)
 	{
 		if (isset($_POST['confirmed'])) {
-			$database = NSEvent::get_database_connection();
+			$database = RegistrationSystem::get_database_connection();
 			
 			$database->query('DELETE FROM %s_registrations WHERE event_id = ?;', array($event->id()));
 			$database->query('DELETE FROM %s_housing       WHERE event_id = ?;', array($event->id()));
@@ -140,12 +140,12 @@ class NSEvent_Request_Controller
 			require_once ABSPATH . 'wp-admin/admin-header.php';
 		}
 		
-		echo NSEvent::render_template('admin/event-delete.html', array('event' => $event));
+		echo RegistrationSystem::render_template('admin/event-delete.html', array('event' => $event));
 	}
 	
 	static public function admin_event_edit($event)
 	{
-		$validation = new NSEvent_Form_Validation;
+		$validation = new RegistrationSystem_Form_Validation;
 		
 		if (!empty($_POST)) {
 			$validation->add_rules(array(
@@ -161,9 +161,9 @@ class NSEvent_Request_Controller
 				));
 			
 			if ($validation->validate()) {
-				$database = NSEvent::get_database_connection();
+				$database = RegistrationSystem::get_database_connection();
 				
-				$event = new NSEvent_Model_Event($_POST);
+				$event = new RegistrationSystem_Model_Event($_POST);
 				
 				if ($_GET['request'] == 'admin_event_add') {
 					$database->query('INSERT %s_events VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', array(
@@ -218,7 +218,7 @@ class NSEvent_Request_Controller
 				$temp = (array) $event;
 				
 				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
-					$key = "\0NSEvent_Model_Event\0" . $property->getName();
+					$key = "\0RegistrationSystem_Model_Event\0" . $property->getName();
 					$_POST[$property->getName()] = $temp[$key];
 				}
 				
@@ -244,28 +244,28 @@ class NSEvent_Request_Controller
 			require_once ABSPATH . 'wp-admin/admin-header.php';
 		}
 		
-		echo NSEvent::render_template('admin/event-edit.html', array(
+		echo RegistrationSystem::render_template('admin/event-edit.html', array(
 			'event'      => $event,
 			'validation' => $validation));
 	}
 	
 	static public function report_competitions($event)
 	{
-		echo NSEvent::render_template('reports/competitions.html', array(
+		echo RegistrationSystem::render_template('reports/competitions.html', array(
 			'event' => $event,
 			'items' => $event->items_where(array(':type' => 'competition'))));
 	}
 	
 	static public function report_dancer($event, $dancer)
 	{
-		echo NSEvent::render_template('reports/dancer.html', array(
+		echo RegistrationSystem::render_template('reports/dancer.html', array(
 			'event'  => $event,
 			'dancer' => $dancer));
 	}
 	
 	static public function report_dancers($event)
 	{
-		echo NSEvent::render_template('reports/dancers.html', array(
+		echo RegistrationSystem::render_template('reports/dancers.html', array(
 			'event'   => $event,
 			'dancers' => $event->dancers()));
 	}
@@ -349,8 +349,8 @@ class NSEvent_Request_Controller
 		else {
 			if ($_GET['data'] == 'competitions') {
 				$filename = 'Competitors';
-				$database = NSEvent::get_database_connection();
-				$dancers  = $database->query('SELECT DISTINCT %1$s_dancers.`dancer_id` as dancer_id, last_name, first_name, email FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`type` = "competition" ORDER BY %1$s_dancers.`last_name` ASC, %1$s_dancers.`first_name` ASC', array(':event_id' => $event->id()))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+				$database = RegistrationSystem::get_database_connection();
+				$dancers  = $database->query('SELECT DISTINCT %1$s_dancers.`dancer_id` as dancer_id, last_name, first_name, email FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`type` = "competition" ORDER BY %1$s_dancers.`last_name` ASC, %1$s_dancers.`first_name` ASC', array(':event_id' => $event->id()))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
 			}
 			elseif ($_GET['data'] == 'dancers') {
 				$filename = 'Dancers';
@@ -390,19 +390,19 @@ class NSEvent_Request_Controller
 	
 	static public function report_index()
 	{
-		echo NSEvent::render_template('reports/index.html', array('events' => NSEvent_Model_Event::get_events()));
+		echo RegistrationSystem::render_template('reports/index.html', array('events' => RegistrationSystem_Model_Event::get_events()));
 	}
 	
 	static public function report_index_event($event)
 	{
-		echo NSEvent::render_template('reports/index-event.html', array('event' => $event));
+		echo RegistrationSystem::render_template('reports/index-event.html', array('event' => $event));
 	}
 	
 	static public function report_housing_needed($event)
 	{
 		$dancers = $event->dancers_where(array(':housing_type' => 1));
 		
-		echo NSEvent::render_template('reports/housing.html', array(
+		echo RegistrationSystem::render_template('reports/housing.html', array(
 			'event'         => $event,
 			'dancers'       => $dancers,
 			'housing_count' => count($dancers),
@@ -412,7 +412,7 @@ class NSEvent_Request_Controller
 	
 	static public function report_housing_providers($event)
 	{
-		echo NSEvent::render_template('reports/housing.html', array(
+		echo RegistrationSystem::render_template('reports/housing.html', array(
 			'event'         => $event,
 			'dancers'       => $event->dancers_where(array(':housing_type' => 2)),
 			'housing_count' => $event->count_housing_spots_available(),
@@ -422,7 +422,7 @@ class NSEvent_Request_Controller
 	
 	static public function report_money($event)
 	{
-		echo NSEvent::render_template('reports/money.html', array(
+		echo RegistrationSystem::render_template('reports/money.html', array(
 			'event'   => $event,
 			'dancers' => $event->dancers(),
 			'items'   => $event->items()));
@@ -430,7 +430,7 @@ class NSEvent_Request_Controller
 	
 	static public function report_numbers($event)
 	{
-		$database = NSEvent::get_database_connection();
+		$database = RegistrationSystem::get_database_connection();
 		
 		# Dancers
 		$lists['Dancers']['Total']   = $event->count_dancers();
@@ -487,14 +487,14 @@ class NSEvent_Request_Controller
 			$lists[$header_key] = array_filter($lists[$header_key]);
 		}
 		
-		echo NSEvent::render_template('reports/numbers.html', array(
+		echo RegistrationSystem::render_template('reports/numbers.html', array(
 			'event' => $event,
 			'lists' => $lists));
 	}
 	
 	static public function report_packet_printout($event)
 	{
-		echo NSEvent::render_template('reports/packet-printout.html', array(
+		echo RegistrationSystem::render_template('reports/packet-printout.html', array(
 			'event'   => $event,
 			'dancers' => $event->dancers()));
 	}
@@ -516,14 +516,14 @@ class NSEvent_Request_Controller
 			}
 		}
 		
-		echo NSEvent::render_template('reports/reg-list.html', array(
+		echo RegistrationSystem::render_template('reports/reg-list.html', array(
 			'event' => $event,
 			'dancers' => $dancers));
 	}
 	
 	static public function report_volunteers($event)
 	{
-		echo NSEvent::render_template('reports/volunteers.html', array(
+		echo RegistrationSystem::render_template('reports/volunteers.html', array(
 			'event'      => $event,
 			'volunteers' => $event->dancers_where(array(':status' => 1))));
 	}

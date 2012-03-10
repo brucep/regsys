@@ -1,6 +1,6 @@
 <?php
 
-class NSEvent_Model_Item extends NSEvent_Model
+class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 {
 	private $event_id,
 	        $item_id,
@@ -139,7 +139,7 @@ class NSEvent_Model_Item extends NSEvent_Model
 			$order_by = ($this->meta != 'position') ? '' : 'item_meta DESC, ';
 			$order_by .= 'last_name ASC, first_name ASC';
 			
-			$this->registered_dancers = self::$database->query('SELECT %1$s_dancers.*, %1$s_registrations.`item_meta` FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id ORDER BY '.$order_by, array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+			$this->registered_dancers = self::$database->query('SELECT %1$s_dancers.*, %1$s_registrations.`item_meta` FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id ORDER BY '.$order_by, array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
 		}
 		
 		return $this->registered_dancers;

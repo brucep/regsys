@@ -1,6 +1,6 @@
 <?php
 
-abstract class NSEvent_Model
+abstract class RegistrationSystem_Model
 {
 	static protected $database, $options;
 	

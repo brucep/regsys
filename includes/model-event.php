@@ -1,6 +1,6 @@
 <?php
 
-class NSEvent_Model_Event extends NSEvent_Model
+class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 {
 	private $event_id,
 	        $name,
@@ -45,17 +45,17 @@ class NSEvent_Model_Event extends NSEvent_Model
 	
 	static public function get_events()
 	{
-		return self::$database->query('SELECT * FROM %1$s_events ORDER BY date_paypal_prereg_end DESC')->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Event');
+		return self::$database->query('SELECT * FROM %1$s_events ORDER BY date_paypal_prereg_end DESC')->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Event');
 	}
 	
 	static public function get_event_by_id($event_id)
 	{
-		return self::$database->query('SELECT * FROM %1$s_events WHERE event_id = :event_id', array(':event_id' => $event_id))->fetchObject('NSEvent_Model_Event');
+		return self::$database->query('SELECT * FROM %1$s_events WHERE event_id = :event_id', array(':event_id' => $event_id))->fetchObject('RegistrationSystem_Model_Event');
 	}
 	
 	public function items()
 	{
-		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
+		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
 	}
 	
 	public function items_where(array $where, $exclude_expired = false)
@@ -74,17 +74,17 @@ class NSEvent_Model_Event extends NSEvent_Model
 			$where[':date_expires'] = time();
 		}
 		
-		return self::$database->query('SELECT * FROM %1$s_items WHERE '.$query, $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
+		return self::$database->query('SELECT * FROM %1$s_items WHERE '.$query, $where)->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
 	}
 	
 	public function item_by_id($item_id)
 	{
-		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $item_id))->fetchObject('NSEvent_Model_Item');
+		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $item_id))->fetchObject('RegistrationSystem_Model_Item');
 	}
 		
 	public function dancers()
 	{
-		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id, event_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id, event_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
 	}
 		
 	public function dancers_where(array $where, $equal = true)
@@ -100,17 +100,17 @@ class NSEvent_Model_Event extends NSEvent_Model
 		$query = implode(' AND', $query);
 		$where[':event_id'] = $this->event_id;
 		
-		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id, event_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE '.$query.' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer');
+		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id, event_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE '.$query.' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
 	}
 	
 	public function dancer_by_id($dancer_id)
 	{
-		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id, event_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id AND %1$s_dancers.`dancer_id` = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $dancer_id))->fetchObject('NSEvent_Model_Dancer');
+		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id, event_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id AND %1$s_dancers.`dancer_id` = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $dancer_id))->fetchObject('RegistrationSystem_Model_Dancer');
 	}
 	
 	public function volunteers()
 	{
-		return ($this->has_volunteers()) ? self::$database->query('SELECT * FROM %1$s_dancers WHERE event_id = :event_id AND status = 1 ORDER BY last_name ASC, first_name ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Dancer') : array();
+		return ($this->has_volunteers()) ? self::$database->query('SELECT * FROM %1$s_dancers WHERE event_id = :event_id AND status = 1 ORDER BY last_name ASC, first_name ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer') : array();
 	}
 	
 	public function count_dancers(array $where = array())

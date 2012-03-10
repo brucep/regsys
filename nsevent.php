@@ -1,7 +1,6 @@
 <?php
 /*
-Plugin Name: NSEvent
-Plugin URI: http://github.com/brucep/nsevent
+Plugin Name: Registration System
 Description: An event registration and reporting system for dance organizations.
 Version: 1.0
 Author: Bruce Phillips
@@ -20,8 +19,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Except as contained in this notice, the name of the author not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from the author.
 */
 
-if (!class_exists('NSEvent')):
-class NSEvent
+if (!class_exists('RegistrationSystem')):
+class RegistrationSystem
 {
 	static public $event, $validation; # Used by validation methods
 	static private $vip, $validated_package_id = 0, $validated_items = array(), $twig;
@@ -49,17 +48,17 @@ class NSEvent
 	
 	static public function admin_init()
 	{
-		register_setting('nsevent', 'nsevent', 'NSEvent::admin_validate_options');
+		register_setting('nsevent', 'nsevent', 'RegistrationSystem::admin_validate_options');
 	}
 	
 	static public function admin_menu()
 	{
-		$hookname = add_menu_page('Registration Reports', 'Registration Reports', 'edit_pages', 'nsevent', 'NSEvent::page_request');
-		add_submenu_page('nsevent', 'Registration Options', 'Registration Options', 'manage_options', 'nsevent-options', 'NSEvent::page_options');
+		$hookname = add_menu_page('Registration Reports', 'Registration Reports', 'edit_pages', 'nsevent', 'RegistrationSystem::page_request');
+		add_submenu_page('nsevent', 'Registration Options', 'Registration Options', 'manage_options', 'nsevent-options', 'RegistrationSystem::page_options');
 		
-		add_action('admin_print_scripts-' . $hookname, 'NSEvent::admin_print_scripts');
-		add_action('admin_print_styles-' . $hookname,  'NSEvent::admin_print_styles');
-		add_action('admin_print_styles',               'NSEvent::admin_menu_hide_icon');
+		add_action('admin_print_scripts-' . $hookname, 'RegistrationSystem::admin_print_scripts');
+		add_action('admin_print_styles-' . $hookname,  'RegistrationSystem::admin_print_styles');
+		add_action('admin_print_styles',               'RegistrationSystem::admin_menu_hide_icon');
 	}
 	
 	static public function admin_menu_hide_icon()
@@ -83,9 +82,9 @@ class NSEvent
 	{
 		$options = self::get_options();
 		
-		NSEvent_Model::set_database(self::get_database_connection());
+		RegistrationSystem_Model::set_database(self::get_database_connection());
 		
-		if (isset($input['current_event_id']) and NSEvent_Model_Event::get_event_by_id($input['current_event_id'])) {
+		if (isset($input['current_event_id']) and RegistrationSystem_Model_Event::get_event_by_id($input['current_event_id'])) {
 			$options['current_event_id'] = (int) $input['current_event_id'];
 		}
 		
@@ -155,8 +154,8 @@ class NSEvent
 	
 	static public function autoload($class)
 	{
-		if (substr($class, 0, 8) == 'NSEvent_') {
-			$class = implode('-', explode('_', strtolower(substr($class, 8))));
+		if (substr($class, 0, 19) == 'RegistrationSystem_') {
+			$class = implode('-', explode('_', strtolower(substr($class, 19))));
 			require dirname(__FILE__) . '/includes/' . $class . '.php';
 		}
 	}
@@ -165,7 +164,7 @@ class NSEvent
 	{
 		global $wpdb;
 		
-		return new NSEvent_Database(array(
+		return new RegistrationSystem_Database(array(
 			'host'     => DB_HOST,
 			'port'     => defined('DB_HOST_PORT') ? DB_HOST_PORT : false,
 			'name'     => DB_NAME,
@@ -186,12 +185,12 @@ class NSEvent
 			throw new Exception(__('Cheatin&#8217; uh?'));
 		}
 		
-		NSEvent_Model::set_database(self::get_database_connection());
-		NSEvent_Model::set_options(self::get_options());
+		RegistrationSystem_Model::set_database(self::get_database_connection());
+		RegistrationSystem_Model::set_options(self::get_options());
 		
 		$events = array();
 		
-		foreach (NSEvent_Model_Event::get_events() as $event) {
+		foreach (RegistrationSystem_Model_Event::get_events() as $event) {
 			$events[$event->id()] = $event->name();
 		}
 		
@@ -207,14 +206,14 @@ class NSEvent
 				throw new Exception(__('Cheatin&#8217; uh?'));
 			}
 			
-			NSEvent_Model::set_database(self::get_database_connection());
-			NSEvent_Model::set_options(self::get_options());
+			RegistrationSystem_Model::set_database(self::get_database_connection());
+			RegistrationSystem_Model::set_options(self::get_options());
 			
 			if (empty($_GET['request'])) {
 				$_GET['request'] = 'report_index';
 			}
 			
-			if (is_callable(array('NSEvent_Request_Controller', $_GET['request']))) {
+			if (is_callable(array('RegistrationSystem_Request_Controller', $_GET['request']))) {
 				if (substr($_GET['request'], 0, 6) == 'admin_' and !current_user_can('administrator')) {
 					throw new Exception(__('Cheatin&#8217; uh?'));
 				}
@@ -222,7 +221,7 @@ class NSEvent
 				$params = array();
 				
 				if (!in_array($_GET['request'], array('report_index', 'admin_event_add'))) {
-					if (!$params['event'] = self::$event = NSEvent_Model_Event::get_event_by_id($_GET['event_id'])) {
+					if (!$params['event'] = self::$event = RegistrationSystem_Model_Event::get_event_by_id($_GET['event_id'])) {
 						throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
 					}
 					
@@ -239,7 +238,7 @@ class NSEvent
 					}
 				}
 				
-				call_user_func_array(array('NSEvent_Request_Controller', $_GET['request']), $params);
+				call_user_func_array(array('RegistrationSystem_Request_Controller', $_GET['request']), $params);
 			}
 			else {
 				throw new Exception(sprintf('Unable to handle page request: %s', esc_html($_GET['request'])));
@@ -405,15 +404,15 @@ class NSEvent
 			# Don't mess with my timezone WordPress!
 			@date_default_timezone_set(get_option('timezone_string'));
 			
-			NSEvent_Model::set_database(self::get_database_connection());
-			NSEvent_Model::set_options(self::get_options());
+			RegistrationSystem_Model::set_database(self::get_database_connection());
+			RegistrationSystem_Model::set_options(self::get_options());
 			
 			$options = self::get_options();
-			self::$validation = new NSEvent_Form_Validation;
+			self::$validation = new RegistrationSystem_Form_Validation;
 			
 			
 			# Find current event
-			$event = self::$event = NSEvent_Model_Event::get_event_by_id($options['current_event_id']);
+			$event = self::$event = RegistrationSystem_Model_Event::get_event_by_id($options['current_event_id']);
 			
 			if (!$event) {
 				throw new Exception(sprintf('Event ID not found: %d', $options['current_event_id']));
@@ -433,13 +432,13 @@ class NSEvent
 				self::$validation->add_rules(array(
 					'first_name'      => 'trim|required|max_length[100]|ucfirst',
 					'last_name'       => 'trim|required|max_length[100]|ucfirst',
-					'email'           => 'trim|valid_email|max_length[100]|NSEvent::validate_email_address',
+					'email'           => 'trim|valid_email|max_length[100]|RegistrationSystem::validate_email_address',
 					'confirm_email'   => 'trim|valid_email|max_length[100]',
 					'mobile_phone'    => 'trim|required|max_length[30]',
 					'position'        => 'intval|in[1,2]',
-					'status'          => 'NSEvent::validate_status',
-					'package'         => 'intval|NSEvent::validate_package',
-					'items'           => 'NSEvent::validate_items',
+					'status'          => 'RegistrationSystem::validate_status',
+					'package'         => 'intval|RegistrationSystem::validate_package',
+					'items'           => 'RegistrationSystem::validate_items',
 					'payment_method'  => 'in[Mail,PayPal]',
 					));
 				
@@ -454,7 +453,7 @@ class NSEvent
 				
 				# Discount
 				if ($event->has_discount()) {
-					self::$validation->add_rule('payment_discount', 'intval|in[0,1]|NSEvent::validate_discount');
+					self::$validation->add_rule('payment_discount', 'intval|in[0,1]|RegistrationSystem::validate_discount');
 				}
 				else {
 					$_POST['payment_discount'] = 0;
@@ -468,14 +467,14 @@ class NSEvent
 						'housing_provider[housing_pets]'            => 'if_set[housing_type_provider]|intval|in[0,1]',
 						'housing_provider[housing_gender]'          => 'if_set[housing_type_provider]|intval|in[1,2,3]',
 						'housing_provider[housing_bedtime]'         => 'if_set[housing_type_provider]|intval|in[0,1,2]',
-						'housing_provider[housing_nights]'          => 'if_set[housing_type_provider]|NSEvent::validate_housing_nights',
+						'housing_provider[housing_nights]'          => 'if_set[housing_type_provider]|RegistrationSystem::validate_housing_nights',
 						'housing_provider[housing_comment]'         => 'if_set[housing_type_provider]|trim|max_length[65536]',
 						'housing_needed[housing_from_scene]'        => 'if_set[housing_type_needed]|trim|required|max_length[255]|ucwords',
 						'housing_needed[housing_smoke]'             => 'if_set[housing_type_needed]|intval|in[0,1]',
 						'housing_needed[housing_pets]'              => 'if_set[housing_type_needed]|intval|in[0,1]',
 						'housing_needed[housing_gender]'            => 'if_set[housing_type_needed]|intval|in[1,2,3]',
 						'housing_needed[housing_bedtime]'           => 'if_set[housing_type_needed]|intval|in[0,1,2]',
-						'housing_needed[housing_nights]'            => 'if_set[housing_type_needed]|NSEvent::validate_housing_nights',
+						'housing_needed[housing_nights]'            => 'if_set[housing_type_needed]|RegistrationSystem::validate_housing_nights',
 						'housing_needed[housing_comment]'           => 'if_set[housing_type_needed]|trim|max_length[65536]',
 						));
 				}
@@ -542,7 +541,7 @@ class NSEvent
 					unset($dancer_data['housing_type_needed'],$dancer_data['housing_needed'], $dancer_data['housing_type_provider'], $dancer_data['housing_provider']);
 				}
 				
-				$dancer = new NSEvent_Model_Dancer($dancer_data);
+				$dancer = new RegistrationSystem_Model_Dancer($dancer_data);
 				
 				
 				if (!isset($_POST['confirmed'])) {
@@ -635,7 +634,7 @@ class NSEvent
 	
 	static public function registration_head()
 	{
-		add_action('wp_head', 'NSEvent::registration_wp_head');
+		add_action('wp_head', 'RegistrationSystem::registration_wp_head');
 		wp_enqueue_style('nsevent-registration', plugins_url('css/registration.css', __FILE__));
 		
 		# Check if the current theme has a stylesheet for the registration
@@ -669,7 +668,7 @@ class NSEvent
 				self::$twig->addExtension(new Twig_Extension_Debug());
 			}
 			
-			self::$twig->addGlobal('form', new NSEvent_Form_Controls);
+			self::$twig->addGlobal('form', new RegistrationSystem_Form_Controls);
 			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
 			
 			if (is_admin() and $_GET['page'] == 'nsevent-options') {
@@ -872,8 +871,8 @@ class NSEvent
 	}
 }
 
-add_action('admin_init', 'NSEvent::admin_init');
-add_action('admin_menu', 'NSEvent::admin_menu');
-register_activation_hook(__FILE__, 'NSEvent::plugin_activate');
-spl_autoload_register('NSEvent::autoload');
+add_action('admin_init', 'RegistrationSystem::admin_init');
+add_action('admin_menu', 'RegistrationSystem::admin_menu');
+register_activation_hook(__FILE__, 'RegistrationSystem::plugin_activate');
+spl_autoload_register('RegistrationSystem::autoload');
 endif;

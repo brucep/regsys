@@ -1,6 +1,6 @@
 <?php
 
-class NSEvent_Model_Dancer extends NSEvent_Model
+class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 {
 	private $event_id,
 	        $dancer_id,
@@ -356,7 +356,7 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		{
 			$this->registered_items = array();
 			
-			$registered_items = self::$database->query('SELECT %1$s_items.*, %1$s_registrations.`price` as registered_price, %1$s_registrations.`item_meta` as registered_meta FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchAll(PDO::FETCH_CLASS, 'NSEvent_Model_Item');
+			$registered_items = self::$database->query('SELECT %1$s_items.*, %1$s_registrations.`price` as registered_price, %1$s_registrations.`item_meta` as registered_meta FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
 			
 			foreach ($registered_items as $item) {
 				$this->registered_items[$item->id()] = $item;
@@ -377,9 +377,9 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 	
 	public function send_confirmation_email()
 	{
-		$event = NSEvent_Model_Event::get_event_by_id($this->event_id);
+		$event = RegistrationSystem_Model_Event::get_event_by_id($this->event_id);
 		
-		$body = NSEvent::render_template('registration/confirmation-email.txt', array(
+		$body = RegistrationSystem::render_template('registration/confirmation-email.txt', array(
 			'options' => self::$options,
 			'event'   => $event,
 			'dancer'  => $this));
@@ -419,9 +419,6 @@ class NSEvent_Model_Dancer extends NSEvent_Model
 		if (!empty(self::$options['email_bcc'])) {
 			$message->setBcc(self::$options['email_bcc']);
 		}
-		
-		$headers = $message->getHeaders();
-		$headers->addTextHeader('X-Mailer', 'NSEvent Mailer');
 		
 		return (bool) Swift_Mailer::newInstance($transport)->send($message);
 	}

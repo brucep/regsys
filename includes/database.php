@@ -1,6 +1,6 @@
 <?php
 
-class NSEvent_Database
+class RegistrationSystem_Database
 {
 	private $pdo, $prefix = '';
 	

@@ -1,6 +1,6 @@
 <?php
 
-class NSEvent_PayPal_IPN
+class RegistrationSystem_PayPal_IPN
 {
 	private $data = array();
 	
