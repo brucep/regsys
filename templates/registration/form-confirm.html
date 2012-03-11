@@ -110,8 +110,8 @@
 {% endfor %}
 					<tr>
 						<td class="label">Total Amount Owed</td>
-						<td class="value">{# TODO <?php if ($total_cost > 0) { if ($_POST['payment_method'] === 'PayPal') { echo 'Pay with PayPal'; } else { echo 'Pay by mail'; } } ?>#}</td>
-						<td class="price"><strong>TODO{# <?php printf('$%d', $total_cost); ?> #}<strong></td>
+						<td class="value">{% if dancer.price_total > 0 %}{% if dancer.payment_method === 'PayPal'%}Pay with PayPal{% else %}Pay by mail{% endif %}</td>
+						<td class="price"><strong>${{ dancer.price_total }}<strong></td>
 					</tr>
 				</table>
 

@@ -485,34 +485,20 @@ class RegistrationSystem
 				$file = 'form-reg-info';
 			}
 			else {
-				# Used for confirmation page and email
-				$package_cost      = 0;
-				$competitions      = array();
-				$competitions_cost = 0;
-				$shirts            = array();
-				$shirts_cost       = 0;
-				$total_cost        = 0;
+				$price_total = 0;
 				
 				if (self::$vip) {
-					if (self::$validated_package_id !== 0) {
-						$package_cost = self::$validated_items[self::$validated_package_id]->price_for_vip();
-					}
-					
 					foreach (self::$validated_items as $item) {
-						$total_cost += $item->price_for_vip();
+						$price_total += $item->price_for_vip();
 					}
 				}
 				else {
-					if (self::$validated_package_id !== 0) {
-						$package_cost = self::$validated_items[self::$validated_package_id]->price_for_prereg($_POST['payment_discount']);
-					}
-					
 					foreach (self::$validated_items as $item) {
-						$total_cost += $item->price_for_prereg($_POST['payment_discount']);
+						$price_total += $item->price_for_prereg($_POST['payment_discount']);
 					}
 				}
 				
-				if ($total_cost == 0) {
+				if ($price_total == 0) {
 					$_POST['payment_method'] = 'Mail';
 				}
 				
@@ -521,8 +507,9 @@ class RegistrationSystem
 				$dancer_data = $_POST;
 				unset($dancer_data['items'], $dancer_data['item_meta'], $dancer_data['confirmed'], $dancer_data['confirm_email']);
 				
-				$dancer_data['payment_owed'] = $total_cost;
-				$dancer_data['payment_confirmed'] = ($total_cost == 0) ? 1 : 0;
+				$dancer_data['payment_owed'] = $price_total;
+				$dancer_data['payment_confirmed'] = ($price_total == 0) ? 1 : 0;
+				$dancer_data['price_total'] = $price_total; // Needed for confirmation page
 				
 				if ($options['registration_testing']) {
 					$dancer_data['note'] = 'TEST';
@@ -568,16 +555,7 @@ class RegistrationSystem
 						else {
 							$item_price = $item->price_for_prereg($_POST['payment_discount']);
 						}
-						
-						if ($item->type() == 'competition') {
-							$competitions[$item->id()] = $item;
-							$competitions_cost += $item_price;
-						}
-						elseif ($item->type() == 'shirt') {
-							$shirts[$item->id()] = $item;
-							$shirts_cost += $item_price;
-						}
-						
+												
 						$event->add_registration(array(
 							'dancer_id' => $dancer->id(),
 							'item_id'   => $item->id(),
@@ -585,9 +563,6 @@ class RegistrationSystem
 							'item_meta' => (!isset($_POST['item_meta'][$item->id()]) ? '' : $_POST['item_meta'][$item->id()]),
 							));
 					}
-					
-					
-					// TODO: For VIPs, force payment_method to "mail" if their total cost is 0?
 					
 					
 					# Confirmation email
