@@ -69,16 +69,16 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	{
 		switch ($this->meta) {
 			case 'position':
-				return __('Position', 'nsevent');
+				return 'Position';
 			
 			case 'partner_name':
-				return __('Partner', 'nsevent');
+				return 'Partner';
 				
 			case 'team_members':
-				return __('Team Members', 'nsevent');
+				return 'Team Members';
 			
 			case 'size':
-				return __('Size', 'nsevent');
+				return 'Size';
 			
 			default:
 				return false;

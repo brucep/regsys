@@ -253,29 +253,6 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return $levels;
 	}
 	
-	public function request_href($request, array $parameters = array())
-	{
-		$href = sprintf('%s/wp-admin/admin.php?page=nsevent&amp;event_id=%d&amp;request=%s',
-			get_bloginfo('wpurl'),
-			$this->event_id,
-			rawurlencode($request));
-		
-		foreach ($parameters as $key => $value) {
-			$href .= sprintf('&amp;%s=%s', rawurlencode($key), rawurlencode($value));
-		}
-		
-		return $href;
-	}
-	
-	public function request_link($request, $label, array $parameters = array(), $class = '', $format = '')
-	{
-		return sprintf('<a href="%1$s%4$s"%3$s>%2$s</a>',
-			$this->request_href($request, $parameters),
-			esc_html($label),
-			empty($class)  ? '' : sprintf(' class="%s"', esc_attr($class)),
-			empty($format) ? '' : sprintf('&amp;format=%s', rawurlencode($format)));
-	}
-	
 	public function shirt_description()
 	{
 		return $this->shirt_description;

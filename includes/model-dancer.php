@@ -168,13 +168,13 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	{
 		switch ($this->housing_bedtime) {
 			case 1:
-				return __('Early Bird', 'nsevent');
+				return 'Early Bird';
 			
 			case 2:
-				return __('Night Owl', 'nsevent');
+				return 'Night Owl';
 			
 			default:
-				return __('No Preference', 'nsevent');
+				return 'No Preference';
 		}
 	}
 	
@@ -192,13 +192,13 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	{
 		switch ($this->housing_gender) {
 			case 1:
-				return __('Boys', 'nsevent');
+				return 'Boys';
 			
 			case 2:
-				return __('Girls', 'nsevent');
+				return 'Girls';
 			
 			default:
-				return __('Boys, Girls', 'nsevent');
+				return 'Boys, Girls';
 		}
 	}
 	
@@ -240,10 +240,10 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	{
 		switch ($this->housing_type) {
 			case 1:
-				return __('Housing Needed', 'nsevent');
+				return 'Housing Needed';
 			
 			case 2:
-				return __('Housing Provider', 'nsevent');
+				return 'Housing Provider';
 			
 			default:
 				return false;
@@ -321,10 +321,10 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	{
 		switch ($this->position) {
 			case 1:
-				return __('Lead', 'nsevent');
+				return 'Lead';
 			
 			case 2:
-				return __('Follow', 'nsevent');
+				return 'Follow';
 			
 			default:
 				return false;
