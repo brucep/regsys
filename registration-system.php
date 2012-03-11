@@ -591,14 +591,16 @@ class RegistrationSystem
 					
 					
 					# Confirmation email
-					// if (!$options['registration_testing']) {
-						// try {
-						// 	self::send_confirmation_email($confirmation_email);
-						// }
-						// catch (Exception $confirmation_email_failed) {
-						// 	error_log('Error sending confirmation email: ' . $confirmation_email_failed->getMessage());
-						// }
-					// }
+					if (!$options['registration_testing']) {
+						try {
+							if (!$dancer->send_confirmation_email()) {
+								throw new Exception('Email could not be sent to ' . $dancer->email());
+							}
+						}
+						catch (Exception $confirmation_email_failed) {
+							error_log('Error sending confirmation email: ' . $confirmation_email_failed->getMessage());
+						}
+					}
 					
 					
 					$file = 'form-accepted';
