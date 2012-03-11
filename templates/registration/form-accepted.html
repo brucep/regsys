@@ -1,11 +1,11 @@
 {% extends 'registration/_layout.html' %}
 
-{% block id %}nsevent-reg-form-accepted{% endblock %}
+{% block id %}reg-sys-form-accepted{% endblock %}
 
 {% block title %}Registration Accepted for {{ event.name }}{% endblock %}
 
 {% block content %}
-			<div id="accepted" {%- if vip %} class="vip"{% endif %}>
+			<div{% if vip %} class="vip"{% endif %}>
 				<p>Your registration has been recorded. Your payment must be {{ dancer.payment_method == 'Mail' ? 'postmarked' : 'received' }} by {{ dancer.date_postmark_by | date('F jS') }}.</p>
 
 {% if dancer.payment_method == 'PayPal' %}

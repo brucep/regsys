@@ -3,91 +3,91 @@
 
 .update-nag { display: none; }
 
-#nsevent tr.current-event td.column-title {
+#reg-sys tr.current-event td.column-title {
 	font-size: 1.1em;
 	font-style: italic;
 }
 
-#nsevent ul {
+#reg-sys ul {
 	margin-top: 1em;
 	list-style: disc inside;
 }
 
-#nsevent .ellipsis {
+#reg-sys .ellipsis {
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	-ms-text-overflow: ellipsis;
 }
 
-#nsevent td.date {
+#reg-sys td.date {
 	font-family: monospace;
 }
 
-div.nsevent-exception {margin:2em 1em;}
+div.reg-sys-exception {margin:2em 1em;}
 
-#nsevent form ul {
+#reg-sys form ul {
 	list-style-type: none;
 }
 
-#nsevent form label.radio {
+#reg-sys form label.radio {
 	display: block;
 }
 
-#nsevent form input[type="submit"] {
+#reg-sys form input[type="submit"] {
 	margin-top: 2em;
 }
 
-#nsevent form#registration-add div.field {
+#reg-sys form#registration-add div.field {
 	margin-bottom: 1em;
 }
 
-#nsevent form#registration-add div.meta {
+#reg-sys form#registration-add div.meta {
 	margin-top: 0.5em;
 	margin-bottom: 2em;
 }
 
 
-#nsevent #reg-list .total-cost {
+#reg-sys #reg-list .total-cost {
 	text-align: right;
 }
 
-#nsevent #reg-list .paid {
+#reg-sys #reg-list .paid {
 	text-align: center;
 }
 
-#nsevent #reg-list .overdue {
+#reg-sys #reg-list .overdue {
 	background-color: #fcc;
 }
 
-#nsevent table.report tr:hover td {
+#reg-sys table.report tr:hover td {
 	background-color: #ff9;
 }
 
-#nsevent table.report td.column-title {
+#reg-sys table.report td.column-title {
 	font-weight: bold;
 }
 
-#nsevent table.report th.headerSortDown div {
+#reg-sys table.report th.headerSortDown div {
 	background: url('images/arrow-sort-down.png') right no-repeat;
 }
 
-#nsevent table.report th.headerSortUp div {
+#reg-sys table.report th.headerSortUp div {
 	background: url('images/arrow-sort-up.png') right no-repeat;
 }
 
-#nsevent #report_reg_list td { vertical-align: middle; }
-#nsevent #report_reg_list td.paid { text-align: center; }
-#nsevent #report_reg_list td.owed input { text-align: right; }
+#reg-sys #report_reg_list td { vertical-align: middle; }
+#reg-sys #report_reg_list td.paid { text-align: center; }
+#reg-sys #report_reg_list td.owed input { text-align: right; }
 
-#nsevent #report_packet_printout div.dancer {
+#reg-sys #report_packet_printout div.dancer {
 	margin-bottom: 2em;
 	padding-bottom: 0.5em;
 	border-bottom: 1px dotted #000;
 }
-#nsevent #report_packet_printout div.dancer span.paid-owed { float: right; }
+#reg-sys #report_packet_printout div.dancer span.paid-owed { float: right; }
 
-#nsevent a.delete {
+#reg-sys a.delete {
 	margin-left: 1em;
 	font-size: 12px;
 	font-weight: normal;
@@ -96,7 +96,7 @@ div.nsevent-exception {margin:2em 1em;}
 	text-decoration: underline;
 }
 
-#nsevent input.delete {
+#reg-sys input.delete {
 	color: #fff;
 	background: none;
 	background-color: #bc0b0b;
@@ -104,6 +104,6 @@ div.nsevent-exception {margin:2em 1em;}
 	text-shadow: none;
 }
 
-#nsevent a.button {
+#reg-sys a.button {
 	margin-left: 0.5em;
 }
