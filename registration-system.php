@@ -170,7 +170,7 @@ class RegistrationSystem
 			'name'     => DB_NAME,
 			'user'     => DB_USER,
 			'password' => DB_PASSWORD,
-			'prefix'   => $wpdb->prefix . 'nsevent',
+			'prefix'   => $wpdb->prefix . 'regsys',
 			));
 	}
 	
@@ -266,7 +266,7 @@ class RegistrationSystem
 			'housing');
 		
 		foreach ($tables as $table) {
-			$table_name = sprintf('%snsevent_%s', $wpdb->prefix, $table);
+			$table_name = sprintf('%sregsys_%s', $wpdb->prefix, $table);
 			
 			# Create new database tables
 			if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
