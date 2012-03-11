@@ -48,7 +48,7 @@ class RegistrationSystem
 	
 	static public function admin_init()
 	{
-		register_setting('nsevent', 'nsevent', 'RegistrationSystem::admin_validate_options');
+		register_setting('reg_sys', 'reg_sys', 'RegistrationSystem::admin_validate_options');
 	}
 	
 	static public function admin_menu()
@@ -176,7 +176,7 @@ class RegistrationSystem
 	
 	static public function get_options()
 	{
-		return array_merge(self::$default_options, get_option('nsevent', array()));
+		return array_merge(self::$default_options, get_option('reg_sys', array()));
 	}
 	
 	static public function page_options()
@@ -385,7 +385,7 @@ class RegistrationSystem
 			}
 			
 			self::$default_options['confirmation_email_address'] = get_option('admin_email');
-			add_option('nsevent', self::$default_options, '', 'no');
+			add_option('reg_sys', self::$default_options, '', 'no');
 		}
 			
 	}

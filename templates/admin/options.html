@@ -4,7 +4,7 @@
 	{% if GET['settings-updated'] == 'true' %}{{ form.message('Options saved.') | raw }}{% endif %}
 
 	<form method="post" action="options.php">
-		{{ settings_fields('nsevent') }}{{ form.set_array_name('nsevent') }}
+		{{ settings_fields('reg-sys') }}{{ form.set_array_name('reg-sys') }}
 
 		<h3>Registration</h3>
 
@@ -83,28 +83,28 @@
 				options.email_smtp_host,
 				{'class': 'regular-text'},
 				'',
-				['nsevent-options-smtp']
+				['reg-sys-options-smtp']
 				) | raw }}
 			{{ form.row_text('SMTP Port',
 				'email_smtp_port',
 				options.email_smtp_port,
 				{'class': 'regular-text'},
 				'',
-				['nsevent-options-smtp']
+				['reg-sys-options-smtp']
 				) | raw }}
 			{{ form.row_text('SMTP Username',
 				'email_smtp_username',
 				options.email_smtp_username,
 				{'class': 'regular-text'},
 				'',
-				['nsevent-options-smtp']
+				['reg-sys-options-smtp']
 				) | raw }}
 			{{ form.row_text('SMTP Password',
 				'email_smtp_password',
 				options.email_smtp_password,
 				{'type': 'password', 'class': 'regular-text'},
 				'',
-				['nsevent-options-smtp']
+				['reg-sys-options-smtp']
 				) | raw }}
 			{{ form.row_radio('SMTP Encryption',
 				'email_smtp_encryption',
@@ -112,7 +112,7 @@
 				 {'label': '<span><abbr title="Transport Layer Security">TSL</abbr></span>', 'checked': (options.email_smtp_encryption == 'tls'),  'value': 'tls'},
 				 {'label': '<span>None</span>',                                              'checked': (options.email_smtp_encryption == 'none'), 'value': 'none'}],
 				'',
-				['nsevent-options-smtp']
+				['reg-sys-options-smtp']
 				) | raw }}
 		</table>
 
