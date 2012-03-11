@@ -4,7 +4,7 @@
 	{% if GET['settings-updated'] == 'true' %}{{ form.message('Options saved.') | raw }}{% endif %}
 
 	<form method="post" action="options.php">
-		{{ settings_fields('reg-sys') }}{{ form.set_array_name('reg-sys') }}
+		{{ settings_fields('reg_sys') }}{{ form.set_array_name('reg_sys') }}
 
 		<h3>Registration</h3>
 
