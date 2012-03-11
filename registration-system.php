@@ -53,8 +53,8 @@ class RegistrationSystem
 	
 	static public function admin_menu()
 	{
-		$hookname = add_menu_page('Registration Reports', 'Registration Reports', 'edit_pages', 'nsevent', 'RegistrationSystem::page_request');
-		add_submenu_page('nsevent', 'Registration Options', 'Registration Options', 'manage_options', 'nsevent-options', 'RegistrationSystem::page_options');
+		$hookname = add_menu_page('Registration Reports', 'Registration Reports', 'edit_pages', 'reg-sys', 'RegistrationSystem::page_request');
+		add_submenu_page('reg-sys', 'Registration Options', 'Registration Options', 'manage_options', 'reg-sys-options', 'RegistrationSystem::page_options');
 		
 		add_action('admin_print_scripts-' . $hookname, 'RegistrationSystem::admin_print_scripts');
 		add_action('admin_print_styles-' . $hookname,  'RegistrationSystem::admin_print_styles');
@@ -63,18 +63,18 @@ class RegistrationSystem
 	
 	static public function admin_menu_hide_icon()
 	{
-		echo '<style type="text/css">li#toplevel_page_nsevent div.wp-menu-image { display: none; } body.folded li#toplevel_page_nsevent div.wp-menu-image { display: inherit; }</style>';
+		echo '<style type="text/css">li#toplevel_page_reg-sys div.wp-menu-image { display: none; } body.folded li#toplevel_page_reg-sys div.wp-menu-image { display: inherit; }</style>';
 	}
 	
 	static public function admin_print_scripts()
 	{
-		wp_enqueue_script('nsevent-tablesorter',      plugins_url('js/jquery.tablesorter.min.js', __FILE__), array('jquery'));
-		wp_enqueue_script('nsevent-tablesorter-init', plugins_url('js/tablesorter-init.js', __FILE__),       array('nsevent-tablesorter'));
+		wp_enqueue_script('reg-sys-tablesorter',      plugins_url('js/jquery.tablesorter.min.js', __FILE__), array('jquery'));
+		wp_enqueue_script('reg-sys-tablesorter-init', plugins_url('js/tablesorter-init.js', __FILE__),       array('reg-sys-tablesorter'));
 	}
 	
 	static public function admin_print_styles()
 	{
-		wp_enqueue_style('nsevent-admin', plugins_url('css/admin.css', __FILE__));
+		wp_enqueue_style('reg-sys-admin', plugins_url('css/admin.css', __FILE__));
 		echo '<meta name="viewport" content="initial-scale=1.0;" />';
 	}
 	
@@ -245,7 +245,7 @@ class RegistrationSystem
 			}
 		}
 		catch (Exception $e) {
-			printf('<div id="nsevent-exception">%s</div>', $e->getMessage());
+			printf('<div id="reg-sys-exception">%s</div>', $e->getMessage());
 		}
 	}
 	
@@ -626,24 +626,24 @@ class RegistrationSystem
 			if (!get_post_meta($post->ID, 'registration_form', true)) { get_footer(); }
 		}
 		catch (Exception $e) {
-			if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_header(); }
-			printf('<div id="nsevent-exception">%s</div>'."\n", $e->getMessage());
-			if (!get_post_meta($post->ID, 'nsevent_registration_form', true)) { get_footer(); }
+			if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
+			printf('<div id="reg-sys-exception">%s</div>'."\n", $e->getMessage());
+			if (!get_post_meta($post->ID, 'registration_form', true)) { get_footer(); }
 		}
 	}
 	
 	static public function registration_head()
 	{
 		add_action('wp_head', 'RegistrationSystem::registration_wp_head');
-		wp_enqueue_style('nsevent-registration', plugins_url('css/registration.css', __FILE__));
+		wp_enqueue_style('reg-sys-form', plugins_url('css/registration.css', __FILE__));
 		
 		# Check if the current theme has a stylesheet for the registration
-		$theme_stylesheet = sprintf('%s/%s/style-nsevent-registration.css', get_theme_root(), get_stylesheet());
+		$theme_stylesheet = sprintf('%s/%s/style-reg-sys-form.css', get_theme_root(), get_stylesheet());
 		if (file_exists($theme_stylesheet)) {
-			wp_enqueue_style('nsevent-registration-from-theme', get_stylesheet_directory_uri() . '/style-nsevent-registration.css');
+			wp_enqueue_style('reg-sys-form-theme', get_stylesheet_directory_uri() . '/style-reg-sys-form.css');
 		}
 		
-		wp_enqueue_script('nsevent-reg-info', plugins_url('js/reg-info.js', __FILE__), array('jquery'));
+		wp_enqueue_script('reg-sys-form-script', plugins_url('js/reg-info.js', __FILE__), array('jquery'));
 	}
 	
 	static public function registration_wp_head()
@@ -671,7 +671,7 @@ class RegistrationSystem
 			self::$twig->addGlobal('form', new RegistrationSystem_Form_Controls);
 			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
 			
-			if (is_admin() and $_GET['page'] == 'nsevent-options') {
+			if (is_admin() and $_GET['page'] == 'reg-sys-options') {
 				self::$twig->addFunction('settings_fields', new Twig_Function_Function('settings_fields', array('is_safe' => array('html'))));
 			}
 		}
@@ -684,10 +684,10 @@ class RegistrationSystem
 			$context['admin'] = current_user_can('administrator');
 			
 			if (isset(self::$event)) {
-				$context['request_href'] = site_url('wp-admin/admin.php') . sprintf('?page=nsevent&event_id=%d&request=', self::$event->id());
+				$context['request_href'] = site_url('wp-admin/admin.php') . sprintf('?page=reg-sys&event_id=%d&request=', self::$event->id());
 			}
 			else {
-				$context['request_href'] = site_url('wp-admin/admin.php') . '?page=nsevent&request=';
+				$context['request_href'] = site_url('wp-admin/admin.php') . '?page=reg-sys&request=';
 			}
 		}
 		

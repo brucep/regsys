@@ -11,7 +11,7 @@ class RegistrationSystem_Request_Controller
 			$database->query('DELETE FROM %1$s_housing       WHERE event_id = ? AND dancer_id = ? LIMIT 1', array($event->id(), $dancer->id()));
 			$database->query('DELETE FROM %1$s_dancers       WHERE event_id = ? AND dancer_id = ? LIMIT 1', array($event->id(), $dancer->id()));
 			
-			wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=nsevent&request=report_index_event&event_id=%d&deleted_dancer=%s', $event->id(), rawurlencode($dancer->name())));
+			wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=reg-sys&request=report_index_event&event_id=%d&deleted_dancer=%s', $event->id(), rawurlencode($dancer->name())));
 			exit();
 		}
 		
@@ -101,7 +101,7 @@ class RegistrationSystem_Request_Controller
 	static public function admin_dancer_resend_confirmation_email($event, $dancer)
 	{
 		$dancer->send_confirmation_email();
-		wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=nsevent&request=report_dancer&event_id=%d&dancer_id=%d&confirmation_email=true', $event->id(), $dancer->id()));
+		wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=reg-sys&request=report_dancer&event_id=%d&dancer_id=%d&confirmation_email=true', $event->id(), $dancer->id()));
 		exit();
 	}
 	
@@ -121,7 +121,7 @@ class RegistrationSystem_Request_Controller
 			$database->query('DELETE FROM %s_dancers       WHERE event_id = ?;', array($event->id()));
 			
 			if (isset($_GET['registrations_only']) and $_GET['registrations_only'] == 'true') {
-				wp_redirect(site_url('wp-admin/admin.php') . '?page=nsevent&request=report_index&deleted_event=' . rawurlencode($event->name()) . '&registrations_only=true');
+				wp_redirect(site_url('wp-admin/admin.php') . '?page=reg-sys&request=report_index&deleted_event=' . rawurlencode($event->name()) . '&registrations_only=true');
 				exit();
 			}
 			else {
@@ -130,7 +130,7 @@ class RegistrationSystem_Request_Controller
 				$database->query('DELETE FROM %s_event_levels WHERE event_id = ?;', array($event->id()));
 				$database->query('DELETE FROM %s_events       WHERE event_id = ?;', array($event->id()));
 				
-				wp_redirect(site_url('wp-admin/admin.php') . '?page=nsevent&request=report_index&deleted_event=' . rawurlencode($event->name()));
+				wp_redirect(site_url('wp-admin/admin.php') . '?page=reg-sys&request=report_index&deleted_event=' . rawurlencode($event->name()));
 				exit();
 			}
 		}
@@ -182,7 +182,7 @@ class RegistrationSystem_Request_Controller
 			 			@(string) $_POST['discount_org_name'],
 						));
 					
-					wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=nsevent&event_id=%d&request=admin_event_edit&added=true', $database->lastInsertID()));
+					wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=reg-sys&event_id=%d&request=admin_event_edit&added=true', $database->lastInsertID()));
 					exit();
 				}
 				else {
@@ -469,7 +469,7 @@ class RegistrationSystem_Request_Controller
 				$vip_count = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` = 2', array(':item_id' => $item->id()))->fetchColumn();
 				
 				if ($vip_count) {
-					$lists['Packages'][$item->name()] .= sprintf(' (+%d %s)', $vip_count, _n('VIP', 'VIPs', $vip_count, 'nsevent'));
+					$lists['Packages'][$item->name()] .= sprintf(' (+%d %s)', $vip_count, _n('VIP', 'VIPs', $vip_count));
 				}
 			}
 		}

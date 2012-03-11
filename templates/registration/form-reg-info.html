@@ -143,7 +143,7 @@
 
 								<tbody>
 {% 	for index, item in competitions %}
-									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="nsevent-validation-error"><td colspan="3">', '</td></tr>']) }}
+									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) }}
 {% 		if item.count_openings %}
 									<tr>{% do form.set_array_name('items') %}
 										<td><label>{{ form.input_checkbox(item.id, {'value': item.id}) | raw }} {{ item.name }}</label></td>{% do form.set_array_name(null) %}
@@ -201,7 +201,7 @@
 
 								<tbody>
 {% 	for index, item in shirts %}
-									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="nsevent-validation-error"><td colspan="3">', '</td></tr>']) }}
+									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) }}
 									<tr>
 										<td>{{ item.name }}</td>
 										<td class="price">${{ vip ? item.price_for_vip : item.price_for_prereg }}</td>
