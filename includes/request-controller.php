@@ -463,13 +463,13 @@ class RegistrationSystem_Request_Controller
 		$lists['Packages'] = array();
 		$packages = $event->items_where(array(':preregistration' => 1, ':type' => 'package'));
 		foreach ($packages as $item) {
-			$lists['Packages'][$item->name()] = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` != 2', array(':item_id' => $item->id()))->fetchColumn();
+			$lists['Packages'][$item->name] = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` != 2', array(':item_id' => $item->id()))->fetchColumn();
 			
 			if ($event->has_vip()) {
 				$vip_count = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` = 2', array(':item_id' => $item->id()))->fetchColumn();
 				
 				if ($vip_count) {
-					$lists['Packages'][$item->name()] .= sprintf(' (+%d %s)', $vip_count, _n('VIP', 'VIPs', $vip_count));
+					$lists['Packages'][$item->name] .= sprintf(' (+%d %s)', $vip_count, _n('VIP', 'VIPs', $vip_count));
 				}
 			}
 		}
@@ -478,7 +478,7 @@ class RegistrationSystem_Request_Controller
 		# Shirts
 		$shirts = $event->items_where(array(':preregistration' => 1, ':type' => 'shirt'));
 		foreach ($shirts as $item) {
-			$header_key = sprintf('%s (%d)', $item->name(), $event->count_registrations_where(array(':item_id' => $item->id())));
+			$header_key = sprintf('%s (%d)', $item->name, $event->count_registrations_where(array(':item_id' => $item->id())));
 			
 			foreach (explode(',', $item->description()) as $size) {
 				$lists[$header_key][ucfirst($size)] = $event->count_registrations_where(array(':item_id' => $item->id(), ':item_meta' => $size));

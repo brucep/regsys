@@ -752,7 +752,7 @@ class RegistrationSystem
 				
 				case 'partner_name':
 					if (empty($_POST['item_meta'][$item->id()])) {
-						self::$validation->set_error('item_' . $item->id(), sprintf('Your partner\'s name must be specified for %s.', $item->name()));
+						self::$validation->set_error('item_' . $item->id(), sprintf('Your partner\'s name must be specified for %s.', $item->name));
 						$items_did_validate = false;
 						continue 2;
 					}
@@ -764,7 +764,7 @@ class RegistrationSystem
 				
 				case 'team_members':
 					if (empty($_POST['item_meta'][$item->id()])) {
-						self::$validation->set_error('item_' . $item->id(), sprintf('Team members must be specified for %s.', $item->name()));
+						self::$validation->set_error('item_' . $item->id(), sprintf('Team members must be specified for %s.', $item->name));
 						$items_did_validate = false;
 						continue 2;
 					}
@@ -773,7 +773,7 @@ class RegistrationSystem
 						$_POST['item_meta'][$item->id()] = ucwords(preg_replace(array("/[\r\n]+/", "/\n+/", "/\r+/", '/,([^ ])/', '/, , /'), ', $1', trim($_POST['item_meta'][$item->id()])));
 						
 						if (strlen($_POST['item_meta'][$item->id()]) > 65536) {
-							self::$validation->set_error('item_' . $item->id(), sprintf('Team members list for %s is too long.', $item->name()));
+							self::$validation->set_error('item_' . $item->id(), sprintf('Team members list for %s is too long.', $item->name));
 							$items_did_validate = false;
 							continue 2;
 						}
@@ -782,7 +782,7 @@ class RegistrationSystem
 				
 				case 'size':
 					if (!in_array($value, array_merge(array('None'), explode(',', $item->description())))) {
-						self::$validation->set_error('item_' . $item->id(), sprintf('An invalid size was choosen for %s.', $item->name()));
+						self::$validation->set_error('item_' . $item->id(), sprintf('An invalid size was choosen for %s.', $item->name));
 						$items_did_validate = false;
 						continue 2;
 					}
@@ -795,7 +795,7 @@ class RegistrationSystem
 			
 			# Check openings again, in case they have filled since the form was first displayed to the user
 			if (($item->meta() != 'position' and !$item->count_openings()) or ($item->meta() == 'position' and !$item->count_openings($_POST['item_meta'][$item->id()]))) {
-				self::$validation->set_error('item_' . $item->id(), sprintf('There are no longer any openings for %s.', $item->name()));
+				self::$validation->set_error('item_' . $item->id(), sprintf('There are no longer any openings for %s.', $item->name));
 				$items_did_validate = false;
 				continue;
 			}

@@ -2,11 +2,18 @@
 
 class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 {
-	private $event_id,
-	        $dancer_id,
-	        $first_name,
+	public  $first_name,
 	        $last_name,
 	        $email,
+	        $housing_comment,
+	        $housing_from_scene,
+	        $level,
+	        $mobile_phone,
+	        $note,
+	        $payment_method;
+	
+	private $event_id,
+	        $dancer_id,
 	        $date_registered,
 	        $housing_type,
 	        $housing_spots_available,
@@ -16,16 +23,10 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	        $housing_bedtime,
 	        $housing_pets,
 	        $housing_smoke,
-	        $housing_from_scene,
-	        $housing_comment,
-	        $level,
 	        $level_id,
-	        $mobile_phone,
-	        $note,
 	        $position,
 	        $payment_confirmed,
 	        $payment_discount,
-	        $payment_method,
 	        $payment_owed,
 	        $price_total,
 	        $registered_items,
@@ -136,32 +137,15 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	{
 		return sprintf('%s, %s', $this->last_name, $this->first_name);
 	}
-	
-	public function first_name()
-	{
-		return $this->first_name;
-	}
-	
-	public function last_name()
-	{
-		return $this->last_name;
-	}
 		
-	public function date_postmark_by($format = false)
+	public function date_postmark_by()
 	{
-		$timestamp = strtotime(sprintf('+%d days', self::$options['postmark_within']), $this->date_registered);
-		
-		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
+		return strtotime(sprintf('+%d days', self::$options['postmark_within']), $this->date_registered);
 	}
 	
-	public function date_registered($format = false)
+	public function date_registered()
 	{
-		return ($format === false) ? (int) $this->date_registered : date($format, $this->date_registered);
-	}
-	
-	public function email()
-	{
-		return $this->email;
+		return (int) $this->date_registered;
 	}
 	
 	public function housing_bedtime()
@@ -176,16 +160,6 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 			default:
 				return 'No Preference';
 		}
-	}
-	
-	public function housing_comment()
-	{
-		return $this->housing_comment;
-	}
-	
-	public function housing_from_scene()
-	{
-		return $this->housing_from_scene;
 	}
 	
 	public function housing_gender()
@@ -250,19 +224,9 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		}
 	}
 	
-	public function level()
-	{
-		return $this->level;
-	}
-	
 	public function mailto()
 	{
 		return 'mailto:' . rawurlencode(sprintf('%s %s <%s>', $this->first_name, $this->last_name, $this->email));
-	}
-	
-	public function mobile_phone()
-	{
-		return $this->mobile_phone;
 	}
 	
 	public function payment_confirmed()
@@ -273,11 +237,6 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	public function payment_discount()
 	{
 		return (int) $this->payment_discount;
-	}
-	
-	public function payment_method()
-	{
-		return $this->payment_method;
 	}
 	
 	public function payment_owed()
@@ -301,14 +260,14 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		}
 		
 		foreach ($this->registered_items() as $item) {
-			if ($item->registered_price() == 0) {
+			if ($item->registered_price == 0) {
 				continue;
 			}
 			
-			$href .= sprintf('&item_name_%1$d=%2$s&amount_%1$d=%3$s', $i, rawurlencode($item->name()), rawurlencode($item->registered_price()));
+			$href .= sprintf('&item_name_%1$d=%2$s&amount_%1$d=%3$s', $i, rawurlencode($item->name), rawurlencode($item->registered_price));
 			
 			if ($item->meta() == 'size') {
-				$href .= sprintf('&on0_%1$d=%2$s&os0_%1$d=%3$s', $i, $item->meta_label(), ucfirst($item->registered_meta()));
+				$href .= sprintf('&on0_%1$d=%2$s&os0_%1$d=%3$s', $i, $item->meta_label(), ucfirst($item->registered_meta));
 			}
 			
 			$i++;
@@ -337,9 +296,8 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 			$this->registered_items();
 		}
 		
-		return array_key_exists($item_id, $this->registered_items) ? $this->registered_items[$item_id]->registered_price() : false;
+		return array_key_exists($item_id, $this->registered_items) ? $this->registered_items[$item_id]->registered_price : false;
 	}
-	
 	
 	public function price_total()
 	{

@@ -2,16 +2,20 @@
 
 class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 {
+	public  $name,
+	        $description,
+	        $meta,
+	        $registered_meta,
+	        $registered_price,
+	        $type;
+	
 	private $event_id,
 	        $item_id,
-	        $name,
 	        $count_registrations,
 	        $count_registrations_by_position,
 	        $date_expires,
-	        $description,
 	        $limit_per_position,
 	        $limit_total,
-	        $meta,
 	        $openings,
 	        $preregistration,
 	        $price_prereg,
@@ -20,10 +24,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	        $price_scaled,
 	        $price_tier,
 	        $price_vip,
-	        $registered_dancers,
-	        $registered_meta,
-	        $registered_price,
-	        $type;
+	        $registered_dancers;
 		
 	public function __toString()
 	{
@@ -35,19 +36,9 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		return (int) $this->item_id;
 	}
 	
-	public function name()
+	public function date_expires()
 	{
-		return $this->name;
-	}
-	
-	public function description()
-	{
-		return $this->description;
-	}
-	
-	public function date_expires($format = false)
-	{
-		return ($format === false) ? (int) $this->date_expires : date($format, $this->date_expires);
+		return (int) $this->date_expires;
 	}
 	
 	public function limit_per_position()
@@ -58,11 +49,6 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	public function limit_total()
 	{
 		return (int) $this->limit_total;
-	}
-	
-	public function meta()
-	{
-		return $this->meta;
 	}
 	
 	public function meta_label()
@@ -145,24 +131,9 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		return $this->registered_dancers;
 	}
 	
-	public function registered_meta()
-	{
-		return $this->registered_meta;
-	}
-	
-	public function registered_price()
-	{
-		return $this->registered_price;
-	}
-	
 	public function total_money_from_registrations()
 	{
 		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
-	}
-	
-	public function type()
-	{
-		return $this->type;
 	}
 	
 	public function is_expired()

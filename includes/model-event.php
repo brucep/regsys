@@ -2,15 +2,16 @@
 
 class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 {
+	public  $name,
+	        $discount_org_name;
+	
 	private $event_id,
-	        $name,
 	        $date_mail_prereg_end,
 	        $date_paypal_prereg_end,
 	    	$date_refund_end,
 	        $discount_label,
 	        $discount_name,
 	        $discount_note,
-	        $discount_org_name,
 	        $discounts_used,
 	        $has_discount,
 	        $has_housing,
@@ -81,12 +82,12 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	{
 		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $item_id))->fetchObject('RegistrationSystem_Model_Item');
 	}
-		
+	
 	public function dancers()
 	{
 		return self::$database->query('SELECT *, %1$s_event_levels.`label` as level, %1$s_dancers.`event_id` as event_id FROM %1$s_dancers LEFT JOIN %1$s_event_levels USING(level_id, event_id) LEFT JOIN %1$s_housing USING(dancer_id) WHERE %1$s_dancers.`event_id` = :event_id ORDER BY last_name ASC, first_name ASC, date_registered ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
 	}
-		
+	
 	public function dancers_where(array $where, $equal = true)
 	{
 		$query = array('%1$s_dancers.`event_id` = :event_id');
@@ -187,41 +188,24 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return (int) $this->event_id;
 	}
 	
-	public function name()
+	public function date_mail_prereg_end()
 	{
-		return $this->name;
+		return (int) $this->date_mail_prereg_end;
 	}
 	
-	public function date_mail_prereg_end($format = false)
+	public function date_paypal_prereg_end()
 	{
-		return ($format === false) ? (int) $this->date_mail_prereg_end : date($format, $this->date_mail_prereg_end);
+		return (int) $this->date_paypal_prereg_end;
 	}
 	
-	public function date_paypal_prereg_end($format = false)
+	public function date_refund_end()
 	{
-		return ($format === false) ? (int) $this->date_paypal_prereg_end : date($format, $this->date_paypal_prereg_end);
-	}
-	
-	public function date_refund_end($format = false)
-	{
-		if ($this->date_refund_end) {
-			$timestamp = $this->date_refund_end;
-		}
-		else {
-			$timestamp = $this->date_paypal_prereg_end;
-		}
-		
-		return ($format === false) ? (int) $timestamp : date($format, $timestamp);
+		return (int) $this->date_refund_end ? $this->date_refund_end : $this->date_paypal_prereg_end;
 	}
 	
 	public function discount_limit()
 	{
 		return (int) $this->limit_discount;
-	}
-	
-	public function discount_org_name()
-	{
-		return $this->discount_org_name;
 	}
 	
 	public function housing_nights()
@@ -251,11 +235,6 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		}
 		
 		return $levels;
-	}
-	
-	public function shirt_description()
-	{
-		return $this->shirt_description;
 	}
 	
 	public function total_money_from_registrations()
