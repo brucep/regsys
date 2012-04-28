@@ -409,23 +409,19 @@ class RegistrationSystem
 			
 			$options = self::get_options();
 			self::$validation = new RegistrationSystem_Form_Validation;
+			self::$event = RegistrationSystem_Model_Event::get_event_by_id($options['current_event_id']);
 			
-			
-			# Find current event
-			$event = self::$event = RegistrationSystem_Model_Event::get_event_by_id($options['current_event_id']);
-			
-			if (!$event) {
+			if (!self::$event) {
 				throw new Exception(sprintf('Event ID not found: %d', $options['current_event_id']));
 			}
 			
-			self::$vip = ($event->has_vip() and isset($_GET['vip']));
+			self::$vip = (self::$event->has_vip() and isset($_GET['vip']));
 			
 			# Display page content when registration is not available.
-			if ((time() > $event->date_paypal_prereg_end() and time() > $event->get_date_mail_prereg_end() and !$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
+			if ((time() > self::$event->date_paypal_prereg_end() and time() > self::$event->get_date_mail_prereg_end() and !$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
 				get_template_part('page');
 				return;
 			}
-			
 			
 			# Setup validation rules
 			if (!empty($_POST)) {
@@ -443,16 +439,16 @@ class RegistrationSystem
 					));
 				
 				# Level
-				if ($event->has_levels()) {
+				if (self::$event->has_levels()) {
 					self::$validation->add_rule('level_id', sprintf('intval|in[%s]',
-						implode(',', array_keys($event->levels_keyed_by_id()))));
+						implode(',', array_keys(self::$event->levels_keyed_by_id()))));
 				}
 				else {
 					$_POST['level_id'] = 1;
 				}
 				
 				# Discount
-				if ($event->has_discount()) {
+				if (self::$event->has_discount()) {
 					self::$validation->add_rule('payment_discount', 'intval|in[0,1]|RegistrationSystem::validate_discount');
 				}
 				else {
@@ -460,7 +456,7 @@ class RegistrationSystem
 				}
 				
 				# Housing
-				if ($event->has_housing_enabled()) {
+				if (self::$event->has_housing_enabled()) {
 					self::$validation->add_rules(array(
 						'housing_provider[housing_spots_available]' => 'if_set[housing_type_provider]|intval|greater_than[0]',
 						'housing_provider[housing_smoke]'           => 'if_set[housing_type_provider]|intval|in[0,1]',
@@ -502,20 +498,19 @@ class RegistrationSystem
 					$_POST['payment_method'] = 'Mail';
 				}
 				
-				
 				# Prep info before creating new dancer object
 				$dancer_data = $_POST;
 				unset($dancer_data['items'], $dancer_data['item_meta'], $dancer_data['confirmed'], $dancer_data['confirm_email']);
 				
-				$dancer_data['payment_owed'] = $price_total;
+				$dancer_data['payment_owed']      = $price_total;
+				$dancer_data['price_total']       = $price_total; // Needed for confirmation page
 				$dancer_data['payment_confirmed'] = ($price_total == 0) ? 1 : 0;
-				$dancer_data['price_total'] = $price_total; // Needed for confirmation page
 				
 				if ($options['registration_testing']) {
 					$dancer_data['note'] = 'TEST';
 				}
 				
-				if ($event->has_housing_enabled()) {
+				if (self::$event->has_housing_enabled()) {
 					if (isset($dancer_data['housing_type_needed'])) {
 						$dancer_data = array_merge($dancer_data, $dancer_data['housing_needed']);
 						$dancer_data['housing_type'] = 1;
@@ -530,20 +525,19 @@ class RegistrationSystem
 				
 				$dancer = new RegistrationSystem_Model_Dancer($dancer_data);
 				
-				
 				if (!isset($_POST['confirmed'])) {
 					$file = 'form-confirm';
 				}
 				else {
 					# Add dancer
-					$dancer->add($event->id());
+					$dancer->add(self::$event->id());
 					
 					if (!$dancer) {
 						throw new Exception('Unable to add dancer to database.');
 					}
 					
 					# Add housing
-					if ($event->has_housing_enabled() and ($dancer->needs_housing() or $dancer->is_housing_provider())) {
+					if (self::$event->has_housing_enabled() and ($dancer->needs_housing() or $dancer->is_housing_provider())) {
 						$dancer->add_housing();
 					}
 					
@@ -556,14 +550,13 @@ class RegistrationSystem
 							$item_price = $item->price_for_prereg($_POST['payment_discount']);
 						}
 												
-						$event->add_registration(array(
+						self::$event->add_registration(array(
 							'dancer_id' => $dancer->id(),
 							'item_id'   => $item->id(),
 							'price'     => $item_price,
 							'item_meta' => (!isset($_POST['item_meta'][$item->id()]) ? '' : $_POST['item_meta'][$item->id()]),
 							));
 					}
-					
 					
 					# Confirmation email
 					if (!$options['registration_testing']) {
@@ -577,20 +570,18 @@ class RegistrationSystem
 						}
 					}
 					
-					
 					$file = 'form-accepted';
 				}
 			}
 			
-			
 			if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
 			
 			echo self::render_template(sprintf('registration/%s.html', $file), array(
-				'event'                     => $event,
+				'event'                     => self::$event,
 				'dancer'                    => isset($dancer) ? $dancer : null,
-				'packages'                  => $event->items_where(array(':type' => 'package'),     true),
-				'competitions'              => $event->items_where(array(':type' => 'competition'), true),
-				'shirts'                    => $event->items_where(array(':type' => 'shirt'),       true),
+				'packages'                  => self::$event->items_where(array(':type' => 'package'),     true),
+				'competitions'              => self::$event->items_where(array(':type' => 'competition'), true),
+				'shirts'                    => self::$event->items_where(array(':type' => 'shirt'),       true),
 				'time'                      => time(),
 				'vip'                       => self::$vip,
 				'permalink'                 => get_permalink(),
