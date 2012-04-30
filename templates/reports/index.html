@@ -42,9 +42,9 @@
 {% for event in events %}
 			<tr class="{{ cycle(['', 'alternate'], loop.index) }}{% if options.current_event_id == event.id %} current-event{% endif %}">
 				<td class="column-title"><a href="{{ request_href ~ 'report_index_event' ~ '&event_id=' ~ event.id }}">{{ event.name }}</a></td>
-				<td class="date">{% if event.date_mail_prereg_end %}{{ event.date_mail_prereg_end | date('Y-m-d, h:i A') }}{% else %}&mdash;{% endif %}</td>
-				<td class="date">{{ event.date_paypal_prereg_end | date('Y-m-d, h:i A') }}</td>
-				<td class="date">{{ event.date_refund_end | date('Y-m-d, h:i A') }}</td>
+				<td class="date">{% if event.date_mail_prereg_end %}{{ event.date_mail_prereg_end | date }}{% else %}&mdash;{% endif %}</td>
+				<td class="date">{{ event.date_paypal_prereg_end | date }}</td>
+				<td class="date">{{ event.date_refund_end | date }}</td>
 {% if admin %}
 				<td><a href="{{ request_href ~ 'admin_event_edit' ~ '&event_id=' ~ event.id }}">Edit Event</a></td>
 {% endif %}

@@ -666,6 +666,7 @@ class RegistrationSystem
 				self::$twig->addExtension(new Twig_Extension_Debug());
 			}
 			
+			self::$twig->getExtension('core')->setDateFormat('Y-m-d, h:i A');
 			self::$twig->addGlobal('form', new RegistrationSystem_Form_Controls);
 			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
 			
