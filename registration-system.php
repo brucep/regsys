@@ -42,6 +42,7 @@ class RegistrationSystem
 		'postmark_within'       => 7,
 		'registration_testing'  => false,
 		);
+	const database_version = '2.0-dev';
 	
 	private function __clone() {}
 	private function __construct() {}
@@ -253,151 +254,119 @@ class RegistrationSystem
 	{
 		global $wpdb;
 		
-		# Include `dbDelta` function
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		
-		$tables = array(
-			'events',
-			'event_levels',
-			'event_discounts',
-			'items',
-			'item_prices',
-			'dancers',
-			'registrations',
-			'housing');
-		
-		foreach ($tables as $table) {
-			$table_name = sprintf('%sregsys_%s', $wpdb->prefix, $table);
+		if (version_compare(get_option('reg_sys_db_version'), self::database_version, '<')) {
+			$query = "" .
+			"CREATE TABLE {$wpdb->prefix}regsys_dancers (
+				event_id int(11) unsigned NOT NULL,
+				dancer_id int(11) unsigned NOT NULL AUTO_INCREMENT,
+				first_name varchar(100) NOT NULL,
+				last_name varchar(100) NOT NULL,
+				email varchar(255) NOT NULL,
+				position tinyint(1) NOT NULL DEFAULT '1',
+				level_id tinyint(1) unsigned NOT NULL DEFAULT '1',
+				status tinyint(1) unsigned NOT NULL DEFAULT '0',
+				date_registered int(11) unsigned NOT NULL DEFAULT '0',
+				discount_id tinyint(3) unsigned NOT NULL DEFAULT NULL,
+				payment_method varchar(6) NOT NULL,
+				payment_confirmed tinyint(1) unsigned NOT NULL DEFAULT '0',
+				payment_owed smallint(5) unsigned NOT NULL DEFAULT '0',
+				mobile_phone varchar(30) NOT NULL DEFAULT '',
+				note varchar(255) NOT NULL DEFAULT '',
+				PRIMARY KEY  (dancer_id)
+				);" .
+			"CREATE TABLE {$wpdb->prefix}regsys_events (
+				event_id int(11) unsigned NOT NULL AUTO_INCREMENT,
+				name varchar(255) NOT NULL,
+				date_mail_prereg_end int(11) unsigned NOT NULL DEFAULT '0',
+				date_paypal_prereg_end int(11) unsigned NOT NULL DEFAULT '0',
+				date_refund_end int(11) unsigned NOT NULL DEFAULT '0',
+				has_levels tinyint(1) unsigned NOT NULL DEFAULT '1',
+				has_vip tinyint(1) unsigned NOT NULL DEFAULT '0',
+				has_volunteers tinyint(1) unsigned NOT NULL DEFAULT '0',
+				has_housing tinyint(1) unsigned NOT NULL DEFAULT '0',
+				housing_nights set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
+				PRIMARY KEY  (event_id),
+				UNIQUE KEY name (name)
+				);" .
+			"CREATE TABLE {$wpdb->prefix}regsys_event_discounts (
+				event_id int(11) unsigned NOT NULL,
+				discount_id tinyint(3) unsigned NOT NULL,
+				discount_code varchar(255) NOT NULL,
+				discount_amount smallint(5) unsigned NOT NULL,
+				discount_limit smallint(5) unsigned NOT NULL DEFAULT '0',
+				PRIMARY KEY  (event_id,discount_id),
+				UNIQUE KEY discount_code (event_id,discount_code)
+				);" .
+			"CREATE TABLE {$wpdb->prefix}regsys_event_levels (
+				event_id int(11) unsigned NOT NULL,
+				level_id tinyint(1) unsigned NOT NULL,
+				label varchar(255) NOT NULL,
+				has_tryouts tinyint(1) unsigned NOT NULL DEFAULT '0',
+				PRIMARY KEY  (event_id,level_id),
+				UNIQUE KEY label (event_id,label)
+				);" .
+			"CREATE TABLE {$wpdb->prefix}regsys_housing (
+				event_id int(11) UNSIGNED NOT NULL,
+				dancer_id int(11) UNSIGNED NOT NULL,
+				housing_type tinyint(1) UNSIGNED NOT NULL DEFAULT '1',
+				housing_spots_available tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+				housing_nights set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
+				housing_gender tinyint(1) UNSIGNED NOT NULL DEFAULT '3',
+				housing_bedtime tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+				housing_pets tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+				housing_smoke tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+				housing_from_scene varchar(255) NOT NULL DEFAULT '',
+				housing_comment text NOT NULL,
+				PRIMARY KEY  (event_id,dancer_id)
+				);" .
+			"CREATE TABLE {$wpdb->prefix}regsys_items (
+				event_id int(11) unsigned NOT NULL,
+				item_id int(11) unsigned NOT NULL AUTO_INCREMENT,
+				name varchar(255) NOT NULL,
+				type varchar(11) NOT NULL,
+				preregistration tinyint(1) unsigned NOT NULL DEFAULT '1',
+				price_prereg tinyint(3) unsigned NOT NULL DEFAULT '0',
+				price_door tinyint(3) unsigned NOT NULL DEFAULT '0',
+				price_vip tinyint(3) unsigned NOT NULL DEFAULT '0',
+				limit_total smallint(5) unsigned NOT NULL DEFAULT '0',
+				limit_per_position smallint(5) unsigned NOT NULL DEFAULT '0',
+				date_expires int(11) unsigned NOT NULL DEFAULT '0',
+				meta varchar(20) NOT NULL DEFAULT '',
+				description varchar(255) NOT NULL DEFAULT '',
+				PRIMARY KEY  (item_id),
+				UNIQUE KEY name (event_id,name)
+				);" .
+			"CREATE TABLE {$wpdb->prefix}regsys_item_prices (
+				event_id int(11) unsigned NOT NULL,
+				item_id int(11) unsigned NOT NULL,
+				scale_count smallint(5) unsigned NOT NULL,
+				scale_price smallint(5) unsigned NOT NULL,
+				PRIMARY KEY  (event_id,item_id,scale_count)
+				);" .
+			"CREATE TABLE {$wpdb->prefix}regsys_registrations (
+				event_id int(11) unsigned NOT NULL,
+				dancer_id int(11) unsigned NOT NULL,
+				item_id int(11) unsigned NOT NULL,
+				price tinyint(3) unsigned NOT NULL,
+				item_meta text NOT NULL,
+				PRIMARY KEY  (dancer_id,item_id)
+				);";
 			
-			# Create new database tables
-			if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-				switch ($table):
-					case 'events':
-						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`               int(10) unsigned NOT NULL auto_increment,
-							`name`                   varchar(255) NOT NULL,
-							`date_mail_prereg_end`   int(10) unsigned NOT NULL default '0',
-							`date_paypal_prereg_end` int(10) unsigned NOT NULL default '0',
-							`date_refund_end`        int(10) unsigned NOT NULL default '0',
-							`has_vip`                tinyint(1) unsigned NOT NULL default '0',
-							`has_volunteers`         tinyint(1) unsigned NOT NULL default '0',
-							`has_housing`            tinyint(1) unsigned NOT NULL default '0',
-							`housing_nights`         set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
-							`levels`                 varchar(255) NOT NULL,
-							`shirt_description`      text NOT NULL,
-							PRIMARY KEY  (`id`)
-							);", $table_name);
-						break;
-					
-					case 'event_levels':
-						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`    int(10) unsigned NOT NULL,
-							`level_id`    tinyint(3) unsigned NOT NULL,
-							`label`       varchar(255) NOT NULL,
-							`has_tryouts` tinyint(1) unsigned NOT NULL DEFAULT '0',
-							PRIMARY KEY (`event_id`,`level_id`)
-							);", $table_name);
-						break;
-					
-					case 'event_discounts':
-						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`        int(10) unsigned NOT NULL,
-							`discount_id`     tinyint(3) unsigned NOT NULL,
-							`discount_code`   varchar(255) NOT NULL,
-							`discount_amount` smallint(5) unsigned NOT NULL DEFAULT '0',
-							`discount_limit`  smallint(5) unsigned NOT NULL DEFAULT '0',
-							PRIMARY KEY (`event_id`,`discount_code`)
-							);", $table_name);
-						break;
-					
-					case 'items':
-						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`               int(10) unsigned NOT NULL,
-							`item_id`                int(10) unsigned NOT NULL AUTO_INCREMENT,
-							`name`                   varchar(200) NOT NULL,
-							`type`                   varchar(11) NOT NULL,
-							`preregistration`        tinyint(1) unsigned NOT NULL DEFAULT '1',
-							`price_prereg`           tinyint(3) unsigned NOT NULL DEFAULT '0',
-							`price_door`             tinyint(3) unsigned NOT NULL DEFAULT '0',
-							`price_discount`         tinyint(3) unsigned NOT NULL DEFAULT '0',
-							`price_vip`              tinyint(3) unsigned NOT NULL DEFAULT '0',
-							`limit_total`            smallint(5) unsigned NOT NULL DEFAULT '0',
-							`limit_per_position`     smallint(5) unsigned NOT NULL DEFAULT '0',
-							`date_expires`           int(10) unsigned NOT NULL DEFAULT '0',
-							`meta`                   varchar(20) NOT NULL DEFAULT '',
-							`description`            varchar(255) NOT NULL DEFAULT '',
-							PRIMARY KEY (`id`)
-							);", $table_name);
-						break;
-					
-					case 'item_prices':
-						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`    int(10) unsigned NOT NULL,
-							`item_id`     int(10) unsigned NOT NULL,
-							`scale_count` smallint(5) unsigned NOT NULL,
-							`scale_price` smallint(5) unsigned NOT NULL,
-							PRIMARY KEY (`event_id`,`item_id`,`scale_count`)
-						);", $table_name);
-						break;
-					
-					case 'dancers':
-						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`          int(10) unsigned NOT NULL,
-							`dancer_id`         int(10) unsigned NOT NULL auto_increment,
-							`first_name`        varchar(100) NOT NULL,
-							`last_name`         varchar(100) NOT NULL,
-							`email`             varchar(100) NOT NULL,
-							`position`          tinyint(1) NOT NULL,
-							`level`             tinyint(1) unsigned NOT NULL default '1',
-							`status`            tinyint(1) unsigned NOT NULL default '0',
-							`date_registered`   int(10) unsigned NOT NULL default '0',
-							`discount_id`       tinyint(3) unsigned NOT NULL DEFAULT NULL,
-							`payment_method`    varchar(6) NOT NULL,
-							`payment_discount`  varchar(3) NOT NULL default '0',
-							`payment_confirmed` tinyint(1) unsigned NOT NULL default '0',
-							`payment_owed`      smallint(5) unsigned NOT NULL default '0',
-							`mobile_phone`      varchar(30) NOT NULL DEFAULT '',
-							`note`              varchar(255) NOT NULL,
-							PRIMARY KEY  (`id`)
-							);", $table_name);
-						break;
-					
-					case 'registrations':
-						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`  int(10) unsigned NOT NULL,
-							`dancer_id` int(10) unsigned NOT NULL,
-							`item_id`   int(10) unsigned NOT NULL,
-							`price`     tinyint(3) unsigned NOT NULL,
-							`item_meta` text NOT NULL,
-							PRIMARY KEY  (`dancer_id`,`item_id`)
-							);", $table_name);
-						break;
-					
-					case 'housing':
-						$query = sprintf("CREATE TABLE `%s` (
-							`event_id`                int(10) UNSIGNED NOT NULL,
-							`dancer_id`               int(10) UNSIGNED NOT NULL,
-							`housing_type`            tinyint(1) UNSIGNED NOT NULL DEFAULT '1',
-							`housing_spots_available` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
-							`housing_nights`          set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
-							`housing_gender`          tinyint(1) UNSIGNED NOT NULL DEFAULT '3',
-							`housing_bedtime`         tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
-							`housing_pets`            tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
-							`housing_smoke`           tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
-							`housing_from_scene`      varchar(255) NOT NULL DEFAULT '',
-							`housing_comment`         text NOT NULL,
-							PRIMARY KEY (`event_id`,`dancer_id`)
-							);", $table_name);
-						break;
-				endswitch;
-				
-				dbDelta($query);
-			}
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+			dbDelta($query);
 			
-			self::$default_options['confirmation_email_address'] = get_option('admin_email');
-			add_option('reg_sys', self::$default_options, '', 'no');
+			delete_option('reg_sys_db_version');
+			add_option('reg_sys_db_version', self::database_version, '', 'no');
 		}
-			
+		
+		$options = get_option('reg_sys', array());
+		
+		if (empty($options['email_from'])) {
+			$options['email_from'] = get_option('admin_email');
+		}
+		
+		delete_option('reg_sys');
+		add_option('reg_sys', array_merge(self::$default_options, $options), '', 'no');
 	}
 	
 	static public function registration_form()
@@ -438,8 +407,8 @@ class RegistrationSystem
 				self::$validation->add_rules(array(
 					'first_name'      => 'trim|required|max_length[100]|ucfirst',
 					'last_name'       => 'trim|required|max_length[100]|ucfirst',
-					'email'           => 'trim|valid_email|max_length[100]|RegistrationSystem::validate_email_address',
-					'confirm_email'   => 'trim|valid_email|max_length[100]',
+					'email'           => 'trim|valid_email|max_length[255]|RegistrationSystem::validate_email_address',
+					'confirm_email'   => 'trim|valid_email|max_length[255]',
 					'mobile_phone'    => 'trim|required|max_length[30]',
 					'position'        => 'intval|in[1,2]',
 					'status'          => 'RegistrationSystem::validate_status',

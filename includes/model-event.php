@@ -14,8 +14,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	        $has_vip,
 	        $has_volunteers,
 	        $housing_nights,
-	        $levels,
-	        $limit_per_position;
+	        $levels;
 	
 	public static $possible_housing_nights = array(
 	        1  => 'Friday',
