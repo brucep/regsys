@@ -20,7 +20,6 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	        $preregistration,
 	        $price_prereg,
 	        $price_door,
-	        $price_discount,
 	        $price_scaled,
 	        $price_tier,
 	        $price_vip,
