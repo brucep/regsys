@@ -5,6 +5,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	public  $first_name,
 	        $last_name,
 	        $email,
+	        $discount_id,
 	        $housing_comment,
 	        $housing_from_scene,
 	        $level,
@@ -50,7 +51,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		$this->date_registered = time();
 		$this->event_id = $event_id;
 		
-		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level, :status, :date_registered, :payment_method, :payment_discount, :payment_confirmed, :payment_owed, :mobile_phone, :note)', array(
+		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level, :status, :date_registered, :discount_id, :payment_method, :payment_confirmed, :payment_owed, :mobile_phone, :note)', array(
 			':event_id'          => $this->event_id,
 			':first_name'        => $this->first_name,
 			':last_name'         => $this->last_name,
@@ -59,8 +60,8 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 			':level'             => $this->level,
 			':status'            => $this->status,
 			':date_registered'   => $this->date_registered,
+			':discount_id'       => $this->discount_id,
 			':payment_method'    => $this->payment_method,
-			':payment_discount'  => $this->payment_discount,
 			':payment_confirmed' => (int) $this->payment_confirmed,
 			':payment_owed'      => (int) $this->payment_owed,
 			':mobile_phone'      => (string) $this->mobile_phone,

@@ -259,6 +259,7 @@ class RegistrationSystem
 		$tables = array(
 			'events',
 			'event_levels',
+			'event_discounts',
 			'items',
 			'item_prices',
 			'dancers',
@@ -278,13 +279,10 @@ class RegistrationSystem
 							`date_mail_prereg_end`   int(10) unsigned NOT NULL default '0',
 							`date_paypal_prereg_end` int(10) unsigned NOT NULL default '0',
 							`date_refund_end`        int(10) unsigned NOT NULL default '0',
-							`has_discount`           tinyint(1) unsigned NOT NULL DEFAULT '0',
 							`has_vip`                tinyint(1) unsigned NOT NULL default '0',
 							`has_volunteers`         tinyint(1) unsigned NOT NULL default '0',
 							`has_housing`            tinyint(1) unsigned NOT NULL default '0',
 							`housing_nights`         set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
-							`limit_discount`         tinyint(3) unsigned NOT NULL default '0',
-							`discount_org_name`      varchar(255) NOT NULL DEFAULT '',
 							`levels`                 varchar(255) NOT NULL,
 							`shirt_description`      text NOT NULL,
 							PRIMARY KEY  (`id`)
@@ -298,6 +296,17 @@ class RegistrationSystem
 							`label`       varchar(255) NOT NULL,
 							`has_tryouts` tinyint(1) unsigned NOT NULL DEFAULT '0',
 							PRIMARY KEY (`event_id`,`level_id`)
+							);", $table_name);
+						break;
+					
+					case 'event_discounts':
+						$query = sprintf("CREATE TABLE `%s` (
+							`event_id`        int(10) unsigned NOT NULL,
+							`discount_id`     tinyint(3) unsigned NOT NULL,
+							`discount_code`   varchar(255) NOT NULL,
+							`discount_amount` smallint(5) unsigned NOT NULL DEFAULT '0',
+							`discount_limit`  smallint(5) unsigned NOT NULL DEFAULT '0',
+							PRIMARY KEY (`event_id`,`discount_code`)
 							);", $table_name);
 						break;
 					
@@ -342,6 +351,7 @@ class RegistrationSystem
 							`level`             tinyint(1) unsigned NOT NULL default '1',
 							`status`            tinyint(1) unsigned NOT NULL default '0',
 							`date_registered`   int(10) unsigned NOT NULL default '0',
+							`discount_id`       tinyint(3) unsigned NOT NULL DEFAULT NULL,
 							`payment_method`    varchar(6) NOT NULL,
 							`payment_discount`  varchar(3) NOT NULL default '0',
 							`payment_confirmed` tinyint(1) unsigned NOT NULL default '0',
@@ -448,11 +458,11 @@ class RegistrationSystem
 				}
 				
 				# Discount
-				if (self::$event->has_discount()) {
-					self::$validation->add_rule('payment_discount', 'intval|in[0,1]|RegistrationSystem::validate_discount');
+				if (self::$event->has_discounts()) {
+					self::$validation->add_rule('discount_code', 'trim|RegistrationSystem::validate_discount_code');
 				}
 				else {
-					$_POST['payment_discount'] = 0;
+					unset($_POST['discount_code']);
 				}
 				
 				# Housing
@@ -479,9 +489,25 @@ class RegistrationSystem
 			# Determine appropriate file for current step
 			if (empty($_POST) or !self::$validation->validate()) {
 				$file = 'form-reg-info';
+				
+				$context = array(
+					'packages'     => self::$event->items_where(array(':type' => 'package'),     true),
+					'competitions' => self::$event->items_where(array(':type' => 'competition'), true),
+					'shirts'       => self::$event->items_where(array(':type' => 'shirt'),       true),
+					'validation'   => self::$validation,
+					'the_content'  => get_the_content(),
+					);
 			}
 			else {
 				$price_total = 0;
+				
+				if (empty($_POST['discount_code'])) {
+					$_POST['discount_code'] = null;
+					$discount_amount = false;
+				}
+				else {
+					$discount_amount = self::$event->discount_by_code($_POST['discount_code'])->discount_amount;
+				}
 				
 				if (self::$vip) {
 					foreach (self::$validated_items as $item) {
@@ -490,7 +516,7 @@ class RegistrationSystem
 				}
 				else {
 					foreach (self::$validated_items as $item) {
-						$price_total += $item->price_for_prereg($_POST['payment_discount']);
+						$price_total += $item->price_for_prereg($discount_amount);
 					}
 				}
 				
@@ -525,8 +551,16 @@ class RegistrationSystem
 				
 				$dancer = new RegistrationSystem_Model_Dancer($dancer_data);
 				
+				$context = array('dancer' => $dancer);
+				
 				if (!isset($_POST['confirmed'])) {
 					$file = 'form-confirm';
+					
+					$context = array_merge($context, array(
+						'discount_amount'      => $discount_amount,
+						'validated_items'      => self::$validated_items,
+						'validated_package_id' => self::$validated_package_id,
+						));
 				}
 				else {
 					# Add dancer
@@ -541,15 +575,15 @@ class RegistrationSystem
 						$dancer->add_housing();
 					}
 					
-					# Add registrations				
+					# Add registrations
 					foreach (self::$validated_items as $item) {
 						if (self::$vip) {
 							$item_price = $item->price_for_vip();
 						}
 						else {
-							$item_price = $item->price_for_prereg($_POST['payment_discount']);
+							$item_price = $item->price_for_prereg($discount_amount);
 						}
-												
+						
 						self::$event->add_registration(array(
 							'dancer_id' => $dancer->id(),
 							'item_id'   => $item->id(),
@@ -571,25 +605,21 @@ class RegistrationSystem
 					}
 					
 					$file = 'form-accepted';
+					
+					$conext = array_merge($context, array(
+						'confirmation_email_failed' => isset($confirmation_email_failed) ? $confirmation_email_failed : null,
+						));
 				}
 			}
 			
 			if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
 			
-			echo self::render_template(sprintf('registration/%s.html', $file), array(
-				'event'                     => self::$event,
-				'dancer'                    => isset($dancer) ? $dancer : null,
-				'packages'                  => self::$event->items_where(array(':type' => 'package'),     true),
-				'competitions'              => self::$event->items_where(array(':type' => 'competition'), true),
-				'shirts'                    => self::$event->items_where(array(':type' => 'shirt'),       true),
-				'time'                      => time(),
-				'vip'                       => self::$vip,
-				'permalink'                 => get_permalink(),
-				'the_content'               => get_the_content(),
-				'validation'                => self::$validation,
-				'validated_items'           => self::$validated_items,
-				'validated_package_id'      => self::$validated_package_id,
-				'confirmation_email_failed' => isset($confirmation_email_failed) ? $confirmation_email_failed : null));
+			echo self::render_template(sprintf('registration/%s.html', $file), array_merge($context, array(
+				'event'     => self::$event,
+				'time'      => time(),
+				'vip'       => self::$vip,
+				'permalink' => get_permalink(),
+				)));
 			
 			if (!get_post_meta($post->ID, 'registration_form', true)) { get_footer(); }
 		}
@@ -662,11 +692,11 @@ class RegistrationSystem
 		return self::$twig->loadTemplate($file)->render($context);
 	}
 	
-	static public function validate_discount($payment_discount)
+	static public function validate_discount_code($code)
 	{
-		if ($payment_discount == 1 and !self::$event->has_discount_openings()) {
-			$_POST['payment_discount'] = 0; // Change the value so that the checkbox won't appear checked.
-			self::$validation->set_error('payment_discount', 'There are no more discount openings available. Review the prices before continuing with your registration.');
+		if (!self::$event->has_discount_openings($code)) {
+			unset($_POST['discount_code']);
+			self::$validation->set_error('discount_code', sprintf('"%s" is either an invalid code or its limit has been reached.', esc_html($code)));
 			return false;
 		}
 		else {

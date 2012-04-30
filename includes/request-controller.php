@@ -155,8 +155,6 @@ class RegistrationSystem_Request_Controller
 				'date_refund_end'        => 'if_set[date_refund_end]|strtotime',
 				'has_vip'                => 'intval|in[0,1]',
 				'has_volunteers'         => 'intval|in[0,1]',
-				'has_discount'           => 'intval|in[0,1]',
-				'limit_discount'         => 'intval|less_than[256]|greater_than[-1]',
 				'has_housing'            => 'intval|in[0,1,2]',
 				));
 			
@@ -166,40 +164,34 @@ class RegistrationSystem_Request_Controller
 				$event = new RegistrationSystem_Model_Event($_POST);
 				
 				if ($_GET['request'] == 'admin_event_add') {
-					$database->query('INSERT %s_events VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', array(
+					$database->query('INSERT %s_events VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', array(
 						@(string) $_POST['name'],
 			 			@(int)    $_POST['date_mail_prereg_end'],
 			 			@(int)    $_POST['date_paypal_prereg_end'],
 			 			@(int)    $_POST['date_refund_end'],
-			 			@(int)    $_POST['has_discount'],
 			 			@(int)    $_POST['has_levels'],
 			 			@(int)    $_POST['has_vip'],
 			 			@(int)    $_POST['has_volunteers'],
 			 			@(int)    $_POST['has_housing'],
 			 			@(string) $_POST['housing_nights'],
-			 			@(int)    $_POST['limit_discount'],
 			 			@(int)    $_POST['limit_per_position'],
-			 			@(string) $_POST['discount_org_name'],
 						));
 					
 					wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=reg-sys&event_id=%d&request=admin_event_edit&added=true', $database->lastInsertID()));
 					exit();
 				}
 				else {
-					$database->query('UPDATE %s_events SET `name` = ?, date_mail_prereg_end = ?, date_paypal_prereg_end = ?, date_refund_end = ?, has_discount = ?, has_levels = ?, has_vip = ?, has_volunteers = ?, has_housing = ?, housing_nights = ?, limit_discount = ?, limit_per_position = ?, discount_org_name = ? WHERE event_id = ?', array(
+					$database->query('UPDATE %s_events SET `name` = ?, date_mail_prereg_end = ?, date_paypal_prereg_end = ?, date_refund_end = ?, has_levels = ?, has_vip = ?, has_volunteers = ?, has_housing = ?, housing_nights = ?, limit_per_position = ? WHERE event_id = ?', array(
 						$_POST['name'],
 			 			$_POST['date_mail_prereg_end'],
 			 			$_POST['date_paypal_prereg_end'],
 			 			$_POST['date_refund_end'],
-			 			$_POST['has_discount'],
 			 			@(int) $_POST['has_levels'],
 			 			$_POST['has_vip'],
 			 			$_POST['has_volunteers'],
 			 			$_POST['has_housing'],
 			 			@(string) $_POST['housing_nights'],
-			 			$_POST['limit_discount'],
 			 			@(int)    $_POST['limit_per_position'],
-			 			@(string) $_POST['discount_org_name'],
 						$event->id()));
 				}
 			}
@@ -438,11 +430,9 @@ class RegistrationSystem_Request_Controller
 		$lists['Dancers']['Follows'] = $event->count_dancers(array(':position' => 2));
 		$lists['Dancers']['Ratio']   = @round($lists['Dancers']['Follows'] / $lists['Dancers']['Leads'], 2);
 		
-		if ($event->has_discount()) {
-			$lists['Dancers']['Discounts'] = sprintf('%d of %d', $event->count_discounts_used(), $event->discount_limit());
-			
-			if ($event->has_discount_openings()) {
-				$lists['Dancers']['Discounts'] .= sprintf(' (%d remaining)', $event->discount_limit() - $event->count_discounts_used());
+		if ($event->has_discounts()) {
+			foreach ($event->discounts() as $d) {
+				$lists['Discounts'][$d->discount_code] = sprintf('%d of %d', $event->count_discounts_used($d->discount_code), $d->discount_limit);
 			}
 		}
 		

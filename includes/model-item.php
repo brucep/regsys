@@ -76,7 +76,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		return (int) $this->price_door;
 	}
 	
-	public function price_for_prereg($discount = false)
+	public function price_for_prereg($discount_amount = false)
 	{
 		if ($this->type != 'package') {
 			$price = $this->price_prereg;
@@ -91,8 +91,8 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 			$price = !empty($this->price_scaled) ? $this->price_scaled : $this->price_prereg;
 		}
 		
-		if ($discount) {
-			$price = $price - $this->price_discount;
+		if ($discount_amount) {
+			$price = $price - $discount_amount;
 		}
 		
 		return (int) $price;

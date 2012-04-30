@@ -11,9 +11,9 @@
 				{{ form.input_hidden('email')            | raw }}
 				{{ form.input_hidden('confirm_email')    | raw }}
 				{{ form.input_hidden('mobile_phone')     | raw }}
+				{{ form.input_hidden('discount_code')    | raw }}
 				{{ form.input_hidden('position')         | raw }}
 				{{ form.input_hidden('level')            | raw }}
-				{{ form.input_hidden('payment_discount') | raw }}
 				{{ form.input_hidden('status')           | raw }}
 				{{ form.input_hidden('payment_method')   | raw }}
 				{{ form.input_hidden('confirmed')        | raw }}
@@ -105,7 +105,7 @@
 					<tr>
 						<td class="label">{{ item.name }}</td>
 						<td class="value">{{ attribute(POST.item_meta, key) | capitalize }}
-						<td class="price">${{ dancer.is_vip ? item.price_for_vip : item.price_for_prereg }}</td>{# TODO: Discount #}
+						<td class="price">${{ dancer.is_vip ? item.price_for_vip : item.type == 'package' ? attribute(item, 'price_for_prereg', [discount_amount]) : item.price_for_prereg }}</td>
 					</tr>
 {% endfor %}
 					<tr>

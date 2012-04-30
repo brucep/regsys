@@ -2,25 +2,19 @@
 
 class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 {
-	public  $name,
-	        $discount_org_name;
+	public  $name;
 	
 	private $event_id,
 	        $date_mail_prereg_end,
 	        $date_paypal_prereg_end,
 	    	$date_refund_end,
-	        $discount_label,
-	        $discount_name,
-	        $discount_note,
-	        $discounts_used,
-	        $has_discount,
+	        $discounts,
 	        $has_housing,
 	        $has_levels,
 	        $has_vip,
 	        $has_volunteers,
 	        $housing_nights,
 	        $levels,
-	        $limit_discount,
 	        $limit_per_position;
 	
 	public static $possible_housing_nights = array(
@@ -114,6 +108,24 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return ($this->has_volunteers()) ? self::$database->query('SELECT * FROM %1$s_dancers WHERE event_id = :event_id AND status = 1 ORDER BY last_name ASC, first_name ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer') : array();
 	}
 	
+	public function discounts()
+	{
+		if (!isset($this->discounts)) {
+			$discounts = self::$database->query('SELECT * FROM %1$s_event_discounts WHERE event_id = ? ORDER BY discount_code ASC', array($this->event_id))->fetchAll(PDO::FETCH_OBJ);
+			
+			foreach ($discounts as $d) {
+				$this->discounts[$d->discount_code] = $d;
+			}
+		}
+		
+		return $this->discounts;
+	}
+	
+	public function discount_by_code($code)
+	{
+		return self::$database->query('SELECT * FROM %1$s_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchObject();
+	}
+	
 	public function count_dancers(array $where = array())
 	{
 		$query = array('`event_id` = :event_id');
@@ -129,13 +141,10 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return ($result !== false) ? (int) $result : false;
 	}
 	
-	public function count_discounts_used()
+	public function count_discounts_used($code)
 	{
-		if (!isset($this->discounts_used)) {
-			$this->discounts_used = $this->count_registrations_where(array(':type' => 'package', ':payment_discount' => 1), array('items', 'dancers'));
-		}
-		
-		return $this->discounts_used;
+		$result = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_dancers JOIN %1$s_event_discounts USING(discount_id) WHERE %1$s_dancers.`event_id` = ? AND %1$s_event_discounts.`discount_code` = ?', array($this->event_id, $code))->fetchColumn();
+		return ($result !== false) ? (int) $result : false;
 	}
 	
 	public function count_housing_spots_available()
@@ -203,11 +212,6 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return (int) $this->date_refund_end ? $this->date_refund_end : $this->date_paypal_prereg_end;
 	}
 	
-	public function discount_limit()
-	{
-		return (int) $this->limit_discount;
-	}
-	
 	public function housing_nights()
 	{
 		if (is_string($this->housing_nights)) {
@@ -242,14 +246,15 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id', array(':event_id' => $this->event_id))->fetchColumn();
 	}
 	
-	public function has_discount()
+	public function has_discounts()
 	{
-		return (bool) $this->has_discount;
+		return (bool) $this->discounts();
 	}
 	
-	public function has_discount_openings()
+	public function has_discount_openings($code)
 	{
-		return ($this->limit_discount > $this->count_discounts_used());
+		$limit = self::$database->query('SELECT discount_limit FROM %1$s_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchColumn();
+		return ($limit != 0) ? (bool) ($limit - $this->count_discounts_used($code)) : false;
 	}
 	
 	public function has_housing()

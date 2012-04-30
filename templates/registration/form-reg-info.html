@@ -43,6 +43,11 @@
 					{{ attribute(validation, 'get_error', ['mobile_phone']) | raw }}
 					<div class="field text"><label>Mobile Phone:</label>{{ form.input_text('mobile_phone', null, {'type': 'tel'}) | raw }}</div>
 
+{% if event.has_discounts and not vip %}
+					{{ attribute(validation, 'get_error', ['discount_code']) | raw }}
+					<div class="field text"><label>Discount Code:</label>{{ form.input_text('discount_code') | raw }}</div>
+{% endif %}
+
 					{{ attribute(validation, 'get_error', ['position']) | raw }}
 					<div class="field" id="position">
 						<div class="field-label">Position</div>
@@ -58,15 +63,6 @@
 						<div class="radio"><label>{{ form.input_radio('level_id', {'value': level.level_id, 'default': (level.level_id == 1)}) | raw }} {{ level.label }}{% if level.has_tryouts %} <em>(Tryouts required)</em>{% endif %}</label>
 {% 	endfor %}
 					</div>
-{% endif %}
-
-{% if event.has_discount and not vip %}
-					{{ attribute(validation, 'get_error', ['payment_discount']) }}
-{% 	if event.has_discount_opening %}
-					<div class="field"><label>{{ form.input_checkbox('payment_discount') | raw }} {{ "I'm a student or a member of %s." | format(event.discount_org_name) }}</label></div>
-{% 	else %}
-					<div class="field"><label>{{ form.input_checkbox('payment_discount', {'disabled': 'disabled'}) | raw }} Sorry, there are no more discounts available.</label></div>
-{% 	endif %}
 {% endif %}
 
 {% if event.has_volunteers and not vip %}
@@ -98,7 +94,6 @@
 {% 		if not vip %}
 										<td class="price">
 											<div class="price_prereg">${{ item.price_for_prereg }}</div>
-											<div class="price_prereg_discount no_show">${{ attribute(item, 'price_for_prereg', [true]) }}</div>
 										</td>
 										<td class="price">{{ item.price_at_door ? '$' ~ item.price_at_door : '&mdash;' }}</td>
 {% 		else %}
