@@ -287,7 +287,7 @@ class RegistrationSystem_Request_Controller
 			$dancers = $event->dancers_where(array(':housing_type' => 1));
 			
 			foreach ($dancers as $dancer) {
-				$row = array($dancer->last_name(), $dancer->first_name(), $dancer->email());
+				$row = array($dancer->last_name, $dancer->first_name, $dancer->email);
 				
 				foreach ($event->housing_nights() as $night) {
 					$row[] = in_array($night, $dancer->housing_nights()) ? '•' : '';
@@ -297,9 +297,9 @@ class RegistrationSystem_Request_Controller
 				$row[] = $dancer->housing_prefers_no_pets()  ? '•' : '';
 				$row[] = $dancer->housing_prefers_no_smoke() ? '•' : '';
 				$row[] = $dancer->housing_bedtime();
-				$row[] = $dancer->housing_from_scene();
-				$row[] = $dancer->housing_comment();
-				$row[] = $dancer->date_registered('Y-m-d, h:i A');
+				$row[] = $dancer->housing_from_scene;
+				$row[] = $dancer->housing_comment;
+				$row[] = date('Y-m-d, h:i A', $dancer->date_registered());
 				
 				$rows[] = $row;
 			}
@@ -321,7 +321,7 @@ class RegistrationSystem_Request_Controller
 			$dancers = $event->dancers_where(array(':housing_type' => 2));
 			
 			foreach ($dancers as $dancer) {
-				$row = array($dancer->last_name(), $dancer->first_name(), $dancer->email());
+				$row = array($dancer->last_name, $dancer->first_name, $dancer->email);
 				
 				foreach ($event->housing_nights() as $night) {
 					$row[] = in_array($night, $dancer->housing_nights()) ? '•' : '';
@@ -332,8 +332,8 @@ class RegistrationSystem_Request_Controller
 				$row[] = $dancer->housing_has_pets()  ? '•' : '';
 				$row[] = $dancer->housing_has_smoke() ? '•' : '';
 				$row[] = $dancer->housing_bedtime();
-				$row[] = $dancer->housing_comment();
-				$row[] = $dancer->date_registered('Y-m-d, h:i A');
+				$row[] = $dancer->housing_comment;
+				$row[] = date('Y-m-d, h:i A', $dancer->date_registered());
 				
 				$rows[] = $row;
 			}
@@ -356,7 +356,7 @@ class RegistrationSystem_Request_Controller
 			$rows[0] = array('Last Name', 'First Name', 'Email Address');
 			
 			foreach ($dancers as $dancer) {
-				$rows[] = array($dancer->last_name(), $dancer->first_name(), $dancer->email());
+				$rows[] = array($dancer->last_name, $dancer->first_name, $dancer->email);
 			}
 		}
 		
@@ -470,7 +470,7 @@ class RegistrationSystem_Request_Controller
 		foreach ($shirts as $item) {
 			$header_key = sprintf('%s (%d)', $item->name, $event->count_registrations_where(array(':item_id' => $item->id())));
 			
-			foreach (explode(',', $item->description()) as $size) {
+			foreach (explode(',', $item->description) as $size) {
 				$lists[$header_key][ucfirst($size)] = $event->count_registrations_where(array(':item_id' => $item->id(), ':item_meta' => $size));
 			}
 			

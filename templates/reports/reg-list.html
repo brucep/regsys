@@ -56,8 +56,8 @@
 				<td class="ellipsis">{{ dancer.level }}</td>
 				<td class="date">{{ dancer.date_registered | date('Y-m-d, g:i A') }}</td>
 				<td class="total-cost">${{ dancer.price_total }}</td>
-				<td class="paid">{{ form.set_array_name('payment_confirmed') }}{{ form.checkbox(dancer.id, dancer.payment_confirmed) | raw }}</td>
-				<td class="owed">{{ form.set_array_name('payment_owed') }}{{ form.text(dancer.id,  dancer.payment_owed, {'size': 3}) | raw }}{{ form.set_array_name(null) }}</td>
+				<td class="paid">{% do form.set_array_name('payment_confirmed') %}{{ form.input_checkbox(dancer.id, {'checked': dancer.payment_confirmed}) | raw }}</td>
+				<td class="owed">{% do form.set_array_name('payment_owed') %}{{ form.input_text(dancer.id,  dancer.payment_owed, {'size': 3}) | raw }}{% do form.set_array_name(null) %}</td>
 				<td class="no-print">{{ dancer.payment_method }}</td>
 			</tr>
 {% endfor %}
