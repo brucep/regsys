@@ -110,7 +110,7 @@
 {% endfor %}
 					<tr>
 						<td class="label">Total Amount Owed</td>
-						<td class="value">{% if dancer.price_total > 0 %}{% if dancer.payment_method === 'PayPal'%}Pay with PayPal{% else %}Pay by mail{% endif %}</td>
+						<td class="value">{% if dancer.price_total > 0 %}{% if dancer.payment_method == 'PayPal'%}Pay with PayPal{% else %}Pay by mail{% endif %}{% endif %}</td>
 						<td class="price"><strong>${{ dancer.price_total }}<strong></td>
 					</tr>
 				</table>

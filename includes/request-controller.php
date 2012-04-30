@@ -71,7 +71,7 @@ class RegistrationSystem_Request_Controller
 			$reflection = new ReflectionObject($dancer);
 			
 			if (version_compare(PHP_VERSION, '5.3', '>=')) {
-				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
+				foreach ($reflection->getProperties() as $property) {
 						$property->setAccessible(true);
 						$_POST[$property->getName()] = $property->getValue($dancer);
 				}
@@ -79,7 +79,7 @@ class RegistrationSystem_Request_Controller
 			else {
 				$temp = (array) $event;
 				
-				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
+				foreach ($reflection->getProperties() as $property) {
 					$key = "\0RegistrationSystem_Model_Dancer\0" . $property->getName();
 					$_POST[$property->getName()] = $temp[$key];
 				}
@@ -121,7 +121,7 @@ class RegistrationSystem_Request_Controller
 			$database->query('DELETE FROM %s_dancers       WHERE event_id = ?;', array($event->id()));
 			
 			if (isset($_GET['registrations_only']) and $_GET['registrations_only'] == 'true') {
-				wp_redirect(site_url('wp-admin/admin.php') . '?page=reg-sys&request=report_index&deleted_event=' . rawurlencode($event->name()) . '&registrations_only=true');
+				wp_redirect(site_url('wp-admin/admin.php') . '?page=reg-sys&request=report_index&deleted_event=' . rawurlencode($event->name) . '&registrations_only=true');
 				exit();
 			}
 			else {
@@ -130,7 +130,7 @@ class RegistrationSystem_Request_Controller
 				$database->query('DELETE FROM %s_event_levels WHERE event_id = ?;', array($event->id()));
 				$database->query('DELETE FROM %s_events       WHERE event_id = ?;', array($event->id()));
 				
-				wp_redirect(site_url('wp-admin/admin.php') . '?page=reg-sys&request=report_index&deleted_event=' . rawurlencode($event->name()));
+				wp_redirect(site_url('wp-admin/admin.php') . '?page=reg-sys&request=report_index&deleted_event=' . rawurlencode($event->name));
 				exit();
 			}
 		}
@@ -201,7 +201,7 @@ class RegistrationSystem_Request_Controller
 			$reflection = new ReflectionObject($event);
 			
 			if (version_compare(PHP_VERSION, '5.3', '>=')) {
-				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
+				foreach ($reflection->getProperties() as $property) {
 						$property->setAccessible(true);
 						$_POST[$property->getName()] = $property->getValue($event);
 				}
@@ -209,7 +209,7 @@ class RegistrationSystem_Request_Controller
 			else {
 				$temp = (array) $event;
 				
-				foreach ($reflection->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
+				foreach ($reflection->getProperties() as $property) {
 					$key = "\0RegistrationSystem_Model_Event\0" . $property->getName();
 					$_POST[$property->getName()] = $temp[$key];
 				}
@@ -366,7 +366,7 @@ class RegistrationSystem_Request_Controller
 			throw new Exception('Unable to open output file.');
 		}
 		
-		$filename .= sprintf(' for %s - %s.csv', $event->name(), date('Y-m-d'));
+		$filename .= sprintf(' for %s - %s.csv', $event->name, date('Y-m-d'));
 		
 		header('Content-Type: text/csv');
 		header(sprintf('Content-Disposition: attachment; filename="%s"', $filename));

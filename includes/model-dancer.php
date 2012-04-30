@@ -88,40 +88,12 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 			));
 	}
 	
-	public function add_housing_provider(array $parameters, $event_id)
-	{
-		self::$database->query('INSERT %1$s_housing_providers VALUES (:event_id, :dancer_id, :available, :smoking, :pets, :gender, :nights, :comment)', array(
-			':event_id'  => $event_id,
-			':dancer_id' => $this->dancer_id,
-			':available' => $parameters['housing_provider_available'],
-			':smoking'   => $parameters['housing_provider_smoking'],
-			':pets'      => $parameters['housing_provider_pets'],
-			':gender'    => $parameters['housing_provider_gender'],
-			':nights'    => $parameters['housing_provider_nights'],
-			':comment'   => $parameters['housing_provider_comment'],
-			));
-	}
-	
-	public function add_housing_needed(array $parameters, $event_id)
-	{
-		self::$database->query('INSERT %1$s_housing_needed VALUES (:event_id, :dancer_id, :no_smoking, :no_pets, :gender, :nights, :comment)', array(
-			':event_id'   => $event_id,
-			':dancer_id'  => $this->dancer_id,
-			':no_smoking' => $parameters['housing_needed_no_smoking'],
-			':no_pets'    => $parameters['housing_needed_no_pets'],
-			':gender'     => $parameters['housing_needed_gender'],
-			':nights'     => $parameters['housing_needed_nights'],
-			':comment'    => $parameters['housing_needed_comment'],
-			));
-	}
-	
 	public function update_payment_confirmation($payment_confirmed, $payment_owed)
 	{
 		$this->payment_confirmed = $payment_confirmed;
 		$this->payment_owed = $payment_owed;
 		
-		$statement = self::$database->query('UPDATE %1$s_dancers SET payment_confirmed = :payment_confirmed, payment_owed = :payment_owed WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id, ':payment_confirmed' => $payment_confirmed, ':payment_owed' => $payment_owed));
-		return (bool) $statement->rowCount();
+		return (bool) self::$database->query('UPDATE %1$s_dancers SET payment_confirmed = ?, payment_owed = ? WHERE event_id = ? AND dancer_id = ? LIMIT 1', array($payment_confirmed, $payment_owed, $this->event_id, $this->dancer_id))->rowCount();
 	}
 	
 	public function id()
@@ -235,11 +207,6 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		return (bool) $this->payment_confirmed;
 	}
 	
-	public function payment_discount()
-	{
-		return (int) $this->payment_discount;
-	}
-	
 	public function payment_owed()
 	{
 		return (int) $this->payment_owed;
@@ -267,7 +234,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 			
 			$href .= sprintf('&item_name_%1$d=%2$s&amount_%1$d=%3$s', $i, rawurlencode($item->name), rawurlencode($item->registered_price));
 			
-			if ($item->meta() == 'size') {
+			if ($item->meta == 'size') {
 				$href .= sprintf('&on0_%1$d=%2$s&os0_%1$d=%3$s', $i, $item->meta_label(), ucfirst($item->registered_meta));
 			}
 			
@@ -369,7 +336,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		}
 		
 		$message = Swift_Message::newInstance()
-			->setSubject(sprintf('Registration for %s: %s', $event->name(), $this->name()))
+			->setSubject(sprintf('Registration for %s: %s', $event->name, $this->name()))
 			->setFrom(self::$options['email_from'])
 			->setReplyTo(self::$options['email_from'])
 			->addTo($this->email, $this->name())
@@ -405,10 +372,5 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	public function needs_housing()
 	{
 		return ($this->housing_type == 1);
-	}
-	
-	public function received_discount()
-	{
-		return ($this->payment_discount == 1 and $this->status != 2);
 	}
 }

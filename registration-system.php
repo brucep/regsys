@@ -191,7 +191,7 @@ class RegistrationSystem
 		$events = array();
 		
 		foreach (RegistrationSystem_Model_Event::get_events() as $event) {
-			$events[$event->id()] = $event->name();
+			$events[$event->id()] = $event->name;
 		}
 		
 		echo self::render_template('admin/options.html', array('events' => $events));
@@ -770,7 +770,7 @@ class RegistrationSystem
 				continue;
 			}
 			
-			switch ($item->meta()) {
+			switch ($item->meta) {
 				# If position wasn't specified specifically for item, use dancer's position.
 				case 'position':
 					if (!isset($_POST['item_meta'][$item->id()]) or !in_array($_POST['item_meta'][$item->id()], array('lead', 'follow'))) {
@@ -824,7 +824,7 @@ class RegistrationSystem
 			}
 			
 			# Check openings again, in case they have filled since the form was first displayed to the user
-			if (($item->meta() != 'position' and !$item->count_openings()) or ($item->meta() == 'position' and !$item->count_openings($_POST['item_meta'][$item->id()]))) {
+			if (($item->meta != 'position' and !$item->count_openings()) or ($item->meta == 'position' and !$item->count_openings($_POST['item_meta'][$item->id()]))) {
 				self::$validation->set_error('item_' . $item->id(), sprintf('There are no longer any openings for %s.', $item->name));
 				$items_did_validate = false;
 				continue;
