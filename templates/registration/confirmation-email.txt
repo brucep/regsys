@@ -16,7 +16,7 @@ Status:       Volunteer
 Status:       VIP
 {% endif %}
 
-{% if event.has_housing_enabled %}
+{% if event.has_housing_registrations %}
 {% 	if dancer.needs_housing %}
 Housing Needed: 
 {% 		if dancer.housing_prefers_no_smoke %}

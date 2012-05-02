@@ -38,9 +38,9 @@
 		<table class="form-table">
 			{{ form.row_radio('Housing Support',
 				'has_housing',
-				[{'label': 'None', 'value': 0, 'default': true},
-				 {'label': 'Support enabled and registrations enabled', 'value': 1},
-				 {'label': 'Support enabled but registrations disabled', 'value': 2}]
+				[{'label': 'No housing for this event.', 'value': 0, 'default': true},
+				 {'label': 'Housing reports are enabled, but new housing registrations <strong>are not</strong> allowed.', 'value': 1},
+				 {'label': 'Housing reports are enabled, and new housing registrations <strong>are</strong> allowed.', 'value': 2}]
 				) | raw }}
 		</table>
 

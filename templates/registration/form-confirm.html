@@ -30,7 +30,7 @@
 {% 	endif %}
 {% endfor %}
 
-{% if event.has_housing_enabled %}
+{% if event.has_housing_registrations %}
 {% 	if dancer.needs_housing %}
 				{{ form.input_hidden('housing_type_needed') | raw }}
 {% 		for field in ['from_scene', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment'] %}
@@ -86,7 +86,7 @@
 						<td class="price"></td>
 					</tr>
 {% endif %}
-{% if event.has_housing_enabled %}
+{% if event.has_housing_registrations %}
 {% 	if dancer.needs_housing %}
 					<tr>
 						<td class="label">Housing Needed</td>

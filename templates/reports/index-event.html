@@ -11,7 +11,7 @@
 		<li><a href="{{ request_href ~ 'report_numbers' }}">Attendance&nbsp;/&nbsp;Numbers</a></li>
 		<li><a href="{{ request_href ~ 'report_competitions' }}">Competitions</a></li>
 		<li><a href="{{ request_href ~ 'report_dancers' }}">Dancers</a></li>
-{% if event.has_housing %}
+{% if event.has_housing_support %}
 		<li><a href="{{ request_href ~ 'report_housing_needed' }}">Housing Needed</a></li>
 		<li><a href="{{ request_href ~ 'report_housing_providers' }}">Housing Providers</a></li>
 {% endif %}

@@ -256,12 +256,12 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return ($limit != 0) ? (bool) ($limit - $this->count_discounts_used($code)) : false;
 	}
 	
-	public function has_housing()
+	public function has_housing_support()
 	{
 		return ($this->has_housing == 2 or $this->has_housing == 1);
 	}
 	
-	public function has_housing_enabled()
+	public function has_housing_registrations()
 	{
 		return ($this->has_housing == 2);
 	}
