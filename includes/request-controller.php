@@ -517,11 +517,11 @@ class RegistrationSystem_Request_Controller
 		# Levels
 		if ($event->has_levels()) {
 			foreach ($event->levels() as $level) {
-				$lists['Levels (All Dancers)'][$level['label']] = $event->count_dancers(array(':level_id' => $level['level_id']));
+				$lists['Levels (All Dancers)'][$level->label] = $event->count_dancers(array(':level_id' => $level->level_id));
 				
-				$lists['Levels (Dancers in Classes)'][$level['label']] = sprintf('%d leads, %d follows',
-					$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level_id` = :level_id AND %1$s_dancers.`position` = :position AND %1$s_items.`meta` = "count_for_classes"', array(':event_id' => $event->id(), ':level_id' => $level['level_id'], ':position' => 1))->fetchColumn(),
-					$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_dancers.`level_id` = :level_id AND %1$s_dancers.`position` = :position AND %1$s_items.`meta` = "count_for_classes"', array(':event_id' => $event->id(), ':level_id' => $level['level_id'], ':position' => 2))->fetchColumn());
+				$lists['Levels (Dancers in Classes)'][$level->label] = sprintf('%d leads, %d follows',
+					$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = ? AND %1$s_dancers.`level_id` = ? AND %1$s_dancers.`position` = ? AND %1$s_items.`meta` = "count_for_classes"', array($event->id(), $level->level_id, 1))->fetchColumn(),
+					$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = ? AND %1$s_dancers.`level_id` = ? AND %1$s_dancers.`position` = ? AND %1$s_items.`meta` = "count_for_classes"', array($event->id(), $level->level_id, 2))->fetchColumn());
 			}
 			
 			$lists['Levels (All Dancers)'] = array_filter($lists['Levels (All Dancers)']);
