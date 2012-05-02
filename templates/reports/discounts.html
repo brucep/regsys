@@ -1,0 +1,34 @@
+{% extends 'reports/_layout.html' %}
+
+{% block content %}
+	<h3>Discounts</h3>
+
+{% if dancers %}
+	<table class="widefat page fixed report">
+		<thead>
+			<tr>
+				<th class="manage-column column-title"><div>Name</div></th>
+				<th class="manage-column"><div>Discount Code</div></th>
+			</tr>
+		</thead>
+
+		<tfoot>
+			<tr>
+				<th class="manage-column column-title"><div>Name</div></th>
+				<th class="manage-column"><div>Discount Code</div></th>
+			</tr>
+		</tfoot>
+
+		<tbody>
+{% for dancer in dancers %}
+			<tr>
+				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}</a></td>
+				<td>{{ event.discounts[dancer.discount_id].discount_code }}</td>
+			</tr>
+{% endfor %}
+		</tbody>
+	</table>
+{% else %}
+	<p>No discount codes have been used for this event.</p>
+{% endif %}
+{% endblock content %}

@@ -15,6 +15,9 @@
 		<li><a href="{{ request_href ~ 'report_housing_needed' }}">Housing Needed</a></li>
 		<li><a href="{{ request_href ~ 'report_housing_providers' }}">Housing Providers</a></li>
 {% endif %}
+{% if event.has_discounts %}
+		<li><a href="{{ request_href ~ 'report_discounts' }}">Discounts</a></li>
+{% endif %}
 		<li><a href="{{ request_href ~ 'report_money' }}">Money</a></li>
 		<li><a href="{{ request_href ~ 'report_packet_printout' }}">Packet Printout</a></li>
 		<li><a href="{{ request_href ~ 'report_reg_list' }}">Registration List</a></li>
