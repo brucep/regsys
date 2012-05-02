@@ -125,10 +125,11 @@ class RegistrationSystem_Request_Controller
 				exit();
 			}
 			else {
-				$database->query('DELETE FROM %s_item_prices  WHERE event_id = ?;', array($event->id()));
-				$database->query('DELETE FROM %s_items        WHERE event_id = ?;', array($event->id()));
-				$database->query('DELETE FROM %s_event_levels WHERE event_id = ?;', array($event->id()));
-				$database->query('DELETE FROM %s_events       WHERE event_id = ?;', array($event->id()));
+				$database->query('DELETE FROM %s_item_prices     WHERE event_id = ?;', array($event->id()));
+				$database->query('DELETE FROM %s_items           WHERE event_id = ?;', array($event->id()));
+				$database->query('DELETE FROM %s_event_discounts WHERE event_id = ?;', array($event->id()));
+				$database->query('DELETE FROM %s_event_levels    WHERE event_id = ?;', array($event->id()));
+				$database->query('DELETE FROM %s_events          WHERE event_id = ?;', array($event->id()));
 				
 				wp_redirect(site_url('wp-admin/admin.php') . '?page=reg-sys&request=report_index&deleted_event=' . rawurlencode($event->name));
 				exit();
@@ -164,7 +165,7 @@ class RegistrationSystem_Request_Controller
 				$event = new RegistrationSystem_Model_Event($_POST);
 				
 				if ($_GET['request'] == 'admin_event_add') {
-					$database->query('INSERT %s_events VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', array(
+					$database->query('INSERT %s_events VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?);', array(
 						@(string) $_POST['name'],
 			 			@(int)    $_POST['date_mail_prereg_end'],
 			 			@(int)    $_POST['date_paypal_prereg_end'],
@@ -174,14 +175,13 @@ class RegistrationSystem_Request_Controller
 			 			@(int)    $_POST['has_volunteers'],
 			 			@(int)    $_POST['has_housing'],
 			 			@(string) $_POST['housing_nights'],
-			 			@(int)    $_POST['limit_per_position'],
 						));
 					
 					wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=reg-sys&event_id=%d&request=admin_event_edit&added=true', $database->lastInsertID()));
 					exit();
 				}
 				else {
-					$database->query('UPDATE %s_events SET `name` = ?, date_mail_prereg_end = ?, date_paypal_prereg_end = ?, date_refund_end = ?, has_levels = ?, has_vip = ?, has_volunteers = ?, has_housing = ?, housing_nights = ?, limit_per_position = ? WHERE event_id = ?', array(
+					$database->query('UPDATE %s_events SET `name` = ?, date_mail_prereg_end = ?, date_paypal_prereg_end = ?, date_refund_end = ?, has_levels = ?, has_vip = ?, has_volunteers = ?, has_housing = ?, housing_nights = ? WHERE event_id = ?', array(
 						$_POST['name'],
 			 			$_POST['date_mail_prereg_end'],
 			 			$_POST['date_paypal_prereg_end'],
@@ -191,8 +191,74 @@ class RegistrationSystem_Request_Controller
 			 			$_POST['has_volunteers'],
 			 			$_POST['has_housing'],
 			 			@(string) $_POST['housing_nights'],
-			 			@(int)    $_POST['limit_per_position'],
-						$event->id()));
+						$event->id(),
+						));
+					
+					$levels = $event->levels();
+					
+					foreach ($_POST['edit_levels'] as $key => $value) {
+						if ($value) {
+							if (!isset($levels[$key])) {
+								$database->query('INSERT %s_event_levels VALUES (?, ?, ?, ?);', array(
+									$event->id(),
+									$key,
+									$value,
+									isset($_POST['edit_tryouts'][$key]),
+									));
+							}
+							elseif (isset($levels[$key])) {
+								$database->query('UPDATE %s_event_levels SET label = ?, has_tryouts = ? WHERE event_id = ? AND level_id = ?', array(
+									$value,
+									isset($_POST['edit_tryouts'][$key]),
+									$event->id(),
+									$key,
+									));
+							}
+						}
+						elseif (!$value and isset($levels[$key])) {
+							$database->query('DELETE FROM %s_event_levels WHERE event_id = ? AND level_id = ?', array(
+								$event->id(),
+								$key,
+								));
+						}
+					}
+					
+					$event->unset_levels();
+					unset($_POST['edit_tryouts'], $levels);
+					
+					$discounts = $event->discounts();
+					
+					foreach ($_POST['edit_discount_code'] as $key => $value) {
+						if ($value) {
+							if (!isset($discounts[$key])) {
+								$database->query('INSERT %s_event_discounts VALUES (?, ?, ?, ?, ?);', array(
+									$event->id(),
+									$key,
+									$value,
+									(int) $_POST['edit_discount_amount'][$key],
+									(int) $_POST['edit_discount_limit'][$key],
+									));
+							}
+							elseif (isset($discounts[$key])) {
+								$database->query('UPDATE %s_event_discounts SET discount_code = ?, discount_amount = ?, discount_limit = ? WHERE event_id = ? AND discount_id = ?', array(
+									$value,
+									(int) $_POST['edit_discount_amount'][$key],
+									(int) $_POST['edit_discount_limit'][$key],
+									$event->id(),
+									$key,
+									));
+							}
+						}
+						elseif (!$value and isset($discounts[$key])) {
+							$database->query('DELETE FROM %s_event_discounts WHERE event_id = ? AND discount_id = ?', array(
+								$event->id(),
+								$key,
+								));
+						}
+					}
+					
+					$event->unset_discounts();
+					unset($_POST['edit_discount_code'], $_POST['edit_discount_amount'], $_POST['edit_discount_limit'], $discounts);
 				}
 			}
 		}
@@ -238,7 +304,8 @@ class RegistrationSystem_Request_Controller
 		
 		echo RegistrationSystem::render_template('admin/event-edit.html', array(
 			'event'      => $event,
-			'validation' => $validation));
+			'validation' => $validation,
+			'vip_href'   => get_permalink(get_page_by_path('register')) . '?vip'));
 	}
 	
 	static public function report_competitions($event)

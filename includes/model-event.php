@@ -14,7 +14,8 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	        $has_vip,
 	        $has_volunteers,
 	        $housing_nights,
-	        $levels;
+	        $levels,
+	        $levels_keyed_by_id;
 	
 	public function __construct(array $parameters = array())
 	{
@@ -101,14 +102,21 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	public function discounts()
 	{
 		if (!isset($this->discounts)) {
+			$this->discounts = array();
 			$discounts = self::$database->query('SELECT * FROM %1$s_event_discounts WHERE event_id = ? ORDER BY discount_code ASC', array($this->event_id))->fetchAll(PDO::FETCH_OBJ);
 			
 			foreach ($discounts as $d) {
-				$this->discounts[$d->discount_code] = $d;
+				$this->discounts[$d->discount_id] = $d;
 			}
 		}
 		
 		return $this->discounts;
+	}
+	
+	public function unset_discounts()
+	{
+		# Used after editing discounts with the Edit Event form.
+		unset($this->discounts);
 	}
 	
 	public function discount_by_code($code)
@@ -214,7 +222,12 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	public function levels()
 	{
 		if (!isset($this->levels)) {
-			$this->levels = self::$database->query('SELECT level_id, label, has_tryouts FROM %1$s_event_levels WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll();
+			$this->levels = array();
+			$levels = self::$database->query('SELECT level_id, label, has_tryouts FROM %1$s_event_levels WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_OBJ);
+			
+			foreach ($levels as $level) {
+				$this->levels[$level->level_id] = $level;
+			}
 		}
 		
 		return $this->levels;
@@ -222,13 +235,21 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	
 	public function levels_keyed_by_id()
 	{
-		$levels = array();
-		
-		foreach ($this->levels() as $level) {
-			$levels[$level['level_id']] = $level['label'];
+		if (!isset($this->levels_keyed_by_id)) {
+			$this->levels_keyed_by_id = array();
+			
+			foreach ($this->levels() as $level) {
+				$this->levels_keyed_by_id[$level->level_id] = $level->label;
+			}
 		}
 		
-		return $levels;
+		return $this->levels_keyed_by_id;
+	}
+	
+	public function unset_levels()
+	{
+		# Used after editing levels with the Edit Event form.
+		unset($this->levels);
 	}
 	
 	public function total_money_from_registrations()

@@ -29,7 +29,7 @@
 		<h3>Event Options</h3>
 
 		<table class="form-table">
-			{{ form.row_checkbox('Has VIPs?',       'has_vip',        {}, 'This event supports VIP registrations.') | raw }}
+			{{ form.row_checkbox('Has VIPs?',       'has_vip',        {}, 'This event supports <a href="' ~ vip_href ~ '">VIP registrations</a>.') | raw }}
 			{{ form.row_checkbox('Has Volunteers?', 'has_volunteers', {}, 'This event supports volunteer registrations.') | raw }}
 		</table>
 
@@ -42,7 +42,114 @@
 				 {'label': 'Housing reports are enabled, but new housing registrations <strong>are not</strong> allowed.', 'value': 1},
 				 {'label': 'Housing reports are enabled, and new housing registrations <strong>are</strong> allowed.', 'value': 2}]
 				) | raw }}
+			{{ form.row_text('Housing Nights', 'housing_nights', null, {'class': 'regular-text'}, 'Example: Friday,Saturday,Sunday') | raw }}
 		</table>
+
+{% if GET.request != 'admin_event_add' %}
+		<h3>Levels</h3>
+
+		<table class="form-table">
+			{{ form.row_checkbox('Level Support', 'has_levels', {}, 'This event records levels for dancers.') | raw }}
+			<tr valign="top">
+				<th scope="row">Level 1</th>
+				<td>
+					{% do form.set_array_name('edit_levels') %}
+					{{ form.input_text('1', event.levels_keyed_by_id[1], {'class': 'regular-text'}) | raw }}
+					{% do form.set_array_name('edit_tryouts') %}
+					{{ form.input_checkbox('1', {'checked': event.levels[1].has_tryouts}) | raw }} Has Tryouts
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">Level 2</th>
+				<td>
+					{% do form.set_array_name('edit_levels') %}
+					{{ form.input_text('2', event.levels_keyed_by_id[2], {'class': 'regular-text'}) | raw }}
+					{% do form.set_array_name('edit_tryouts') %}
+					{{ form.input_checkbox('2', {'checked': event.levels[2].has_tryouts}) | raw }} Has Tryouts
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">Level 3</th>
+				<td>
+					{% do form.set_array_name('edit_levels') %}
+					{{ form.input_text('3', event.levels_keyed_by_id[3], {'class': 'regular-text'}) | raw }}
+					{% do form.set_array_name('edit_tryouts') %}
+					{{ form.input_checkbox('3', {'checked': event.levels[3].has_tryouts}) | raw }} Has Tryouts
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">Level 4</th>
+				<td>
+					{% do form.set_array_name('edit_levels') %}
+					{{ form.input_text('4', event.levels_keyed_by_id[4], {'class': 'regular-text'}) | raw }}
+					{% do form.set_array_name('edit_tryouts') %}
+					{{ form.input_checkbox('4', {'checked': event.levels[4].has_tryouts}) | raw }} Has Tryouts
+				</td>
+			</tr>{% do form.set_array_name(null) %}
+		</table>
+
+		<h3>Discount Codes</h3>
+
+		<table class="form-table">
+			<tr valign="top">
+				<th scope="row"></th>
+				<td>Code</td>
+				<td>Amount</td>
+				<td>Limit</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">Discount 1</th>
+				<td>
+					{% do form.set_array_name('edit_discount_code') %}
+					{{ form.input_text('1', event.discounts[1].discount_code) | raw }}
+				</td>
+				<td>
+					{% do form.set_array_name('edit_discount_amount') %}
+					{{ form.input_text('1', event.discounts[1].discount_amount) | raw }}
+				</td>
+				<td>
+					{% do form.set_array_name('edit_discount_limit') %}
+					{{ form.input_text('1', event.discounts[1].discount_limit) | raw }}
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">Discount 2</th>
+				<td>
+					{% do form.set_array_name('edit_discount_code') %}
+					{{ form.input_text('2', event.discounts[2].discount_code) | raw }}
+				</td>
+				<td>
+					{% do form.set_array_name('edit_discount_amount') %}
+					{{ form.input_text('2', event.discounts[2].discount_amount) | raw }}
+				</td>
+				<td>
+					{% do form.set_array_name('edit_discount_limit') %}
+					{{ form.input_text('2', event.discounts[2].discount_limit) | raw }}
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">Discount 3</th>
+				<td>
+					{% do form.set_array_name('edit_discount_code') %}
+					{{ form.input_text('3', event.discounts[3].discount_code) | raw }}
+				</td>
+				<td>
+					{% do form.set_array_name('edit_discount_amount') %}
+					{{ form.input_text('3', event.discounts[3].discount_amount) | raw }}
+				</td>
+				<td>
+					{% do form.set_array_name('edit_discount_limit') %}
+					{{ form.input_text('3', event.discounts[3].discount_limit) | raw }}
+				</td>
+			</tr>		
+		</table>
+{% endif %}
 
 		<p class="submit"><input type="submit" class="button-primary" value="{% if GET.request == 'admin_event_add' %}Add Event{% else %}Edit Event{% endif %}"></p>
 	</form>
