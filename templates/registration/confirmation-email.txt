@@ -49,7 +49,7 @@ Housing Provider:
 
 Items:
 {% for item in dancer.registered_items %}
-  - {{ '%s: $%d' | format(item.name, item.registered_price)) }}{% if item.registered_meta %}{{ ' (%s)' | format(item.registered_meta | capitalize) }}{% endif %}
+  - {{ '%s: $%d' | format(item.name, item.registered_price) }}{% if item.registered_meta %}{{ ' (%s)' | format(item.registered_meta | capitalize) }}{% endif %}
 {% endfor %}
 
 Total Cost: ${{ dancer.price_total }}{% if dancer.payment_method == 'PayPal' and options.paypal_fee %}{{ ' (plus $%d processing fee)' | format(options.paypal_fee) }}{% endif %}
