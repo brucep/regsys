@@ -16,15 +16,6 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	        $housing_nights,
 	        $levels;
 	
-	public static $possible_housing_nights = array(
-	        1  => 'Friday',
-	        2  => 'Saturday',
-	        4  => 'Sunday',
-	        8  => 'Monday',
-	        16 => 'Tuesday',
-	        32 => 'Wednesday',
-	        64 => 'Thursday');
-	
 	public function __construct(array $parameters = array())
 	{
 		foreach ($parameters as $key => $value) {
