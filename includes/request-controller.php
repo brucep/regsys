@@ -510,7 +510,11 @@ class RegistrationSystem_Request_Controller
 		
 		if ($event->has_discounts()) {
 			foreach ($event->discounts() as $d) {
-				$lists['Discounts'][$d->discount_code] = sprintf('%d of %d', $event->count_discounts_used($d->discount_code), $d->discount_limit);
+				$lists['Discounts'][$d->discount_code] = $event->count_discounts_used($d->discount_code);
+				
+				if ($d->discount_limit) {
+					$lists['Discounts'][$d->discount_code] .= ' of ' . $d->discount_limit;
+				}
 			}
 		}
 		
