@@ -18,6 +18,9 @@
 {% if event.has_levels %}
 		<li><strong>Level:</strong> {{ dancer.level }}</li>
 {% endif %}
+{% if event.has_discounts and dancer.discount_id != null %}
+		<li><strong>Discount Code:</strong> {{ event.discounts[dancer.discount_id].discount_code }}
+{% endif %}
 {% if dancer.is_vip %}
 		<li><strong>VIP</strong></li>
 {% elseif dancer.is_volunteer %}
