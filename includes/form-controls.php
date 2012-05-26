@@ -7,10 +7,20 @@ class RegistrationSystem_Form_Controls
 	public function input_checkbox($key, array $parameters = array(), $type = 'checkbox')
 	{
 		$parameters = array_merge(array(
-			'checked' => null,
-			'default' => false,
-			'value'   => 1,
+			'value'      => 1,
+			'checked'    => null,
+			'default'    => false,
+			'disabled'   => false,
+			'attributes' => array(),
 			), $parameters);
+		
+		$parameters['attributes'] = array_merge(array(
+			'type'     => ($type == 'radio') ? 'radio' : 'checkbox',
+			'checked'  => 'checked',
+			'value'    => is_null($parameters['value']) ? esc_attr($this->post_value($key, '1')) : esc_attr($parameters['value']),
+			'name'     => $this->name($key),
+			'disabled' => 'disabled',
+			), $parameters['attributes']);
 		
 		if ($parameters['checked'] == null) {
 			if ((is_null($this->array_name) and !isset($_POST[$key])) or
@@ -27,12 +37,15 @@ class RegistrationSystem_Form_Controls
 			}
 		}
 		
-		return sprintf('<input type="%1$s"%4$s value="%3$s" name="%2$s"%5$s>',
-			($type == 'radio') ? 'radio' : 'checkbox',
-			$this->name($key),
-			is_null($parameters['value']) ? esc_attr($this->post_value($key, '1')) : esc_attr($parameters['value']),
-			$parameters['checked'] ? ' checked="checked"' : '',
-			isset($parameters['attributes']) ? $this->attributes($parameters['attributes']) : '');
+		if (!$parameters['checked']) {
+			unset($parameters['attributes']['checked']);
+		}
+		
+		if (!$parameters['disabled']) {
+			unset($parameters['attributes']['disabled']);
+		}
+		
+		return sprintf('<input%s>', $this->attributes($parameters['attributes']));
 	}
 	
 	public function input_hidden($key, $value = null)
@@ -166,18 +179,13 @@ class RegistrationSystem_Form_Controls
 	
 	private function attributes(array $attributes)
 	{
-		if (!empty($attributes)) {
-			$result = '';
-			
-			foreach ($attributes as $key => $value) {
-				$result .= sprintf(' %s="%s"', esc_attr($key), esc_attr($value));
-			}
-			
-			return $result;
+		$result = '';
+		
+		foreach ($attributes as $key => $value) {
+			$result .= sprintf(' %s="%s"', esc_attr($key), esc_attr($value));
 		}
-		else {
-			return '';
-		}
+		
+		return $result;
 	}
 	
 	private function name($key)

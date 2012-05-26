@@ -1,96 +1,40 @@
-<?php
+{% extends 'admin/_layout.html' %}
 
-require dirname(dirname(__FILE__)).'/includes/form-validation.php';
-NSEvent_FormValidation::set_error_messages();
+{% block content %}
+	<h2 style="margin-bottom: 1em">Edit Registrations for {{ dancer.name }}</h2>
 
-NSEvent::$event = $event; // Needed for validation
-$items = $event->get_items();
+	{% if validation.did_validate %}{{ form.message('Registrations updated.') | raw }}{% endif %}
 
-if (!empty($_POST)):
-	NSEvent_FormValidation::add_rule('items', 'NSEvent::validate_items');
-	
-	if (NSEvent_FormValidation::validate()):
-		$additional_owed = 0;
-		
-		foreach (NSEvent::$validated_items as $item) {
-			$price = $dancer->is_vip() ? $item->get_price_for_vip() : $item->get_price_for_prereg($dancer->get_payment_discount());
-			$additional_owed += $price;
-			
-			$event->add_registration(array(
-				'dancer_id' => $dancer->get_id(),
-				'item_id'   => $item->get_id(),
-				'price'     => $price,
-				'item_meta' => (!isset($_POST['item_meta'][$item->get_id()]) ? '' : $_POST['item_meta'][$item->get_id()]),
-				));
-		}
-		
-		$dancer->update_payment_confirmation(false, $dancer->get_payment_owed() + $additional_owed);
-		
-?>
-<div class="wrap" id="nsevent">
-    <h2><?php _e('Add Registrations for Dancer', 'nsevent'); ?></h2>
+	<form action="{{ request_href ~ 'admin_dancer_registration_edit' ~ '&dancer_id=' ~ dancer.id }}" method="post" id="registration-edit">
+		{{ form.input_hidden('position', dancer.postion) | raw }}{# Needed when item.meta == 'position' #}
 
-	<p><?php _e('Registrations added:', 'nsevent'); ?></p>
+{% for item in items %}
+			{{ attribute(validation, 'get_error', ['item_' ~ item.id]) | raw }}
+			<div style="margin-bottom: 1em">
+				{% do form.set_array_name('items') %}{% if item.meta != 'size' %}{{ form.input_checkbox(item.id, {'checked': dancer.registered_items[item.id], 'disabled': dancer.registered_items[item.id] != null or not item.count_openings or item.is_expired}) | raw }} {% endif %}{{ item.name }}
 
-	<ul>
-<?php foreach (NSEvent::$validated_items as $item): ?>
-		<li><?php echo esc_html($item->get_name()); ?></li>
-<?php endforeach; ?>
-	</ul>
-
-	<p><strong><a href="<?php echo NSEvent::paypal_href($dancer, $dancer->get_registered_items(array_keys(NSEvent::$validated_items)), $options, false); ?>"><?php _e('PayPal Link', 'nsevent'); ?></a><strong></p>
-
-    <p><a href="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->get_id(); ?>&amp;request=dancer&amp;dancer=<?php echo $dancer->get_id(); ?>"><?php printf(__('Back to "%s"', 'nsevent'), $dancer->get_name()); ?></a></p>
-</div>
-<?php
-	endif; # form validation
-	exit;
-endif;
-
-?>
-<div class="wrap" id="nsevent">
-	<h2><?php _e('Add Registrations for Dancer', 'nsevent'); ?></h2>
-
-	<form id="registration-add" action="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->get_id(); ?>&amp;request=registration-add&amp;dancer=<?php echo (int) $_GET['dancer']; ?>" method="post">
-		<p><?php echo __('Dancer:', 'nsevent'), ' ', $dancer->get_name(); ?></p>
-		<?php NSEvent_FormInput::hidden('position', array('value' => $dancer->get_position())); // Needed when $item->get_meta() === 'position' ?>
-
-<?php 	if ($items): ?>
-<?php 		foreach ($items as $item): if ($item->is_expired()) { continue; } ?>
-			<?php NSEvent_FormValidation::get_error('item_'.$item->get_id()); echo "\n"; ?>
-			<div class="field">
-<?php if ($item->get_meta() != 'size'): ?>
-				<?php NSEvent_FormInput::checkbox(sprintf('items[%d]', $item->get_id()), array('label' => $item->get_name(), 'disabled' => ((bool) $dancer->get_registered_items($item->get_id()) or !$item->count_openings()), 'checked' => (bool) $dancer->get_registered_items($item->get_id()))); echo "\n"; ?>
-<?php else: ?>
-				<?php echo esc_html($item->get_name()), "\n"; ?>
-<?php endif; ?>
-
-<?php  			if ($item->get_meta() == 'position'): ?>
-				<div class="meta"><?php _e('Register as:', 'nsevent'); ?>&nbsp;<?php NSEvent_FormInput::radio(sprintf('item_meta[%d]', $item->get_id()), array('value' => 'lead', 'label' => __('Lead', 'nsevent'), 'disabled' => !$item->count_openings('lead'))); ?>&nbsp;<?php NSEvent_FormInput::radio(sprintf('item_meta[%d]', $item->get_id()), array('value' => 'follow', 'label' => __('Follow', 'nsevent'), 'disabled' => !$item->count_openings('follow'))); ?></div>
-<?php 			elseif ($item->get_meta() == 'partner_name'): ?>
-				<div class="meta"><?php NSEvent_FormInput::text(sprintf('item_meta[%d]', $item->get_id()), array('label' => 'Partner:&nbsp;', 'placeholder' => __('Partner\'s name', 'nsevent'))); ?></div>
-<?php 			elseif ($item->get_meta() == 'team_members'): ?>
-				<div class="meta"><?php echo esc_html($item->get_description()); ?><br />
-				<?php NSEvent_FormInput::textarea(sprintf('item_meta[%d]', $item->get_id()), array('rows' => 4)); echo "\n"; ?></div>
-<?php 			elseif ($item->get_meta() == 'size'): ?>
-				<div class="meta">
-					<select name="<?php printf('items[%d]', $item->get_id()); ?>">
-						<option value="none"<?php echo NSEvent_FormInput::_set_select(sprintf('items[%d]', $item->get_id()), 'none', true); ?>><?php _e('None', 'nsevent'); ?></option>
-						<optgroup label="<?php _e('Shirt Size', 'nsevent'); ?>">
-<?php 		foreach (explode(',', $item->get_description()) as $size): ?>
-							<option value="<?php echo esc_attr($size); ?>"<?php echo NSEvent_FormInput::_set_select(sprintf('items[%d]', $item->get_id()), esc_attr($size)); ?>><?php echo esc_html(ucfirst($size)); ?></option>
-<?php 		endforeach; ?>
-						</optgroup>
-					</select>
+{% 	if item.meta %}{% do form.set_array_name('item_meta') %}
+{% 		if item.meta == 'position' %}
+				<div {{ _self.meta_style }}>Register as: {{ form.input_radio(item.id, {'value': 'lead', 'checked': dancer.registered_items[item.id].registered_meta == 'lead', 'disabled': not attribute(item, 'count_openings', ['lead'])}) | raw }}&nbsp;Lead {{ form.input_radio(item.id, {'value': 'follow', 'checked': dancer.registered_items[item.id].registered_meta == 'follow', 'disabled': not attribute(item, 'count_openings', ['follow'])}) | raw }}&nbsp;Follow</div>
+{% 		elseif item.meta == 'partner_name' %}
+				<div {{ _self.meta_style }}>Partner: {{ form.input_text(item.id, {'value': dancer.registered_items[item.id] ? dancer.registered_items[item.id].registered_meta : null}) | raw }}</div>
+{% 		elseif item.meta == 'team_members' %}
+				<div {{ _self.meta_style }}>{{ item.description }}<br>{{ form.input_textarea(item.id) | raw }}</div>
+{% 		elseif item.meta == 'size' %}
+				<div {{ _self.meta_style }}>{% do form.set_array_name('items') %}
+					{{ form.input_select(item.id, 'None,' ~ item.description, {'indent': "\t\t\t\t\t"}) | raw }}
 				</div>
-<?php 			endif; # meta ?>
+{% 		endif %}
+{% 	endif %}
 			</div>
-<?php 		endforeach; ?>
-<?php 	else: ?>
-<p><?php _e('There are no items for this event&hellip;', 'nsevent'); ?></p>
-<?php 	endif; ?>
+{% endfor %}
 
-	    <input type="submit" class="button-primary" value="<?php _e('Add Registrations', 'nsevent'); ?>" />
+			<p class="sumbit">
+	    	<input type="submit" class="button-primary" value="Edit Registrations">
+				<a style="margin-left: 2em" href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id  }}">Back to Dancer Report</a>
+			</p>
     </form>
 </div>
- 
+{% endblock %}
+
+{% macro meta_style() %}style="margin-top: 0.5em; margin-bottom: 2em"{% endmacro %}

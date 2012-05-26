@@ -22,8 +22,8 @@ Except as contained in this notice, the name of the author not be used in advert
 if (!class_exists('RegistrationSystem')):
 class RegistrationSystem
 {
-	static public $event, $validation; # Used by validation methods
-	static private $vip, $validated_package_id = 0, $validated_items = array(), $twig;
+	static public $event, $validation, $validated_items = array(); # Used by validation methods
+	static private $twig, $vip, $validated_package_id = 0;
 	static private $default_options = array(
 		'current_event_id'      => '',
 		'email_bcc'             => '',

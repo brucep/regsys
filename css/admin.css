@@ -38,16 +38,6 @@ div.reg-sys-exception {margin:2em 1em;}
 	margin-top: 2em;
 }
 
-#reg-sys form#registration-add div.field {
-	margin-bottom: 1em;
-}
-
-#reg-sys form#registration-add div.meta {
-	margin-top: 0.5em;
-	margin-bottom: 2em;
-}
-
-
 #reg-sys #reg-list .total-cost {
 	text-align: right;
 }
