@@ -471,7 +471,7 @@ class RegistrationSystem
 					'competitions' => self::$event->items_where(array(':type' => 'competition'), true),
 					'shirts'       => self::$event->items_where(array(':type' => 'shirt'),       true),
 					'validation'   => self::$validation,
-					'the_content'  => get_the_content(),
+					'the_content'  => apply_filters('the_content', $post->post_content),
 					);
 			}
 			else {
