@@ -13,7 +13,7 @@
 				{{ form.input_hidden('mobile_phone')     | raw }}
 				{{ form.input_hidden('discount_code')    | raw }}
 				{{ form.input_hidden('position')         | raw }}
-				{{ form.input_hidden('level')            | raw }}
+				{{ form.input_hidden('level_id')         | raw }}
 				{{ form.input_hidden('status')           | raw }}
 				{{ form.input_hidden('payment_method')   | raw }}
 				{{ form.input_hidden('confirmed')        | raw }}
@@ -68,7 +68,7 @@
 {% if event.has_levels %}
 					<tr>
 						<td class="label">Level</td>
-						<td class="value">{{ dancer.level }}</td>
+						<td class="value">{{ event.levels_keyed_by_id[POST.level_id] }}{# dancer.level has not been JOINed by query yet #}</td>
 						<td class="price"></td>
 					</tr>
 {% endif %}

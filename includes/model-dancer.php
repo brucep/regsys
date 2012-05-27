@@ -51,13 +51,13 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		$this->date_registered = time();
 		$this->event_id = $event_id;
 		
-		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level, :status, :date_registered, :discount_id, :payment_method, :payment_confirmed, :payment_owed, :mobile_phone, :note)', array(
+		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level_id, :status, :date_registered, :discount_id, :payment_method, :payment_confirmed, :payment_owed, :mobile_phone, :note)', array(
 			':event_id'          => $this->event_id,
 			':first_name'        => $this->first_name,
 			':last_name'         => $this->last_name,
 			':email'             => $this->email,
 			':position'          => $this->position,
-			':level'             => $this->level,
+			':level_id'          => $this->level_id,
 			':status'            => $this->status,
 			':date_registered'   => $this->date_registered,
 			':discount_id'       => $this->discount_id,
