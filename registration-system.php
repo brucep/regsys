@@ -355,6 +355,7 @@ class RegistrationSystem
 				dancer_id int(11) unsigned NOT NULL,
 				item_id int(11) unsigned NOT NULL,
 				price tinyint(3) unsigned NOT NULL,
+				paypal_confirmed tinyint(1) unsigned NOT NULL DEFAULT '0',
 				item_meta text NOT NULL,
 				PRIMARY KEY  (dancer_id,item_id)
 				);";
@@ -589,8 +590,9 @@ class RegistrationSystem
 					
 					$file = 'form-accepted';
 					
-					$conext = array_merge($context, array(
+					$context = array_merge($context, array(
 						'confirmation_email_failed' => isset($confirmation_email_failed) ? $confirmation_email_failed : null,
+						'notify_url' => plugins_url('includes/paypal-confirm.php', __FILE__),
 						));
 				}
 			}

@@ -15,8 +15,8 @@
 					{{ form.input_hidden('cmd', '_cart') | raw }}
 					{{ form.input_hidden('upload')       | raw }}
 					{{ form.input_hidden('no_shipping')  | raw }}
-					{{ form.input_hidden('business', options.paypal_business) | raw }}
-					{# TODO: notify url for IPN #}
+					{{ form.input_hidden('business', options.paypal_sandbox ? options.paypal_sandbox_email : options.paypal_business) | raw }}
+					{{ form.input_hidden('notify_url', notify_url) | raw }}
 
 					{{ form.input_hidden('custom', dancer.id) | raw }}
 					{{ form.input_hidden('first_name') | raw }}
@@ -25,10 +25,11 @@
 {% 	if options.paypal_fee %}
 					{{ form.input_hidden('item_name_1', 'Processing Fee')   | raw }}
 					{{ form.input_hidden('amount_1',    options.paypal_fee) | raw }}
-
 {% 	endif %}
+
 {% 	set i = options.paypal_fee ? 2 : 1 %}
-{% 	for item in validated_items if attribute(dancer, 'price_for_registered_item', [item.id]) != 0 %}
+{% 	for item in dancer.registered_items if item.registered_price > 0 %}
+					{{ form.input_hidden('item_number_' ~ i, item.id) | raw }}
 					{{ form.input_hidden('item_name_' ~ i, item.name) | raw }}
 					{{ form.input_hidden('amount_' ~ i,    attribute(dancer, 'price_for_registered_item', [item.id])) | raw }}
 {% 		if item.meta == 'size' and attribute(POST.item_meta, item.id) %}

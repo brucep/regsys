@@ -179,7 +179,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	
 	public function add_registration($parameters)
 	{
-		$statement = self::$database->query('INSERT %1$s_registrations VALUES (:event_id, :dancer_id, :item_id, :price, :item_meta)', array(
+		$statement = self::$database->query('INSERT %1$s_registrations VALUES (:event_id, :dancer_id, :item_id, :price, DEFAULT, :item_meta)', array(
 			':event_id'  => $this->event_id,
 			':dancer_id' => $parameters['dancer_id'],
 			':item_id'   => $parameters['item_id'],
