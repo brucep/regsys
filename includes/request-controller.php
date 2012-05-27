@@ -80,8 +80,12 @@ class RegistrationSystem_Request_Controller
 				$temp = (array) $event;
 				
 				foreach ($reflection->getProperties() as $property) {
-					$key = "\0RegistrationSystem_Model_Dancer\0" . $property->getName();
-					$_POST[$property->getName()] = $temp[$key];
+					if (isset($temp[$property->getName()])) {
+						$_POST[$property->getName()] = $temp[$property->getName()];
+					}
+					else {
+						$_POST[$property->getName()] = $temp["\0RegistrationSystem_Model_Dancer\0" . $property->getName()];
+					}
 				}
 				
 				unset($temp);
@@ -333,8 +337,12 @@ class RegistrationSystem_Request_Controller
 				$temp = (array) $event;
 				
 				foreach ($reflection->getProperties() as $property) {
-					$key = "\0RegistrationSystem_Model_Event\0" . $property->getName();
-					$_POST[$property->getName()] = $temp[$key];
+					if (isset($temp[$property->getName()])) {
+						$_POST[$property->getName()] = $temp[$property->getName()];
+					}
+					else {
+						$_POST[$property->getName()] = $temp["\0RegistrationSystem_Model_Event\0" . $property->getName()];
+					}
 				}
 				
 				unset($temp);
