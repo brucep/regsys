@@ -64,7 +64,7 @@ class RegistrationSystem_PayPal_IPN
 				$items[$index] = array(
 					'name'     => $this->{'item_name'   . $index},
 					'number'   => $this->{'item_number' . $index},
-					'mc_gross' => $this->{'mc_gross'    . $index},
+					'mc_gross' => $this->{'mc_gross_'   . $index},
 					'options'  => array());
 				
 				$option_index = 0;
