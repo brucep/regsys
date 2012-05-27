@@ -39,6 +39,7 @@ class RegistrationSystem
 		'paypal_business'       => '',
 		'paypal_fee'            => 0,
 		'paypal_sandbox'        => false,
+		'paypal_sandbox_email'  => '',
 		'postmark_within'       => 7,
 		'registration_testing'  => false,
 		);
@@ -112,6 +113,12 @@ class RegistrationSystem
 		
 		if (isset($input['paypal_fee'])) {
 			$options['paypal_fee'] = (int) $input['paypal_fee'];
+		}
+		
+		$options['paypal_sandbox'] = isset($input['paypal_sandbox']);
+		
+		if (isset($input['paypal_sandbox_email'])) {
+			$options['paypal_sandbox_email'] = trim($input['paypal_sandbox_email']);
 		}
 		
 		if (isset($input['email_from'])) {

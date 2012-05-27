@@ -55,6 +55,17 @@
 				{'class': 'regular-text'},
 				'The processing fee, if any, for payments made via PayPal.'
 				) | raw }}
+			{{ form.row_checkbox('PayPal Sandbox',
+				'paypal_sandbox',
+				{'checked': options.paypal_sandbox},
+				' Use the PayPal <a href="https://developer.paypal.com/">Sandbox</a> (advanced testing only).'
+				) | raw }}
+			{{ form.row_text('PayPal Sandbox Address',
+				'paypal_sandbox_email',
+				options.paypal_sandbox_email,
+				{'class': 'regular-text'},
+				'The email address used for the PayPal Sandbox.'
+				) | raw }}	
 		</table>
 
 		<h3>Confirmation Email</h3>
