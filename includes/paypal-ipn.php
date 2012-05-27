@@ -66,7 +66,7 @@ class RegistrationSystem_PayPal_IPN
 					'number'   => $this->{'item_number' . $index},
 					'mc_gross' => $this->{'mc_gross'    . $index},
 					'options'  => array());
-					
+				
 				$option_index = 0;
 				while (++$option_index) {
 					if (isset($this->{'option_name' . $option_index . '_' . $index}) and isset($this->{'option_selection' . $option_index . '_' . $index})) {
@@ -77,7 +77,7 @@ class RegistrationSystem_PayPal_IPN
 					}
 				}
 				
-				$item['options'] = array_merge($default_options, $item['options']);
+				$items[$index]['options'] = array_merge($default_options, $items[$index]['options']);
 			}
 			else {
 				break;
