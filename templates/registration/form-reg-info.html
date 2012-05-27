@@ -58,7 +58,7 @@
 					</div>
 
 {% if event.has_levels %}
-					{{ attribute(validation, 'get_error', ['level_id']) }}
+					{{ attribute(validation, 'get_error', ['level_id']) | raw }}
 					<div class="field" id="level_id">
 						<div class="field-label">Level</div>
 {% 	for level in event.levels %}
@@ -68,7 +68,7 @@
 {% endif %}
 
 {% if event.has_volunteers and not vip %}
-					{{ attribute(validation, 'get_error', ['status']) }}
+					{{ attribute(validation, 'get_error', ['status']) | raw }}
 					<div class="field"><label>{{ form.input_checkbox('status') | raw }} I'm interested in volunteering. (Volunteers will receive $5 for every one-hour shift worked!)</div>
 {% endif %}
 				</fieldset>
@@ -78,7 +78,7 @@
 {% if packages %}
 						<h2>Packages <span>(Select One)</span></h2>
 						<fieldset id="packages">
-							{{ attribute(validation, 'get_error', ['package']) }}
+							{{ attribute(validation, 'get_error', ['package']) | raw }}
 							<table cellspacing="0">
 								<thead>
 									<tr>		
@@ -140,7 +140,7 @@
 
 								<tbody>
 {% 	for index, item in competitions %}
-									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) }}
+									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) | raw }}
 {% 		if item.count_openings %}
 									<tr>{% do form.set_array_name('items') %}
 										<td><label>{{ form.input_checkbox(item.id, {'value': item.id}) | raw }} {{ item.name }}</label></td>{% do form.set_array_name(null) %}
@@ -198,7 +198,7 @@
 
 								<tbody>
 {% 	for index, item in shirts %}
-									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) }}
+									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) | raw }}
 									<tr>
 										<td>{{ item.name }}</td>
 										<td class="price">${{ vip ? item.price_for_vip : item.price_for_prereg }}</td>
@@ -227,17 +227,17 @@
 {% 	if event.has_housing_registration %}
 						<h2><label>{{ form.input_checkbox('housing_type_provider', {'attributes': {'id': 'housing_type_provider'}}) | raw }} I Can Provide Housing</label> <span>(Optional)</span></h2>
 						<fieldset id="housing_type_provider_fields">{% do form.set_array_name('housing_provider') %}
-							{{ attribute(validation, 'get_error', ['housing_spots_available']) }}
+							{{ attribute(validation, 'get_error', ['housing_spots_available']) | raw }}
 							<div class="field">{{ 'I can provide housing for %s person(s).' | format(form.input_text('housing_spots_available', null, {'size': 2, 'placeholder': '#'})) | raw }}</div>
 
-							{{ attribute(validation, 'get_error', ['housing_smoke']) }}
-							{{ attribute(validation, 'get_error', ['housing_pets']) }}
+							{{ attribute(validation, 'get_error', ['housing_smoke']) | raw }}
+							{{ attribute(validation, 'get_error', ['housing_pets'])  | raw }}
 							<div class="field">
 								<div class="checkbox"><label>{{ form.input_checkbox('housing_smoke') | raw }} I smoke.</label></div>
 								<div class="checkbox"><label>{{ form.input_checkbox('housing_pets')  | raw }} I have pets.</label></div>
 							</div>
 
-							{{ attribute(validation, 'get_error', ['housing_nights']) }}
+							{{ attribute(validation, 'get_error', ['housing_nights']) | raw }}
 							<div class="field">
 								<div class="field-label">I can providing housing on:</div>
 {% 		for index, night in event.housing_nights %}
@@ -245,7 +245,7 @@
 {% 		endfor %}
 							</div>
 
-							{{ attribute(validation, 'get_error', ['housing_gender']) }}
+							{{ attribute(validation, 'get_error', ['housing_gender']) | raw }}
 							<div class="field">
 								<div class="field-label">I prefer to house:</div>
 								<div class="radio"><label>{{ form.input_radio('housing_gender', {'value': 3, 'default': true}) | raw }} Boys and/or Girls</div>
@@ -253,7 +253,7 @@
 								<div class="radio"><label>{{ form.input_radio('housing_gender', {'value': 2})                  | raw }} Girls only</div>
 							</div>
 
-							{{ attribute(validation, 'get_error', ['housing_bedtime']) }}
+							{{ attribute(validation, 'get_error', ['housing_bedtime']) | raw }}
 							<div class="field">
 								<div class="field-label">Bedtime preference:</div>
 								<div class="radio"><label>{{ form.input_radio('housing_bedtime', {'value': 0, 'default': true}) | raw }} No Preference</div>
@@ -261,7 +261,7 @@
 								<div class="radio"><label>{{ form.input_radio('housing_bedtime', {'value': 2}) | raw }} Night Owl</div>
 							</div>
 
-							{{ attribute(validation, 'get_error', ['housing_comment']) }}
+							{{ attribute(validation, 'get_error', ['housing_comment']) | raw}}
 							<div class="field textarea">
 								<label for="housing_provider_comment">Comments:</label><br>
 								{{ form.input_textarea('housing_comment', null, {'rows': 6}) | raw }}
@@ -315,7 +315,7 @@
 {% 	else %}
 						<fieldset>
 							{{ attribute(validation, 'get_error', ['housing_type_provider']) | raw }}
-							{{ attribute(validation, 'get_error', ['housing_type_needed']) | raw }}
+							{{ attribute(validation, 'get_error', ['housing_type_needed'])   | raw }}
 							<div class="field">Housing requests are no longer available for this event.</div>
 						</fieldset>
 {% 	endif %}
