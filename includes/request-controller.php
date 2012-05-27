@@ -77,7 +77,7 @@ class RegistrationSystem_Request_Controller
 				}
 			}
 			else {
-				$temp = (array) $event;
+				$temp = (array) $dancer;
 				
 				foreach ($reflection->getProperties() as $property) {
 					if (isset($temp[$property->getName()])) {
