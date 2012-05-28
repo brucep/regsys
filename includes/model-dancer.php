@@ -306,7 +306,6 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		$event = RegistrationSystem_Model_Event::get_event_by_id($this->event_id);
 		
 		$body = RegistrationSystem::render_template('registration/confirmation-email.txt', array(
-			'options' => self::$options,
 			'event'   => $event,
 			'dancer'  => $this));
 		
@@ -338,9 +337,12 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		$message = Swift_Message::newInstance()
 			->setSubject(sprintf('Registration for %s: %s', $event->name, $this->name()))
 			->setFrom(self::$options['email_from'])
-			->setReplyTo(self::$options['email_from'])
 			->addTo($this->email, $this->name())
 			->setBody($body);
+		
+		if (!empty(self::$options['email_reply_to'])) {
+			$message->setReplyTo(self::$options['email_reply_to']);
+		}
 		
 		if (!empty(self::$options['email_bcc'])) {
 			$message->setBcc(self::$options['email_bcc']);

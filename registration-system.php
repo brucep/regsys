@@ -28,6 +28,7 @@ class RegistrationSystem
 		'current_event_id'      => '',
 		'email_bcc'             => '',
 		'email_from'            => '',
+		'email_reply_to'        => '',
 		'email_smtp_host'       => 'smtp.gmail.com',
 		'email_smtp_port'       => '465',
 		'email_smtp_username'   => '',
@@ -126,6 +127,10 @@ class RegistrationSystem
 		}
 		else {
 			$options['email_from'] = get_option('admin_email');
+		}
+		
+		if (isset($input['email_reply_to'])) {
+			$options['email_reply_to'] = trim($input['email_reply_to']);
 		}
 		
 		if (isset($input['email_bcc'])) {

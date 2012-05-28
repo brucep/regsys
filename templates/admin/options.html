@@ -74,14 +74,17 @@
 			{{ form.row_text('Email From',
 				'email_from',
 				options.email_from,
-				{'class': 'regular-text'},
-				'This email address will appear on confirmation emails.'
+				{'class': 'regular-text'}
+				) | raw }}
+			{{ form.row_text('Email Reply-To',
+				'email_reply_to',
+				options.email_reply_to,
+				{'class': 'regular-text'}
 				) | raw }}
 			{{ form.row_text('Email Bcc',
 				'email_bcc',
 				options.email_bcc,
-				{'class': 'regular-text'},
-				'This email address will receive a copy of confirmation emails.'
+				{'class': 'regular-text'}
 				) | raw }}
 			{{ form.row_radio('Transport Type',
 				'email_transport',
