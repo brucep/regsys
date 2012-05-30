@@ -107,19 +107,19 @@
 			<tr valign="top">
 				<th scope="row">Discount 1</th>
 				<td>
-					{% do form.set_array_name('edit_discount_code') %}
+					{% do form.set_array_name('edit_discount_code') -%}
 					{{ form.input_text('1', event.discounts[1].discount_code) | raw }}
 				</td>
 				<td>
-					{% do form.set_array_name('edit_discount_amount') %}
+					{% do form.set_array_name('edit_discount_amount') -%}
 					{{ form.input_text('1', event.discounts[1].discount_amount) | raw }}
 				</td>
 				<td>
-					{% do form.set_array_name('edit_discount_limit') %}
+					{% do form.set_array_name('edit_discount_limit') -%}
 					{{ form.input_text('1', event.discounts[1].discount_limit) | raw }}
 				</td>
 				<td>
-					{% do form.set_array_name('edit_discount_expires') %}
+					{% do form.set_array_name('edit_discount_expires') -%}
 					{{ form.input_text('1', event.discounts[1].discount_expires ? event.discounts[1].discount_expires | date : 0) | raw }}
 				</td>
 			</tr>
@@ -127,19 +127,19 @@
 			<tr valign="top">
 				<th scope="row">Discount 2</th>
 				<td>
-					{% do form.set_array_name('edit_discount_code') %}
+					{% do form.set_array_name('edit_discount_code') -%}
 					{{ form.input_text('2', event.discounts[2].discount_code) | raw }}
 				</td>
 				<td>
-					{% do form.set_array_name('edit_discount_amount') %}
+					{% do form.set_array_name('edit_discount_amount') -%}
 					{{ form.input_text('2', event.discounts[2].discount_amount) | raw }}
 				</td>
 				<td>
-					{% do form.set_array_name('edit_discount_limit') %}
+					{% do form.set_array_name('edit_discount_limit') -%}
 					{{ form.input_text('2', event.discounts[2].discount_limit) | raw }}
 				</td>
 				<td>
-					{% do form.set_array_name('edit_discount_expires') %}
+					{% do form.set_array_name('edit_discount_expires') -%}
 					{{ form.input_text('2', event.discounts[2].discount_expires ? event.discounts[2].discount_expires | date : 0) | raw }}
 				</td>
 			</tr>
@@ -147,19 +147,19 @@
 			<tr valign="top">
 				<th scope="row">Discount 3</th>
 				<td>
-					{% do form.set_array_name('edit_discount_code') %}
+					{% do form.set_array_name('edit_discount_code') -%}
 					{{ form.input_text('3', event.discounts[3].discount_code) | raw }}
 				</td>
 				<td>
-					{% do form.set_array_name('edit_discount_amount') %}
+					{% do form.set_array_name('edit_discount_amount') -%}
 					{{ form.input_text('3', event.discounts[3].discount_amount) | raw }}
 				</td>
 				<td>
-					{% do form.set_array_name('edit_discount_limit') %}
+					{% do form.set_array_name('edit_discount_limit') -%}
 					{{ form.input_text('3', event.discounts[3].discount_limit) | raw }}
 				</td>
 				<td>
-					{% do form.set_array_name('edit_discount_expires') %}
+					{% do form.set_array_name('edit_discount_expires') -%}
 					{{ form.input_text('3', event.discounts[3].discount_expires ? event.discounts[3].discount_expires | date : 0) | raw }}
 				</td>
 			</tr>		
