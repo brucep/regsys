@@ -23,7 +23,7 @@ if (!class_exists('RegistrationSystem')):
 class RegistrationSystem
 {
 	static public $event, $validation, $validated_items = array(); # Used by validation methods
-	static private $twig, $vip, $validated_package_id = 0;
+	static private $twig, $vip;
 	static private $default_options = array(
 		'current_event_id'      => '',
 		'email_bcc'             => '',
@@ -549,7 +549,6 @@ class RegistrationSystem
 					$context = array_merge($context, array(
 						'discount_amount'      => $discount_amount,
 						'validated_items'      => self::$validated_items,
-						'validated_package_id' => self::$validated_package_id,
 						));
 				}
 				else {
@@ -736,7 +735,6 @@ class RegistrationSystem
 				return false;
 			}
 			else {
-				self::$validated_package_id = $package_id;
 				return true;
 			}
 		}

@@ -19,7 +19,7 @@
 				{{ form.input_hidden('confirmed')        | raw }}
 
 {% for key, item in validated_items %}
-{% 	if key == validated_package_id %}
+{% 	if item.type == 'package' %}
 				{{ form.input_hidden('package', key) | raw }}
 				{{ form.input_hidden('package_tier[%d]' | format(key), item.price_tier) | raw }}
 {% 	else %}
