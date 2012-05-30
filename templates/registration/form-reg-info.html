@@ -224,7 +224,7 @@
 
 {# HOUSING #######################}
 {% if event.has_housing_support %}
-{% 	if event.has_housing_registration %}
+{% 	if event.has_housing_registrations %}
 						<h2><label>{{ form.input_checkbox('housing_type_provider', {'attributes': {'id': 'housing_type_provider'}}) | raw }} I Can Provide Housing</label> <span>(Optional)</span></h2>
 						<fieldset id="housing_type_provider_fields">{% do form.set_array_name('housing_provider') %}
 							{{ attribute(validation, 'get_error', ['housing_spots_available']) | raw }}
