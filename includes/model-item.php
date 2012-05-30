@@ -91,7 +91,12 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		}
 		
 		if ($discount_amount) {
-			$price = $price - $discount_amount;
+			if ($discount_amount < 0) {
+				$price = $price - $discount_amount * -1; # Negative numbers for amount off
+			}
+			else {
+				$price = $discount_amount; # Zero or positive number for fixed price
+			}
 		}
 		
 		return (int) $price;
