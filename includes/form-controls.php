@@ -94,9 +94,9 @@ class RegistrationSystem_Form_Controls
 	
 	public function input_text($key, $value = null, array $attributes = array())
 	{
-		$attributes = array_merge(array('type' => 'text'), $attributes);
+		$attributes = array_merge(array('id' => $this->name($key), 'type' => 'text'), $attributes);
 		
-		$output = sprintf('<input value="%2$s" name="%1$s" id="%1$s"%3$s>',
+		$output = sprintf('<input value="%2$s" name="%1$s"%3$s>',
 			$this->name($key),
 			is_null($value) ? esc_attr($this->post_value($key, '')) : esc_attr($value),
 			$this->attributes($attributes));
