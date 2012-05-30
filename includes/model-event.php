@@ -262,6 +262,12 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return (bool) $this->discounts();
 	}
 	
+	public function has_discount_expired($code)
+	{
+		$expires = self::$database->query('SELECT discount_expires FROM %1$s_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchColumn();
+		return $expires ? $expires <= time() : false;
+	}
+	
 	public function has_discount_openings($code)
 	{
 		$limit = self::$database->query('SELECT discount_limit FROM %1$s_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchColumn();

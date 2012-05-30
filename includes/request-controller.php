@@ -292,19 +292,21 @@ class RegistrationSystem_Request_Controller
 					foreach ($_POST['edit_discount_code'] as $key => $value) {
 						if ($value) {
 							if (!isset($discounts[$key])) {
-								$database->query('INSERT %s_event_discounts VALUES (?, ?, ?, ?, ?);', array(
+								$database->query('INSERT %s_event_discounts VALUES (?, ?, ?, ?, ?, ?);', array(
 									$event->id(),
 									$key,
 									$value,
 									(int) $_POST['edit_discount_amount'][$key],
 									(int) $_POST['edit_discount_limit'][$key],
+									strtotime($_POST['edit_discount_expires'][$key]),
 									));
 							}
 							elseif (isset($discounts[$key])) {
-								$database->query('UPDATE %s_event_discounts SET discount_code = ?, discount_amount = ?, discount_limit = ? WHERE event_id = ? AND discount_id = ?', array(
+								$database->query('UPDATE %s_event_discounts SET discount_code = ?, discount_amount = ?, discount_limit = ?, discount_expires = ? WHERE event_id = ? AND discount_id = ?', array(
 									$value,
 									(int) $_POST['edit_discount_amount'][$key],
 									(int) $_POST['edit_discount_limit'][$key],
+									strtotime($_POST['edit_discount_expires'][$key]),
 									$event->id(),
 									$key,
 									));

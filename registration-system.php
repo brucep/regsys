@@ -304,8 +304,9 @@ class RegistrationSystem
 				event_id int(11) unsigned NOT NULL,
 				discount_id tinyint(3) unsigned NOT NULL,
 				discount_code varchar(255) NOT NULL,
-				discount_amount smallint(5) unsigned NOT NULL,
+				discount_amount smallint(5) NOT NULL,
 				discount_limit smallint(5) unsigned NOT NULL DEFAULT '0',
+				discount_expires int(11) unsigned NOT NULL DEFAULT '0',
 				PRIMARY KEY  (event_id,discount_id),
 				UNIQUE KEY discount_code (event_id,discount_code)
 				);" .
@@ -688,6 +689,11 @@ class RegistrationSystem
 		if (!self::$event->has_discount_openings($code)) {
 			unset($_POST['discount_code']);
 			self::$validation->set_error('discount_code', sprintf('"%s" is either an invalid code or its limit has been reached.', esc_html($code)));
+			return false;
+		}
+		elseif (self::$event->has_discount_expired($code)) {
+			unset($_POST['discount_code']);
+			self::$validation->set_error('discount_code', sprintf('Discount code "%s" has expired.', esc_html($code)));
 			return false;
 		}
 		else {
