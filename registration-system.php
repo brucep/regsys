@@ -547,8 +547,8 @@ class RegistrationSystem
 					$file = 'form-confirm';
 					
 					$context = array_merge($context, array(
-						'discount_amount'      => $discount_amount,
-						'validated_items'      => self::$validated_items,
+						'discount_amount' => $discount_amount,
+						'validated_items' => self::$validated_items,
 						));
 				}
 				else {
