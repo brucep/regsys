@@ -5,11 +5,9 @@
 {% block title %}Register for {{ event.name }}{% endblock %}
 
 {% block content %}
-{% if not options.registration_testing %}
 			<div class="entry-content">
 				{{ the_content | raw }}
 			</div>
-{% endif %}
 
 			<form action="{{ permalink }}{% if vip %}?vip{% endif %}" method="post"{% if vip %} class="vip"{% endif %}>
 {% if not vip %}
