@@ -265,7 +265,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	public function has_discount_openings($code)
 	{
 		$limit = self::$database->query('SELECT discount_limit FROM %1$s_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchColumn();
-		return ($limit != 0) ? (bool) ($limit - $this->count_discounts_used($code)) : false;
+		return ($limit > 0) ? (bool) ($limit - $this->count_discounts_used($code)) : true;
 	}
 	
 	public function has_housing_support()
