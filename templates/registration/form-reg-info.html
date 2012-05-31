@@ -267,7 +267,7 @@
 						</fieldset>
 
 						
-						<h2><labe>{{ form.input_checkbox('housing_type_needed', {'attributes': {'id': 'housing_type_needed'}}) | raw }} I Need Housing <span>(Optional)</span></h2>
+						<h2>{% do form.set_array_name(null) %}<label>{{ form.input_checkbox('housing_type_needed', {'attributes': {'id': 'housing_type_needed'}}) | raw }} I Need Housing</label> <span>(Optional)</span></h2>
 						<fieldset id="housing_type_needed_fields">{% do form.set_array_name('housing_needed') %}
 							{{ attribute(validation, 'get_error', ['housing_needed[housing_from_scene]']) | raw }}
 							<div class="field">I am from: {{ form.input_text('housing_from_scene', null, {'size': 30, 'placeholder': 'Scene, area, nearest major city, etc.'}) | raw }}</div>
@@ -283,8 +283,7 @@
 							<div class="field">
 								<div class="field-label">I need housing for:</div>
 {% 		for index, night in event.housing_nights %}
-								<div class="checkbox"><label>{{ form.input_checkbox('housing_nights', {'value': night}) | raw }} {{ night }}<label></div>
-								{# 'housing_needed[housing_nights][%d]' #}
+								<div class="checkbox"><label><input type="checkbox" {%- if attribute(POST.housing_needed.housing_nights, index + 1) %} checked="checked"{% endif %} value="{{ index + 1 }}" name="housing_needed[housing_nights][{{ index + 1 }}]"> {{ night }}<label></div>
 {% 		endfor %}
 							</div>
 
