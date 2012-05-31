@@ -412,7 +412,15 @@ class RegistrationSystem
 			
 			# Display page content when registration is not available.
 			if ((time() > self::$event->date_paypal_prereg_end() and time() > self::$event->date_mail_prereg_end() and !$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
-				get_template_part('index');
+				if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
+				
+				echo self::render_template('registration/page-content.html', array(
+					'event'       => self::$event,
+					'the_content' => apply_filters('the_content', $post->post_content),
+					));
+				
+				if (!get_post_meta($post->ID, 'registration_form', true)) { get_footer(); }
+				
 				return;
 			}
 			

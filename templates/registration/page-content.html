@@ -1,0 +1,11 @@
+{% extends 'registration/_layout.html' %}
+
+{% block id %}reg-sys-form-info{% endblock %}
+
+{% block title %}Register for {{ event.name }}{% endblock %}
+
+{% block content %}
+			<div class="entry-content">
+				{{ the_content | raw }}
+			</div>
+{% endblock %}
