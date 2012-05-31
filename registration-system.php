@@ -465,14 +465,14 @@ class RegistrationSystem
 						'housing_provider[housing_gender]'          => 'if_set[housing_type_provider]|intval|in[1,2,3]',
 						'housing_provider[housing_bedtime]'         => 'if_set[housing_type_provider]|intval|in[0,1,2]',
 						'housing_provider[housing_nights]'          => 'if_set[housing_type_provider]|RegistrationSystem::validate_housing_nights',
-						'housing_provider[housing_comment]'         => 'if_set[housing_type_provider]|trim|max_length[65536]',
+						'housing_provider[housing_comment]'         => 'if_set[housing_type_provider]|trim|stripslashes|max_length[65536]',
 						'housing_needed[housing_from_scene]'        => 'if_set[housing_type_needed]|trim|required|max_length[255]|ucwords',
 						'housing_needed[housing_smoke]'             => 'if_set[housing_type_needed]|intval|in[0,1]',
 						'housing_needed[housing_pets]'              => 'if_set[housing_type_needed]|intval|in[0,1]',
 						'housing_needed[housing_gender]'            => 'if_set[housing_type_needed]|intval|in[1,2,3]',
 						'housing_needed[housing_bedtime]'           => 'if_set[housing_type_needed]|intval|in[0,1,2]',
 						'housing_needed[housing_nights]'            => 'if_set[housing_type_needed]|RegistrationSystem::validate_housing_nights',
-						'housing_needed[housing_comment]'           => 'if_set[housing_type_needed]|trim|max_length[65536]',
+						'housing_needed[housing_comment]'           => 'if_set[housing_type_needed]|trim|stripslashes|max_length[65536]',
 						));
 				}
 				elseif (self::$event->has_housing_support()) {
