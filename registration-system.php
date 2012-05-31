@@ -685,7 +685,10 @@ class RegistrationSystem
 	
 	static public function validate_discount_code($code)
 	{
-		if (!self::$event->has_discount_openings($code)) {
+		if (empty($code)) {
+			return true;
+		}
+		elseif (!self::$event->has_discount_openings($code)) {
 			unset($_POST['discount_code']);
 			self::$validation->set_error('discount_code', sprintf('"%s" is either an invalid code or its limit has been reached.', esc_html($code)));
 			return false;
