@@ -52,7 +52,7 @@
 {% endif %}
 
 {% if confirmation_email_failed %}
-				<p style="background-color: #fcc;">Your registration has been recorded, but it appears that your confirmation email failed to send. If you would like, you may email {{ '<a href="mailto:%1$s">%1$s</a>' | format(options.reply_to ? options.reply_to : options.email_from) }} to request that your confirmation email be re-sent.<br><br>Reason: {{ confirmation_email_failed.message }}</p>
+				<p style="background-color: #fcc;">Your registration has been recorded, but it appears that your confirmation email failed to send. If you would like, you may email {{ '<a href="mailto:%1$s">%1$s</a>' | format(options.reply_to ? options.reply_to : options.email_from) | raw }} to request that your confirmation email be re-sent.<br><br>Reason: {{ confirmation_email_failed.message }}</p>
 {% endif %}
 			</div>
 {% endblock %}
