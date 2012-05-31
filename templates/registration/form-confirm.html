@@ -11,12 +11,14 @@
 				{{ form.input_hidden('email')            | raw }}
 				{{ form.input_hidden('confirm_email')    | raw }}
 				{{ form.input_hidden('mobile_phone')     | raw }}
-				{{ form.input_hidden('discount_code')    | raw }}
 				{{ form.input_hidden('position')         | raw }}
 				{{ form.input_hidden('level_id')         | raw }}
 				{{ form.input_hidden('status')           | raw }}
 				{{ form.input_hidden('payment_method')   | raw }}
 				{{ form.input_hidden('confirmed')        | raw }}
+{% if POST.discount_code %}
+				{{ form.input_hidden('discount_code') | raw }}
+{% endif %}
 
 {% for key, item in validated_items %}
 {% 	if item.type == 'package' %}
@@ -115,6 +117,9 @@
 					</tr>
 				</table>
 
-				<div id="submit"><input type="submit" value="Confirm Registration"></div>
+				<div id="submit">
+					<input type="submit" value="Confirm Registration">
+					<script charset="utf-8">jQuery(document).ready(function($) { $('#submit').append('<a href="javascript:history.go(-1)" style="margin-left:2em">Make Changes</a>'); });</script>
+				</div>
 			</form>
 {% endblock %}
