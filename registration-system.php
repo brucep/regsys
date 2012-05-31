@@ -431,7 +431,7 @@ class RegistrationSystem
 					'last_name'       => 'trim|required|max_length[100]|ucfirst',
 					'email'           => 'trim|valid_email|max_length[255]|RegistrationSystem::validate_email_address',
 					'confirm_email'   => 'trim|valid_email|max_length[255]',
-					'mobile_phone'    => 'trim|required|max_length[30]',
+					'mobile_phone'    => 'trim|required|max_length[30]|RegistrationSystem::validate_mobile_phone',
 					'position'        => 'intval|in[1,2]',
 					'status'          => 'RegistrationSystem::validate_status',
 					'package'         => 'intval|RegistrationSystem::validate_package',
@@ -731,6 +731,14 @@ class RegistrationSystem
 			self::$validation->set_error('email', 'Your email addresses do not match.');
 			return false;
 		}
+	}
+	
+	static public function validate_mobile_phone($phone_number)
+	{
+		preg_match('/^(?:\(?([0-9]{3})\)?)?[- \.]?([0-9]{3})[- \.]?([0-9]{4})/', $phone_number, $matches);
+		unset($matches[0]);
+		
+		return (!empty($matches)) ? implode('-', array_filter($matches)) : true;
 	}
 	
 	static public function validate_package($package_id)
