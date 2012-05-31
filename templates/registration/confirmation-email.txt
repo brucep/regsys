@@ -1,23 +1,24 @@
+{% autoescape false %}
 Thanks for registering for {{ event.name }}. We're excited that you're joining us!
 
----
 
-First Name:   {{ dancer.first_name }}
-Last Name:    {{ dancer.last_name }}
+First Name: {{ dancer.first_name }}
+Last Name: {{ dancer.last_name }}
 Mobile Phone: {{ dancer.mobile_phone }}
-Position:     {{ dancer.position }}
+Position: {{ dancer.position }}
 {% if event.has_levels %}
-Level:        {{ dancer.level }}
+Level: {{ dancer.level }}
 {% endif %}
 {% if dancer.is_volunteer %}
-Status:       Volunteer
+Status: Volunteer
 {% endif %}
 {% if dancer.is_vip %}
-Status:       VIP
-{% endif %}
+Status: VIP
+{% endif -%}
 
 {% if event.has_housing_registrations %}
 {% 	if dancer.needs_housing %}
+
 Housing Needed: 
 {% 		if dancer.housing_prefers_no_smoke %}
   - I would prefer no smoking.
@@ -26,11 +27,12 @@ Housing Needed:
   - I would prefer no pets.
 {% 		endif %}
   - I would prefer to be housed with: {{ dancer.housing_gender }}
-  - I will need housing for: {{ dancer.housing_nights }}
+  - I will need housing for: {{ dancer.housing_nights | join(', ') }}
 {% 		if dancer.housing_comment %}
   - {{ dancer.housing_comment }}
 {% 		endif %}
 {% 	elseif dancer.is_housing_provider %}
+
 Housing Provider:
   - I have room for {{ pluralize('%d person.', '%d persons.', dancer.housing_spots_available) | format(dancer.housing_spots_available) }}
 {% 		if dancer.housing_has_smoke %}
@@ -40,7 +42,7 @@ Housing Provider:
   - I have pets.
 {% 		endif %}
   - I will house: {{ dancer.housing_gender }}
-  - I will provide housing for: {{ dancer.housing_nights }}
+  - I will provide housing for: {{ dancer.housing_nights | join(', ') }}
 {% if dancer.housing_comment %}
   - {{ dancer.housing_comment }}
 {% 		endif %}
@@ -49,25 +51,28 @@ Housing Provider:
 
 Items:
 {% for item in dancer.registered_items %}
-  - {{ '%s: $%d' | format(item.name, item.registered_price) }}{% if item.registered_meta %}{{ ' (%s)' | format(item.registered_meta | capitalize) }}{% endif %}
+  {{ "- %s: $%d" | format(item.name, item.registered_price) }}{% if item.registered_meta %}{{ ' (%s)' | format(item.registered_meta | capitalize) }}{% endif %}{{ "\n" -}}
 {% endfor %}
 
 Total Cost: ${{ dancer.price_total }}{% if dancer.payment_method == 'PayPal' and options.paypal_fee %}{{ ' (plus $%d processing fee)' | format(options.paypal_fee) }}{% endif %}
 
----
 
-{% if dancer.payment_method == 'Mail' %}
-You still need to write a check to "{{ options.payable_to }}" for ${{ dancer.price_total }} for mail it to:
+
+{% if dancer.price_total > 0 %}
+{% 	if dancer.payment_method == 'Mail' %}
+You still need to write a check to "{{ options.payable_to }}" and mail it to:
 
 {{ options.mailing_address }}
 
 Your check must be postmarked by {{ dancer.date_postmark_by | date('F jS') }}.
-
-{% elseif dancer.payment_method == 'PayPal' %}
+{% 	elseif dancer.payment_method == 'PayPal' %}
 If you haven't already paid via PayPal, you may use this link to do so:
 
-{{ dancer.paypal_href | raw }}
+{{ dancer.paypal_href }}
 
+Your payment must be received in full by {{ dancer.date_postmark_by | date('F jS') }}.
+{% 	endif %}
+
+Refunds are available until {{ event.date_refund_end | date('F jS') }} at the discretion of {{ options.payable_to }}.
 {% endif %}
-
-Refunds are not allowed after: {{ event.date_refund_end | date('F jS') }}
+{% endautoescape %}
