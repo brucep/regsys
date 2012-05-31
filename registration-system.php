@@ -723,7 +723,7 @@ class RegistrationSystem
 				return true;
 			}
 			else {
-				self::$validation->set_error('email', sprintf('Someone has already registered with this information. If you have already registered and need to change your information, then please reply to your confirmation email. For any other concerns, email <a href="mailto:%1$s">%1$s</a>.', $options['confirmation_email_address']));
+				self::$validation->set_error('email', sprintf('Someone has already registered with this information. If you have already registered and need to change your information, then please reply to your confirmation email. For any other concerns, email <a href="mailto:%1$s">%1$s</a>.', $options['email_reply_to'] ? $options['email_reply_to'] : $options['email_from']));
 				return false;
 			}
 		}
