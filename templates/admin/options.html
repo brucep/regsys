@@ -86,6 +86,11 @@
 				options.email_bcc,
 				{'class': 'regular-text'}
 				) | raw }}
+			{{ form.row_checkbox('Send Email While Testing',
+				'email_testing',
+				{'checked': options.email_testing},
+				' Send confirmation email while registration testing is enabled.'
+				) | raw }}
 			{{ form.row_radio('Transport Type',
 				'email_transport',
 				[{'label': '<span><abbr title="Simple Mail Transfer Protocol">SMTP</abbr></span>', 'checked': (options.email_transport == 'smtp'), 'value': 'smtp', 'default': true},

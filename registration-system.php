@@ -34,6 +34,7 @@ class RegistrationSystem
 		'email_smtp_username'   => '',
 		'email_smtp_password'   => '',
 		'email_smtp_encryption' => 'ssl',
+		'email_testing'         => false,
 		'email_transport'       => 'mail',
 		'mailing_address'       => '',
 		'payable_to'            => '',
@@ -136,6 +137,8 @@ class RegistrationSystem
 		if (isset($input['email_bcc'])) {
 			$options['email_bcc'] = trim($input['email_bcc']);
 		}
+		
+		$options['email_testing'] = isset($input['email_testing']);
 		
 		if (isset($input['email_transport']) and in_array($input['email_transport'], array('smtp', 'mail'))) {
 			$options['email_transport'] = $input['email_transport'];
@@ -593,7 +596,7 @@ class RegistrationSystem
 					}
 					
 					# Confirmation email
-					if (!$options['registration_testing']) {
+					if (!$options['registration_testing'] or ($options['registration_testing'] and $options['email_testing'])) {
 						try {
 							if (!$dancer->send_confirmation_email()) {
 								throw new Exception('Email could not be sent to ' . $dancer->email());
