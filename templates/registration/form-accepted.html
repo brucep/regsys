@@ -6,45 +6,53 @@
 
 {% block content %}
 			<div{% if vip %} class="vip"{% endif %}>
-				<p>Your registration has been recorded. Your payment must be {{ dancer.payment_method == 'Mail' ? 'postmarked' : 'received' }} by {{ dancer.date_postmark_by | date('F jS') }}.</p>
+				<p>Your registration has been recorded.{% if dancer.price_total == 0 %} (Your total cost was $0, so no payment is required.){% endif %}</p>
 
-{% if dancer.payment_method == 'PayPal' %}
+{% if dancer.price_total > 0 %}
+{% 	if dancer.payment_method == 'PayPal' %}
+				<p>Use the button below to pay via PayPal. (A PayPal link has also been included in your confirmation email.)</p>
+
 				<form action="{{ options.paypal_sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr' }}" method="post">
-					<input type="image" id="paypal-button" src="https://www.paypal.com/en_US/i/btn/x-click-but6.gif" name="submit" alt="Send payment via PayPal">
+					<input type="image" src="https://www.paypal.com/en_US/i/btn/x-click-but6.gif" name="submit" alt="Send payment via PayPal" style="display: block; margin: 1.5em auto;">
 
 					{{ form.input_hidden('cmd', '_cart') | raw }}
 					{{ form.input_hidden('upload')       | raw }}
 					{{ form.input_hidden('no_shipping')  | raw }}
 					{{ form.input_hidden('business', options.paypal_sandbox ? options.paypal_sandbox_email : options.paypal_business) | raw }}
 					{{ form.input_hidden('notify_url', notify_url) | raw }}
-
 					{{ form.input_hidden('custom', dancer.id) | raw }}
-					{{ form.input_hidden('first_name') | raw }}
-					{{ form.input_hidden('last_name')  | raw }}
 
-{% 	if options.paypal_fee %}
+{% 		if options.paypal_fee %}
 					{{ form.input_hidden('item_name_1', 'Processing Fee')   | raw }}
 					{{ form.input_hidden('amount_1',    options.paypal_fee) | raw }}
-{% 	endif %}
+{% 		endif %}
 
-{% 	set i = options.paypal_fee ? 2 : 1 %}
-{% 	for item in dancer.registered_items if item.registered_price > 0 %}
+{% 		set i = options.paypal_fee ? 2 : 1 %}
+{% 		for item in dancer.registered_items if item.registered_price > 0 %}
 					{{ form.input_hidden('item_number_' ~ i, item.id) | raw }}
 					{{ form.input_hidden('item_name_' ~ i, item.name) | raw }}
 					{{ form.input_hidden('amount_' ~ i,    attribute(dancer, 'price_for_registered_item', [item.id])) | raw }}
-{% 		if item.meta == 'size' and attribute(POST.item_meta, item.id) %}
+{% 			if item.meta == 'size' and attribute(POST.item_meta, item.id) %}
 					{{ form.input_hidden('on0_' ~ i, item.meta_label) | raw }}
 					{{ form.input_hidden('os0_' ~ i, attribute(POST.item_meta, item.id) | capitalize) | raw }}
-{% 		endif %}
-{% 		set i = i + 1 %}
-{% 	endfor %}
+{% 			endif %}
+{% 			set i = i + 1 %}
+{% 		endfor %}
 				</form>
-{% elseif dancer.payment_method == 'Mail' and dancer.price_total > 0 %}
-						<p>Please mail your check for <strong>${{ dancer.price_total }}</strong> (made out to <em>{{ options.payable_to }}</em>), along with your name and email address, to:</p>
-						<p style="font-weight: bold;">{{ options.mailing_address | nl2br }}</p>
+{% 	elseif dancer.payment_method == 'Mail' %}
+				<p>Please mail your check for <strong>${{ dancer.price_total }}</strong> (made out to <em>{{ options.payable_to }}</em>), along with your name and email address, to:</p>
+				<p style="font-weight: bold;">{{ options.mailing_address | nl2br }}</p>
+
+				<p>(Note that checks are processed in batches, so there will be a delay in cashing your check after it is received.)</p>
+{% 	endif %}
+				<p>Your payment must be {{ dancer.payment_method == 'Mail' ? 'postmarked' : 'received in full' }} by {{ dancer.date_postmark_by | date('F jS') }}.
+				If payment is not received on time you will forfeit your registration. You will have to register again &mdash; with the going price and subject to availability &mdash; to secure your reservation.</p>
+
+				<p>Refunds are available until {{ event.date_refund_end | date('F jS') }} at the discretion of {{ options.payable_to }}.</p>
 {% endif %}
+
 {% if confirmation_email_failed %}
-				<p style="background-color: #fcc;">Your registration has been recorded, but it appears that your confirmation email failed to send. You may email {{ '<a href="mailto:%1$s">%1$s</a>' | format(options.confirmation_email_address) }} to request that your confirmation email be re-sent.<br /><br />Reason: {{ confirmation_email_failed.message }}</p>
+				<p style="background-color: #fcc;">Your registration has been recorded, but it appears that your confirmation email failed to send. If you would like, you may email {{ '<a href="mailto:%1$s">%1$s</a>' | format(options.reply_to ? options.reply_to : options.email_from) }} to request that your confirmation email be re-sent.<br><br>Reason: {{ confirmation_email_failed.message }}</p>
 {% endif %}
 			</div>
 {% endblock %}
