@@ -548,24 +548,20 @@ class RegistrationSystem
 				}
 				
 				$dancer = new RegistrationSystem_Model_Dancer($dancer_data);
-				
-				$context = array('dancer' => $dancer);
+				unset($dancer_data);
 				
 				if (!isset($_POST['confirmed'])) {
 					$file = 'form-confirm';
 					
-					$context = array_merge($context, array(
+					$context = array(
+						'dancer' => $dancer,
 						'discount_amount' => $discount_amount,
 						'validated_items' => self::$validated_items,
-						));
+						);
 				}
 				else {
 					# Add dancer
 					$dancer->add(self::$event->id());
-					
-					if (!$dancer) {
-						throw new Exception('Unable to add dancer to database.');
-					}
 					
 					# Add housing
 					if (self::$event->has_housing_registrations() and ($dancer->needs_housing() or $dancer->is_housing_provider())) {
@@ -589,6 +585,13 @@ class RegistrationSystem
 							));
 					}
 					
+					# Create new dancer object with data from JOIN querys. Needed for confirmation email.
+					$dancer = self::$event->dancer_by_id($dancer->id());
+					
+					if (!$dancer) {
+						throw new Exception('Unable to retrieve new dancer info from database.');
+					}
+					
 					# Confirmation email
 					if (!$options['registration_testing']) {
 						try {
@@ -603,10 +606,11 @@ class RegistrationSystem
 					
 					$file = 'form-accepted';
 					
-					$context = array_merge($context, array(
+					$context = array(
+						'dancer' => $dancer,
 						'confirmation_email_failed' => isset($confirmation_email_failed) ? $confirmation_email_failed : null,
 						'notify_url' => plugins_url('includes/paypal-confirm.php', __FILE__),
-						));
+						);
 				}
 			}
 			
