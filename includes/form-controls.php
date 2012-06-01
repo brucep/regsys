@@ -106,7 +106,7 @@ class RegistrationSystem_Form_Controls
 	
 	public function input_textarea($key, $value = null, array $attributes = array())
 	{
-		$attributes = array_merge(array('cols' => '40', 'rows' => '4'), $attributes);
+		$attributes = array_merge(array('id' => $this->name($key), 'cols' => '40', 'rows' => '4'), $attributes);
 		
 		return sprintf('<textarea name="%1$s"%3$s>%2$s</textarea>',
 			$this->name($key),
