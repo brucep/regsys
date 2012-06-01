@@ -22,7 +22,7 @@
 					{{ form.input_hidden('notify_url', notify_url) | raw }}
 					{{ form.input_hidden('custom', dancer.id) | raw }}
 
-{% 		if options.paypal_fee %}
+{% 		if options.paypal_fee and not vip %}
 					{{ form.input_hidden('item_name_1', 'Processing Fee')   | raw }}
 					{{ form.input_hidden('amount_1',    options.paypal_fee) | raw }}
 {% 		endif %}
