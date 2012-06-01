@@ -25,9 +25,9 @@
 				{{ form.input_hidden('package', key) | raw }}
 				{{ form.input_hidden('package_tier[%d]' | format(key), item.price_tier) | raw }}
 {% 	else %}
-				{{ form.input_hidden('items[%d]' | format(key), key) | raw }}
+				{{ form.input_hidden('items[%d]' | format(key), item.meta == 'size' ? POST.items[key] : key) | raw }}
 {% 		if attribute(POST.item_meta, key) %}
-				{{ form.input_hidden('item_meta[%d]' | format(key), attribute(POST.item_meta, key)) | raw }}
+				{{ form.input_hidden('item_meta[%d]' | format(key), POST.item_meta[key]) | raw }}
 {% 		endif %}
 {% 	endif %}
 {% endfor %}
