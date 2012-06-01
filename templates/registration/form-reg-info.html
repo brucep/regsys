@@ -95,9 +95,9 @@
 										<td class="price">
 											<div class="price_prereg">${{ item.price_for_prereg }}</div>
 										</td>
-										<td class="price">{{ item.price_at_door ? '$' ~ item.price_at_door : '&mdash;' }}</td>
+										<td class="price">{{ (item.price_at_door ? '$' ~ item.price_at_door : '&mdash;') | raw }}</td>
 {% 		else %}
-										<td class="price">{{ item.price_for_vip ? '$' ~ item.price_for_vip : '&mdash;' }}</td>
+										<td class="price">{{ (item.price_for_vip ? '$' ~ item.price_for_vip : '&mdash;') | raw }}</td>
 										<td class="price">&mdash;</td>
 {% 		endif %}
 										<td class="description">{{ item.description }}</td>
@@ -200,7 +200,7 @@
 									<tr>
 										<td>{{ item.name }}</td>
 										<td class="price">${{ vip ? item.price_for_vip : item.price_for_prereg }}</td>
-										<td class="price">${{ item.price_at_door ? item.price_at_door : '&mdash;' | raw }}</td>
+										<td class="price">{{ (item.price_at_door ? '$' ~ item.price_at_door : '&mdash;') | raw }}</td>
 										<td class="size">{% do form.set_array_name('items') %}
 											{{ form.input_select(item.id, 'None,' ~ item.description, {'indent': "\t\t\t\t\t\t\t\t\t\t\t"}) | raw }}
 										</td>{% do form.set_array_name(null) %}
