@@ -60,7 +60,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 			$where[':date_expires'] = time();
 		}
 		
-		return self::$database->query('SELECT * FROM %1$s_items WHERE '.$query, $where)->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
+		return self::$database->query('SELECT * FROM %1$s_items WHERE ' . $query . ' ORDER BY item_id ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
 	}
 	
 	public function item_by_id($item_id)
