@@ -91,7 +91,26 @@
 			</tr>{% do form.set_array_name(null) %}
 		</table>
 
-		<h3>Discount Codes</h3>
+		<script charset="utf-8">
+			jQuery(document).ready(function($) {
+				$('#add_discount_code').click(function() {
+					// http://charlie.griefer.com/blog/2009/09/17/jquery-dynamically-adding-form-elements/
+					
+					var num    = $('.discount-row').length;
+					var newNum = num + 1;
+					
+					var newElem = $('#discount_row_' + num).clone().attr('id', 'discount_row_' + newNum);
+					
+					newElem.children('th:first-child').html('Discount ' + newNum);
+					newElem.find('input').attr('name', function(index, attr) { return attr.replace('[' + num + ']', '[' + newNum + ']'); }).val('');
+					newElem.find('input#discount_expires_' + num).attr('id', 'discount_expires_' + newNum).val("{{ 'now' | date('Y-m-d, 11:59 \\P\\M') }}");
+					
+					$('#discount_row_' + num).after(newElem);
+				});
+			});
+		</script>
+
+		<h3>Discount Codes<button type="button" style="margin-left:1.25em " id="add_discount_code">Add New Code</button></h3>
 
 		<p>Discount amounts: Negative number for amount off; Positive number (or zero) for fixed price.</p>
 
@@ -104,65 +123,27 @@
 				<td>Expiration Date</td>
 			</tr>
 
-			<tr valign="top">
-				<th scope="row">Discount 1</th>
+{% for id, discount in event.discounts | default({1: {'discount_expires': 'now' | date('Y-m-d, 11:59 \\P\\M')}}) %}
+			<tr valign="top" class="discount-row" id="discount_row_{{ id }}">
+				<th scope="row">Discount {{ id }}</th>
 				<td>
 					{% do form.set_array_name('edit_discount_code') -%}
-					{{ form.input_text('1', event.discounts[1].discount_code) | raw }}
+					{{ form.input_text(id, discount.discount_code, {'id': ''}) | raw }}
 				</td>
 				<td>
 					{% do form.set_array_name('edit_discount_amount') -%}
-					{{ form.input_text('1', event.discounts[1].discount_amount) | raw }}
+					{{ form.input_text(id, discount.discount_amount, {'id': ''}) | raw }}
 				</td>
 				<td>
 					{% do form.set_array_name('edit_discount_limit') -%}
-					{{ form.input_text('1', event.discounts[1].discount_limit) | raw }}
+					{{ form.input_text(id, discount.discount_limit, {'id': ''}) | raw }}
 				</td>
 				<td>
 					{% do form.set_array_name('edit_discount_expires') -%}
-					{{ form.input_text('1', event.discounts[1].discount_expires ? event.discounts[1].discount_expires | date : 0) | raw }}
+					{{ form.input_text(id, discount.discount_expires ? discount.discount_expires | date : 0, {'id': 'discount_expires_' ~ id}) | raw }}
 				</td>
 			</tr>
-
-			<tr valign="top">
-				<th scope="row">Discount 2</th>
-				<td>
-					{% do form.set_array_name('edit_discount_code') -%}
-					{{ form.input_text('2', event.discounts[2].discount_code) | raw }}
-				</td>
-				<td>
-					{% do form.set_array_name('edit_discount_amount') -%}
-					{{ form.input_text('2', event.discounts[2].discount_amount) | raw }}
-				</td>
-				<td>
-					{% do form.set_array_name('edit_discount_limit') -%}
-					{{ form.input_text('2', event.discounts[2].discount_limit) | raw }}
-				</td>
-				<td>
-					{% do form.set_array_name('edit_discount_expires') -%}
-					{{ form.input_text('2', event.discounts[2].discount_expires ? event.discounts[2].discount_expires | date : 0) | raw }}
-				</td>
-			</tr>
-
-			<tr valign="top">
-				<th scope="row">Discount 3</th>
-				<td>
-					{% do form.set_array_name('edit_discount_code') -%}
-					{{ form.input_text('3', event.discounts[3].discount_code) | raw }}
-				</td>
-				<td>
-					{% do form.set_array_name('edit_discount_amount') -%}
-					{{ form.input_text('3', event.discounts[3].discount_amount) | raw }}
-				</td>
-				<td>
-					{% do form.set_array_name('edit_discount_limit') -%}
-					{{ form.input_text('3', event.discounts[3].discount_limit) | raw }}
-				</td>
-				<td>
-					{% do form.set_array_name('edit_discount_expires') -%}
-					{{ form.input_text('3', event.discounts[3].discount_expires ? event.discounts[3].discount_expires | date : 0) | raw }}
-				</td>
-			</tr>		
+{% endfor %}
 		</table>
 {% endif %}
 
