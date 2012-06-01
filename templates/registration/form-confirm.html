@@ -106,7 +106,7 @@
 {% for key, item in validated_items %}
 					<tr>
 						<td class="label">{{ item.name }}</td>
-						<td class="value">{{ item.type == 'package' and POST.discount_code ? 'Discount code "%s"%s' | format(POST.discount_code, (discount_amount < 0 ? ' [-$%s]' | format(discount_amount * -1) : '')) : attribute(POST.item_meta, key) | capitalize }}</td>
+						<td class="value">{{ item.type == 'package' and POST.discount_code ? 'Discount code "%s"%s' | format(POST.discount_code, (discount_amount < 0 ? ' [-$%s]' | format(discount_amount * -1) : '')) : POST.item_meta[key] }}</td>
 						<td class="price">${{ dancer.is_vip ? item.price_for_vip : item.type == 'package' ? attribute(item, 'price_for_prereg', [discount_amount]) : item.price_for_prereg }}</td>
 					</tr>
 {% endfor %}
