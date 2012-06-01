@@ -116,7 +116,7 @@
 
 {% 	do form.set_array_name('package_tier') %}
 {% 	for item in packages %}
-							{{ form.input_hidden(item.id, {'value': item.price_tier}) | raw }}
+							{{ form.input_hidden(item.id, item.price_tier) | raw }}
 {% 	endfor %}
 {% 	do form.set_array_name(null) %}
 						</fieldset>
