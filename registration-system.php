@@ -832,7 +832,7 @@ class RegistrationSystem
 					break;
 				
 				case 'size':
-					if (!in_array($value, array_merge(array('None'), explode(',', $item->description())))) {
+					if (!in_array($value, array_merge(array('None'), explode(',', $item->description)))) {
 						self::$validation->set_error('item_' . $item->id(), sprintf('An invalid size was choosen for %s.', $item->name));
 						$items_did_validate = false;
 						continue 2;
