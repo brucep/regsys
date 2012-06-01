@@ -214,13 +214,14 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	
 	public function paypal_href()
 	{
-		$href = sprintf('https://%1$s/cgi-bin/webscr?cmd=_cart&upload=1&no_shipping=1&business=%2$s&custom=%3$d',
-			!self::$options['paypal_sandbox'] ? 'www.paypal.com' : 'www.sandbox.paypal.com',
+		$href = sprintf('https://%1$s/cgi-bin/webscr?cmd=_cart&upload=1&no_shipping=1&business=%2$s&notify_url=%3$s&custom=%4$d',
+			self::$options['paypal_sandbox'] ? 'www.sandbox.paypal.com' : 'www.paypal.com',
 			rawurlencode(self::$options['paypal_business']),
+			rawurlencode(plugins_url('paypal-confirm.php', __FILE__)),
 			$this->dancer_id);
 		
-		if (!empty($options['paypal_fee']) and !$dancer->is_vip()) {
-			$href .= sprintf('&item_name_1=%1$s&amount_1=%2$s', 'Processing%20Fee', $options['paypal_fee']);
+		if (!empty(self::$options['paypal_fee']) and !$this->is_vip()) {
+			$href .= sprintf('&item_name_1=%1$s&amount_1=%2$d', 'Processing%20Fee', self::$options['paypal_fee']);
 			$i = 2;
 		}
 		else {
@@ -232,10 +233,10 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 				continue;
 			}
 			
-			$href .= sprintf('&item_name_%1$d=%2$s&amount_%1$d=%3$s', $i, rawurlencode($item->name), rawurlencode($item->registered_price));
+			$href .= sprintf('&item_number_%1$d=%2$d&item_name_%1$d=%3$s&amount_%1$d=%4$s', $i,rawurlencode($item->id()), rawurlencode($item->name), rawurlencode($item->registered_price));
 			
 			if ($item->meta == 'size') {
-				$href .= sprintf('&on0_%1$d=%2$s&os0_%1$d=%3$s', $i, $item->meta_label(), ucfirst($item->registered_meta));
+				$href .= sprintf('&on0_%1$d=%2$s&os0_%1$d=%3$s', $i, $item->meta_label(), $item->registered_meta);
 			}
 			
 			$i++;
