@@ -159,7 +159,7 @@
 												<label>{{ form.input_radio(item.id, {'value': 'follow', 'disabled': not attribute(item, 'count_openings', ['follow'])}) | raw }}&nbsp;Follow</label>
 											</span>
 {% 			elseif item.meta == 'partner_name' %}
-											<label>Partner:&nbsp;{{ form.text_input(item.id, null, {'placeholder': "Partner's name"}) | raw }}</label><br />(Only one of you need to sign up.)
+											<label>Partner:&nbsp;{{ form.input_text(item.id, null, {'placeholder': "Partner's name"}) | raw }}</label><br />(Only one of you need to sign up.)
 {% 			elseif item.meta == 'team_members' %}
 											{% if item.description %}{{ item.description }}<br />{% endif %}
 											{{ form.input_textarea(item.id, null, {'rows': 6}) | raw }}
