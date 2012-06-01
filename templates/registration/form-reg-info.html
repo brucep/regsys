@@ -155,8 +155,8 @@
 {% 			do form.set_array_name('item_meta') %}
 {% 			if item.meta == 'position' %}
 											<span class="inline_radio">Register as:&nbsp;
-												<label>{{ form.input_radio(item.id, {'value': 'lead',   'disabled': not attribute(item, 'count_openings', ['lead'])}) | raw   }}&nbsp;Lead</label>
-												<label>{{ form.input_radio(item.id, {'value': 'follow', 'disabled': not attribute(item, 'count_openings', ['follow'])}) | raw }}&nbsp;Follow</label>
+												<label>{{ form.input_radio(item.id, {'value': 'Lead',   'disabled': not attribute(item, 'count_openings', ['lead'])}) | raw   }}&nbsp;Lead</label>
+												<label>{{ form.input_radio(item.id, {'value': 'Follow', 'disabled': not attribute(item, 'count_openings', ['follow'])}) | raw }}&nbsp;Follow</label>
 											</span>
 {% 			elseif item.meta == 'partner_name' %}
 											<label>Partner:&nbsp;{{ form.input_text(item.id, null, {'placeholder': "Partner's name"}) | raw }}</label><br />(Only one of you need to sign up.)

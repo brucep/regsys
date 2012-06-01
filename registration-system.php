@@ -794,9 +794,9 @@ class RegistrationSystem
 			switch ($item->meta) {
 				# If position wasn't specified specifically for item, use dancer's position.
 				case 'position':
-					if (!isset($_POST['item_meta'][$item->id()]) or !in_array($_POST['item_meta'][$item->id()], array('lead', 'follow'))) {
+					if (!isset($_POST['item_meta'][$item->id()]) or !in_array($_POST['item_meta'][$item->id()], array('Lead', 'Follow'))) {
 						if (!self::$validation->get_error('position')) {
-							$_POST['item_meta'][$item->id()] = ($_POST['position'] == 1) ? 'lead' : 'follow';
+							$_POST['item_meta'][$item->id()] = ($_POST['position'] == 1) ? 'Lead' : 'Follow';
 						}
 					}
 					break;
