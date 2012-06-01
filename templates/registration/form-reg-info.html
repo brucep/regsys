@@ -209,6 +209,11 @@
 								</tbody>
 							</table>
 
+{% 	if shirt_description %}
+							<div class="field" id="shirt-description">
+{{ shirt_description | raw }}
+							</div>
+{% 	endif %}
 {% 	if not vip %}
 							<div class="field">
 								<div class="caption">

@@ -497,6 +497,7 @@ class RegistrationSystem
 					'shirts'       => self::$event->items_where(array(':type' => 'shirt'),       true),
 					'validation'   => self::$validation,
 					'the_content'  => apply_filters('the_content', $post->post_content),
+					'shirt_description' => @file_get_contents(sprintf('%s/%s/shirt-description.html', get_theme_root(), get_stylesheet())),
 					);
 			}
 			else {
