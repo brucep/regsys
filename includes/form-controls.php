@@ -76,7 +76,7 @@ class RegistrationSystem_Form_Controls
 			$options = array();
 			
 			foreach ($temp as $value) {
-				$options[$value] = $value;
+				$options[$value] = ucfirst($value);
 			}
 			
 			unset($temp, $value);
