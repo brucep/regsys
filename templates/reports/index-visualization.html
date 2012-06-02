@@ -3,24 +3,25 @@
 	<h2>Registration Visualization</h2>
 
 	<!-- http://code.google.com/apis/ajax/playground/?type=visualization#line_chart -->
+	<!-- https://google-developers.appspot.com/chart/interactive/docs/gallery/linechart -->
 
 	<script type='text/javascript' charset="utf-8">
 		google.load('visualization', '1', {packages: ['corechart']});
-		
+
 		jQuery(document).ready(function($) {
 			// Create and populate the data table.
-			var data = google.visualization.arrayToDataTable([
-				['x',   'FOO', 'BAR'],
-				['Jun',   50,     40],
-				['Jul',   70,     55],
-			]);
-			
+			var data = google.visualization.arrayToDataTable(
+				{{ json | raw }}
+			);
+
 			// Create and draw the visualization.
 			new google.visualization.LineChart(document.getElementById('visualization')).
-				draw(data, {curveType: "function",
-					width: 800, height: 600,
-					vAxis: {maxValue: 10}}
-					);
+				draw(data, {
+					curveType: "none",
+					width:  850,
+					height: 500,
+					vAxis: {maxValue: 10},
+					});
 		});
 	</script>
 
