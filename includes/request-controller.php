@@ -535,6 +535,11 @@ class RegistrationSystem_Request_Controller
 		echo RegistrationSystem::render_template('reports/index-event.html', array('event' => $event));
 	}
 	
+	static public function report_index_visualization()
+	{
+		echo RegistrationSystem::render_template('reports/index-visualization.html');
+	}
+	
 	static public function report_housing_needed($event)
 	{
 		$dancers = $event->dancers_where(array(':housing_type' => 1));

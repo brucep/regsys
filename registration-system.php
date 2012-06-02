@@ -74,6 +74,10 @@ class RegistrationSystem
 	{
 		wp_enqueue_script('reg-sys-tablesorter',      plugins_url('js/jquery.tablesorter.min.js', __FILE__), array('jquery'));
 		wp_enqueue_script('reg-sys-tablesorter-init', plugins_url('js/tablesorter-init.js', __FILE__),       array('reg-sys-tablesorter'));
+		
+		if (isset($_GET['request']) and $_GET['request'] == 'report_index_visualization') {
+			wp_enqueue_script('reg-sys-google-jsapi', 'http://www.google.com/jsapi');
+		}
 	}
 	
 	static public function admin_print_styles()
@@ -236,7 +240,7 @@ class RegistrationSystem
 				
 				$params = array();
 				
-				if (!in_array($_GET['request'], array('report_index', 'admin_event_add'))) {
+				if (!in_array($_GET['request'], array('report_index', 'report_index_visualization', 'admin_event_add'))) {
 					if (!$params['event'] = self::$event = RegistrationSystem_Model_Event::get_event_by_id($_GET['event_id'])) {
 						throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
 					}
