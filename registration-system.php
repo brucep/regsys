@@ -2,7 +2,7 @@
 /*
 Plugin Name: Registration System
 Description: An event registration and reporting system for dance organizations.
-Version: 1.0
+Version: 2.0-dev
 Author: Bruce Phillips
 License: X11
 Note: Requires PHP 5.2.3 or later.
