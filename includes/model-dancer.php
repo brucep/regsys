@@ -11,7 +11,8 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	        $level,
 	        $mobile_phone,
 	        $note,
-	        $payment_method;
+	        $payment_method,
+	        $paypal_fee;
 	
 	private $event_id,
 	        $dancer_id,
@@ -51,7 +52,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		$this->date_registered = time();
 		$this->event_id = $event_id;
 		
-		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level_id, :status, :date_registered, :discount_id, :payment_method, :payment_confirmed, :payment_owed, :mobile_phone, :note)', array(
+		self::$database->query('INSERT %s_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level_id, :status, :date_registered, :discount_id, :payment_method, :payment_confirmed, :payment_owed, DEFAULT, :mobile_phone, :note)', array(
 			':event_id'          => $this->event_id,
 			':first_name'        => $this->first_name,
 			':last_name'         => $this->last_name,

@@ -289,6 +289,7 @@ class RegistrationSystem
 				payment_method varchar(6) NOT NULL,
 				payment_confirmed tinyint(1) unsigned NOT NULL DEFAULT '0',
 				payment_owed smallint(5) unsigned NOT NULL DEFAULT '0',
+				paypal_fee decimal(2,2) DEFAULT NULL,
 				mobile_phone varchar(30) NOT NULL DEFAULT '',
 				note varchar(255) NOT NULL DEFAULT '',
 				PRIMARY KEY  (dancer_id)

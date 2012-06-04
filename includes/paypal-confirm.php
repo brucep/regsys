@@ -48,7 +48,7 @@ try {
 	
 	
 	$payment_owed = $dancer->payment_owed();
-	unset($dancer, $event, $options);
+	unset($event);
 	
 	
 	$unconfirmed_registrations = array();
@@ -63,6 +63,7 @@ try {
 	
 	
 	$output[] = 'Dancer ID ' . $notification->custom;
+	$confirmed_registrations = 0;
 	
 	foreach ($notification->get_all_items() as $item) {
 		if (empty($item['number'])) {
@@ -74,11 +75,21 @@ try {
 			
 			$database->query('UPDATE %s_registrations SET paypal_confirmed = 1 WHERE dancer_id = ? AND item_id = ?', array($notification->custom, $item['number']));
 			
+			$confirmed_registrations++;
 			$output[] = 'Confirmed item ' . $item['number'];
 		}
 		else {
 			$output[] = '  Skipped item ' . $item['number'];
 		}
+	}
+	
+	if ($confirmed_registrations > 0) {
+		$fee = $options['paypal_fee'] ? $options['paypal_fee'] - $notification->mc_fee : $notification->mc_fee;
+		$database->query('UPDATE %s_dancers SET paypal_fee = ? WHERE dancer_id = ?', array($fee + $dancer->paypal_fee, $notification->custom));
+		$output[] = sprintf('$%.2f fee recorded%s', $fee, $options['paypal_fee'] ? sprintf(' (%d - %.2f)', $options['paypal_fee'], $notification->mc_fee) : '');
+	}
+	else {
+		$output[] = 'No fee recorded';
 	}
 	
 	$registrations_remaining = $database->query('SELECT COUNT(dancer_id) FROM %s_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom))->fetchColumn();
@@ -88,7 +99,7 @@ try {
 	
 	$database->query('UPDATE %s_dancers SET payment_owed = ?, payment_confirmed = ? WHERE dancer_id = ?', array($payment_owed, (!$registrations_remaining and $payment_owed == 0), $notification->custom));
 	
-	exit(implode("\n", $output));
+	isset($_GET['test']) ? exit(implode("\n", $output)) : exit();
 }
 catch (Exception $e) {
 	header('HTTP/1.1 500 Internal Server Error');

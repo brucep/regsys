@@ -7,12 +7,13 @@
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
-				<th class="manage-column column-title" width="18%">Name</th>
+				<th class="manage-column column-title" width="19%">Name</th>
 {% for item in items %}
 				<th class="manage-column">{{ item.name }}</th>
 {% endfor %}
-				<th class="manage-column">Total</th>
-				<th class="manage-column">Method</th>
+				<th class="manage-column" width="7%">PayPal Fee</th>
+				<th class="manage-column" width="9%">Total</th>
+				<th class="manage-column ellipsis" width="8%">Method</th>
 			</tr>
 		</thead>
 
@@ -22,19 +23,22 @@
 {% for item in items %}
 				<th class="manage-column">{{ item.name }}</th>
 {% endfor %}
+				<th class="manage-column">PayPal Fee</th>
 				<th class="manage-column">Total</th>
-				<th class="manage-column">Method</th>
+				<th class="manage-column ellipsis">Method</th>
 			</tr>
 		</tfoot>
 
 		<tbody>
+{% set fee_total = 0 %}
 {% for dancer in dancers if dancer.price_total %}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
 				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}</a></td>
-{% for item in items %}
-				<td>{% set price = attribute(dancer, 'price_for_registered_item', [item.id]) %}{% if price %}${{ price }}{% endif %}</td>
-{% endfor %}
-				<td>${{ dancer.price_total }}</td>
+{% 	for item in items %}
+				<td>{% set price = attribute(dancer, 'price_for_registered_item', [item.id]) %}{% if price %}{{ '$%d' | format(price) }}{% endif %}</td>
+{% 	endfor %}
+				<td>{% if dancer.paypal_fee %}{{ '$%.2f' | format(dancer.paypal_fee) }}{% set fee_total = fee_total + dancer.paypal_fee %}{% endif %}</td>
+				<td>{{ (dancer.paypal_fee ? '$%.2f' : '$%d') | format(dancer.price_total + dancer.paypal_fee) }}</td>
 				<td>{{ dancer.payment_method }}</td>
 			</tr>
 
@@ -42,9 +46,10 @@
 			<tr style="background-color: rgba(0, 255, 0, 0.1);">
 				<td class="column-title"><strong>Total<strong></td>
 {% for item in items %}
-				<td>${{ item.total_money_from_registrations }}</td>
+				<td>{{ '$%d' | format(item.total_money_from_registrations) }}</td>
 {% endfor %}
-				<td>${{ event.total_money_from_registrations }}</td>
+				<td>{{ '$%.2f' | format(fee_total) }}</td>
+				<td>{{ (fee_total ? '$%.2f' : '$%d') | format(event.total_money_from_registrations + fee_total) }}</td>
 				<td>&mdash;</td>
 			</tr>
 		</tbody>
