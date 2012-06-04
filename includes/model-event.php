@@ -41,7 +41,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	
 	public function items()
 	{
-		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
+		return self::$database->query('SELECT * FROM %1$s_items WHERE event_id = :event_id ORDER BY item_id ASC', array(':event_id' => $this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
 	}
 	
 	public function items_where(array $where, $exclude_expired = false)
