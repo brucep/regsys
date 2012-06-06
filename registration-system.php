@@ -305,6 +305,8 @@ class RegistrationSystem
 				has_volunteers tinyint(1) unsigned NOT NULL DEFAULT '0',
 				has_housing tinyint(1) unsigned NOT NULL DEFAULT '0',
 				housing_nights set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
+				visualization tinyint(1) unsigned NOT NULL DEFAULT '1',
+				visualization_color char(6) NOT NULL DEFAULT '#333',
 				PRIMARY KEY  (event_id),
 				UNIQUE KEY name (name)
 				);" .

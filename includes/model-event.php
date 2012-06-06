@@ -2,7 +2,9 @@
 
 class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 {
-	public  $name;
+	public  $name,
+	        $visualization,
+	        $visualization_color;
 	
 	private $event_id,
 	        $date_mail_prereg_end,

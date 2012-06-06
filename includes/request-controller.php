@@ -539,7 +539,7 @@ class RegistrationSystem_Request_Controller
 	{
 		$database = RegistrationSystem::get_database_connection();
 		$options  = RegistrationSystem::get_options();
-		$events   = array_reverse(RegistrationSystem_Model_Event::get_events());
+		$events   = $database->query('SELECT event_id, name, date_paypal_prereg_end FROM %s_events WHERE visualization = 1 ORDER BY name ASC')->fetchAll(PDO::FETCH_OBJ);
 		$data     = array(0 => array('x'));
 		
 		foreach ($events as $event) {
@@ -564,7 +564,7 @@ class RegistrationSystem_Request_Controller
 			return $range;
 		}
 		
-		$dates = $database->query('SELECT MIN(DISTINCT FROM_UNIXTIME(date_registered, "%%m-%%d")) AS start, MAX(DISTINCT FROM_UNIXTIME(date_registered, "%%m-%%d")) AS end FROM %1$s_dancers WHERE date_registered > 1')->fetch(PDO::FETCH_OBJ);
+		$dates = $database->query('SELECT MIN(DISTINCT FROM_UNIXTIME(date_registered, "%%m-%%d")) AS start, MAX(DISTINCT FROM_UNIXTIME(date_registered, "%%m-%%d")) AS end FROM %1$s_dancers WHERE date_registered > 1 AND event_id IN (SELECT event_id FROM %1$s_events WHERE visualization = 1)')->fetch(PDO::FETCH_OBJ);
 		$dates = createDateRange('2012-' . $dates->start, '2012-' . $dates->end);
 		
 		$i = 1;
@@ -572,14 +572,14 @@ class RegistrationSystem_Request_Controller
 			$data[$i] = array($date);
 			
 			foreach ($events as $event) {
-				if ($event->id() == $options['current_event_id'] and strtotime(date('Y-') . $date) > time()) {
+				if ($event->event_id == $options['current_event_id'] and strtotime(date('Y-') . $date) > time()) {
 					$data[$i][] = null;
 				}
-				elseif ($date > date('m-d', $event->date_paypal_prereg_end())) {
+				elseif ($date > date('m-d', $event->date_paypal_prereg_end)) {
 					$data[$i][] = null;
 				}
 				else {
-					$count = (int) $database->query('SELECT COUNT(dancer_id) FROM %1$s_dancers WHERE FROM_UNIXTIME(date_registered, "%%m-%%d") <= ? AND event_id = ?', array($date, $event->id()))->fetchColumn();
+					$count = (int) $database->query('SELECT COUNT(dancer_id) FROM %1$s_dancers WHERE FROM_UNIXTIME(date_registered, "%%m-%%d") <= ? AND event_id = ?', array($date, $event->event_id))->fetchColumn();
 					$data[$i][] = $count > 0 ? $count : null;
 				}
 			}
@@ -587,7 +587,9 @@ class RegistrationSystem_Request_Controller
 			$i++;
 		}
 		
-		echo RegistrationSystem::render_template('reports/index-visualization.html', array('json' => json_encode($data)));
+		$colors = $database->query('SELECT visualization_color FROM %s_events WHERE visualization = 1 ORDER BY name ASC')->fetchAll(PDO::FETCH_COLUMN);
+		
+		echo RegistrationSystem::render_template('reports/index-visualization.html', array('registration_data' => $data, 'colors' => $colors));
 	}
 	
 	static public function report_housing_needed($event)
