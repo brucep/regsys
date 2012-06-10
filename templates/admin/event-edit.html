@@ -145,6 +145,13 @@
 			</tr>
 {% endfor %}
 		</table>
+
+		<h3>Visualization</h3>
+
+		<table class="form-table">
+			{{ form.row_checkbox('Include in Visualization?', 'visualization', {}, 'This event is included in the registration visualization chart.') | raw }}
+			{{ form.row_text('Line Color', 'visualization', null, {'class': 'regular-text'}) | raw }}
+		</table>
 {% endif %}
 
 		<p class="submit"><input type="submit" class="button-primary" value="{% if GET.request == 'admin_event_add' %}Add Event{% else %}Edit Event{% endif %}"></p>

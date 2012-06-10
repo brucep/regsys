@@ -11,7 +11,7 @@
 		jQuery(document).ready(function($) {
 			// Create and populate the data table.
 			var data = google.visualization.arrayToDataTable(
-				{{ json | raw }}
+				{{ registration_data | json_encode | raw }}
 			);
 
 			// Create and draw the visualization.
@@ -21,6 +21,7 @@
 					width:  850,
 					height: 500,
 					vAxis: {maxValue: 10},
+					colors: {{ colors | json_encode | raw }},
 					});
 		});
 	</script>
