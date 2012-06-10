@@ -79,7 +79,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 			':dancer_id'               => $this->dancer_id,
 			':housing_type'            => (int) $this->housing_type,
 			':housing_spots_available' => (int) $this->housing_spots_available,
-			':housing_nights'          => (int) $this->housing_nights,
+			':housing_nights'          => (string) $this->housing_nights,
 			':housing_gender'          => (int) $this->housing_gender,
 			':housing_bedtime'         => (int) $this->housing_bedtime,
 			':housing_pets'            => (int) $this->housing_pets,

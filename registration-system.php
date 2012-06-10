@@ -496,6 +496,16 @@ class RegistrationSystem
 			if (empty($_POST) or !self::$validation->validate()) {
 				$file = 'form-reg-info';
 				
+				# Change housing night values back to array to retain values
+				if (self::$event->has_housing_registrations()) {
+					if (isset($_POST['housing_type_needed'])) {
+						$_POST['housing_needed']['housing_nights'] = array_combine(explode(',', $_POST['housing_needed']['housing_nights']), explode(',', $_POST['housing_needed']['housing_nights']));
+					}
+					elseif (isset($_POST['housing_type_provider'])) {
+						$_POST['housing_provider']['housing_nights'] = array_combine(explode(',', $_POST['housing_provider']['housing_nights']), explode(',', $_POST['housing_provider']['housing_nights']));
+					}
+				}
+				
 				$context = array(
 					'packages'     => self::$event->items_where(array(':type' => 'package'),     true),
 					'competitions' => self::$event->items_where(array(':type' => 'competition'), true),
@@ -879,13 +889,10 @@ class RegistrationSystem
 	static public function validate_housing_nights($nights)
 	{
 		if (is_array($nights)) {
-			$nights = array_sum($nights);
-		}
-		else {
-			$nights = (int) $nights;
+			$nights = implode(',', $nights);
 		}
 		
-		if ($nights > 0) {
+		if (!empty($nights)) {
 			return $nights;
 		}
 		else {

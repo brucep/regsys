@@ -243,8 +243,8 @@
 							{{ attribute(validation, 'get_error', ['housing_provider[housing_nights]']) | raw }}
 							<div class="field">
 								<div class="field-label">I can providing housing on:</div>
-{% 		for index, night in event.housing_nights %}
-								<div class="checkbox"><label><input type="checkbox" {%- if attribute(POST.housing_provider.housing_nights, index + 1) %} checked="checked"{% endif %} value="{{ index + 1 }}" name="housing_provider[housing_nights][{{ index + 1 }}]"> {{ night }}</label></div>
+{% 		for night in event.housing_nights %}
+								<div class="checkbox"><label><input type="checkbox" {%- if POST.housing_provider.housing_nights[nights] %} checked="checked"{% endif %} value="{{ night }}" name="housing_provider[housing_nights][{{ night }}]"> {{ night }}</label></div>
 {% 		endfor %}
 							</div>
 
@@ -287,8 +287,8 @@
 							{{ attribute(validation, 'get_error', ['housing_needed[housing_nights]']) | raw }}
 							<div class="field">
 								<div class="field-label">I need housing for:</div>
-{% 		for index, night in event.housing_nights %}
-								<div class="checkbox"><label><input type="checkbox" {%- if attribute(POST.housing_needed.housing_nights, index + 1) %} checked="checked"{% endif %} value="{{ index + 1 }}" name="housing_needed[housing_nights][{{ index + 1 }}]"> {{ night }}<label></div>
+{% 		for night in event.housing_nights %}
+								<div class="checkbox"><label><input type="checkbox" {%- if POST.housing_needed.housing_nights[night] %} checked="checked"{% endif %} value="{{ night }}" name="housing_needed[housing_nights][{{ night }}]"> {{ night }}<label></div>
 {% 		endfor %}
 							</div>
 
