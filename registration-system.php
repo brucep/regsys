@@ -554,6 +554,28 @@ class RegistrationSystem
 				if ($options['registration_testing']) {
 					$dancer_data['note'] = 'TEST';
 				}
+				else {
+					if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+						$ip = $_SERVER['HTTP_CLIENT_IP'];
+					}
+					elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+						$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+					}
+					elseif (!empty($_SERVER['HTTP_X_FORWARDED'])) {
+						$ip = $_SERVER['HTTP_X_FORWARDED'];
+					}
+					elseif (!empty($_SERVER['HTTP_FORWARDED_FOR'])) {
+						$ip = $_SERVER['HTTP_FORWARDED_FOR'];
+					}
+					elseif (!empty($_SERVER['HTTP_FORWARDED'])) {
+						$ip = $_SERVER['HTTP_FORWARDED'];
+					}
+					else {
+						$ip = $_SERVER['REMOTE_ADDR'];
+					}
+					
+					$dancer_data['note'] = 'IP Address: ' . $ip;
+				}
 				
 				if (self::$event->has_housing_registrations()) {
 					if (isset($dancer_data['housing_type_needed'])) {
