@@ -80,4 +80,10 @@
 {% endif %}
 	</ul>
 {% endif %}
+
+{% if dancer.note %}
+	<h4>Admin's Note</h4>
+
+	<p>{{ dancer.note | nl2br }}</p>
+{% endif %}
 {% endblock content %}
