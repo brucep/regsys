@@ -90,7 +90,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 			$price = !empty($this->price_scaled) ? $this->price_scaled : $this->price_prereg;
 		}
 		
-		if ($discount_amount) {
+		if ($discount_amount !== false) {
 			if ($discount_amount < 0) {
 				$price = $price - $discount_amount * -1; # Negative numbers for amount off
 			}
