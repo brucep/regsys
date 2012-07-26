@@ -551,6 +551,10 @@ class RegistrationSystem
 				$dancer_data['price_total']       = $price_total; // Needed for confirmation page
 				$dancer_data['payment_confirmed'] = ($price_total == 0) ? 1 : 0;
 				
+				if (empty($_POST['discount_code'])) {
+					$dancer_data['discount_id'] = self::$event->discount_by_code($_POST['discount_code'])->discount_id;
+				}
+				
 				if ($options['registration_testing']) {
 					$dancer_data['note'] = 'TEST';
 				}
