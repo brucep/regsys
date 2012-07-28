@@ -643,7 +643,7 @@ class RegistrationSystem
 					if (!$options['registration_testing'] or ($options['registration_testing'] and $options['email_testing'])) {
 						try {
 							if (!$dancer->send_confirmation_email()) {
-								throw new Exception('Email could not be sent to ' . $dancer->email());
+								throw new Exception('Email could not be sent to ' . $dancer->email);
 							}
 						}
 						catch (Exception $confirmation_email_failed) {
