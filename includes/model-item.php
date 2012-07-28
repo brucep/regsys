@@ -78,7 +78,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	public function price_for_prereg($discount_amount = false)
 	{
 		if ($this->type != 'package') {
-			$price = $this->price_prereg;
+			return (int) $this->price_prereg;
 		}
 		else {
 			if (!isset($this->price_scaled)) {
@@ -88,18 +88,18 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 			}
 			
 			$price = !empty($this->price_scaled) ? $this->price_scaled : $this->price_prereg;
-		}
-		
-		if ($discount_amount !== false) {
-			if ($discount_amount < 0) {
-				$price = $price - $discount_amount * -1; # Negative numbers for amount off
+			
+			if ($discount_amount !== false) {
+				if ($discount_amount < 0) {
+					$price = $price - $discount_amount * -1; # Negative numbers for amount off
+				}
+				else {
+					$price = $discount_amount; # Zero or positive number for fixed price
+				}
 			}
-			else {
-				$price = $discount_amount; # Zero or positive number for fixed price
-			}
+			
+			return (int) $price;
 		}
-		
-		return (int) $price;
 	}
 	
 	public function price_for_vip()
