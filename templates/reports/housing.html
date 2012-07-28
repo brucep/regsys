@@ -59,7 +59,7 @@
 		<tbody>
 {% for dancer in dancers %}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
-				<td class="column-title"><a href="{{ request_href ~ 'dancer' ~ '&dancer_id' ~ dancer.id }}">{{ dancer.name_last_first }}</a>{% if dancer.is_vip %} [VIP]{% endif %}</td>
+				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}</a>{% if dancer.is_vip %} [VIP]{% endif %}</td>
 {% for night in event.housing_nights %}
 				<td>{% if night in dancer.housing_nights %}&bull;{% endif %}</td>
 {% endfor %}
