@@ -16,36 +16,34 @@ Status: Volunteer
 Status: VIP
 {% endif -%}
 
-{% if event.has_housing_registrations %}
-{% 	if dancer.needs_housing %}
+{% if event.has_housing_registrations and dancer.needs_housing %}
 
 Housing Needed: 
-{% 		if dancer.housing_prefers_no_smoke %}
+{% 	if dancer.housing_prefers_no_smoke %}
   - I would prefer no smoking.
-{% 		endif %}
-{% 		if dancer.housing_prefers_no_pets %}
+{% 	endif %}
+{% 	if dancer.housing_prefers_no_pets %}
   - I would prefer no pets.
-{% 		endif %}
+{% 	endif %}
   - I would prefer to be housed with: {{ dancer.housing_gender }}
   - I will need housing for: {{ dancer.housing_nights | join(', ') }}
-{% 		if dancer.housing_comment %}
+{% 	if dancer.housing_comment %}
   - {{ dancer.housing_comment }}
-{% 		endif %}
-{% 	elseif dancer.is_housing_provider %}
+{% 	endif %}
+{% elseif event.has_housing_support and dancer.is_housing_provider %}
 
 Housing Provider:
   - I have room for {{ pluralize('%d person.', '%d persons.', dancer.housing_spots_available) | format(dancer.housing_spots_available) }}
-{% 		if dancer.housing_has_smoke %}
+{% 	if dancer.housing_has_smoke %}
   - I smoke.
-{% 		endif %}
-{% 		if dancer.housing_has_pets %}
+{% 	endif %}
+{% 	if dancer.housing_has_pets %}
   - I have pets.
-{% 		endif %}
+{% 	endif %}
   - I will house: {{ dancer.housing_gender }}
   - I will provide housing for: {{ dancer.housing_nights | join(', ') }}
-{% if dancer.housing_comment %}
+{% 	if dancer.housing_comment %}
   - {{ dancer.housing_comment }}
-{% 		endif %}
 {% 	endif %}
 {% endif %}
 

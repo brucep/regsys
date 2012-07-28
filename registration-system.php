@@ -467,7 +467,7 @@ class RegistrationSystem
 				}
 				
 				# Housing
-				if (self::$event->has_housing_registrations()) {
+				if (self::$event->has_housing_support()) {
 					self::$validation->add_rules(array(
 						'housing_provider[housing_spots_available]' => 'if_set[housing_type_provider]|intval|greater_than[0]',
 						'housing_provider[housing_smoke]'           => 'if_set[housing_type_provider]|intval|in[0,1]',
@@ -476,19 +476,23 @@ class RegistrationSystem
 						'housing_provider[housing_bedtime]'         => 'if_set[housing_type_provider]|intval|in[0,1,2]',
 						'housing_provider[housing_nights]'          => 'if_set[housing_type_provider]|RegistrationSystem::validate_housing_nights',
 						'housing_provider[housing_comment]'         => 'if_set[housing_type_provider]|trim|stripslashes|max_length[65536]',
-						'housing_needed[housing_from_scene]'        => 'if_set[housing_type_needed]|trim|required|max_length[255]|ucwords',
-						'housing_needed[housing_smoke]'             => 'if_set[housing_type_needed]|intval|in[0,1]',
-						'housing_needed[housing_pets]'              => 'if_set[housing_type_needed]|intval|in[0,1]',
-						'housing_needed[housing_gender]'            => 'if_set[housing_type_needed]|intval|in[1,2,3]',
-						'housing_needed[housing_bedtime]'           => 'if_set[housing_type_needed]|intval|in[0,1,2]',
-						'housing_needed[housing_nights]'            => 'if_set[housing_type_needed]|RegistrationSystem::validate_housing_nights',
-						'housing_needed[housing_comment]'           => 'if_set[housing_type_needed]|trim|stripslashes|max_length[65536]',
+						));
+				}
+				
+				if (self::$event->has_housing_registrations()) {
+					self::$validation->add_rules(array(
+						'housing_needed[housing_from_scene]' => 'if_set[housing_type_needed]|trim|required|max_length[255]|ucwords',
+						'housing_needed[housing_smoke]'      => 'if_set[housing_type_needed]|intval|in[0,1]',
+						'housing_needed[housing_pets]'       => 'if_set[housing_type_needed]|intval|in[0,1]',
+						'housing_needed[housing_gender]'     => 'if_set[housing_type_needed]|intval|in[1,2,3]',
+						'housing_needed[housing_bedtime]'    => 'if_set[housing_type_needed]|intval|in[0,1,2]',
+						'housing_needed[housing_nights]'     => 'if_set[housing_type_needed]|RegistrationSystem::validate_housing_nights',
+						'housing_needed[housing_comment]'    => 'if_set[housing_type_needed]|trim|stripslashes|max_length[65536]',
 						));
 				}
 				elseif (self::$event->has_housing_support()) {
 					# Invalidate form if housing registrations were shut off during the registration process.
 					self::$validation->add_rules(array(
-						'housing_type_provider' => 'if_set[housing_type_provider]|in[0]',
 						'housing_type_needed'   => 'if_set[housing_type_needed]|in[0]',
 						));
 				}
@@ -499,13 +503,11 @@ class RegistrationSystem
 				$file = 'form-reg-info';
 				
 				# Change housing night values back to array to retain values
-				if (self::$event->has_housing_registrations()) {
-					if (isset($_POST['housing_type_needed'])) {
-						$_POST['housing_needed']['housing_nights'] = array_combine(explode(',', $_POST['housing_needed']['housing_nights']), explode(',', $_POST['housing_needed']['housing_nights']));
-					}
-					elseif (isset($_POST['housing_type_provider'])) {
-						$_POST['housing_provider']['housing_nights'] = array_combine(explode(',', $_POST['housing_provider']['housing_nights']), explode(',', $_POST['housing_provider']['housing_nights']));
-					}
+				if (self::$event->has_housing_registrations() and isset($_POST['housing_type_needed'])) {
+					$_POST['housing_needed']['housing_nights'] = array_combine(explode(',', $_POST['housing_needed']['housing_nights']), explode(',', $_POST['housing_needed']['housing_nights']));
+				}
+				elseif (self::$event->has_housing_support() and isset($_POST['housing_type_provider'])) {
+					$_POST['housing_provider']['housing_nights'] = array_combine(explode(',', $_POST['housing_provider']['housing_nights']), explode(',', $_POST['housing_provider']['housing_nights']));
 				}
 				
 				$context = array(
@@ -581,18 +583,16 @@ class RegistrationSystem
 					$dancer_data['note'] = 'IP Address: ' . $ip;
 				}
 				
-				if (self::$event->has_housing_registrations()) {
-					if (isset($dancer_data['housing_type_needed'])) {
-						$dancer_data = array_merge($dancer_data, $dancer_data['housing_needed']);
-						$dancer_data['housing_type'] = 1;
-					}
-					elseif (isset($dancer_data['housing_type_provider'])) {
-						$dancer_data = array_merge($dancer_data, $dancer_data['housing_provider']);
-						$dancer_data['housing_type'] = 2;
-					}
-					
-					unset($dancer_data['housing_type_needed'],$dancer_data['housing_needed'], $dancer_data['housing_type_provider'], $dancer_data['housing_provider']);
+				if (self::$event->has_housing_registrations() and isset($dancer_data['housing_type_needed'])) {
+					$dancer_data = array_merge($dancer_data, $dancer_data['housing_needed']);
+					$dancer_data['housing_type'] = 1;
 				}
+				elseif (self::$event->has_housing_support() and isset($dancer_data['housing_type_provider'])) {
+					$dancer_data = array_merge($dancer_data, $dancer_data['housing_provider']);
+					$dancer_data['housing_type'] = 2;
+				}
+				
+				unset($dancer_data['discount_code'], $dancer_data['housing_type_needed'], $dancer_data['housing_needed'], $dancer_data['housing_type_provider'], $dancer_data['housing_provider']);
 				
 				$dancer = new RegistrationSystem_Model_Dancer($dancer_data);
 				unset($dancer_data);
@@ -611,7 +611,7 @@ class RegistrationSystem
 					$dancer->add(self::$event->id());
 					
 					# Add housing
-					if (self::$event->has_housing_registrations() and ($dancer->needs_housing() or $dancer->is_housing_provider())) {
+					if ((self::$event->has_housing_registrations() and $dancer->needs_housing()) or (self::$event->has_housing_support() and $dancer->is_housing_provider())) {
 						$dancer->add_housing();
 					}
 					

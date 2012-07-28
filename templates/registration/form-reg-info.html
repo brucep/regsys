@@ -227,7 +227,6 @@
 
 {# HOUSING #######################}
 {% if event.has_housing_support %}
-{% 	if event.has_housing_registrations %}
 						<h2><label>{{ form.input_checkbox('housing_type_provider', {'attributes': {'id': 'housing_type_provider'}}) | raw }} I Can Provide Housing</label> <span>(Optional)</span></h2>
 						<fieldset id="housing_type_provider_fields">{% do form.set_array_name('housing_provider') %}
 							{{ attribute(validation, 'get_error', ['housing_provider[housing_spots_available]']) | raw }}
@@ -243,9 +242,9 @@
 							{{ attribute(validation, 'get_error', ['housing_provider[housing_nights]']) | raw }}
 							<div class="field">
 								<div class="field-label">I can providing housing on:</div>
-{% 		for night in event.housing_nights %}
+{% 	for night in event.housing_nights %}
 								<div class="checkbox"><label><input type="checkbox" {%- if POST.housing_provider.housing_nights[nights] %} checked="checked"{% endif %} value="{{ night }}" name="housing_provider[housing_nights][{{ night }}]"> {{ night }}</label></div>
-{% 		endfor %}
+{% 	endfor %}
 							</div>
 
 							{{ attribute(validation, 'get_error', ['housing_provider[housing_gender]']) | raw }}
@@ -270,8 +269,9 @@
 								{{ form.input_textarea('housing_comment', null, {'rows': 6}) | raw }}
 							</div>
 						</fieldset>
+{% endif %}
 
-						
+{% if event.has_housing_registrations %}
 						<h2>{% do form.set_array_name(null) %}<label>{{ form.input_checkbox('housing_type_needed', {'attributes': {'id': 'housing_type_needed'}}) | raw }} I Need Housing</label> <span>(Optional)</span></h2>
 						<fieldset id="housing_type_needed_fields">{% do form.set_array_name('housing_needed') %}
 							{{ attribute(validation, 'get_error', ['housing_needed[housing_from_scene]']) | raw }}
@@ -287,9 +287,9 @@
 							{{ attribute(validation, 'get_error', ['housing_needed[housing_nights]']) | raw }}
 							<div class="field">
 								<div class="field-label">I need housing for:</div>
-{% 		for night in event.housing_nights %}
+{% 	for night in event.housing_nights %}
 								<div class="checkbox"><label><input type="checkbox" {%- if POST.housing_needed.housing_nights[night] %} checked="checked"{% endif %} value="{{ night }}" name="housing_needed[housing_nights][{{ night }}]"> {{ night }}<label></div>
-{% 		endfor %}
+{% 	endfor %}
 							</div>
 
 							{{ attribute(validation, 'get_error', ['housing_needed[housing_gender]']) | raw }}
@@ -314,19 +314,18 @@
 								{{ form.input_textarea('housing_comment', null, {'rows': 6}) | raw }}
 							</div>
 						</fieldset>{% do form.set_array_name(null) %}
-{% 	else %}
+{% elseif event.has_housing_support %}
+						<h2>I Need Housing <span>(Optional)</span></h2>
 						<fieldset>
-							{{ attribute(validation, 'get_error', ['housing_type_provider']) | raw }}
 							{{ attribute(validation, 'get_error', ['housing_type_needed'])   | raw }}
 							<div class="field">Housing requests are no longer available for this event.</div>
 						</fieldset>
-{% 	endif %}
 {% endif %}
 
 
 {# PAYMENT METHOD ##########################################}
 						<h2>Payment Method</h2>
-						<fieldset id="payment">
+						<fieldset id="payment">{% do form.set_array_name(null) %}
 							{{ attribute(validation, 'get_error', ['payment_method']) | raw }}
 							<div class="field">
 {% if time <= event.date_paypal_prereg_end %}

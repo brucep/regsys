@@ -32,18 +32,16 @@
 {% 	endif %}
 {% endfor %}
 
-{% if event.has_housing_registrations %}
-{% 	if dancer.needs_housing %}
+{% if event.has_housing_registrations and dancer.needs_housing %}
 				{{ form.input_hidden('housing_type_needed') | raw }}
-{% 		for field in ['from_scene', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment'] %}
+{% 	for field in ['from_scene', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment'] %}
 				{{ form.input_hidden('housing_needed[housing_%s]' | format(field), attribute(POST.housing_needed, 'housing_' ~ field)) | raw }}
-{% 		endfor %}
-{% 	elseif dancer.is_housing_provider %}
+{% 	endfor %}
+{% elseif event.has_housing_support and dancer.is_housing_provider %}
 				{{ form.input_hidden('housing_type_provider') | raw }}
-{% 		for field in ['spots_available', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment'] %}
+{% 	for field in ['spots_available', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment'] %}
 				{{ form.input_hidden('housing_provider[housing_%s]' | format(field), attribute(POST.housing_provider, 'housing_' ~ field)) | raw }}
-{% 		endfor %}
-{% 	endif %}
+{% 	endfor %}
 {% endif %}
 
 				<table>
@@ -88,20 +86,18 @@
 						<td class="price"></td>
 					</tr>
 {% endif %}
-{% if event.has_housing_registrations %}
-{% 	if dancer.needs_housing %}
+{% if event.has_housing_registrations and dancer.needs_housing %}
 					<tr>
 						<td class="label">Housing Needed</td>
 						<td class="value"></td>
 						<td class="price"></td>
 					</tr>
-{% 	elseif dancer.is_housing_provider %}
+{% elseif event.has_housing_support and dancer.is_housing_provider %}
 					<tr>
 						<td class="label">Housing Provider</td>
 						<td class="value">(Thank you!)</td>
 						<td class="price"></td>
 					</tr>
-{% 	endif %}
 {% endif %}
 {% for key, item in validated_items %}
 					<tr>
