@@ -58,8 +58,8 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		$where[':event_id'] = $this->event_id;
 		
 		if ($exclude_expired) {
-			$query .= ' AND date_expires <= :date_expires';
-			$where[':date_expires'] = time();
+			$query .= ' AND (date_expires = 0 OR date_expires > :current_time)';
+			$where[':current_time'] = time();
 		}
 		
 		return self::$database->query('SELECT * FROM %1$s_items WHERE ' . $query . ' ORDER BY item_id ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
