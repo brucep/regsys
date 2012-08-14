@@ -14,6 +14,7 @@
 			<tr>
 				<th class="manage-column column-title"><div>Name</div></th>
 				<th class="manage-column"><div>Mobile Phone Number</div></th>
+				<th class="manage-column"><div>Date Registered</div></th>
 			</tr>
 		</thead>
 
@@ -21,6 +22,7 @@
 			<tr>
 				<th class="manage-column column-title"><div>Name</div></th>
 				<th class="manage-column"><div>Mobile Phone Number</div></th>
+				<th class="manage-column"><div>Date Registered</div></th>
 			</tr>
 		</tfoot>
 
@@ -29,6 +31,7 @@
 			<tr class="vcard">
 				<td class="column-title"><a class="n" href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}"><span class="family-name">{{ dancer.last_name }}</span>, <span class="given-name">{{ dancer.first_name }}</span></a></td>
 				<td class="tel">{{ dancer.mobile_phone }}</td>
+				<td class="date">{{ dancer.date_registered | date }}</td>
 			</tr>
 {% endfor %}
 		</tbody>
