@@ -135,9 +135,9 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		return $this->registered_dancers;
 	}
 	
-	public function total_money_from_registrations()
+	public function total_money_from_registrations($payment_method)
 	{
-		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations WHERE %1$s_registrations.`event_id` = :event_id AND item_id = :item_id', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
+		return self::$database->query('SELECT SUM(price) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING (dancer_id) WHERE %1$s_registrations.event_id = ? AND payment_method = ? AND item_id = ?', array($this->event_id, $payment_method, $this->item_id))->fetchColumn();
 	}
 	
 	public function is_expired()
