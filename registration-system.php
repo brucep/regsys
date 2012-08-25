@@ -233,7 +233,9 @@ class RegistrationSystem
 				$_GET['request'] = 'report_index';
 			}
 			
-			if (is_callable(array('RegistrationSystem_Request_Controller', $_GET['request']))) {
+			@include sprintf('%s/controllers/%s.php', dirname(__FILE__), str_replace('_', '-', $_GET['request']));
+			
+			if (is_callable('regsys_' . $_GET['request'])) {
 				if (substr($_GET['request'], 0, 6) == 'admin_' and !current_user_can('administrator')) {
 					throw new Exception(__('Cheatin&#8217; uh?'));
 				}
@@ -258,7 +260,7 @@ class RegistrationSystem
 					}
 				}
 				
-				call_user_func_array(array('RegistrationSystem_Request_Controller', $_GET['request']), $params);
+				call_user_func_array('regsys_' . $_GET['request'], $params);
 			}
 			else {
 				throw new Exception(sprintf('Unable to handle page request: %s', esc_html($_GET['request'])));

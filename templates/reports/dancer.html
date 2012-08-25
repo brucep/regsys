@@ -33,7 +33,7 @@
 {% if admin %}
 		<a class="button" href="{{ request_href ~ 'admin_dancer_registration_edit' ~ '&dancer_id=' ~ dancer.id }}">Edit Registrations</a>
 		<a class="button" href="{{ dancer.paypal_href }}" >PayPal Link</a>
-		<a class="button" href="{{ request_href ~ 'admin_dancer_resend_confirmation_email' ~ '&dancer_id=' ~ dancer.id ~ '&noheader=true' }}">Resend Confirmation Email</a>
+		<a class="button" href="{{ request_href ~ 'admin_dancer_resend_email' ~ '&dancer_id=' ~ dancer.id ~ '&noheader=true' }}">Resend Confirmation Email</a>
 {% endif %}
 	</h4>
 
