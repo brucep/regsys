@@ -10,16 +10,6 @@ function regsys_report_numbers($event)
 	$lists['Dancers']['Follows'] = $event->count_dancers(array(':position' => 2));
 	$lists['Dancers']['Ratio']   = @round($lists['Dancers']['Follows'] / $lists['Dancers']['Leads'], 2);
 	
-	if ($event->has_discounts()) {
-		foreach ($event->discounts() as $d) {
-			$lists['Discounts'][$d->discount_code] = $event->count_discounts_used($d->discount_code);
-			
-			if ($d->discount_limit) {
-				$lists['Discounts'][$d->discount_code] .= ' of ' . $d->discount_limit;
-			}
-		}
-	}
-	
 	# Levels
 	if ($event->has_levels()) {
 		foreach ($event->levels() as $level) {

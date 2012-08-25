@@ -3,32 +3,21 @@
 {% block content %}
 	<h3>Discounts</h3>
 
-{% if dancers %}
-	<table class="widefat page fixed report">
-		<thead>
-			<tr>
-				<th class="manage-column column-title"><div>Name</div></th>
-				<th class="manage-column"><div>Discount Code</div></th>
-			</tr>
-		</thead>
+{%- for discount_code, dancers in groups %}
 
-		<tfoot>
-			<tr>
-				<th class="manage-column column-title"><div>Name</div></th>
-				<th class="manage-column"><div>Discount Code</div></th>
-			</tr>
-		</tfoot>
 
-		<tbody>
-{% for dancer in dancers %}
-			<tr>
-				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}</a></td>
-				<td>{{ event.discounts[dancer.discount_id].discount_code }}</td>
-			</tr>
-{% endfor %}
-		</tbody>
-	</table>
-{% else %}
+	<h4>{{ discount_code }}</h4>
+	<p>{{ '%d used; %d Mail; %d PayPal' | format(
+		attribute(event, 'count_discounts_used', [discount_code]),
+		attribute(event, 'count_discounts_used', [discount_code, 'Mail']),
+		attribute(event, 'count_discounts_used', [discount_code, 'PayPal'])
+		) }}</p>
+	<ul>
+{% 	for dancer in dancers %}
+		<li><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}</a></li>
+{% 	endfor %}
+	</ul>
+{%- else %}
 	<p>No discount codes have been used for this event.</p>
-{% endif %}
+{% endfor %}
 {% endblock content %}

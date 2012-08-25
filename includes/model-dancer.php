@@ -5,6 +5,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	public  $first_name,
 	        $last_name,
 	        $email,
+	        $discount_code,
 	        $discount_id,
 	        $housing_comment,
 	        $housing_from_scene,

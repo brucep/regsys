@@ -141,9 +141,15 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return ($result !== false) ? (int) $result : false;
 	}
 	
-	public function count_discounts_used($code)
+	public function count_discounts_used($code, $payment_method = null)
 	{
-		$result = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_dancers JOIN %1$s_event_discounts USING(discount_id) WHERE %1$s_dancers.`event_id` = ? AND %1$s_event_discounts.`discount_code` = ?', array($this->event_id, $code))->fetchColumn();
+		if ($payment_method == null) {
+			$result = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_dancers JOIN %1$s_event_discounts USING(discount_id) WHERE %1$s_dancers.event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchColumn();
+		}
+		else {
+			$result = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_dancers JOIN %1$s_event_discounts USING(discount_id) WHERE %1$s_dancers.event_id = ? AND discount_code = ? AND payment_method = ?', array($this->event_id, $code, $payment_method))->fetchColumn();
+		}
+		
 		return ($result !== false) ? (int) $result : false;
 	}
 	
