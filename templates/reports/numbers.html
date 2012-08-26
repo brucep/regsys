@@ -12,4 +12,91 @@
 	</ul>
 
 {% endfor %}
+
+
+{% for item in tiered_packages %}
+	<h4 style="margin-top: 2em;">Package –  {{ item.name }}</h4>
+	<table class="widefat page fixed report">
+		<thead>
+			<tr>
+				<th class="manage-column column-title"></th>
+				<th class="manage-column">Total</th>
+{% 	for payment_method in event.payment_methods %}
+				<th class="manage-column">{{ payment_method }}</th>
+{% 	endfor %}
+			</tr>
+		</thead>
+
+		<tbody>
+{% 	for price, numbers in item.registration_price_numbers %}
+			<tr class="{{- cycle(['', ' alternate'], loop.index) }}">
+				<td>{% if price == 'Total' %}<em>{{ item.name }}</em>{% else %}{{ '%s: $%d' | format(item.name, price) }}{% endif %}</td>
+{% 		for number in numbers %}
+				<td>{{ number }}</td>
+{% 		endfor %}
+			</tr>
+{% 	else %}
+			<tr><td colspan="{{ 2 + (event.payment_methods | length) }}">There are no registrations for this item.</td></tr>
+{% 	endfor %}
+		</tbody>
+	</table>
+{% endfor %}
+
+
+{% if packages_and_comps %}
+	<h4 style="margin-top: 2em;">{% if tiered_packages %}Other {% endif -%} Packages and Competitions</h4>
+	<table class="widefat page fixed report">
+		<thead>
+			<tr>
+				<th class="manage-column column-title"></th>
+				<th class="manage-column">Total</th>
+{% 	for payment_method in event.payment_methods %}
+				<th class="manage-column">{{ payment_method }}</th>
+{% 	endfor %}
+			</tr>
+		</thead>
+
+		<tbody>
+{% 	for item in packages_and_comps %}
+			<tr class="{{- cycle(['', ' alternate'], loop.index) }}">
+				<td>{{ item.name }}</td>
+				<td>{% if item.type == 'package' %}{{ '%d%s' | format(item.count_registrations - item.count_registrations_for_vips, item.count_registrations_for_vips ? ' (+%d VIPs)' | format(item.count_registrations_for_vips) : '') }}{% else %}{{ item.count_registrations }}{% endif %}</td>
+{% 		for payment_method in event.payment_methods %}
+				<td>{{ attribute(item, 'count_registrations_by_payment_method', [payment_method]) }}</td>
+{% 		endfor %}
+			</tr>
+{% 	endfor %}
+		</tbody>
+	
+	</table>
+{% endif %}
+
+{% if shirts %}
+	<h4 style="margin-top: 2em;">Shirts</h4>
+	<table class="widefat page fixed report">
+		<thead>
+			<tr>
+				<th class="manage-column column-title" width="22%"></th>
+{% 	for size in sizes %}
+				<th class="manage-column">{{ size }}</th>
+{% 	endfor %}
+				<th class="manage-column">Total</th>
+				<th class="manage-column" width="16%">Payment Methods</th>
+			</tr>
+		</thead>
+
+		<tbody>
+{% 	for item in shirts %}
+			<tr class="{{- cycle(['', ' alternate'], loop.index) }}">
+				<td>{{ item.name }}</td>
+{% 		for size in sizes %}
+				<td>{% if size in item.sizes %}{{ attribute(item, 'count_registrations_by_size', [size]) }}{% else %}&mdash;{% endif %}</td>
+{% 		endfor %}
+				<td>{{ item.count_registrations }}</td>
+				<td>{% for payment_method in event.payment_methods %}{{ '%d %s%s' | format(attribute(item, 'count_registrations_by_payment_method', [payment_method]), payment_method, not loop.last ? '; ' : '') }}{% endfor %}</td>
+			</tr>
+{% 	endfor %}
+		</tbody>
+	</table>
+{% endif %}
 {% endblock content %}

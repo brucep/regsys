@@ -12,6 +12,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	private $event_id,
 	        $item_id,
 	        $count_registrations,
+	        $count_registrations_for_vips,
 	        $count_registrations_by_position,
 	        $date_expires,
 	        $limit_per_position,
@@ -145,6 +146,11 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		return (!empty($this->date_expires) and time() > $this->date_expires);
 	}
 	
+	public function sizes()
+	{
+		return ($this->type == 'shirt') ? explode(',', $this->description) : null;
+	}
+	
 	public function count_openings($position = false)
 	{
 		if (!isset($this->openings)) {
@@ -207,6 +213,14 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		return $this->count_registrations;
 	}
 	
+	public function count_registrations_for_vips() {
+		if (!isset($this->count_registrations_for_vips)) {
+			$this->count_registrations_for_vips = (int) self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE item_id = ? AND status = 2', array($this->item_id))->fetchColumn();
+		}
+		
+		return $this->count_registrations_for_vips;
+	}
+	
 	public function count_registrations_by_position()
 	{
 		if (!isset($this->count_registrations_by_position)) {
@@ -233,29 +247,62 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 			_n('follow', 'follows', $result['follows']));
 	}
 	
-	private function count_registrations_where(array $where = array(), $join_table = false)
+	public function registration_price_numbers() {
+		$event = RegistrationSystem_Model_Event::get_event_by_id($this->event_id);
+		$result = array();
+		
+		if ($this->type == 'package' and self::$database->query('SELECT item_id FROM %s_item_prices WHERE item_id = ?', array($this->item_id))->fetchColumn()) {
+			$registrations = self::$database->query('SELECT price, payment_method FROM %1$s_registrations LEFT JOIN %1$s_dancers USING (dancer_id) WHERE price > 0 AND item_id = ? ORDER BY price ASC', array($this->item_id))->fetchAll(PDO::FETCH_OBJ);
+			
+			foreach ($registrations as $reg) {
+				if (!isset($result[$reg->price])) {
+					$result[$reg->price] = array_combine(array_merge(array('Total'), $event->payment_methods()), array(0, 0, 0));
+				}
+				
+				$result[$reg->price]['Total']++;
+				$result[$reg->price][$reg->payment_method]++;
+			}
+			
+			$result['Total']['Total'] = sprintf('%d%s', $this->count_registrations() - $this->count_registrations_for_vips(), $this->count_registrations_for_vips() ? sprintf(' (+%d VIPs)', $this->count_registrations_for_vips()) : '');
+			
+			foreach ($event->payment_methods() as $payment_method) {
+				$result['Total'][$payment_method] = $this->count_registrations_by_payment_method($payment_method);
+			}
+			
+			return $result;
+		}
+		else {
+			return null;
+		}
+	}
+	
+	public function count_registrations_by_payment_method($payment_method)
+	{
+		return self::$database->query('SELECT COUNT(dancer_id) from %1$s_registrations LEFT JOIN %1$s_dancers USING (dancer_id) WHERE price > 0 AND item_id = ? AND payment_method = ?', array($this->item_id, $payment_method))->fetchColumn();
+	}
+	
+	public function count_registrations_by_size($size)
+	{
+		return self::$database->query('SELECT COUNT(dancer_id) from %s_registrations WHERE item_id = ? AND item_meta = ?', array($this->item_id, $size))->fetchColumn();
+	}
+	
+	private function count_registrations_where(array $where = array(), $join_dancers_table = false)
 	{
 		$where[':item_id'] = $this->item_id;
-		$query = array('%1$s_registrations.`event_id` = :event_id');
+		$query = array('%1$s_registrations.event_id = :event_id');
 		
 		foreach ($where as $field => $value) {
 			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
 		}
 		
-		$query = ' WHERE '.implode(' AND', $query);
+		$query = ' WHERE ' . implode(' AND', $query);
 		$where[':event_id'] = $this->event_id;
 		
-		switch ($join_table) {
-			case 'items':
-				$query = ' JOIN %1$s_items USING(item_id)'.$query;
-				break;
-			
-			case 'dancers':
-				$query = ' JOIN %1$s_dancers USING(dancer_id)'.$query;
-				break;
+		if ($join_dancers_table) {
+			$query = ' JOIN %1$s_dancers USING(dancer_id)' . $query;
 		}
 		
-		$result = self::$database->query('SELECT COUNT(*) FROM %1$s_registrations'.$query, $where)->fetchColumn();
+		$result = self::$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations' . $query, $where)->fetchColumn();
 		return ($result !== false) ? (int) $result : false;
 	}
 }

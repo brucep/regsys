@@ -5,7 +5,7 @@ function regsys_report_numbers($event)
 	$database = RegistrationSystem::get_database_connection();
 	
 	# Dancers
-	$lists['Dancers']['Total']   = $event->count_dancers();
+	$lists['Dancers']['Total']   = sprintf('%d [%d Mail; %d PayPal]', $event->count_dancers(), $event->count_dancers(array(':payment_method' => 'Mail')), $event->count_dancers(array(':payment_method' => 'PayPal')));
 	$lists['Dancers']['Leads']   = $event->count_dancers(array(':position' => 1));
 	$lists['Dancers']['Follows'] = $event->count_dancers(array(':position' => 2));
 	$lists['Dancers']['Ratio']   = @round($lists['Dancers']['Follows'] / $lists['Dancers']['Leads'], 2);
@@ -23,35 +23,24 @@ function regsys_report_numbers($event)
 		$lists['Levels (All Dancers)'] = array_filter($lists['Levels (All Dancers)']);
 	}
 	
-	# Packages
-	$lists['Packages'] = array();
-	$packages = $event->items_where(array(':preregistration' => 1, ':type' => 'package'));
-	foreach ($packages as $item) {
-		$lists['Packages'][$item->name] = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` != 2', array(':item_id' => $item->id()))->fetchColumn();
-		
-		if ($event->has_vip()) {
-			$vip_count = $database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`item_id` = :item_id AND %1$s_dancers.`status` = 2', array(':item_id' => $item->id()))->fetchColumn();
-			
-			if ($vip_count) {
-				$lists['Packages'][$item->name] .= sprintf(' (+%d %s)', $vip_count, _n('VIP', 'VIPs', $vip_count));
-			}
-		}
-	}
-	$lists['Packages'] = array_filter($lists['Packages']);
+	# Packages and Competitions
+	$tiered_packages    = $database->query('SELECT * FROM %1$s_items WHERE item_id IN     (SELECT DISTINCT item_id FROM %1$s_item_prices WHERE event_id = ?)', array($event->id()))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
+	$packages_and_comps = $database->query('SELECT * FROM %1$s_items WHERE item_id NOT IN (SELECT DISTINCT item_id FROM %1$s_item_prices WHERE event_id = :event_id) AND event_id = :event_id AND type != "shirt"', array(':event_id' => $event->id()))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
 	
 	# Shirts
-	$shirts = $event->items_where(array(':preregistration' => 1, ':type' => 'shirt'));
-	foreach ($shirts as $item) {
-		$header_key = sprintf('%s (%d)', $item->name, $event->count_registrations_where(array(':item_id' => $item->id())));
-		
-		foreach (explode(',', $item->description) as $size) {
-			$lists[$header_key][ucfirst($size)] = $event->count_registrations_where(array(':item_id' => $item->id(), ':item_meta' => $size));
-		}
-		
-		$lists[$header_key] = array_filter($lists[$header_key]);
+	$shirts = $event->items_where(array(':type' => 'shirt'));
+	$sizes = array();
+	foreach ($shirts as &$item) {
+		$sizes = array_merge($sizes, $item->sizes());
 	}
+	$sizes = array_unique($sizes);
+	
 	
 	echo RegistrationSystem::render_template('reports/numbers.html', array(
-		'event' => $event,
-		'lists' => $lists));
+		'event'  => $event,
+		'lists'  => $lists,
+		'shirts' => $shirts,
+		'sizes'  => $sizes,
+		'tiered_packages'    => $tiered_packages,
+		'packages_and_comps' => $packages_and_comps));
 }

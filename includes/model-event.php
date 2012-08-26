@@ -159,32 +159,6 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return ($result !== false) ? (int) $result : false;
 	}
 	
-	public function count_registrations_where(array $where, array $join_tables = array())
-	{
-		$where_query = array('%1$s_registrations.`event_id` = :event_id');
-		
-		foreach ($where as $field => $value) {
-			$where_query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
-		}
-		
-		$where_query = ' WHERE '.implode(' AND', $where_query);
-		
-		$where[':event_id'] = $this->event_id;
-		
-		$join_query = '';
-		
-		if (in_array('items', $join_tables)) {
-			$join_query .= ' JOIN %1$s_items USING(item_id)';
-		}
-		
-		if (in_array('dancers', $join_tables)) {
-			$join_query .= ' JOIN %1$s_dancers USING(dancer_id)';
-		}
-		
-		$result = self::$database->query('SELECT COUNT(*) FROM %1$s_registrations'.$join_query.$where_query, $where)->fetchColumn();
-		return ($result !== false) ? (int) $result : false;
-	}
-	
 	public function add_registration($parameters)
 	{
 		$statement = self::$database->query('INSERT %1$s_registrations VALUES (:event_id, :dancer_id, :item_id, :price, DEFAULT, :item_meta)', array(
@@ -311,5 +285,10 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	public function has_volunteers()
 	{
 		return (bool) $this->has_volunteers;
+	}
+	
+	public function payment_methods()
+	{
+		return array('Mail', 'PayPal');
 	}
 }
