@@ -15,9 +15,9 @@
 		<thead>
 			<tr>
 				<th class="manage-column column-title" width="19%"><div>Name</div></th>
-				<th class="manage-column"><div>Package</div></th>
-				<th class="manage-column"><div class="ellipsis">Competitions</div></th>
-				<th class="manage-column"><div>Shirts</div></th>
+{% 	for item in items %}
+				<th class="manage-column">{{ item.name }}</th>
+{% 	endfor %}
 				<th class="manage-column" width="17%"><div>Level</div></th>
 				<th class="manage-column" width="11%"><div class="ellipsis">Date Registered</div></th>
 				<th class="manage-column total-cost" width="6%"><div>Total</div></th>
@@ -30,9 +30,9 @@
 		<tfoot>
 			<tr>
 				<th class="manage-column column-title">Name</th>
-				<th class="manage-column">Package</th>
-				<th class="manage-column ellipsis">Competitions</th>
-				<th class="manage-column">Shirts</th>
+{% 	for item in items %}
+				<th class="manage-column">{{ item.name }}</th>
+{% 	endfor %}
 				<th class="manage-column">Level</th>
 				<th class="manage-column ellipsis">Date Registered</th>
 				<th class="manage-column total-cost">Total Cost</th>
@@ -46,13 +46,9 @@
 {% for dancer in dancers %}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
 				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}{% if dancer.is_vip %} [VIP]{% endif %}</td>
-{% for type in ['package', 'competition', 'shirt'] %}
-				<td>
-{%- for item in dancer.registered_items if item.type == type %}
-					{%- if type != 'shirt' %}{{ item.name }}{% else %}{{ '%s (%s)' | format(item.name, item.registered_meta | capitalize) }}{% endif %}<br>
-{%- endfor -%}
-				</td>
-{% endfor %}
+{% 	for item in items %}
+				<td>{% if dancer.registered_items[item.id] %}&bull;{% endif %}</td>
+{% 	endfor %}
 				<td class="ellipsis">{{ dancer.level }}</td>
 				<td class="date">{{ dancer.date_registered | date('Y-m-d, g:i A') }}</td>
 				<td class="total-cost">${{ dancer.price_total }}</td>

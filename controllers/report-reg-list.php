@@ -18,6 +18,7 @@ function regsys_report_reg_list($event)
 	}
 	
 	echo RegistrationSystem::render_template('reports/reg-list.html', array(
-		'event' => $event,
+		'event'   => $event,
+		'items'   => $event->items(),
 		'dancers' => $dancers));
 }
