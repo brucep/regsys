@@ -3,10 +3,7 @@
 
 .update-nag { display: none; }
 
-#reg-sys tr.current-event td.column-title {
-	font-size: 1.1em;
-	font-style: italic;
-}
+div.reg-sys-exception { margin: 2em 1em; }
 
 #reg-sys ul {
 	margin-top: 1em;
@@ -24,8 +21,6 @@
 	font-family: monospace;
 }
 
-div.reg-sys-exception {margin:2em 1em;}
-
 #reg-sys form ul {
 	list-style-type: none;
 }
@@ -36,18 +31,6 @@ div.reg-sys-exception {margin:2em 1em;}
 
 #reg-sys form input[type="submit"] {
 	margin-top: 2em;
-}
-
-#reg-sys #reg-list .total-cost {
-	text-align: right;
-}
-
-#reg-sys #reg-list .paid {
-	text-align: center;
-}
-
-#reg-sys #reg-list .overdue {
-	background-color: #fcc;
 }
 
 #reg-sys table.report tr:hover td {
@@ -65,17 +48,6 @@ div.reg-sys-exception {margin:2em 1em;}
 #reg-sys table.report th.headerSortUp div {
 	background: url('images/arrow-sort-up.png') right no-repeat;
 }
-
-#reg-sys #report_reg_list td { vertical-align: middle; }
-#reg-sys #report_reg_list td.paid { text-align: center; }
-#reg-sys #report_reg_list td.owed input { text-align: right; }
-
-#reg-sys #report_packet_printout div.dancer {
-	margin-bottom: 2em;
-	padding-bottom: 0.5em;
-	border-bottom: 1px dotted #000;
-}
-#reg-sys #report_packet_printout div.dancer span.paid-owed { float: right; }
 
 #reg-sys a.delete {
 	margin-left: 1em;

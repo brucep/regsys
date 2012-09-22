@@ -2,26 +2,8 @@
 #wphead, #adminmenuback, #adminmenuwrap, #screen-meta, #footer { display: none; }
 #wpcontent { margin-left: 4px; }
 
-#reg-sys .no-print { display: none; }
-
 html { background-color: #fff; }
 
-#reg-sys #dancer a.button { display: none; }
-#reg-sys #dancer h2 a { color: inherit; text-decoration: none; }
+#reg-sys .no-print { display: none; }
 
 #reg-sys td.dancer-name a { color: inherit !important; }
-#reg-sys #reg-list td { font-family: Georgia, serif !important; }
-#reg-sys #reg-list td.owed input {
-	text-align: right;
-	border: 0;
-	background-color: inherit;
-	font-family: inherit;
-	font-size: inherit;
-}
-
-#reg-sys #packet-printout ul { font-size: 16pt !important; }
-#reg-sys #packet-printout h5 { font-size: 16pt !important; }
-#reg-sys #packet-printout h4 { font-size: 32pt !important; margin: 1em 0 2em; }
-
-#reg-sys #packet-printout div.dancer { page-break-after:always; margin: 0; border: none; }
-#reg-sys #packet-printout div.dancer:nth-last-of-type(1) { page-break-after: avoid; }

@@ -1,6 +1,26 @@
 {% extends 'reports/_layout.html' %}
 
 {% block content %}
+	<style type="text/css">
+		#reg-sys #report-packet-printout div.dancer span.paid-owed { float: right; }
+
+		@media screen {
+			#reg-sys #report-packet-printout div.dancer {
+				margin-bottom: 2em;
+				padding-bottom: 0.5em;
+				border-bottom: 1px dotted #000;
+			}
+		}
+		@media print {
+			#reg-sys #report-packet-printout h2 { display: none; }
+			#reg-sys #report-packet-printout h4 { font-size: 32pt !important; margin: 1em 0 2em; }
+			#reg-sys #report-packet-printout h5 { font-size: 16pt !important; }
+			#reg-sys #report-packet-printout ul { font-size: 16pt !important; }
+			#reg-sys #report-packet-printout div.dancer { page-break-after: always; }
+			#reg-sys #report-packet-printout div.dancer:nth-last-of-type(1) { page-break-after: avoid; }
+		}
+	</style>
+
 	<h3 class="no-print" style="margin-bottom: 2em;">Packet Printouts</h3>
 
 {% for dancer in dancers %}

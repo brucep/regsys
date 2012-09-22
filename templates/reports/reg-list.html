@@ -3,6 +3,26 @@
 {% from 'admin/_layout.html' import message as message %}
 
 {% block content %}
+	<style type="text/css">
+		@media screen {
+			#reg-sys #report_reg_list td { vertical-align: middle; }
+			#reg-sys #report_reg_list td.paid { text-align: center; }
+			#reg-sys #report_reg_list td.owed input { text-align: right; }
+			#reg-sys #report-reg-list td.total-cost { text-align: right; }
+			#reg-sys #report-reg-list .overdue { background-color: #fcc; }
+		}
+		@media print {
+			#reg-sys #report-reg-list td { font-family: Georgia, serif !important; }
+			#reg-sys #report-reg-list td.owed input {
+				text-align: right;
+				border: 0;
+				background-color: inherit;
+				font-family: inherit;
+				font-size: inherit;
+			}
+		}
+	</style>
+
 	{%- if POST %}{{ "\t" }}{{ message('Payment info updated.') }}{{ "\n" }}{% endif %}
 	<form action="{{ request_href ~ 'report_reg_list' }}{% if GET.vip_only == 'true' %}&amp;vip_only=true{% endif %}" method="post">
 {% if dancers %}

@@ -10,6 +10,12 @@
 	</h2>
 	{%- if GET.deleted_event %}{{ "\n\t\t" }}{{ message('Deleted %s%s.' | format((GET.registrations_only == 'true' ? 'registrations for ' : ''), GET.deleted_event), 'error') }}{% endif %}
 
+	<style type="text/css">
+		#reg-sys tr.current-event td.column-title {
+			font-size: 1.1em;
+			font-style: italic;
+		}
+	</style>
 
 	<h3>Choose Event</h3>
 
