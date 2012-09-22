@@ -145,6 +145,11 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		return (!empty($this->date_expires) and time() > $this->date_expires);
 	}
 	
+	public function sizes()
+	{
+		return $this->type == 'shirt' ? explode(',', 'None,' . $this->description) : null;
+	}
+	
 	public function count_openings($position = false)
 	{
 		if (!isset($this->openings)) {

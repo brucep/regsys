@@ -93,14 +93,6 @@ text-align: left;
 background-color: #afd1e4;
 }
 
-#reg-sys-form-info tbody tr.limit_reached td {
-background-color: #d1d1d1;
-}
-
-#reg-sys-form-info tbody tr.limit_reached td:first-child {
-padding-left: 1em;
-}
-
 #reg-sys-form-info tbody td {
 padding: 0.5em 0;
 border-top: 1px solid #b3b3b3;
