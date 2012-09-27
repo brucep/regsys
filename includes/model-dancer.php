@@ -308,7 +308,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	{
 		$event = RegistrationSystem_Model_Event::get_event_by_id($this->event_id);
 		
-		$body = RegistrationSystem::render_template('registration/confirmation-email.txt', array(
+		$body = RegistrationSystem::render_template('form-email.txt', array(
 			'event'   => $event,
 			'dancer'  => $this));
 		
