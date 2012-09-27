@@ -42,11 +42,11 @@ div.reg-sys-exception { margin: 2em 1em; }
 }
 
 #reg-sys table.report th.headerSortDown div {
-	background: url('images/arrow-sort-down.png') right no-repeat;
+	background: url('arrow-sort-down.png') right no-repeat;
 }
 
 #reg-sys table.report th.headerSortUp div {
-	background: url('images/arrow-sort-up.png') right no-repeat;
+	background: url('arrow-sort-up.png') right no-repeat;
 }
 
 #reg-sys a.delete {

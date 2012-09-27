@@ -72,8 +72,8 @@ class RegistrationSystem
 	
 	static public function admin_print_scripts()
 	{
-		wp_enqueue_script('reg-sys-tablesorter',      plugins_url('js/jquery.tablesorter.min.js', __FILE__), array('jquery'));
-		wp_enqueue_script('reg-sys-tablesorter-init', plugins_url('js/tablesorter-init.js', __FILE__),       array('reg-sys-tablesorter'));
+		wp_enqueue_script('reg-sys-tablesorter',      plugins_url('static/jquery.tablesorter.min.js',  __FILE__), array('jquery'));
+		wp_enqueue_script('reg-sys-tablesorter-init', plugins_url('static/jquery.tablesorter-init.js', __FILE__), array('reg-sys-tablesorter'));
 		
 		if (isset($_GET['request']) and $_GET['request'] == 'report_index_visualization') {
 			wp_enqueue_script('reg-sys-google-jsapi', 'http://www.google.com/jsapi');
@@ -82,7 +82,7 @@ class RegistrationSystem
 	
 	static public function admin_print_styles()
 	{
-		wp_enqueue_style('reg-sys-admin', plugins_url('css/admin.css', __FILE__));
+		wp_enqueue_style('reg-sys-admin', plugins_url('static/admin.css', __FILE__));
 		echo '<meta name="viewport" content="initial-scale=1.0;" />';
 	}
 	
@@ -684,7 +684,7 @@ class RegistrationSystem
 	static public function registration_head()
 	{
 		add_action('wp_head', 'RegistrationSystem::registration_wp_head');
-		wp_enqueue_style('reg-sys-form', plugins_url('css/registration.css', __FILE__));
+		wp_enqueue_style('reg-sys-form', plugins_url('static/register.css', __FILE__));
 		
 		# Check if the current theme has a stylesheet for the registration
 		$theme_stylesheet = sprintf('%s/%s/style-reg-sys-form.css', get_theme_root(), get_stylesheet());
@@ -692,7 +692,7 @@ class RegistrationSystem
 			wp_enqueue_style('reg-sys-form-theme', get_stylesheet_directory_uri() . '/style-reg-sys-form.css');
 		}
 		
-		wp_enqueue_script('reg-sys-form-script', plugins_url('js/reg-info.js', __FILE__), array('jquery'));
+		wp_enqueue_script('reg-sys-form-script', plugins_url('static/register.js', __FILE__), array('jquery'));
 	}
 	
 	static public function registration_wp_head()
