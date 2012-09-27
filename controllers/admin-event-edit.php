@@ -164,7 +164,7 @@ function regsys_admin_event_edit($event)
 		require_once ABSPATH . 'wp-admin/admin-header.php';
 	}
 	
-	echo RegistrationSystem::render_template('admin/event-edit.html', array(
+	echo RegistrationSystem::render_template('admin-event-edit.html', array(
 		'event'      => $event,
 		'validation' => $validation,
 		'vip_href'   => get_permalink(get_page_by_path('register')) . '?vip'));

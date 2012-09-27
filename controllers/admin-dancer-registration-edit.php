@@ -38,7 +38,7 @@ function regsys_admin_dancer_registration_edit($event, $dancer)
 		}
 	}
 	
-	echo RegistrationSystem::render_template('admin/registration-edit.html', array(
+	echo RegistrationSystem::render_template('admin-registration-edit.html', array(
 		'event'      => $event,
 		'items'      => $event->items(),
 		'dancer'     => $dancer,

@@ -11,7 +11,7 @@ function regsys_report_discounts($event)
 		$groups[$dancer->discount_code][] = $dancer;
 	}
 	
-	echo RegistrationSystem::render_template('reports/discounts.html', array(
+	echo RegistrationSystem::render_template('report-discounts.html', array(
 		'event'  => $event,
 		'groups' => $groups));
 }

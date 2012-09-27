@@ -214,7 +214,7 @@ class RegistrationSystem
 			$events[$event->id()] = $event->name;
 		}
 		
-		echo self::render_template('admin/options.html', array('events' => $events));
+	echo self::render_template('admin-options.html', array('events' => $events));
 	}
 	
 	static public function page_request()
@@ -426,7 +426,7 @@ class RegistrationSystem
 			if ((time() > self::$event->date_paypal_prereg_end() and time() > self::$event->date_mail_prereg_end() and !self::$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
 				if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
 				
-				echo self::render_template('registration/page-content.html', array(
+				echo self::render_template('form-page-content.html', array(
 					'event'       => self::$event,
 					'the_content' => apply_filters('the_content', $post->post_content),
 					));
@@ -502,7 +502,7 @@ class RegistrationSystem
 			
 			# Determine appropriate file for current step
 			if (empty($_POST) or !self::$validation->validate()) {
-				$file = 'form-reg-info';
+				$file = 'form-register';
 				
 				# Change housing night values back to array to retain values
 				if (self::$event->has_housing_registrations() and isset($_POST['housing_type_needed'])) {
@@ -665,7 +665,7 @@ class RegistrationSystem
 			
 			if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
 			
-			echo self::render_template(sprintf('registration/%s.html', $file), array_merge($context, array(
+			echo self::render_template(sprintf('%s.html', $file), array_merge($context, array(
 				'event'     => self::$event,
 				'time'      => time(),
 				'vip'       => self::$vip,

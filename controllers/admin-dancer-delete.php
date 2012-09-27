@@ -18,7 +18,7 @@ function regsys_admin_dancer_delete($event, $dancer)
 		require_once ABSPATH . 'wp-admin/admin-header.php';
 	}
 	
-	echo RegistrationSystem::render_template('admin/dancer-delete.html', array(
+	echo RegistrationSystem::render_template('admin-dancer-delete.html', array(
 		'event'  => $event,
 		'dancer' => $dancer));
 }

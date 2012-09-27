@@ -30,5 +30,5 @@ function regsys_admin_event_delete($event)
 		require_once ABSPATH . 'wp-admin/admin-header.php';
 	}
 	
-	echo RegistrationSystem::render_template('admin/event-delete.html', array('event' => $event));
+	echo RegistrationSystem::render_template('admin-event-delete.html', array('event' => $event));
 }

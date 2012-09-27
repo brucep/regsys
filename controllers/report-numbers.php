@@ -36,7 +36,7 @@ function regsys_report_numbers($event)
 	$sizes = array_unique($sizes);
 	
 	
-	echo RegistrationSystem::render_template('reports/numbers.html', array(
+	echo RegistrationSystem::render_template('report-numbers.html', array(
 		'event'  => $event,
 		'lists'  => $lists,
 		'shirts' => $shirts,

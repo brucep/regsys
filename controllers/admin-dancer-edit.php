@@ -71,7 +71,7 @@ function regsys_admin_dancer_edit($event, $dancer)
 		$_POST['date_registered'] = date('Y-m-d h:i A', $_POST['date_registered']);
 	}
 	
-	echo RegistrationSystem::render_template('admin/dancer-edit.html', array(
+	echo RegistrationSystem::render_template('admin-dancer-edit.html', array(
 		'event'      => $event,
 		'dancer'     => $dancer,
 		'validation' => $validation));

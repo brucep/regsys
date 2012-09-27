@@ -12,7 +12,7 @@ function regsys_report_money($event)
 		$groups[$dancer->payment_method][] = $dancer;
 	}
 	
-	echo RegistrationSystem::render_template('reports/money.html', array(
+	echo RegistrationSystem::render_template('report-money.html', array(
 		'event'  => $event,
 		'groups' => $groups,
 		'items'  => $event->items(),

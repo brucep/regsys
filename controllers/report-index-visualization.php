@@ -54,5 +54,5 @@ function regsys_report_index_visualization()
 	
 	$colors = $database->query('SELECT visualization_color FROM %s_events WHERE visualization = 1 ORDER BY name ASC')->fetchAll(PDO::FETCH_COLUMN);
 	
-	echo RegistrationSystem::render_template('reports/index-visualization.html', array('registration_data' => $data, 'colors' => $colors));
+	echo RegistrationSystem::render_template('report-index-visualization.html', array('registration_data' => $data, 'colors' => $colors));
 }
