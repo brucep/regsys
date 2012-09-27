@@ -16,16 +16,16 @@ function regsys_report_numbers($event)
 			$lists['Levels (All Dancers)'][$level->label] = $event->count_dancers(array(':level_id' => $level->level_id));
 			
 			$lists['Levels (Dancers in Classes)'][$level->label] = sprintf('%d leads, %d follows',
-				$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = ? AND %1$s_dancers.`level_id` = ? AND %1$s_dancers.`position` = ? AND %1$s_items.`meta` = "count_for_classes"', array($event->id(), $level->level_id, 1))->fetchColumn(),
-				$database->query('SELECT COUNT(dancer_id) FROM %1$s_registrations LEFT JOIN %1$s_dancers USING(dancer_id) LEFT JOIN %1$s_items USING(item_id) WHERE %1$s_registrations.`event_id` = ? AND %1$s_dancers.`level_id` = ? AND %1$s_dancers.`position` = ? AND %1$s_items.`meta` = "count_for_classes"', array($event->id(), $level->level_id, 2))->fetchColumn());
+				$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations LEFT JOIN regsys_dancers USING(dancer_id) LEFT JOIN regsys_items USING(item_id) WHERE regsys_registrations.`event_id` = ? AND regsys_dancers.`level_id` = ? AND regsys_dancers.`position` = ? AND regsys_items.`meta` = "count_for_classes"', array($event->id(), $level->level_id, 1))->fetchColumn(),
+				$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations LEFT JOIN regsys_dancers USING(dancer_id) LEFT JOIN regsys_items USING(item_id) WHERE regsys_registrations.`event_id` = ? AND regsys_dancers.`level_id` = ? AND regsys_dancers.`position` = ? AND regsys_items.`meta` = "count_for_classes"', array($event->id(), $level->level_id, 2))->fetchColumn());
 		}
 		
 		$lists['Levels (All Dancers)'] = array_filter($lists['Levels (All Dancers)']);
 	}
 	
 	# Packages and Competitions
-	$tiered_packages    = $database->query('SELECT * FROM %1$s_items WHERE item_id IN     (SELECT DISTINCT item_id FROM %1$s_item_prices WHERE event_id = ?)', array($event->id()))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
-	$packages_and_comps = $database->query('SELECT * FROM %1$s_items WHERE item_id NOT IN (SELECT DISTINCT item_id FROM %1$s_item_prices WHERE event_id = :event_id) AND event_id = :event_id AND type != "shirt"', array(':event_id' => $event->id()))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
+	$tiered_packages    = $database->query('SELECT * FROM regsys_items WHERE item_id IN     (SELECT DISTINCT item_id FROM regsys_item_prices WHERE event_id = ?)', array($event->id()))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
+	$packages_and_comps = $database->query('SELECT * FROM regsys_items WHERE item_id NOT IN (SELECT DISTINCT item_id FROM regsys_item_prices WHERE event_id = :event_id) AND event_id = :event_id AND type != "shirt"', array(':event_id' => $event->id()))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
 	
 	# Shirts
 	$shirts = $event->items_where(array(':type' => 'shirt'));

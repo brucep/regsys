@@ -21,7 +21,7 @@ function regsys_admin_event_edit($event)
 			$event = new RegistrationSystem_Model_Event($_POST);
 			
 			if ($_GET['request'] == 'admin_event_add') {
-				$database->query('INSERT %s_events VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?);', array(
+				$database->query('INSERT regsys_events VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?);', array(
 					@(string) $_POST['name'],
 		 			@(int)    $_POST['date_mail_prereg_end'],
 		 			@(int)    $_POST['date_paypal_prereg_end'],
@@ -37,7 +37,7 @@ function regsys_admin_event_edit($event)
 				exit();
 			}
 			else {
-				$database->query('UPDATE %s_events SET `name` = ?, date_mail_prereg_end = ?, date_paypal_prereg_end = ?, date_refund_end = ?, has_levels = ?, has_vip = ?, has_volunteers = ?, has_housing = ?, housing_nights = ? WHERE event_id = ?', array(
+				$database->query('UPDATE regsys_events SET `name` = ?, date_mail_prereg_end = ?, date_paypal_prereg_end = ?, date_refund_end = ?, has_levels = ?, has_vip = ?, has_volunteers = ?, has_housing = ?, housing_nights = ? WHERE event_id = ?', array(
 					$_POST['name'],
 		 			$_POST['date_mail_prereg_end'],
 		 			$_POST['date_paypal_prereg_end'],
@@ -55,7 +55,7 @@ function regsys_admin_event_edit($event)
 				foreach ($_POST['edit_levels'] as $key => $value) {
 					if ($value) {
 						if (!isset($levels[$key])) {
-							$database->query('INSERT %s_event_levels VALUES (?, ?, ?, ?);', array(
+							$database->query('INSERT regsys_event_levels VALUES (?, ?, ?, ?);', array(
 								$event->id(),
 								$key,
 								$value,
@@ -63,7 +63,7 @@ function regsys_admin_event_edit($event)
 								));
 						}
 						elseif (isset($levels[$key])) {
-							$database->query('UPDATE %s_event_levels SET label = ?, has_tryouts = ? WHERE event_id = ? AND level_id = ?', array(
+							$database->query('UPDATE regsys_event_levels SET label = ?, has_tryouts = ? WHERE event_id = ? AND level_id = ?', array(
 								$value,
 								isset($_POST['edit_tryouts'][$key]),
 								$event->id(),
@@ -72,7 +72,7 @@ function regsys_admin_event_edit($event)
 						}
 					}
 					elseif (!$value and isset($levels[$key])) {
-						$database->query('DELETE FROM %s_event_levels WHERE event_id = ? AND level_id = ?', array(
+						$database->query('DELETE FROM regsys_event_levels WHERE event_id = ? AND level_id = ?', array(
 							$event->id(),
 							$key,
 							));
@@ -87,7 +87,7 @@ function regsys_admin_event_edit($event)
 				foreach ($_POST['edit_discount_code'] as $key => $value) {
 					if ($value) {
 						if (!isset($discounts[$key])) {
-							$database->query('INSERT %s_event_discounts VALUES (?, ?, ?, ?, ?, ?);', array(
+							$database->query('INSERT regsys_event_discounts VALUES (?, ?, ?, ?, ?, ?);', array(
 								$event->id(),
 								$key,
 								$value,
@@ -97,7 +97,7 @@ function regsys_admin_event_edit($event)
 								));
 						}
 						elseif (isset($discounts[$key])) {
-							$database->query('UPDATE %s_event_discounts SET discount_code = ?, discount_amount = ?, discount_limit = ?, discount_expires = ? WHERE event_id = ? AND discount_id = ?', array(
+							$database->query('UPDATE regsys_event_discounts SET discount_code = ?, discount_amount = ?, discount_limit = ?, discount_expires = ? WHERE event_id = ? AND discount_id = ?', array(
 								$value,
 								(int) $_POST['edit_discount_amount'][$key],
 								(int) $_POST['edit_discount_limit'][$key],
@@ -108,7 +108,7 @@ function regsys_admin_event_edit($event)
 						}
 					}
 					elseif (!$value and isset($discounts[$key])) {
-						$database->query('DELETE FROM %s_event_discounts WHERE event_id = ? AND discount_id = ?', array(
+						$database->query('DELETE FROM regsys_event_discounts WHERE event_id = ? AND discount_id = ?', array(
 							$event->id(),
 							$key,
 							));

@@ -20,10 +20,6 @@ class RegistrationSystem_Database
 					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));
 			
 			$this->pdo->exec('SET NAMES "utf8";');
-			
-			if (!empty($settings['prefix'])) {
-				$this->prefix = $settings['prefix'];
-			}
 		}
 		catch (PDOException $e) {
 			$message = preg_replace('/^[A-Z]+\[[A-Z0-9]+\]:? \[[0-9]+\] (.*?)/', '$1', $e->getMessage());
@@ -31,13 +27,9 @@ class RegistrationSystem_Database
 		}
 	}
 	
-	public function query($query, array $params = array(), $use_prefix = true)
+	public function query($query, array $params = array())
 	{
 		try {
-			if ($use_prefix) {
-				$query = sprintf($query, $this->prefix);
-			}
-			
 			$statement = $this->pdo->prepare($query);
 			
 			if (!($statement->execute($params))) {

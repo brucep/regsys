@@ -182,15 +182,12 @@ class RegistrationSystem
 	
 	static public function get_database_connection()
 	{
-		global $wpdb;
-		
 		return new RegistrationSystem_Database(array(
 			'host'     => DB_HOST,
 			'port'     => defined('DB_HOST_PORT') ? DB_HOST_PORT : false,
 			'name'     => DB_NAME,
 			'user'     => DB_USER,
 			'password' => DB_PASSWORD,
-			'prefix'   => $wpdb->prefix . 'regsys',
 			));
 	}
 	
@@ -273,11 +270,9 @@ class RegistrationSystem
 	
 	static public function plugin_activate()
 	{
-		global $wpdb;
-		
 		if (version_compare(get_option('reg_sys_db_version'), self::database_version, '<')) {
 			$query = "" .
-			"CREATE TABLE {$wpdb->prefix}regsys_dancers (
+			"CREATE TABLE regsys_dancers (
 				event_id int(11) unsigned NOT NULL,
 				dancer_id int(11) unsigned NOT NULL AUTO_INCREMENT,
 				first_name varchar(100) NOT NULL,
@@ -296,7 +291,7 @@ class RegistrationSystem
 				note varchar(255) NOT NULL DEFAULT '',
 				PRIMARY KEY  (dancer_id)
 				);" .
-			"CREATE TABLE {$wpdb->prefix}regsys_events (
+			"CREATE TABLE regsys_events (
 				event_id int(11) unsigned NOT NULL AUTO_INCREMENT,
 				name varchar(255) NOT NULL,
 				date_mail_prereg_end int(11) unsigned NOT NULL DEFAULT '0',
@@ -312,7 +307,7 @@ class RegistrationSystem
 				PRIMARY KEY  (event_id),
 				UNIQUE KEY name (name)
 				);" .
-			"CREATE TABLE {$wpdb->prefix}regsys_event_discounts (
+			"CREATE TABLE regsys_event_discounts (
 				event_id int(11) unsigned NOT NULL,
 				discount_id tinyint(3) unsigned NOT NULL,
 				discount_code varchar(255) NOT NULL,
@@ -322,7 +317,7 @@ class RegistrationSystem
 				PRIMARY KEY  (event_id,discount_id),
 				UNIQUE KEY discount_code (event_id,discount_code)
 				);" .
-			"CREATE TABLE {$wpdb->prefix}regsys_event_levels (
+			"CREATE TABLE regsys_event_levels (
 				event_id int(11) unsigned NOT NULL,
 				level_id tinyint(1) unsigned NOT NULL,
 				label varchar(255) NOT NULL,
@@ -330,7 +325,7 @@ class RegistrationSystem
 				PRIMARY KEY  (event_id,level_id),
 				UNIQUE KEY label (event_id,label)
 				);" .
-			"CREATE TABLE {$wpdb->prefix}regsys_housing (
+			"CREATE TABLE regsys_housing (
 				event_id int(11) UNSIGNED NOT NULL,
 				dancer_id int(11) UNSIGNED NOT NULL,
 				housing_type tinyint(1) UNSIGNED NOT NULL DEFAULT '1',
@@ -344,7 +339,7 @@ class RegistrationSystem
 				housing_comment text NOT NULL,
 				PRIMARY KEY  (event_id,dancer_id)
 				);" .
-			"CREATE TABLE {$wpdb->prefix}regsys_items (
+			"CREATE TABLE regsys_items (
 				event_id int(11) unsigned NOT NULL,
 				item_id int(11) unsigned NOT NULL AUTO_INCREMENT,
 				name varchar(255) NOT NULL,
@@ -361,14 +356,14 @@ class RegistrationSystem
 				PRIMARY KEY  (item_id),
 				UNIQUE KEY name (event_id,name)
 				);" .
-			"CREATE TABLE {$wpdb->prefix}regsys_item_prices (
+			"CREATE TABLE regsys_item_prices (
 				event_id int(11) unsigned NOT NULL,
 				item_id int(11) unsigned NOT NULL,
 				scale_count smallint(5) unsigned NOT NULL,
 				scale_price smallint(5) unsigned NOT NULL,
 				PRIMARY KEY  (event_id,item_id,scale_count)
 				);" .
-			"CREATE TABLE {$wpdb->prefix}regsys_registrations (
+			"CREATE TABLE regsys_registrations (
 				event_id int(11) unsigned NOT NULL,
 				dancer_id int(11) unsigned NOT NULL,
 				item_id int(11) unsigned NOT NULL,

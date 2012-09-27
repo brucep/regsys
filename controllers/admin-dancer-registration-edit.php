@@ -31,7 +31,7 @@ function regsys_admin_dancer_registration_edit($event, $dancer)
 					continue;
 				}
 				
-				$database->query('UPDATE %s_registrations SET item_meta = ? WHERE item_id = ? AND dancer_id = ? AND event_id = ?;', array($value, $key, $dancer->id(), $event->id()));
+				$database->query('UPDATE regsys_registrations SET item_meta = ? WHERE item_id = ? AND dancer_id = ? AND event_id = ?;', array($value, $key, $dancer->id(), $event->id()));
 			}
 			
 			unset($_POST['items'], $_POST['item_meta']);

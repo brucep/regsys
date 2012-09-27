@@ -26,7 +26,7 @@ function regsys_admin_dancer_edit($event, $dancer)
 		if ($validation->validate()) {
 			$database = RegistrationSystem::get_database_connection();
 			
-			$database->query('UPDATE %s_dancers SET first_name = ?, last_name = ?, email = ?, position = ?, level_id = ?, status = ?, date_registered = ?, payment_method = ?, mobile_phone = ? WHERE dancer_id = ?;', array(
+			$database->query('UPDATE regsys_dancers SET first_name = ?, last_name = ?, email = ?, position = ?, level_id = ?, status = ?, date_registered = ?, payment_method = ?, mobile_phone = ? WHERE dancer_id = ?;', array(
 				@$_POST['first_name'],
 				@$_POST['last_name'],
 				@$_POST['email'],

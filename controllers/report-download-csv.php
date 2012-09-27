@@ -80,7 +80,7 @@ function regsys_report_download_csv($event)
 		if ($_GET['data'] == 'competitions') {
 			$filename = 'Competitors';
 			$database = RegistrationSystem::get_database_connection();
-			$dancers  = $database->query('SELECT DISTINCT %1$s_dancers.`dancer_id` as dancer_id, last_name, first_name, email FROM %1$s_registrations LEFT JOIN %1$s_items USING(item_id) LEFT JOIN %1$s_dancers USING(dancer_id) WHERE %1$s_registrations.`event_id` = :event_id AND %1$s_items.`type` = "competition" ORDER BY %1$s_dancers.`last_name` ASC, %1$s_dancers.`first_name` ASC', array(':event_id' => $event->id()))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
+			$dancers  = $database->query('SELECT DISTINCT regsys_dancers.`dancer_id` as dancer_id, last_name, first_name, email FROM regsys_registrations LEFT JOIN regsys_items USING(item_id) LEFT JOIN regsys_dancers USING(dancer_id) WHERE regsys_registrations.`event_id` = :event_id AND regsys_items.`type` = "competition" ORDER BY regsys_dancers.`last_name` ASC, regsys_dancers.`first_name` ASC', array(':event_id' => $event->id()))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
 		}
 		elseif ($_GET['data'] == 'dancers') {
 			$filename = 'Dancers';

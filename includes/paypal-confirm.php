@@ -53,7 +53,7 @@ try {
 	
 	$unconfirmed_registrations = array();
 	
-	$tmp_registrations = $database->query('SELECT item_id, price FROM %s_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom))->fetchAll(PDO::FETCH_OBJ);
+	$tmp_registrations = $database->query('SELECT item_id, price FROM regsys_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom))->fetchAll(PDO::FETCH_OBJ);
 	
 	foreach ($tmp_registrations as $reg) {
 		$unconfirmed_registrations[$reg->item_id] = $reg->price;
@@ -73,7 +73,7 @@ try {
 		if (isset($unconfirmed_registrations[$item['number']])) {
 			$payment_owed = $payment_owed - $item['mc_gross'];
 			
-			$database->query('UPDATE %s_registrations SET paypal_confirmed = 1 WHERE dancer_id = ? AND item_id = ?', array($notification->custom, $item['number']));
+			$database->query('UPDATE regsys_registrations SET paypal_confirmed = 1 WHERE dancer_id = ? AND item_id = ?', array($notification->custom, $item['number']));
 			
 			$confirmed_registrations++;
 			$output[] = 'Confirmed item ' . $item['number'];
@@ -85,19 +85,19 @@ try {
 	
 	if ($confirmed_registrations > 0) {
 		$fee = $options['paypal_fee'] ? $options['paypal_fee'] - $notification->mc_fee : $notification->mc_fee;
-		$database->query('UPDATE %s_dancers SET paypal_fee = ? WHERE dancer_id = ?', array($fee + $dancer->paypal_fee, $notification->custom));
+		$database->query('UPDATE regsys_dancers SET paypal_fee = ? WHERE dancer_id = ?', array($fee + $dancer->paypal_fee, $notification->custom));
 		$output[] = sprintf('$%.2f fee recorded%s', $fee, $options['paypal_fee'] ? sprintf(' (%d - %.2f)', $options['paypal_fee'], $notification->mc_fee) : '');
 	}
 	else {
 		$output[] = 'No fee recorded';
 	}
 	
-	$registrations_remaining = $database->query('SELECT COUNT(dancer_id) FROM %s_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom))->fetchColumn();
+	$registrations_remaining = $database->query('SELECT COUNT(dancer_id) FROM regsys_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom))->fetchColumn();
 	
 	$output[] = sprintf('$%d owed', $payment_owed);
 	$output[] = sprintf('%d registration%s remaining', $registrations_remaining, $registrations_remaining == 1 ? '' : 's');
 	
-	$database->query('UPDATE %s_dancers SET payment_owed = ?, payment_confirmed = ? WHERE dancer_id = ?', array($payment_owed, (!$registrations_remaining and $payment_owed == 0), $notification->custom));
+	$database->query('UPDATE regsys_dancers SET payment_owed = ?, payment_confirmed = ? WHERE dancer_id = ?', array($payment_owed, (!$registrations_remaining and $payment_owed == 0), $notification->custom));
 	
 	isset($_GET['test']) ? exit(implode("\n", $output)) : exit();
 }
