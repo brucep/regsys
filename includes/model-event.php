@@ -215,6 +215,17 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return $this->levels;
 	}
 	
+	public function levels_for_registration_form()
+	{
+		$levels = array();
+		
+		foreach ($this->levels() as $level) {
+			$levels[] = array('value' => $level->level_id, 'label' => !$level->has_tryouts ? esc_html($level->label) : esc_html($level->label) . ' <em>(Tryouts required)</em>');
+		}
+		
+		return $levels;
+	}
+	
 	public function levels_keyed_by_id()
 	{
 		if (!isset($this->levels_keyed_by_id)) {

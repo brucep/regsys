@@ -148,7 +148,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	
 	public function sizes()
 	{
-		return ($this->type == 'shirt') ? explode(',', $this->description) : null;
+		return $this->type == 'shirt' ? explode(',', 'None,' . $this->description) : null;
 	}
 	
 	public function count_openings($position = false)

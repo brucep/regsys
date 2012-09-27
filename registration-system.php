@@ -423,7 +423,7 @@ class RegistrationSystem
 			self::$vip = (self::$event->has_vip() and isset($_GET['vip']));
 			
 			# Display page content when registration is not available.
-			if ((time() > self::$event->date_paypal_prereg_end() and time() > self::$event->date_mail_prereg_end() and !$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
+			if ((time() > self::$event->date_paypal_prereg_end() and time() > self::$event->date_mail_prereg_end() and !self::$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
 				if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
 				
 				echo self::render_template('registration/page-content.html', array(

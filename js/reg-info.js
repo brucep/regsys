@@ -1,6 +1,6 @@
 jQuery(document).ready(function($) {
     // $() will work as an alias for jQuery() inside of this function
-	$('#first_name').focus();
+	$('input[name=first_name]').focus();
 
 	$('a.pop').click(function(){
         window.open(this.href);

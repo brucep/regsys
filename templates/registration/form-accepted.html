@@ -12,33 +12,7 @@
 {% 	if dancer.payment_method == 'PayPal' %}
 				<p>Use the button below to pay via PayPal. (A PayPal link has also been included in your confirmation email.)</p>
 
-				<form action="{{ options.paypal_sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr' }}" method="post">
-					<input type="image" src="https://www.paypal.com/en_US/i/btn/x-click-but6.gif" name="submit" alt="Send payment via PayPal" style="display: block; margin: 1.5em auto;">
-
-					{{ form.input_hidden('cmd', '_cart') | raw }}
-					{{ form.input_hidden('upload')       | raw }}
-					{{ form.input_hidden('no_shipping')  | raw }}
-					{{ form.input_hidden('business', options.paypal_sandbox ? options.paypal_sandbox_email : options.paypal_business) | raw }}
-					{{ form.input_hidden('notify_url', notify_url) | raw }}
-					{{ form.input_hidden('custom', dancer.id) | raw }}
-
-{% 		if options.paypal_fee and not vip %}
-					{{ form.input_hidden('item_name_1', 'Processing Fee')   | raw }}
-					{{ form.input_hidden('amount_1',    options.paypal_fee) | raw }}
-{% 		endif %}
-
-{% 		set i = options.paypal_fee ? 2 : 1 %}
-{% 		for item in dancer.registered_items if item.registered_price > 0 %}
-					{{ form.input_hidden('item_number_' ~ i, item.id) | raw }}
-					{{ form.input_hidden('item_name_' ~ i, item.name) | raw }}
-					{{ form.input_hidden('amount_' ~ i,    attribute(dancer, 'price_for_registered_item', [item.id])) | raw }}
-{% 			if item.meta == 'size' and attribute(POST.item_meta, item.id) %}
-					{{ form.input_hidden('on0_' ~ i, item.meta_label) | raw }}
-					{{ form.input_hidden('os0_' ~ i, attribute(POST.item_meta, item.id) | capitalize) | raw }}
-{% 			endif %}
-{% 			set i = i + 1 %}
-{% 		endfor %}
-				</form>
+				<a href="{{ dancer.paypal_href }}"><img src="https://www.paypal.com/en_US/i/btn/x-click-but6.gif" alt="Send payment via PayPal" style="display: block; margin: 1.5em auto;"></a>
 {% 	elseif dancer.payment_method == 'Mail' %}
 				<p>Please mail your check for <strong>${{ dancer.price_total }}</strong> (made out to <em>{{ options.payable_to }}</em>), along with your name and email address, to:</p>
 				<p style="font-weight: bold;">{{ options.mailing_address | nl2br }}</p>

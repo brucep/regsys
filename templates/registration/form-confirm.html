@@ -6,41 +6,41 @@
 
 {% block content %}
 			<form action="{{ permalink }}{% if vip %}?vip{% endif %}" method="post"{% if vip %} class="vip"{% endif %}>
-				{{ form.input_hidden('first_name')       | raw }}
-				{{ form.input_hidden('last_name')        | raw }}
-				{{ form.input_hidden('email')            | raw }}
-				{{ form.input_hidden('confirm_email')    | raw }}
-				{{ form.input_hidden('mobile_phone')     | raw }}
-				{{ form.input_hidden('position')         | raw }}
-				{{ form.input_hidden('level_id')         | raw }}
-				{{ form.input_hidden('status')           | raw }}
-				{{ form.input_hidden('payment_method')   | raw }}
-				{{ form.input_hidden('confirmed')        | raw }}
+				<input type="hidden" name="{{ 'first_name'     }}" value="{{ POST.first_name }}">
+				<input type="hidden" name="{{ 'last_name'      }}" value="{{ POST.last_name }}">
+				<input type="hidden" name="{{ 'email'          }}" value="{{ POST.email }}">
+				<input type="hidden" name="{{ 'confirm_email'  }}" value="{{ POST.confirm_email }}">
+				<input type="hidden" name="{{ 'mobile_phone'   }}" value="{{ POST.mobile_phone }}">
+				<input type="hidden" name="{{ 'position'       }}" value="{{ POST.position }}">
+				<input type="hidden" name="{{ 'level_id'       }}" value="{{ POST.level_id }}">
+				<input type="hidden" name="{{ 'status'         }}" value="{{ POST.status }}">
+				<input type="hidden" name="{{ 'payment_method' }}" value="{{ POST.payment_method }}">
+				<input type="hidden" name="{{ 'confirmed'      }}" value="{{ POST.confirmed }}">
 {% if POST.discount_code %}
-				{{ form.input_hidden('discount_code') | raw }}
+				<input type="hidden" name="{{ 'discount_code' }}" value="{{ POST.discount_code }}">
 {% endif %}
 
 {% for key, item in validated_items %}
 {% 	if item.type == 'package' %}
-				{{ form.input_hidden('package', key) | raw }}
-				{{ form.input_hidden('package_tier[%d]' | format(key), item.price_tier) | raw }}
+				{{- _self.field_hidden('package', POST) }}
+				<input type="hidden" name="{{ 'package_tier[%d]' | format(key) }}" value="{{ item.price_tier }}">
 {% 	else %}
-				{{ form.input_hidden('items[%d]' | format(key), item.meta == 'size' ? POST.items[key] : key) | raw }}
+				<input type="hidden" name="{{ 'items[%d]' | format(key) }}" value="{{ item.meta == 'size' ? POST.items[key] : key }}">
 {% 		if attribute(POST.item_meta, key) %}
-				{{ form.input_hidden('item_meta[%d]' | format(key), POST.item_meta[key]) | raw }}
+				<input type="hidden" name="{{ 'item_meta[%d]' | format(key) }}" value="{{ POST.item_meta[key] }}">
 {% 		endif %}
 {% 	endif %}
 {% endfor %}
 
 {% if event.has_housing_registrations and dancer.needs_housing %}
-				{{ form.input_hidden('housing_type_needed') | raw }}
+				<input type="hidden" name="{{ 'housing_type_needed' }}" value="{{ POST.housing_type_needed }}">
 {% 	for field in ['from_scene', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment'] %}
-				{{ form.input_hidden('housing_needed[housing_%s]' | format(field), attribute(POST.housing_needed, 'housing_' ~ field)) | raw }}
+				<input type="hidden" name="{{ 'housing_needed[housing_%s]' | format(field) }}" value="{{ POST.housing_needed['housing_' ~ field] }}">
 {% 	endfor %}
 {% elseif event.has_housing_support and dancer.is_housing_provider %}
-				{{ form.input_hidden('housing_type_provider') | raw }}
+				<input type="hidden" name="{{ 'housing_type_provider' }}" value="{{ POST.housing_type_provider }}">
 {% 	for field in ['spots_available', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment'] %}
-				{{ form.input_hidden('housing_provider[housing_%s]' | format(field), attribute(POST.housing_provider, 'housing_' ~ field)) | raw }}
+				<input type="hidden" name="{{ 'housing_provider[housing_%s]' | format(field) }}" value="{{ POST.housing_provider['housing_' ~ field] }}">
 {% 	endfor %}
 {% endif %}
 
@@ -72,13 +72,6 @@
 						<td class="price"></td>
 					</tr>
 {% endif %}
-{# }<?php if ($dancer->received_discount()): ?>
-					<tr>
-						<td class="label">Discount</td>
-						<td class="value"><?php printf('Student or member of %s', esc_html($event->get_discount_org_name())); ?></td>
-						<td class="price"></td>
-					</tr>
-<?php endif; ?> #}
 {% if event.has_volunteers and dancer.is_volunteer %}
 					<tr>
 						<td class="label">Volunteer</td>
@@ -115,7 +108,7 @@
 
 				<div id="submit">
 					<input type="submit" value="Confirm Registration">
-					<script charset="utf-8">jQuery(document).ready(function($) { $('#submit').append('<a href="javascript:history.go(-1)" style="margin-left:2em">Make Changes</a>'); });</script>
+					<script type="text/javascript">jQuery(document).ready(function($) { $('#submit').append('<a href="javascript:history.go(-1)" style="margin-left:2em">Make Changes</a>'); });</script>
 				</div>
 			</form>
 {% endblock %}

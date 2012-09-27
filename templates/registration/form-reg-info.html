@@ -12,318 +12,249 @@
 			<form action="{{ permalink }}{% if vip %}?vip{% endif %}" method="post"{% if vip %} class="vip"{% endif %}>
 {% if not vip %}
 				<div id="pricing-dates">
-{% 	if time <= event.date_mail_prereg_end %}
-					<div>{{ 'Preregistration by mail is available until %s on %s.' | format(event.date_mail_prereg_end | date('h:i A (T)'), event.date_mail_prereg_end | date('F jS')) }}</div>
-{% 	else %}
-					<div>Preregistration by mail is no longer available.</div>
-{% 	endif %}
-{% 	if time <= event.date_paypal_prereg_end %}
-					<div>{{ 'Preregistration by PayPal is available until %s on %s.' | format(event.date_paypal_prereg_end | date('h:i A (T)'), event.date_paypal_prereg_end | date('F jS')) }}</div>
-{% 	else %}
-					<div>Preregistration by PayPal is no longer available.</div>
-{% 	endif %}
+					<div>{% if time <= event.date_mail_prereg_end   %}{{ 'Preregistration by mail   is available until %s on %s.' | format(event.date_mail_prereg_end   | date('h:i A (T)'), event.date_mail_prereg_end   | date('F jS')) }}{% else %}Preregistration by mail   is no longer available.{% endif %}</div>
+					<div>{% if time <= event.date_paypal_prereg_end %}{{ 'Preregistration by PayPal is available until %s on %s.' | format(event.date_paypal_prereg_end | date('h:i A (T)'), event.date_paypal_prereg_end | date('F jS')) }}{% else %}Preregistration by PayPal is no longer available.{% endif %}</div>
 				</div>
 {% endif %}
 
 {# PERSONAL INFO ####}
 				<h2>Personal Info <span>(All Fields Required)</span></h2>
 				<fieldset id="personal">
-					{{ attribute(validation, 'get_error', ['first_name']) | raw }}
-					<div class="field text"><label for="first_name">First Name:</label>{{ form.input_text('first_name') | raw }}</div>
+					{{- _self.field_text('First Name:',      'first_name',    POST, validation) }}
+					{{- _self.field_text('Last  Name:',      'last_name',     POST, validation) }}
+					{{- _self.field_text('Email Address:',   'email',         POST, validation, 'email') }}
+					{{- _self.field_text('Confirm Address:', 'confirm_email', POST, validation, 'email') }}
+					{{- _self.field_text('Mobile Phone:',    'mobile_phone',  POST, validation, 'tel') }}
 
-					{{ attribute(validation, 'get_error', ['last_name']) | raw }}
-					<div class="field text"><label for="last_name">Last Name:</label>{{ form.input_text('last_name') | raw }}</div>
+{%- if event.has_discounts and not vip %}
+					{{- _self.field_text('Discount Code:', 'discount_code', POST, validation) }}
+{%- endif %}
 
-					{{ attribute(validation, 'get_error', ['email']) | raw }}
-					<div class="field text"><label for="email">Email Address:</label>{{ form.input_text('email', null, {'type': 'email'}) | raw }}</div>
+					{{- _self.field_radios('Position', 'position', POST, validation, [
+						{'label': 'Lead',   'value': 1, 'default': true},
+						{'label': 'Follow', 'value': 2},
+						]) }}
 
-					{{ attribute(validation, 'get_error', ['confirm_email']) | raw }}
-					<div class="field text"><label for="confirm_email">Confirm Address:</label>{{ form.input_text('confirm_email', null, {'type': 'email'}) | raw }}</div>
+{%- if event.has_levels %}
+					{{- _self.field_radios('Level', 'level_id', POST, validation, event.levels_for_registration_form) }}
+{%- endif %}
 
-					{{ attribute(validation, 'get_error', ['mobile_phone']) | raw }}
-					<div class="field text"><label for="mobile_phone">Mobile Phone:</label>{{ form.input_text('mobile_phone', null, {'type': 'tel'}) | raw }}</div>
+{%- if event.has_volunteers and not vip %}
+					{{- _self.field_checkbox('I\'m interested in volunteering. (Volunteers will receive $5 for every one-hour shift worked!)', 'status', POST.status == 1, validation) }}
+{%- endif %}
 
-{% if event.has_discounts and not vip %}
-					{{ attribute(validation, 'get_error', ['discount_code']) | raw }}
-					<div class="field text"><label for="discount_code">Discount Code:</label>{{ form.input_text('discount_code') | raw }}</div>
-{% endif %}
-
-					{{ attribute(validation, 'get_error', ['position']) | raw }}
-					<div class="field" id="position">
-						<div class="field-label">Position</div>
-						<div class="radio"><label>{{ form.input_radio('position', {'value': 1, 'default': true}) | raw }} Lead</label></div>
-						<div class="radio"><label>{{ form.input_radio('position', {'value': 2}) | raw }} Follow</label></div>
-					</div>
-
-{% if event.has_levels %}
-					{{ attribute(validation, 'get_error', ['level_id']) | raw }}
-					<div class="field" id="level_id">
-						<div class="field-label">Level</div>
-{% 	for level in event.levels %}
-						<div class="radio"><label>{{ form.input_radio('level_id', {'value': level.level_id, 'default': (level.level_id == 1)}) | raw }} {{ level.label }}{% if level.has_tryouts %} <em>(Tryouts required)</em>{% endif %}</label>
-{% 	endfor %}
-					</div>
-{% endif %}
-
-{% if event.has_volunteers and not vip %}
-					{{ attribute(validation, 'get_error', ['status']) | raw }}
-					<div class="field"><label>{{ form.input_checkbox('status') | raw }} I'm interested in volunteering. (Volunteers will receive $5 for every one-hour shift worked!)</div>
-{% endif %}
 				</fieldset>
 
 
 {# PACKAGES ########}
 {% if packages %}
-						<h2>Packages <span>(Select One)</span></h2>
-						<fieldset id="packages">
-							{{ attribute(validation, 'get_error', ['package']) | raw }}
-							<table cellspacing="0">
-								<thead>
-									<tr>		
-										<th width="30%">Package</th>
-										<th width="15%" class="price">Preregistered</th>
-										<th width="10%" class="price">At Door</th>
-										<th width="45%">Description</th>
-									</tr>
-								</thead>
+				<h2>Packages <span>(Select One)</span></h2>
+				<fieldset id="packages">
+					{%- set error = attribute(validation, 'get_error', ['package']) %}{{ (error ? "\n\t\t\t\t\t" ~ error : '') | raw }}
+					<table cellspacing="0">
+						<thead>
+							<tr>		
+								<th width="30%">Package</th>
+								<th width="15%" class="price">Preregistered</th>
+								<th width="10%" class="price">At Door</th>
+								<th width="45%">Description</th>
+							</tr>
+						</thead>
 
-								<tbody>
+						<tbody>
 {% 	for index, item in packages %}
-									<tr>
-										<td><label>{{ form.input_radio('package', {'value': item.id, 'default': not index }) | raw }} {{ item.name }}</label></td>
-{% 		if not vip %}
-										<td class="price">
-											<div class="price_prereg">${{ item.price_for_prereg }}</div>
-										</td>
-										<td class="price">{{ (item.price_at_door ? '$' ~ item.price_at_door : '&mdash;') | raw }}</td>
-{% 		else %}
-										<td class="price">{{ (item.price_for_vip ? '$' ~ item.price_for_vip : '&mdash;') | raw }}</td>
-										<td class="price">&mdash;</td>
-{% 		endif %}
-										<td class="description">{{ item.description }}</td>
-									</tr>
-{% 	endfor %}
-									<tr>
-										<td colspan="3"><label>{{ form.input_radio('package', {'value': 0}) | raw }} N/A</label></td>
-{% 	if not vip %}
-										<td class="description">(Use this option if you only want to request/provide housing or buy a shirt.)</td>
-{% 	else %}
-										<td class="description"><strong>VIPs:</strong> To help us track attendance, please choose the most suitable package for yourself.</td>
-{% 	endif %}
-									</tr>
-								</tbody>
-							</table>
+							<tr>
+								<td><label><input name="package" value="{{ item.id }}" type="radio" {%- if POST.package == item.id or not index %} checked{% endif %}{% if not item.count_openings %} disabled{% endif %}>&nbsp;{{ item.name }}</label></td>
+								<td class="price">{{ (vip ? (item.price_for_vip ? '$' ~ item.price_for_vip : '&mdash;') : '$' ~ item.price_for_prereg) | raw }}</td>
+								<td class="price">{{ (vip ? '&mdash;' : (item.price_at_door ? '$' ~ item.price_at_door : '&mdash;')) | raw }}</td>
+								<td class="description">{{ item.description }}</td>
+								<input name="package_tier[{{ item.id }}]" value="{{ item.price_tier }}" type="hidden">
+							</tr>
 
-{% 	do form.set_array_name('package_tier') %}
-{% 	for item in packages %}
-							{{ form.input_hidden(item.id, item.price_tier) | raw }}
 {% 	endfor %}
-{% 	do form.set_array_name(null) %}
-						</fieldset>
+							<tr>
+								<td colspan="3"><label><input name="package" value="0" type="radio" {%- if fields['package'].value is sameas(0) %} checked{% endif %}>&nbsp;N/A</label></td>
+								<td class="description">{% if not vip %}(Use this option if you only want to request/provide housing or buy a shirt.){% else %}<strong>VIPs:</strong> To help us track attendance, please choose the most suitable package for yourself.{% endif %}</td>
+							</tr>
+						</tbody>
+					</table>
+				</fieldset>
 {% endif %}
 
 
 {# COMPETITIONS ###############}
 {% if competitions %}
-						<h2>Competitions</h2>
-						<fieldset id="competitions">
-							<table cellspacing="0">
-								<thead>
-									<tr>		
-										<th width="30%">Competition</th>
-										<th width="25%" class="price">Preregistered</th>
-										<th width="45%">Information</th>
-									</tr>
-								</thead>
+				<h2>Competitions</h2>
+				<fieldset id="competitions">
+					<table cellspacing="0">
+						<thead>
+							<tr>		
+								<th width="30%">Competition</th>
+								<th width="25%" class="price">Preregistered</th>
+								<th width="45%">Information</th>
+							</tr>
+						</thead>
 
-								<tbody>
+						<tbody>
 {% 	for index, item in competitions %}
-									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) | raw }}
+							{%- set error = attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) %}{{ (error ? "\n\t\t\t\t\t\t\t" ~ error : '') | raw }}
 {% 		if item.count_openings %}
-									<tr>{% do form.set_array_name('items') %}
-										<td><label>{{ form.input_checkbox(item.id, {'value': item.id}) | raw }} {{ item.name }}</label></td>{% do form.set_array_name(null) %}
-										<td class="price">
-											<div>${{ vip ? item.price_for_vip : item.price_for_prereg }}</div>
-										</td>
-										<td class="description">
+							<tr>
+								<td><label><input name="items[{{ item.id }}]" value="{{ item.id }}" type="checkbox" {%- if POST.items[item.id] %} checked{% endif %}>&nbsp;{{ item.name }}</label></td>
+								<td class="price">${{ vip ? item.price_for_vip : item.price_for_prereg }}</td>
+								<td class="description">
 {% 			if item.limit_total %}
-											{{ 'Openings: %d' | format(item.count_openings) }}{% if item.meta == 'partner_name' %}{{ pluralize(' couple', 'couples', item.count_openings) }}{% endif %}<br />
+									{{ 'Openings: %d' | format(item.count_openings) }}{% if item.meta == 'partner_name' %} {{ pluralize('couple', 'couples', item.count_openings) }}{% endif %}<br>
 {% 			elseif item.limit_per_position %}
-											{{ 'Openings: ' ~ item.openings_by_position }}<br />
+									{{ 'Openings: %d' | format(item.openings_by_position) }}<br>
 {%			endif %}
-
-{% 			do form.set_array_name('item_meta') %}
 {% 			if item.meta == 'position' %}
-											<span class="inline_radio">Register as:&nbsp;
-												<label>{{ form.input_radio(item.id, {'value': 'Lead',   'disabled': not attribute(item, 'count_openings', ['lead'])}) | raw   }}&nbsp;Lead</label>
-												<label>{{ form.input_radio(item.id, {'value': 'Follow', 'disabled': not attribute(item, 'count_openings', ['follow'])}) | raw }}&nbsp;Follow</label>
-											</span>
+									<span class="inline_radio">Register as:&nbsp;
+										<label><input name="item_meta[{{ item.id }}]" type="radio" value="Lead"   {%- if not attribute(item, 'count_openings', ['follow']) %} disabled{% endif %}>&nbsp;Lead</label>
+										<label><input name="item_meta[{{ item.id }}]" type="radio" value="Follow" {%- if not attribute(item, 'count_openings', ['follow']) %} disabled{% endif %}>&nbsp;Follow</label>
+									</span>
 {% 			elseif item.meta == 'partner_name' %}
-											<label>Partner:&nbsp;{{ form.input_text(item.id, null, {'placeholder': "Partner's name"}) | raw }}</label><br />(Only one of you need to sign up.)
+									<label>Partner:&nbsp;<input name="item_meta[{{ item.id }}]" value="" type="text" placeholder="Partner's name"></label><br>(Only one of you need to sign up.)
 {% 			elseif item.meta == 'team_members' %}
-											{% if item.description %}{{ item.description }}<br />{% endif %}
-											{{ form.input_textarea(item.id, null, {'rows': 6}) | raw }}
+									{%- if item.description %}{{ "\n\t\t\t\t\t\t\t\t\t" ~ item.description }}<br>{% endif %}
+									<textarea name="" rows="6" cols="40"></textarea>
 {% 			endif %}
-{% 			do form.set_array_name(null) %}
-										</td>
-									</tr>
+								</td>
+							</tr>
 {% 		else %}
-									<tr class="limit-reached">
-										<td>{{ item.name }}</td>
-										<td class="description" colspan="2">There are no more openings for this competition.</td>
-									</tr>
+							<tr style="background-color: #d1d1d1;">
+								<td style="padding-left: 1em;">{{ item.name }}</td>
+								<td class="description" colspan="2">There are no more openings for this competition.</td>
+							</tr>
 {% 		endif %}
 {% 	endfor %}
-								</tbody>
-							</table>
-						</fieldset>
+						</tbody>
+					</table>
+				</fieldset>
 {% endif %}
 
 
 {# SHIRTS ################}
 {% if shirts %}
-						<h2>T-Shirts <span>(Optional)</span></h2>
-						<fieldset id="shirt">
-							<table cellspacing="0">
-								<thead>
-									<tr>
-										<th width="30%">Shirt Style</th>
-										<th width="15%">Preregistered</th>
-										<th width="10%">At Door</th>
-										<th width="45%">Size</th>
-									</tr>
-								</thead>
+				<h2>T-Shirts <span>(Optional)</span></h2>
+				<fieldset id="shirt">
+					<table cellspacing="0">
+						<thead>
+							<tr>
+								<th width="30%">Shirt Style</th>
+								<th width="15%">Preregistered</th>
+								<th width="10%">At Door</th>
+								<th width="45%">Size</th>
+							</tr>
+						</thead>
 
-								<tbody>
-{% 	for index, item in shirts %}
-									{{ attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) | raw }}
-									<tr>
-										<td>{{ item.name }}</td>
-										<td class="price">${{ vip ? item.price_for_vip : item.price_for_prereg }}</td>
-										<td class="price">{{ (item.price_at_door ? '$' ~ item.price_at_door : '&mdash;') | raw }}</td>
-										<td class="size">{% do form.set_array_name('items') %}
-											{{ form.input_select(item.id, 'None,' ~ item.description, {'indent': "\t\t\t\t\t\t\t\t\t\t\t"}) | raw }}
-										</td>{% do form.set_array_name(null) %}
-									</tr>
+						<tbody>
+{% 	for item in shirts %}
+							{%- set error = attribute(validation, 'get_error', ['item_' ~ item.id, '<tr class="error"><td colspan="3">', '</td></tr>']) %}{{ (error ? "\n\t\t\t\t\t\t\t" ~ error : '') | raw }}
+							<tr>
+								<td>{{ item.name }}</td>
+								<td class="price">${{ vip ? item.price_for_vip : item.price_for_prereg }}</td>
+								<td class="price">{{ (item.price_at_door ? '$' ~ item.price_at_door : '&mdash;') | raw }}</td>
+								<td class="size">
+									<select name="items[{{ item.id }}]">
+{% 		for size in item.sizes %}
+										<option value="{{ size }}" {%- if POST.items[item.id] == size %} selected{% endif %}>{{ size }}</option>
+{% 		endfor %}
+									</select>
+								</td>
+							</tr>
 {% 	endfor %}
-								</tbody>
-							</table>
+						</tbody>
+					</table>
 
 {% 	if shirt_description %}
-							<div class="field" id="shirt-description">
+					<div class="field" id="shirt-description">
 {{ shirt_description | raw }}
-							</div>
+					</div>
 {% 	endif %}
 {% 	if not vip %}
-							<div class="field">
-								<div class="caption">
-									<p>Note: At-The-Door quantities will be limited.</p>
-								</div>
-							</div>
+					<p class="caption">Note: At-The-Door quantities will be limited.</p>
 {% 	endif %}
-						</fieldset>
+				</fieldset>
 {% endif %}
 
 
 {# HOUSING #######################}
 {% if event.has_housing_support %}
-						<h2><label>{{ form.input_checkbox('housing_type_provider', {'attributes': {'id': 'housing_type_provider'}}) | raw }} I Can Provide Housing</label> <span>(Optional)</span></h2>
-						<fieldset id="housing_type_provider_fields">{% do form.set_array_name('housing_provider') %}
-							{{ attribute(validation, 'get_error', ['housing_provider[housing_spots_available]']) | raw }}
-							<div class="field"><label>{{ 'I can provide housing for %s person(s).' | format(form.input_text('housing_spots_available', null, {'size': 2, 'placeholder': '#'})) | raw }}</label></div>
+				<h2><label><input type="checkbox" name="housing_type_provider" id="housing_type_provider">&nbsp;I Can Provide Housing<label> <span>(Optional)</span></h2>
+				<fieldset id="housing_type_provider_fields">
+					{%- set error = attribute(validation, 'get_error', ['housing_provider[housing_spots_available]']) %}{{ (error ? "\n\t\t\t\t\t\t\t" ~ error : '') | raw }}
+					<div class="field"><label>I can provide housing for <input name="housing_provider[housing_spots_available]" value="{{ POST.housing_provider.housing_spots_available }}" size="2" placeholder="#" type="text"> person(s).</label></div>
 
-							{{ attribute(validation, 'get_error', ['housing_provider[housing_smok]']) | raw }}
-							{{ attribute(validation, 'get_error', ['housing_provider[housing_pets]'])  | raw }}
-							<div class="field">
-								<div class="checkbox"><label>{{ form.input_checkbox('housing_smoke') | raw }} I smoke.</label></div>
-								<div class="checkbox"><label>{{ form.input_checkbox('housing_pets')  | raw }} I have pets.</label></div>
-							</div>
+					{{- _self.field_checkbox('I smoke.',     'housing_provider[housing_smoke]', POST.housing_provider.housing_smoke, validation) }}
+					{{- _self.field_checkbox('I have pets.', 'housing_provider[housing_pets]',  POST.housing_provider.housing_pets,  validation) }}
 
-							{{ attribute(validation, 'get_error', ['housing_provider[housing_nights]']) | raw }}
-							<div class="field">
-								<div class="field-label">I can providing housing on:</div>
-{% 	for night in event.housing_nights %}
-								<div class="checkbox"><label><input type="checkbox" {%- if POST.housing_provider.housing_nights[nights] %} checked="checked"{% endif %} value="{{ night }}" name="housing_provider[housing_nights][{{ night }}]"> {{ night }}</label></div>
-{% 	endfor %}
-							</div>
+					{%- set error = attribute(validation, 'get_error', ['housing_provider[housing_nights]']) %}{{ (error ? "\n\t\t\t\t\t\t\t" ~ error : '') | raw }}
+					<div class="field">
+						<div class="field-label">I can providing housing on:</div>
+{% 		for night in event.housing_nights %}
+						<div class="checkbox"><label><input type="checkbox" {%- if POST.housing_provider.housing_nights[nights] %} checked="checked"{% endif %} value="{{ night }}" name="housing_provider[housing_nights][{{ night }}]"> {{ night }}</label></div>
+{% 		endfor %}
+					</div>
 
-							{{ attribute(validation, 'get_error', ['housing_provider[housing_gender]']) | raw }}
-							<div class="field">
-								<div class="field-label">I prefer to house:</div>
-								<div class="radio"><label>{{ form.input_radio('housing_gender', {'value': 3, 'default': true}) | raw }} Boys and/or Girls</div>
-								<div class="radio"><label>{{ form.input_radio('housing_gender', {'value': 1})                  | raw }} Boys only</div>
-								<div class="radio"><label>{{ form.input_radio('housing_gender', {'value': 2})                  | raw }} Girls only</div>
-							</div>
+					{{- _self.field_radios('I prefer to house:', 'housing_provider[housing_gender]', POST, validation, [
+						{'label': 'Boys and/or Girls', 'value': 3, 'default': true},
+						{'label': 'Boys only',         'value': 1},
+						{'label': 'Girls only',        'value': 2},
+						]) }}
 
-							{{ attribute(validation, 'get_error', ['housing_provider[housing_bedtime]']) | raw }}
-							<div class="field">
-								<div class="field-label">Bedtime preference:</div>
-								<div class="radio"><label>{{ form.input_radio('housing_bedtime', {'value': 0, 'default': true}) | raw }} No Preference</div>
-								<div class="radio"><label>{{ form.input_radio('housing_bedtime', {'value': 1}) | raw }} Early Bird</div>
-								<div class="radio"><label>{{ form.input_radio('housing_bedtime', {'value': 2}) | raw }} Night Owl</div>
-							</div>
+					{{- _self.field_radios('Bedtime preference:', 'housing_provider[housing_bedtime]', POST, validation, [
+						{'label': 'No Preference', 'value': 0, 'default': true},
+						{'label': 'Early Bird',    'value': 1},
+						{'label': 'Night Owl',     'value': 2},
+						]) }}
 
-							{{ attribute(validation, 'get_error', ['housing_provider[housing_comment]']) | raw}}
-							<div class="field textarea">
-								<label for="housing_provider[housing_comment]">Comments:</label><br>
-								{{ form.input_textarea('housing_comment', null, {'rows': 6}) | raw }}
-							</div>
-						</fieldset>
-{% endif %}
+					{{- _self.field_textarea('Comments:', 'housing_provider[housing_comment]', POST.housing_provider.housing_comment, validation) }}
+				</fieldset>
 
-{% if event.has_housing_registrations %}
-						<h2>{% do form.set_array_name(null) %}<label>{{ form.input_checkbox('housing_type_needed', {'attributes': {'id': 'housing_type_needed'}}) | raw }} I Need Housing</label> <span>(Optional)</span></h2>
-						<fieldset id="housing_type_needed_fields">{% do form.set_array_name('housing_needed') %}
-							{{ attribute(validation, 'get_error', ['housing_needed[housing_from_scene]']) | raw }}
-							<div class="field"><label>I am from: {{ form.input_text('housing_from_scene', null, {'size': 30, 'placeholder': 'Scene, area, nearest major city, etc.'}) | raw }}</label></div>
+{% 	if event.has_housing_registrations %}
+				<h2><label><input type="checkbox" name="housing_type_needed" id="housing_type_needed">&nbsp;I Need Housing<label> <span>(Optional)</span></h2>
+				<fieldset id="housing_type_needed_fields">
+					{%- set error = attribute(validation, 'get_error', ['housing_needed[housing_from_scene]']) %}{{ (error ? "\n\t\t\t\t\t\t\t" ~ error : '') | raw }}
+					<div class="field"><label>I am from: <input name="housing_needed[housing_scene]" value="{{ POST.housing_needed.housing_scene }}" size="30" placeholder="Scene, area, nearest major city, etc." type="text"></label></div>
 
-							{{ attribute(validation, 'get_error', ['housing_needed[housing_smoke]']) | raw }}
-							{{ attribute(validation, 'get_error', ['housing_needed[housing_pets]'])  | raw }}
-							<div class="field">
-								<div class="checkbox"><label>{{ form.input_checkbox('housing_smoke') | raw }} I would prefer no smoking.</label></div>
-								<div class="checkbox"><label>{{ form.input_checkbox('housing_pets')  | raw }} I would prefer no pets.</label></div>
-							</div>
+					{{- _self.field_checkbox('I would prefer no smoking.', 'housing_needed[housing_smoke]', POST.housing_needed.housing_smoke, validation) }}
+					{{- _self.field_checkbox('I would prefer no pets.',    'housing_needed[housing_pets]',  POST.housing_needed.housing_pets,  validation) }}
 
-							{{ attribute(validation, 'get_error', ['housing_needed[housing_nights]']) | raw }}
-							<div class="field">
-								<div class="field-label">I need housing for:</div>
-{% 	for night in event.housing_nights %}
-								<div class="checkbox"><label><input type="checkbox" {%- if POST.housing_needed.housing_nights[night] %} checked="checked"{% endif %} value="{{ night }}" name="housing_needed[housing_nights][{{ night }}]"> {{ night }}<label></div>
-{% 	endfor %}
-							</div>
+					{%- set error = attribute(validation, 'get_error', ['housing_needed[housing_nights]']) %}{{ (error ? "\n\t\t\t\t\t\t\t" ~ error : '') | raw }}
+					<div class="field">
+						<div class="field-label">I need housing for:</div>
+{% 		for night in event.housing_nights %}
+						<div class="checkbox"><label><input type="checkbox" {%- if POST.housing_needed.housing_nights[night] %} checked="checked"{% endif %} value="{{ night }}" name="housing_needed[housing_nights][{{ night }}]"> {{ night }}<label></div>
+{% 		endfor %}
+					</div>
 
-							{{ attribute(validation, 'get_error', ['housing_needed[housing_gender]']) | raw }}
-							<div class="field">
-								<div class="field-label">I prefer to be housed with:</div>
-								<div class="radio"><label>{{ form.input_radio('housing_gender', {'value': 3, 'default': true}) | raw }} Boys and/or Girls</label></div>
-								<div class="radio"><label>{{ form.input_radio('housing_gender', {'value': 1})                  | raw }} Boys only</label></div>
-								<div class="radio"><label>{{ form.input_radio('housing_gender', {'value': 2})                  | raw }} Girls only</label></div>
-							</div>
+					{{- _self.field_radios('I prefer to be housed with:', 'housing_needed[housing_gender]', POST, validation, [
+						{'label': 'Boys and/or Girls', 'value': 3, 'default': true},
+						{'label': 'Boys only',         'value': 1},
+						{'label': 'Girls only',        'value': 2},
+						]) }}
 
-							{{ attribute(validation, 'get_error', ['housing_needed[housing_bedtime]']) | raw }}
-							<div class="field">
-								<div class="field-label">Bedtime preference:</div>
-								<div class="radio"><label>{{ form.input_radio('housing_bedtime', {'value': 0, 'default': true}) | raw }} No Preference</label></div>
-								<div class="radio"><label>{{ form.input_radio('housing_bedtime', {'value': 1})                  | raw }} Early Bird</label></div>
-								<div class="radio"><label>{{ form.input_radio('housing_bedtime', {'value': 2})                  | raw }} Night Owl</label></div>
-							</div>
+					{{- _self.field_radios('Bedtime preference:', 'housing_needed[housing_bedtime]', POST, validation, [
+						{'label': 'No Preference', 'value': 0, 'default': true},
+						{'label': 'Early Bird',    'value': 1},
+						{'label': 'Night Owl',     'value': 2},
+						]) }}
 
-							{{ attribute(validation, 'get_error', ['housing_needed[housing_comment]']) | raw }}
-							<div class="field textarea">
-								<label for="housing_needed[housing_comment]">Comments:</label><br>
-								{{ form.input_textarea('housing_comment', null, {'rows': 6}) | raw }}
-							</div>
-						</fieldset>{% do form.set_array_name(null) %}
-{% elseif event.has_housing_support %}
-						<h2>I Need Housing <span>(Optional)</span></h2>
-						<fieldset>
-							{{ attribute(validation, 'get_error', ['housing_type_needed'])   | raw }}
-							<div class="field">Housing requests are no longer available for this event.</div>
-						</fieldset>
+					{{- _self.field_textarea('Comments:', 'housing_needed[housing_comment]', POST.housing_needed.housing_comment, validation) }}
+				</fieldset>
+{% 	else %}
+				<fieldset>
+					{{ attribute(validation, 'get_error', ['housing_type_provider']) | raw }}
+					{{ attribute(validation, 'get_error', ['housing_type_needed'])   | raw }}
+					<div class="field">Housing requests are no longer available for this event.</div>
+				</fieldset>
+{% 	endif %}
 {% endif %}
 
 
 {# PAYMENT METHOD ##########################################}
+<<<<<<< HEAD
 						<h2>Payment Method</h2>
 						<fieldset id="payment">{% do form.set_array_name(null) %}
 							{{ attribute(validation, 'get_error', ['payment_method']) | raw }}
@@ -340,9 +271,50 @@
 								</div>
 							</div>
 						</fieldset>
+=======
+				<h2>Payment Method</h2>
+				<fieldset id="payment">
+					{{- _self.field_radios('', 'payment_method', POST, validation, [
+						{'label': 'PayPal' ~ (options.paypal_fee ? ' ($%d processing fee)' | format(options.paypal_fee) : ''), 'value': 'PayPal', 'disabled': time > event.date_paypal_prereg_end, 'default': true},
+						{'label': 'Mail'   ~ (options.postmark_within ? ' (Check must be postmarked within %d days from date of registration.)' | format(options.postmark_within) : ''), 'value': 'Mail',   'disabled': time > event.date_mail_prereg_end},
+						]) }}
+
+					<p class="caption">Refunds are available until {{ event.date_refund_end | date('F jS') }} at the discretion of {{ options.payable_to }}.</p>
+				</fieldset>
+>>>>>>> registration-form-template-cleanup
 
 
-						<div id="submit"><input type="submit" value="Continue&hellip;"></div>
-					</form>
-				</div>
+				<div id="submit"><input type="submit" value="Continue&hellip;"></div>
+			</form>
+		</div>
 {% endblock %}
+
+
+
+{% macro field_text(label, name, POST, validation, type) %}
+					{%- set error = attribute(validation, 'get_error', [name]) %}{{ (error ? "\n\t\t\t\t\t" ~ error : '') | raw }}
+					<div class="field text"><label for="{{ name }}">{{ label }}</label><input name="{{ name }}" value="{{ POST[name] }}" type="{{ type | default('text') }}"></div>
+{% endmacro %}
+
+{% macro field_radios(label, name, POST, validation, radios, type) %}
+					{%- set error = attribute(validation, 'get_error', [name]) %}{{ (error ? "\n\t\t\t\t\t" ~ error : '') | raw }}
+					<div class="field">
+						<div class="field-label">{{ label }}</div>
+{% 	for radio in radios %}
+						<div class="{{ type | default('radio') }}"><label><input type="{{ type | default('radio') }}" name="{{ name }}" value="{{ radio.value }}" {%- if POST[name] == radio.value or radio.default == true %} checked{% endif %}{% if radio.disabled %} disabled{% endif %}>&nbsp;{{ radio.label | raw }}</label></div>
+{% 	endfor %}
+					</div>
+{% endmacro %}
+
+{% macro field_checkbox(label, name, checked, validation) %}
+					{%- set error = attribute(validation, 'get_error', [name]) %}{{ (error ? "\n\t\t\t\t\t" ~ error : '') | raw }}
+					<div class="field"><label><input type="checkbox" value="1" name="{{ name }}" {%- if checked %} checked{% endif %}>&nbsp;{{ label }}</label></div>
+{% endmacro %}
+
+{% macro field_textarea(label, name, value, validation) %}
+					{%- set error = attribute(validation, 'get_error', [name]) %}{{ (error ? "\n\t\t\t\t\t" ~ error : '') | raw }}
+					<div class="field textarea">
+						<label>{{ label }}<br>
+						<textarea name="{{ name }}" cols="40" rows="6">{{ value }}</textarea></label>
+					</div>					
+{% endmacro %}
