@@ -83,9 +83,9 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		}
 		else {
 			if (!isset($this->price_scaled)) {
-				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations JOIN regsys_items USING(item_id) JOIN regsys_dancers USING(dancer_id) WHERE regsys_registrations.`event_id` = :event_id AND regsys_items.`item_id` = :item_id AND regsys_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations AS r JOIN regsys_items AS i USING(item_id) JOIN regsys_dancers AS d USING(dancer_id) WHERE r.event_id = ? AND i.item_id = ? AND d.status != 2', array($this->event_id, $this->item_id))->fetchColumn();
 				
-				$this->price_scaled = self::$database->query('SELECT scale_price FROM regsys_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers <= scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->item_id, ':number_dancers' => $number_dancers))->fetchColumn();
+				$this->price_scaled = self::$database->query('SELECT scale_price FROM regsys_item_prices WHERE event_id = ? AND item_id = ? AND ? <= scale_count ORDER BY scale_count ASC LIMIT 1', array($this->event_id, $this->item_id, $number_dancers))->fetchColumn();
 			}
 			
 			$price = !empty($this->price_scaled) ? $this->price_scaled : $this->price_prereg;
@@ -115,9 +115,9 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		}
 		else {
 			if (!isset($this->price_tier)) {
-				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations JOIN regsys_items USING(item_id) JOIN regsys_dancers USING(dancer_id) WHERE regsys_registrations.`event_id` = :event_id AND regsys_items.`item_id` = :item_id AND regsys_dancers.`status` != 2', array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchColumn();
+				$number_dancers = self::$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations AS r JOIN regsys_items AS i USING(item_id) JOIN regsys_dancers AS d USING(dancer_id) WHERE r.event_id = ? AND i.item_id = ? AND d.status != 2', array($this->event_id, $this->item_id))->fetchColumn();
 				
-				$this->price_tier = (int) self::$database->query('SELECT scale_count FROM regsys_item_prices WHERE event_id = :event_id AND item_id = :item_id AND :number_dancers < scale_count ORDER BY scale_count ASC LIMIT 1', array(':event_id' => $this->event_id, ':item_id' => $this->item_id, ':number_dancers' => $number_dancers))->fetchColumn();
+				$this->price_tier = (int) self::$database->query('SELECT scale_count FROM regsys_item_prices WHERE event_id = ? AND item_id = ? AND ? < scale_count ORDER BY scale_count ASC LIMIT 1', array($this->event_id, $this->item_id, $number_dancers))->fetchColumn();
 			}
 			
 			return $this->price_tier;
@@ -130,7 +130,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 			$order_by = ($this->meta != 'position') ? '' : 'item_meta DESC, ';
 			$order_by .= 'last_name ASC, first_name ASC';
 			
-			$this->registered_dancers = self::$database->query('SELECT regsys_dancers.*, regsys_registrations.`item_meta` FROM regsys_registrations LEFT JOIN regsys_dancers USING(dancer_id) WHERE regsys_registrations.`event_id` = :event_id AND item_id = :item_id ORDER BY '.$order_by, array(':event_id' => $this->event_id, ':item_id' => $this->item_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
+			$this->registered_dancers = self::$database->query('SELECT d.*, r.item_meta FROM regsys_registrations AS r LEFT JOIN regsys_dancers AS d USING(dancer_id) WHERE r.event_id = ? AND item_id = ? ORDER BY ' . $order_by, array($this->event_id, $this->item_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
 		}
 		
 		return $this->registered_dancers;
@@ -138,7 +138,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	
 	public function total_money_from_registrations($payment_method)
 	{
-		return self::$database->query('SELECT SUM(price) FROM regsys_registrations LEFT JOIN regsys_dancers USING (dancer_id) WHERE regsys_registrations.event_id = ? AND payment_method = ? AND item_id = ?', array($this->event_id, $payment_method, $this->item_id))->fetchColumn();
+		return self::$database->query('SELECT SUM(price) FROM regsys_registrations AS r LEFT JOIN regsys_dancers USING (dancer_id) WHERE r.event_id = ? AND payment_method = ? AND item_id = ?', array($this->event_id, $payment_method, $this->item_id))->fetchColumn();
 	}
 	
 	public function is_expired()
@@ -207,7 +207,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	public function count_registrations()
 	{
 		if (!isset($this->count_registrations)) {
-			$this->count_registrations = (int) self::$database->query('SELECT COUNT(*) FROM regsys_registrations WHERE item_id = :item_id', array(':item_id' => $this->item_id))->fetchColumn();
+			$this->count_registrations = (int) self::$database->query('SELECT COUNT(*) FROM regsys_registrations WHERE item_id = ?', array($this->item_id))->fetchColumn();
 		}
 		
 		return $this->count_registrations;
@@ -227,7 +227,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 			$this->count_registrations_by_position = array();
 			
 			foreach (array('leads' => 1, 'follows' => 2) as $key => $value) {
-				$result = (int) self::$database->query('SELECT COUNT(*) FROM regsys_registrations JOIN regsys_dancers USING(dancer_id) WHERE item_id = :item_id AND position = :position', array(':item_id' => $this->item_id, ':position' => $value))->fetchColumn();
+				$result = (int) self::$database->query('SELECT COUNT(*) FROM regsys_registrations JOIN regsys_dancers USING(dancer_id) WHERE item_id = ? AND position = ?', array($this->item_id, $value))->fetchColumn();
 				
 				$this->count_registrations_by_position[$key] = $result;
 			}
@@ -289,7 +289,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 	private function count_registrations_where(array $where = array(), $join_dancers_table = false)
 	{
 		$where[':item_id'] = $this->item_id;
-		$query = array('regsys_registrations.event_id = :event_id');
+		$query = array('r.event_id = :event_id');
 		
 		foreach ($where as $field => $value) {
 			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
@@ -302,7 +302,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 			$query = ' JOIN regsys_dancers USING(dancer_id)' . $query;
 		}
 		
-		$result = self::$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations' . $query, $where)->fetchColumn();
+		$result = self::$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations AS r' . $query, $where)->fetchColumn();
 		return ($result !== false) ? (int) $result : false;
 	}
 }

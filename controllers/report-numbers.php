@@ -16,8 +16,8 @@ function regsys_report_numbers($event)
 			$lists['Levels (All Dancers)'][$level->label] = $event->count_dancers(array(':level_id' => $level->level_id));
 			
 			$lists['Levels (Dancers in Classes)'][$level->label] = sprintf('%d leads, %d follows',
-				$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations LEFT JOIN regsys_dancers USING(dancer_id) LEFT JOIN regsys_items USING(item_id) WHERE regsys_registrations.`event_id` = ? AND regsys_dancers.`level_id` = ? AND regsys_dancers.`position` = ? AND regsys_items.`meta` = "count_for_classes"', array($event->id(), $level->level_id, 1))->fetchColumn(),
-				$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations LEFT JOIN regsys_dancers USING(dancer_id) LEFT JOIN regsys_items USING(item_id) WHERE regsys_registrations.`event_id` = ? AND regsys_dancers.`level_id` = ? AND regsys_dancers.`position` = ? AND regsys_items.`meta` = "count_for_classes"', array($event->id(), $level->level_id, 2))->fetchColumn());
+				$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations AS r LEFT JOIN regsys_dancers AS d USING(dancer_id) LEFT JOIN regsys_items AS i USING(item_id) WHERE r.event_id = ? AND d.level_id = ? AND d.position = ? AND i.meta = "count_for_classes"', array($event->id(), $level->level_id, 1))->fetchColumn(),
+				$database->query('SELECT COUNT(dancer_id) FROM regsys_registrations AS r LEFT JOIN regsys_dancers AS d USING(dancer_id) LEFT JOIN regsys_items AS i USING(item_id) WHERE r.event_id = ? AND d.level_id = ? AND d.position = ? AND i.meta = "count_for_classes"', array($event->id(), $level->level_id, 2))->fetchColumn());
 		}
 		
 		$lists['Levels (All Dancers)'] = array_filter($lists['Levels (All Dancers)']);

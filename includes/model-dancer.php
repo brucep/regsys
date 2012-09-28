@@ -53,21 +53,21 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		$this->date_registered = time();
 		$this->event_id = $event_id;
 		
-		self::$database->query('INSERT regsys_dancers VALUES (:event_id, NULL, :first_name, :last_name, :email, :position, :level_id, :status, :date_registered, :discount_id, :payment_method, :payment_confirmed, :payment_owed, DEFAULT, :mobile_phone, :note)', array(
-			':event_id'          => $this->event_id,
-			':first_name'        => $this->first_name,
-			':last_name'         => $this->last_name,
-			':email'             => $this->email,
-			':position'          => $this->position,
-			':level_id'          => $this->level_id,
-			':status'            => $this->status,
-			':date_registered'   => $this->date_registered,
-			':discount_id'       => $this->discount_id,
-			':payment_method'    => $this->payment_method,
-			':payment_confirmed' => (int) $this->payment_confirmed,
-			':payment_owed'      => (int) $this->payment_owed,
-			':mobile_phone'      => (string) $this->mobile_phone,
-			':note'              => (string) $this->note,
+		self::$database->query('INSERT regsys_dancers VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DEFAULT, ?, ?)', array(
+			$this->event_id,
+			$this->first_name,
+			$this->last_name,
+			$this->email,
+			$this->position,
+			$this->level_id,
+			$this->status,
+			$this->date_registered,
+			$this->discount_id,
+			$this->payment_method,
+			(int) $this->payment_confirmed,
+			(int) $this->payment_owed,
+			(string) $this->mobile_phone,
+			(string) $this->note,
 			));
 		
 		$this->dancer_id = self::$database->lastInsertID();
@@ -75,18 +75,18 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	
 	public function add_housing()
 	{
-		self::$database->query('INSERT regsys_housing VALUES (:event_id, :dancer_id, :housing_type, :housing_spots_available, :housing_nights, :housing_gender, :housing_bedtime, :housing_pets, :housing_smoke, :housing_from_scene, :housing_comment)', array(
-			':event_id'                => $this->event_id,
-			':dancer_id'               => $this->dancer_id,
-			':housing_type'            => (int) $this->housing_type,
-			':housing_spots_available' => (int) $this->housing_spots_available,
-			':housing_nights'          => (string) $this->housing_nights,
-			':housing_gender'          => (int) $this->housing_gender,
-			':housing_bedtime'         => (int) $this->housing_bedtime,
-			':housing_pets'            => (int) $this->housing_pets,
-			':housing_smoke'           => (int) $this->housing_smoke,
-			':housing_from_scene'      => (string) $this->housing_from_scene,
-			':housing_comment'         => (string) $this->housing_comment,
+		self::$database->query('INSERT regsys_housing VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+			$this->event_id,
+			$this->dancer_id,
+			(int) $this->housing_type,
+			(int) $this->housing_spots_available,
+			(string) $this->housing_nights,
+			(int) $this->housing_gender,
+			(int) $this->housing_bedtime,
+			(int) $this->housing_pets,
+			(int) $this->housing_smoke,
+			(string) $this->housing_from_scene,
+			(string) $this->housing_comment,
 			));
 	}
 	
@@ -273,7 +273,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	public function price_total()
 	{
 		if (!isset($this->price_total)) {
-			$this->price_total = self::$database->query('SELECT SUM(price) FROM regsys_registrations WHERE event_id = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchColumn();
+			$this->price_total = self::$database->query('SELECT SUM(price) FROM regsys_registrations WHERE event_id = ? AND dancer_id = ?', array($this->event_id, $this->dancer_id))->fetchColumn();
 		}
 		
 		return ($this->price_total !== false) ? (int) $this->price_total : false;
@@ -285,7 +285,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		{
 			$this->registered_items = array();
 			
-			$registered_items = self::$database->query('SELECT regsys_items.*, regsys_registrations.`price` as registered_price, regsys_registrations.`item_meta` as registered_meta FROM regsys_registrations LEFT JOIN regsys_items USING(item_id) WHERE regsys_registrations.`event_id` = :event_id AND dancer_id = :dancer_id', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
+			$registered_items = self::$database->query('SELECT i.*, r.price AS registered_price, r.item_meta AS registered_meta FROM regsys_registrations AS r LEFT JOIN regsys_items as i USING(item_id) WHERE r.event_id = ? AND dancer_id = ?', array($this->event_id, $this->dancer_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
 			
 			foreach ($registered_items as $item) {
 				$this->registered_items[$item->id()] = $item;
@@ -298,7 +298,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	public function registered_package_id()
 	{
 		if (!isset($this->registered_package_id)) {
-			$this->registered_package_id = self::$database->query('SELECT regsys_registrations.`item_id` FROM regsys_registrations LEFT JOIN regsys_items USING(item_id) WHERE regsys_registrations.`event_id` = :event_id AND dancer_id = :dancer_id AND regsys_items.`type` = "package"', array(':event_id' => $this->event_id, ':dancer_id' => $this->dancer_id))->fetchColumn();
+			$this->registered_package_id = self::$database->query('SELECT r.item_id FROM regsys_registrations AS r LEFT JOIN regsys_items AS i USING(item_id) WHERE r.event_id = ? AND dancer_id = ? AND i.type = "package"', array($this->event_id, $this->dancer_id))->fetchColumn();
 		}
 		
 		return ($this->registered_package_id !== false) ? (int) $this->registered_package_id : false;
