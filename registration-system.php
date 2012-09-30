@@ -211,7 +211,7 @@ class RegistrationSystem
 			$events[$event->id()] = $event->name;
 		}
 		
-	echo self::render_template('admin-options.html', array('events' => $events));
+		echo self::render_template('admin-options.html', array('events' => $events));
 	}
 	
 	static public function page_request()
