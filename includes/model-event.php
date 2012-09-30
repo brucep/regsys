@@ -91,11 +91,6 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return self::$database->fetchObject('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels AS el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE d.event_id = ? AND d.dancer_id = ?', array($this->event_id, $dancer_id), 'RegistrationSystem_Model_Dancer');
 	}
 	
-	public function volunteers()
-	{
-		return self::$database->fetchAll('SELECT * FROM regsys_dancers WHERE event_id = ? AND status = 1 ORDER BY last_name ASC, first_name ASC', array($this->event_id), 'RegistrationSystem_Model_Dancer');
-	}
-	
 	public function discounts()
 	{
 		if (!isset($this->discounts)) {
