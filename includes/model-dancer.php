@@ -273,7 +273,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	public function price_total()
 	{
 		if (!isset($this->price_total)) {
-			$this->price_total = self::$database->query('SELECT SUM(price) FROM regsys_registrations WHERE event_id = ? AND dancer_id = ?', array($this->event_id, $this->dancer_id))->fetchColumn();
+			$this->price_total = self::$database->fetchColumn('SELECT SUM(price) FROM regsys_registrations WHERE event_id = ? AND dancer_id = ?', array($this->event_id, $this->dancer_id));
 		}
 		
 		return ($this->price_total !== false) ? (int) $this->price_total : false;
@@ -285,7 +285,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 		{
 			$this->registered_items = array();
 			
-			$registered_items = self::$database->query('SELECT i.*, r.price AS registered_price, r.item_meta AS registered_meta FROM regsys_registrations AS r LEFT JOIN regsys_items as i USING(item_id) WHERE r.event_id = ? AND dancer_id = ?', array($this->event_id, $this->dancer_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
+			$registered_items = self::$database->fetchAll('SELECT i.*, r.price AS registered_price, r.item_meta AS registered_meta FROM regsys_registrations AS r LEFT JOIN regsys_items as i USING(item_id) WHERE r.event_id = ? AND dancer_id = ?', array($this->event_id, $this->dancer_id), 'RegistrationSystem_Model_Item');
 			
 			foreach ($registered_items as $item) {
 				$this->registered_items[$item->id()] = $item;
@@ -298,7 +298,7 @@ class RegistrationSystem_Model_Dancer extends RegistrationSystem_Model
 	public function registered_package_id()
 	{
 		if (!isset($this->registered_package_id)) {
-			$this->registered_package_id = self::$database->query('SELECT r.item_id FROM regsys_registrations AS r LEFT JOIN regsys_items AS i USING(item_id) WHERE r.event_id = ? AND dancer_id = ? AND i.type = "package"', array($this->event_id, $this->dancer_id))->fetchColumn();
+			$this->registered_package_id = self::$database->fetchColumn('SELECT r.item_id FROM regsys_registrations AS r LEFT JOIN regsys_items AS i USING(item_id) WHERE r.event_id = ? AND dancer_id = ? AND i.type = "package"', array($this->event_id, $this->dancer_id));
 		}
 		
 		return ($this->registered_package_id !== false) ? (int) $this->registered_package_id : false;

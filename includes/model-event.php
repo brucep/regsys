@@ -33,17 +33,17 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	
 	static public function get_events()
 	{
-		return self::$database->query('SELECT * FROM regsys_events ORDER BY date_paypal_prereg_end DESC')->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Event');
+		return self::$database->fetchAll('SELECT * FROM regsys_events ORDER BY date_paypal_prereg_end DESC', array(), 'RegistrationSystem_Model_Event');
 	}
 	
 	static public function get_event_by_id($event_id)
 	{
-		return self::$database->query('SELECT * FROM regsys_events WHERE event_id = ?', array($event_id))->fetchObject('RegistrationSystem_Model_Event');
+		return self::$database->fetchObject('SELECT * FROM regsys_events WHERE event_id = ?', array($event_id), 'RegistrationSystem_Model_Event');
 	}
 	
 	public function items()
 	{
-		return self::$database->query('SELECT * FROM regsys_items WHERE event_id = ? ORDER BY item_id ASC', array($this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
+		return self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? ORDER BY item_id ASC', array($this->event_id), 'RegistrationSystem_Model_Item');
 	}
 	
 	public function items_where(array $where, $exclude_expired = false)
@@ -62,17 +62,17 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 			$where[':current_time'] = time();
 		}
 		
-		return self::$database->query('SELECT * FROM regsys_items WHERE ' . $query . ' ORDER BY item_id ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Item');
+		return self::$database->fetchAll('SELECT * FROM regsys_items WHERE ' . $query . ' ORDER BY item_id ASC', $where, 'RegistrationSystem_Model_Item');
 	}
 	
 	public function item_by_id($item_id)
 	{
-		return self::$database->query('SELECT * FROM regsys_items WHERE event_id = ? AND item_id = ?', array($this->event_id, $item_id))->fetchObject('RegistrationSystem_Model_Item');
+		return self::$database->fetchObject('SELECT * FROM regsys_items WHERE event_id = ? AND item_id = ?', array($this->event_id, $item_id), 'RegistrationSystem_Model_Item');
 	}
 	
 	public function dancers()
 	{
-		return self::$database->query('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels AS el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE d.event_id = ? ORDER BY last_name ASC, first_name ASC, date_registered ASC', array($this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
+		return self::$database->fetchAll('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels AS el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE d.event_id = ? ORDER BY last_name ASC, first_name ASC, date_registered ASC', array($this->event_id), 'RegistrationSystem_Model_Dancer');
 	}
 	
 	public function dancers_where(array $where, $equal = true)
@@ -88,24 +88,24 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		$query = implode(' AND', $query);
 		$where[':event_id'] = $this->event_id;
 		
-		return self::$database->query('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels as el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE ' . $query . ' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where)->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer');
+		return self::$database->fetchAll('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels as el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE ' . $query . ' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where, 'RegistrationSystem_Model_Dancer');
 	}
 	
 	public function dancer_by_id($dancer_id)
 	{
-		return self::$database->query('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels AS el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE d.event_id = ? AND d.dancer_id = ?', array($this->event_id, $dancer_id))->fetchObject('RegistrationSystem_Model_Dancer');
+		return self::$database->fetchObject('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels AS el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE d.event_id = ? AND d.dancer_id = ?', array($this->event_id, $dancer_id), 'RegistrationSystem_Model_Dancer');
 	}
 	
 	public function volunteers()
 	{
-		return ($this->has_volunteers()) ? self::$database->query('SELECT * FROM regsys_dancers WHERE event_id = ? AND status = 1 ORDER BY last_name ASC, first_name ASC', array($this->event_id))->fetchAll(PDO::FETCH_CLASS, 'RegistrationSystem_Model_Dancer') : array();
+		return self::$database->fetchAll('SELECT * FROM regsys_dancers WHERE event_id = ? AND status = 1 ORDER BY last_name ASC, first_name ASC', array($this->event_id), 'RegistrationSystem_Model_Dancer');
 	}
 	
 	public function discounts()
 	{
 		if (!isset($this->discounts)) {
 			$this->discounts = array();
-			$discounts = self::$database->query('SELECT * FROM regsys_event_discounts WHERE event_id = ? ORDER BY discount_code ASC', array($this->event_id))->fetchAll(PDO::FETCH_OBJ);
+			$discounts = self::$database->fetchObject('SELECT * FROM regsys_event_discounts WHERE event_id = ? ORDER BY discount_code ASC', array($this->event_id));
 			
 			foreach ($discounts as $d) {
 				$this->discounts[$d->discount_id] = $d;
@@ -123,7 +123,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	
 	public function discount_by_code($code)
 	{
-		return self::$database->query('SELECT * FROM regsys_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchObject();
+		return self::$database->fetchObject('SELECT * FROM regsys_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code));
 	}
 	
 	public function count_dancers(array $where = array())
@@ -137,17 +137,17 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		$query = implode(' AND', $query);
 		$where[':event_id'] = $this->event_id;
 		
-		$result = self::$database->query('SELECT COUNT(dancer_id) FROM regsys_dancers WHERE '.$query, $where)->fetchColumn();
+		$result = self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_dancers WHERE '.$query, $where);
 		return ($result !== false) ? (int) $result : false;
 	}
 	
 	public function count_discounts_used($code, $payment_method = null)
 	{
 		if ($payment_method == null) {
-			$result = self::$database->query('SELECT COUNT(dancer_id) FROM regsys_dancers AS d JOIN regsys_event_discounts USING(discount_id) WHERE d.event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchColumn();
+			$result = self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_dancers AS d JOIN regsys_event_discounts USING(discount_id) WHERE d.event_id = ? AND discount_code = ?', array($this->event_id, $code));
 		}
 		else {
-			$result = self::$database->query('SELECT COUNT(dancer_id) FROM regsys_dancers AS d JOIN regsys_event_discounts USING(discount_id) WHERE d.event_id = ? AND discount_code = ? AND payment_method = ?', array($this->event_id, $code, $payment_method))->fetchColumn();
+			$result = self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_dancers AS d JOIN regsys_event_discounts USING(discount_id) WHERE d.event_id = ? AND discount_code = ? AND payment_method = ?', array($this->event_id, $code, $payment_method));
 		}
 		
 		return ($result !== false) ? (int) $result : false;
@@ -155,7 +155,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	
 	public function count_housing_spots_available()
 	{
-		$result = self::$database->query('SELECT SUM(housing_spots_available) FROM regsys_housing WHERE event_id = ? AND housing_type = 2', array($this->event_id))->fetchColumn();
+		$result = self::$database->fetchColumn('SELECT SUM(housing_spots_available) FROM regsys_housing WHERE event_id = ? AND housing_type = 2', array($this->event_id));
 		return ($result !== false) ? (int) $result : false;
 	}
 	
@@ -205,7 +205,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	{
 		if (!isset($this->levels)) {
 			$this->levels = array();
-			$levels = self::$database->query('SELECT level_id, label, has_tryouts FROM regsys_event_levels WHERE event_id = ?', array($this->event_id))->fetchAll(PDO::FETCH_OBJ);
+			$levels = self::$database->fetchObject('SELECT level_id, label, has_tryouts FROM regsys_event_levels WHERE event_id = ?', array($this->event_id));
 			
 			foreach ($levels as $level) {
 				$this->levels[$level->level_id] = $level;
@@ -247,7 +247,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	
 	public function total_money_from_registrations($payment_method)
 	{
-		return self::$database->query('SELECT SUM(price) FROM regsys_registrations AS r LEFT JOIN regsys_dancers USING (dancer_id) WHERE r.event_id = ? AND payment_method = ?', array($this->event_id, $payment_method))->fetchColumn();
+		return self::$database->fetchColumn('SELECT SUM(price) FROM regsys_registrations AS r LEFT JOIN regsys_dancers USING (dancer_id) WHERE r.event_id = ? AND payment_method = ?', array($this->event_id, $payment_method));
 	}
 	
 	public function has_discounts()
@@ -263,7 +263,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	
 	public function has_discount_openings($code)
 	{
-		$limit = self::$database->query('SELECT discount_limit FROM regsys_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchColumn();
+		$limit = self::$database->fetchColumn('SELECT discount_limit FROM regsys_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code));
 		
 		if ($limit !== false) {
 			return ($limit > 0) ? (bool) ($limit - $this->count_discounts_used($code)) : true;

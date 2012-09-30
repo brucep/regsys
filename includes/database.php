@@ -17,7 +17,7 @@ class RegistrationSystem_Database
 				$settings['password'],
 				array(
 					PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));
+					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ));
 			
 			$this->pdo->exec('SET NAMES "utf8";');
 		}
@@ -25,6 +25,36 @@ class RegistrationSystem_Database
 			$message = preg_replace('/^[A-Z]+\[[A-Z0-9]+\]:? \[[0-9]+\] (.*?)/', '$1', $e->getMessage());
 			exit('<pre>' . $message . '</pre>');
 		}
+	}
+	
+	public function fetchAll($query, array $params = array(), $class = null)
+	{
+		if (class_exists($class)) {
+			return $this->query($query, $params)->fetchAll(PDO::FETCH_CLASS, $class);
+		}
+		else {
+			return $this->query($query, $params)->fetchAll(PDO::FETCH_OBJ);
+		}
+	}
+	
+	public function fetchColumn($query, array $params = array())
+	{
+		return $this->query($query, $params)->fetchColumn();
+	}
+	
+	public function fetchObject($query, array $params = array(), $class = null)
+	{
+		if (class_exists($class)) {
+			return $this->query($query, $params)->fetch(PDO::FETCH_CLASS, $class);
+		}
+		else {
+			return $this->query($query, $params)->fetch(PDO::FETCH_OBJ);
+		}
+	}
+	
+	public function lastInsertID($name = '')
+	{
+		return $this->pdo->lastInsertID($name);
 	}
 	
 	public function query($query, array $params = array())
@@ -35,6 +65,8 @@ class RegistrationSystem_Database
 			if (!($statement->execute($params))) {
 				throw PDOException();
 			}
+			
+			return $statement;
 		}
 		catch (PDOException $e) {
 			$message = preg_replace("/^[A-Z]+\[[A-Z0-9]+\]:?(.+ [0-9]+)? (.+)$/", '$2', $e->getMessage());
@@ -45,12 +77,5 @@ class RegistrationSystem_Database
 			
 			throw new Exception($message);
 		}
-		
-		return $statement;
-	}
-	
-	public function lastInsertID($name = '')
-	{
-		return $this->pdo->lastInsertID($name);
 	}
 }

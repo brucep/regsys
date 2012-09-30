@@ -53,7 +53,7 @@ try {
 	
 	$unconfirmed_registrations = array();
 	
-	$tmp_registrations = $database->query('SELECT item_id, price FROM regsys_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom))->fetchAll(PDO::FETCH_OBJ);
+	$tmp_registrations = $database->fetchAll('SELECT item_id, price FROM regsys_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom));
 	
 	foreach ($tmp_registrations as $reg) {
 		$unconfirmed_registrations[$reg->item_id] = $reg->price;
@@ -92,7 +92,7 @@ try {
 		$output[] = 'No fee recorded';
 	}
 	
-	$registrations_remaining = $database->query('SELECT COUNT(dancer_id) FROM regsys_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom))->fetchColumn();
+	$registrations_remaining = $database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom));
 	
 	$output[] = sprintf('$%d owed', $payment_owed);
 	$output[] = sprintf('%d registration%s remaining', $registrations_remaining, $registrations_remaining == 1 ? '' : 's');
