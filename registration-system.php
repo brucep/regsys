@@ -202,13 +202,11 @@ class RegistrationSystem
 			throw new Exception(__('Cheatin&#8217; uh?'));
 		}
 		
-		RegistrationSystem_Model::set_database(self::get_database_connection());
-		RegistrationSystem_Model::set_options(self::get_options());
-		
 		$events = array();
+		$result = self::get_database_connection()->fetchAll('SELECT event_id, name FROM regsys_events ORDER BY date_paypal_prereg_end DESC');
 		
-		foreach (RegistrationSystem_Model_Event::get_events() as $event) {
-			$events[$event->id()] = $event->name;
+		foreach ($result as $event) {
+			$events[$event->event_id] = $event->name;
 		}
 		
 		echo self::render_template('admin-options.html', array('events' => $events));

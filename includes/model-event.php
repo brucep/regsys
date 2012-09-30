@@ -31,11 +31,6 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return sprintf('%s [#%d]', $this->name, $this->event_id);
 	}
 	
-	static public function get_events()
-	{
-		return self::$database->fetchAll('SELECT * FROM regsys_events ORDER BY date_paypal_prereg_end DESC', array(), 'RegistrationSystem_Model_Event');
-	}
-	
 	static public function get_event_by_id($event_id)
 	{
 		return self::$database->fetchObject('SELECT * FROM regsys_events WHERE event_id = ?', array($event_id), 'RegistrationSystem_Model_Event');
