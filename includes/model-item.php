@@ -252,7 +252,7 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		$result = array();
 		
 		if ($this->type == 'package' and self::$database->fetchColumn('SELECT item_id FROM regsys_item_prices WHERE item_id = ?', array($this->item_id))) {
-			$registrations = self::$database->fetchObject('SELECT price, payment_method FROM regsys_registrations LEFT JOIN regsys_dancers USING (dancer_id) WHERE price > 0 AND item_id = ? ORDER BY price ASC', array($this->item_id));
+			$registrations = self::$database->fetchAll('SELECT price, payment_method FROM regsys_registrations LEFT JOIN regsys_dancers USING (dancer_id) WHERE price > 0 AND item_id = ? ORDER BY price ASC', array($this->item_id));
 			
 			foreach ($registrations as $reg) {
 				if (!isset($result[$reg->price])) {
