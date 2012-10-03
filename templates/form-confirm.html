@@ -17,17 +17,17 @@
 				<input type="hidden" name="{{ 'payment_method' }}" value="{{ POST.payment_method }}">
 				<input type="hidden" name="{{ 'confirmed'      }}" value="{{ POST.confirmed }}">
 {% if POST.discount_code %}
-				<input type="hidden" name="{{ 'discount_code' }}" value="{{ POST.discount_code }}">
+				<input type="hidden" name="discount_code" value="{{ POST.discount_code }}">
 {% endif %}
 
 {% for key, item in validated_items %}
 {% 	if item.type == 'package' %}
-				{{- _self.field_hidden('package', POST) }}
-				<input type="hidden" name="{{ 'package_tier[%d]' | format(key) }}" value="{{ item.price_tier }}">
+				<input type="hidden" name="package" value="{{ POST.package }}">
+				<input type="hidden" name="package_tier[{{ key }}]" value="{{ POST.package_tier[key] ? POST.package_tier[key] : item.price_tier }}">
 {% 	else %}
-				<input type="hidden" name="{{ 'items[%d]' | format(key) }}" value="{{ item.meta == 'size' ? POST.items[key] : key }}">
-{% 		if attribute(POST.item_meta, key) %}
-				<input type="hidden" name="{{ 'item_meta[%d]' | format(key) }}" value="{{ POST.item_meta[key] }}">
+				<input type="hidden" name="items[{{ key }}]" value="{{ item.meta == 'size' ? POST.items[key] : key }}">
+{% 		if POST.item_meta[key] %}
+				<input type="hidden" name="item_meta[{{ key }}]" value="{{ POST.item_meta[key] }}">
 {% 		endif %}
 {% 	endif %}
 {% endfor %}
@@ -68,7 +68,7 @@
 {% if event.has_levels %}
 					<tr>
 						<td class="label">Level</td>
-						<td class="value">{{ event.levels_keyed_by_id[POST.level_id] }}{# dancer.level has not been JOINed by query yet #}</td>
+						<td class="value">{{ event.levels[POST.level_id].label }}{# dancer.level has not been JOINed by query yet #}</td>
 						<td class="price"></td>
 					</tr>
 {% endif %}
