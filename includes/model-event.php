@@ -123,12 +123,6 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return ($result !== false) ? (int) $result : false;
 	}
 	
-	public function count_housing_spots_available()
-	{
-		$result = self::$database->fetchColumn('SELECT SUM(housing_spots_available) FROM regsys_housing WHERE event_id = ? AND housing_type = 2', array($this->event_id));
-		return ($result !== false) ? (int) $result : false;
-	}
-	
 	public function add_registration($parameters)
 	{
 		$statement = self::$database->query('INSERT regsys_registrations VALUES (?, ?, ?, ?, DEFAULT, ?)', array(
