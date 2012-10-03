@@ -23,7 +23,7 @@ if (!class_exists('RegistrationSystem')):
 class RegistrationSystem
 {
 	static public $event, $validation, $validated_items = array(); # Used by validation methods
-	static private $twig, $vip;
+	static private $twig, $database, $vip;
 	static private $default_options = array(
 		'current_event_id'      => '',
 		'email_bcc'             => '',
@@ -182,13 +182,17 @@ class RegistrationSystem
 	
 	static public function get_database_connection()
 	{
-		return new RegistrationSystem_Database(array(
-			'host'     => DB_HOST,
-			'port'     => defined('DB_HOST_PORT') ? DB_HOST_PORT : false,
-			'name'     => DB_NAME,
-			'user'     => DB_USER,
-			'password' => DB_PASSWORD,
-			));
+		if (!(self::$database instanceof RegistrationSystem_Database)) {
+			self::$database = new RegistrationSystem_Database(array(
+				'host'     => DB_HOST,
+				'port'     => defined('DB_HOST_PORT') ? DB_HOST_PORT : null,
+				'name'     => DB_NAME,
+				'user'     => DB_USER,
+				'password' => DB_PASSWORD,
+				));
+		}
+		
+		return self::$database;
 	}
 	
 	static public function get_options()
