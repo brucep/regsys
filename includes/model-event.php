@@ -95,7 +95,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	{
 		if (!isset($this->discounts)) {
 			$this->discounts = array();
-			$discounts = self::$database->fetchObject('SELECT * FROM regsys_event_discounts WHERE event_id = ? ORDER BY discount_code ASC', array($this->event_id));
+			$discounts = self::$database->fetchAll('SELECT * FROM regsys_event_discounts WHERE event_id = ? ORDER BY discount_code ASC', array($this->event_id));
 			
 			foreach ($discounts as $d) {
 				$this->discounts[$d->discount_id] = $d;
@@ -195,7 +195,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	{
 		if (!isset($this->levels)) {
 			$this->levels = array();
-			$levels = self::$database->fetchObject('SELECT level_id, label, has_tryouts FROM regsys_event_levels WHERE event_id = ?', array($this->event_id));
+			$levels = self::$database->fetchAll('SELECT level_id, label, has_tryouts FROM regsys_event_levels WHERE event_id = ?', array($this->event_id));
 			
 			foreach ($levels as $level) {
 				$this->levels[$level->level_id] = $level;
