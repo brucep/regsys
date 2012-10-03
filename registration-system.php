@@ -450,8 +450,7 @@ class RegistrationSystem
 				
 				# Level
 				if (self::$event->has_levels()) {
-					self::$validation->add_rule('level_id', sprintf('intval|in[%s]',
-						implode(',', array_keys(self::$event->levels_keyed_by_id()))));
+					$validation->add_rule('level_id', sprintf('intval|in[%s]', $event->levels_for_validation()));
 				}
 				else {
 					$_POST['level_id'] = 1;

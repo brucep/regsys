@@ -16,8 +16,7 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 	        $has_vip,
 	        $has_volunteers,
 	        $housing_nights,
-	        $levels,
-	        $levels_keyed_by_id;
+	        $levels;
 	
 	public function __construct(array $parameters = array())
 	{
@@ -197,17 +196,15 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return $levels;
 	}
 	
-	public function levels_keyed_by_id()
+	public function levels_for_validation()
 	{
-		if (!isset($this->levels_keyed_by_id)) {
-			$this->levels_keyed_by_id = array();
-			
-			foreach ($this->levels() as $level) {
-				$this->levels_keyed_by_id[$level->level_id] = $level->label;
-			}
+		$result = array();
+		
+		foreach ($this->levels() as $level) {
+			$result[] = $level->level_id;
 		}
 		
-		return $this->levels_keyed_by_id;
+		return implode(',', $result);
 	}
 	
 	public function unset_levels()

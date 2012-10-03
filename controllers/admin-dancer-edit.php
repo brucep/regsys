@@ -16,8 +16,7 @@ function regsys_admin_dancer_edit($event, $dancer)
 			));
 		
 		if ($event->has_levels()) {
-			$validation->add_rule('level_id', sprintf('intval|in[%s]',
-				implode(',', array_keys($event->levels_keyed_by_id()))));
+			$validation->add_rule('level_id', sprintf('intval|in[%s]', $event->levels_for_validation()));
 		}
 		else {
 			$_POST['level'] = 1;
