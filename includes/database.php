@@ -44,11 +44,11 @@ class RegistrationSystem_Database
 	
 	public function fetchObject($query, array $params = array(), $class = null)
 	{
-		if (class_exists($class)) {
-			return $this->query($query, $params)->fetch(PDO::FETCH_CLASS, $class);
+		if ($class) {
+			return $this->query($query, $params)->fetchObject($class);
 		}
 		else {
-			return $this->query($query, $params)->fetch(PDO::FETCH_OBJ);
+			return $this->query($query, $params)->fetchObject();
 		}
 	}
 	
