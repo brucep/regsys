@@ -510,9 +510,9 @@ class RegistrationSystem
 				}
 				
 				$context = array(
-					'packages'     => self::$event->items_where(array(':type' => 'package'),     true),
-					'competitions' => self::$event->items_where(array(':type' => 'competition'), true),
-					'shirts'       => self::$event->items_where(array(':type' => 'shirt'),       true),
+					'packages'     => self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? AND (date_expires = 0 OR date_expires > ?) AND type = ? ORDER BY item_id ASC', array(self::$event->id(), time(), 'package'),     'RegistrationSystem_Model_Item'),
+					'competitions' => self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? AND (date_expires = 0 OR date_expires > ?) AND type = ? ORDER BY item_id ASC', array(self::$event->id(), time(), 'competition'), 'RegistrationSystem_Model_Item'),
+					'shirts'       => self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? AND (date_expires = 0 OR date_expires > ?) AND type = ? ORDER BY item_id ASC', array(self::$event->id(), time(), 'shirt'),       'RegistrationSystem_Model_Item'),
 					'validation'   => self::$validation,
 					'the_content'  => apply_filters('the_content', $post->post_content),
 					'shirt_description' => @file_get_contents(sprintf('%s/%s/shirt-description.html', get_theme_root(), get_stylesheet())),

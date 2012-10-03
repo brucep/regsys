@@ -41,25 +41,6 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		return self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? ORDER BY item_id ASC', array($this->event_id), 'RegistrationSystem_Model_Item');
 	}
 	
-	public function items_where(array $where, $exclude_expired = false)
-	{
-		$query = array('`event_id` = :event_id');
-		
-		foreach ($where as $field => $value) {
-			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
-		}
-		
-		$query = implode(' AND', $query);
-		$where[':event_id'] = $this->event_id;
-		
-		if ($exclude_expired) {
-			$query .= ' AND (date_expires = 0 OR date_expires > :current_time)';
-			$where[':current_time'] = time();
-		}
-		
-		return self::$database->fetchAll('SELECT * FROM regsys_items WHERE ' . $query . ' ORDER BY item_id ASC', $where, 'RegistrationSystem_Model_Item');
-	}
-	
 	public function item_by_id($item_id)
 	{
 		return self::$database->fetchObject('SELECT * FROM regsys_items WHERE event_id = ? AND item_id = ?', array($this->event_id, $item_id), 'RegistrationSystem_Model_Item');

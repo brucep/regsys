@@ -28,7 +28,7 @@ function regsys_report_numbers($event)
 	$packages_and_comps = $database->fetchAll('SELECT * FROM regsys_items WHERE item_id NOT IN (SELECT DISTINCT item_id FROM regsys_item_prices WHERE event_id = :event_id) AND event_id = :event_id AND type != "shirt"', array(':event_id' => $event->id()), 'RegistrationSystem_Model_Item');
 	
 	# Shirts
-	$shirts = $event->items_where(array(':type' => 'shirt'));
+	$shirts = self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? AND type = ? ORDER BY item_id ASC', array($event->id(), 'shirt'), 'RegistrationSystem_Model_Item');
 	$sizes = array();
 	foreach ($shirts as &$item) {
 		$sizes = array_merge($sizes, $item->sizes());
