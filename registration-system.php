@@ -221,45 +221,42 @@ class RegistrationSystem
 		try {
 			@date_default_timezone_set(get_option('timezone_string'));
 			
-			if (!current_user_can('edit_pages')) {
-				throw new Exception(__('Cheatin&#8217; uh?'));
-			}
-			
-			RegistrationSystem_Model::set_database(self::get_database_connection());
-			RegistrationSystem_Model::set_options(self::get_options());
-			
 			if (empty($_GET['request'])) {
 				$_GET['request'] = 'report_index';
 			}
 			
-			@include sprintf('%s/controllers/%s.php', dirname(__FILE__), str_replace('_', '-', $_GET['request']));
+			if (!current_user_can('edit_pages') or (substr($_GET['request'], 0, 6) == 'admin_' and !current_user_can('administrator'))) {
+				throw new Exception(__('Cheatin&#8217; uh?'));
+			}
 			
-			if (is_callable('regsys_' . $_GET['request'])) {
-				if (substr($_GET['request'], 0, 6) == 'admin_' and !current_user_can('administrator')) {
-					throw new Exception(__('Cheatin&#8217; uh?'));
-				}
+			$filename = sprintf('%s/controllers/%s.php', dirname(__FILE__), str_replace('_', '-', $_GET['request']));
+			
+			if (file_exists($filename)) {
+				$database = self::get_database_connection();
+				$options  = self::get_options();
 				
-				$params = array();
+				RegistrationSystem_Model::set_database($database);
+				RegistrationSystem_Model::set_options($options);
 				
 				if (!in_array($_GET['request'], array('report_index', 'report_index_visualization', 'admin_event_add'))) {
-					if (!$params['event'] = self::$event = RegistrationSystem_Model_Event::get_event_by_id($_GET['event_id'])) {
+					if (!($event = self::$event = RegistrationSystem_Model_Event::get_event_by_id($_GET['event_id']))) {
 						throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
 					}
 					
 					if (isset($_GET['dancer_id'])) {
-						if (!$params['dancer'] = self::$event->dancer_by_id($_GET['dancer_id'])) {
+						if (!($dancer = $event->dancer_by_id($_GET['dancer_id']))) {
 							throw new Exception(sprintf('Dancer ID not found: %d', $_GET['dancer_id']));
 						}
 					}
 					
 					if (isset($_GET['item_id'])) {
-						if (!$params['item'] = self::$event->item_by_id($_GET['item_id'])) {
+						if (!($item = $event->item_by_id($_GET['item_id']))) {
 							throw new Exception(sprintf('Item ID not found: %d', $_GET['dancer_id']));
 						}
 					}
 				}
 				
-				call_user_func_array('regsys_' . $_GET['request'], $params);
+				require $filename;
 			}
 			else {
 				throw new Exception(sprintf('Unable to handle page request: %s', esc_html($_GET['request'])));
