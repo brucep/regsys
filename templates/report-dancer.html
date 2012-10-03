@@ -3,11 +3,6 @@
 {% from 'admin.html' import message as message %}
 
 {% block content %}
-	<style type="text/css" media="screen">
-		#reg-sys #report-dancer a.button { display: none; }
-		#reg-sys #report-dancer h2 a { color: inherit; text-decoration: none; }
-	</style>
-
 	<div class="vcard">
 	<h3><span class="fn n"><span class="given-name">{{ dancer.first_name }}</span> <span class="family-name">{{ dancer.last_name }}</span></span>
 {% if admin %}
