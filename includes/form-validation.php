@@ -198,7 +198,7 @@ class RegistrationSystem_Form_Validation
 		$this->validated = array();
 	}
 	
-	protected function get_post_value($key)
+	public function get_post_value($key)
 	{
 		if (strpos($key, '[') >= 1) {
 			$key = explode('[', $key, 2);

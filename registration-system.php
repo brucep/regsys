@@ -716,6 +716,8 @@ class RegistrationSystem
 			
 			self::$twig->getExtension('core')->setDateFormat('Y-m-d, h:i A');
 			self::$twig->addGlobal('form', new RegistrationSystem_Form_Controls);
+			self::$twig->addFunction('getPost',  new Twig_Function_Function('RegistrationSystem_Form_Validation::get_post_value'));
+			self::$twig->addFunction('getError', new Twig_Function_Function('RegistrationSystem::template_error_helper'));
 			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
 			
 			if (is_admin() and $_GET['page'] == 'reg-sys-options') {
@@ -739,6 +741,11 @@ class RegistrationSystem
 		}
 		
 		return self::$twig->loadTemplate($file)->render($context);
+	}
+	
+	static public function template_error_helper($key, $prefix = null, $suffix = null)
+	{
+		return self::$validation->get_error($key, $prefix, $suffix);
 	}
 	
 	static public function validate_discount_code($code)
