@@ -1,8 +1,10 @@
 <?php
-if (!class_exists('RegistrationSystem')) {
-	@header('HTTP/1.1 500 Internal Server Error');
-	exit('Registration System plugin is not active.');
+
+if (class_exists('RegSys')) {
+	RegSys::registrationHead();
+	RegSys::registrationForm();
 }
-RegistrationSystem::registration_head();
-RegistrationSystem::registration_form();
-?>
+else {
+	@header('HTTP/1.0 500 Internal Server Error');
+	exit('RegSys plugin is not active.');
+}
