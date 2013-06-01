@@ -1,55 +1,65 @@
 @import url('admin-small.css') screen and (max-device-width: 480px);
 @import url('admin-print.css') print;
 
-.update-nag { display: none; }
+.update-nag, #regsys .hidden { display: none; }
 
-div.reg-sys-exception { margin: 2em 1em; }
+div#regsys-exception,
+#regsys .regsys-validation-error td {
+	/* Copied from WordPress div.error */
+	background-color: #ffebe8;
+	border: 1px solid #c00;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	margin: 5px 0 15px;
+	padding: 0 0.6em;
+	display: block;
+}
 
-#reg-sys ul {
+#regsys ul {
 	margin-top: 1em;
 	list-style: disc inside;
 }
 
-#reg-sys .ellipsis {
+#regsys .ellipsis {
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	-ms-text-overflow: ellipsis;
 }
 
-#reg-sys td.date {
+#regsys td.date {
 	font-family: monospace;
 }
 
-#reg-sys form ul {
+#regsys form ul {
 	list-style-type: none;
 }
 
-#reg-sys form label.radio {
+#regsys form label.radio {
 	display: block;
 }
 
-#reg-sys form input[type="submit"] {
+#regsys form input[type="submit"] {
 	margin-top: 2em;
 }
 
-#reg-sys table.report tr:hover td {
+#regsys table.report tr:hover td {
 	background-color: #ff9;
 }
 
-#reg-sys table.report td.column-title {
+#regsys table.report td.column-title {
 	font-weight: bold;
 }
 
-#reg-sys table.report th.headerSortDown div {
+#regsys table.report th.headerSortDown div {
 	background: url('arrow-sort-down.png') right no-repeat;
 }
 
-#reg-sys table.report th.headerSortUp div {
+#regsys table.report th.headerSortUp div {
 	background: url('arrow-sort-up.png') right no-repeat;
 }
 
-#reg-sys a.delete {
+#regsys a.delete {
 	margin-left: 1em;
 	font-size: 12px;
 	font-weight: normal;
@@ -58,7 +68,7 @@ div.reg-sys-exception { margin: 2em 1em; }
 	text-decoration: underline;
 }
 
-#reg-sys input.delete {
+#regsys input.delete {
 	color: #fff;
 	background: none;
 	background-color: #bc0b0b;
@@ -66,6 +76,6 @@ div.reg-sys-exception { margin: 2em 1em; }
 	text-shadow: none;
 }
 
-#reg-sys a.button {
+#regsys a.button {
 	margin-left: 0.5em;
 }

@@ -1,12 +1,12 @@
-.reg-sys-form p {
+#regsys p {
 margin: 1em;
 }
 
-.reg-sys-form div.field {
+#regsys div.field {
 margin-top: 1em;
 }
 
-.reg-sys-form #submit input {
+#regsys #submit input {
 margin: 0 auto;
 padding: 0.2em 0.5em;
 background-color: #fff;
@@ -16,41 +16,41 @@ border: 1px solid #d9d9d9;
 cursor: pointer;
 }
 
-.reg-sys-form #submit input:hover {
+#regsys #submit input:hover {
 background-color: #ff7;
 }
 
 
-#reg-sys-form-info .no_show {
+#regsys-form .hidden {
 display: none;
 }
 
-#reg-sys-form-info div.error {
+#regsys-form div.validation-error {
 margin: 1.5em -0.5em 1em;
 padding: 0.5em;
 background-color: #fcc;
 }
 
-#reg-sys-form-info div.error p {
+#regsys-form div.validation-error p {
 	margin: 0 !important;
 }
 
-#reg-sys-form-info tr.error td {
+#regsys-form tr.validation-error td {
 padding: 0.4em;
 background-color: #fcc;
 }
 
-#reg-sys-form-info div#pricing-dates {
+#regsys-form div#pricing-dates {
 margin-top: 1em;
 }
 
-form fieldset, div.reg-sys-form div.price_table {
+form fieldset, div#regsys div.price_table {
 margin-bottom: 3em;
 padding: 1em 1em;
 background-color: #d6e7f1;
 }
 
-#reg-sys-form-info h2, div.reg-sys-form div.price_table h2 {
+#regsys-form h2, div#regsys div.price_table h2 {
 margin: 1.5em 0 0;
 padding: 0.4em;
 font-weight: bold;
@@ -59,107 +59,111 @@ color: #fff;
 background-color: #1c90c7;
 }
 
-#reg-sys-form-info fieldset h2 span {
+#regsys-form fieldset h2 span {
 font-size: 0.8em;
 margin-left: 0.8em;
 }
 
-#reg-sys-form-info fieldset p {
+#regsys-form fieldset p {
 margin: 1em 0 0 !important;
 }
 
-#reg-sys-form-info fieldset div:first-child {
+#regsys-form fieldset div:first-child {
 margin-top: 0 !important;
 }
 
-#reg-sys-form-info div.text label {
+#regsys-form div.text label {
 display: block;
 width: 8.5em;
 float: left;
 clear: left;
 }
 
-#reg-sys-form-info div.text input {
+#regsys-form div.text input {
 margin-top: -1px;
 }
 
-#reg-sys-form-info table, div.reg-sys-form table {
+#regsys-form table, div#regsys table {
 width: 100%;
 }
 
-#reg-sys-form-info thead th, div.reg-sys-form thead th {
+#regsys-form thead th, div#regsys thead th {
 font-size: 0.8em;
 text-align: left;
 background-color: #afd1e4;
 }
 
-#reg-sys-form-info tbody td {
+#regsys-form tbody td {
 padding: 0.5em 0;
 border-top: 1px solid #b3b3b3;
 }
 
-#reg-sys-form-info td.not_early_bird {
+#regsys-form td.not_early_bird {
 text-decoration: line-through;
 }
 
-#reg-sys-form-info .still_early_bird #packages table th.price {
+#regsys-form .still_early_bird #packages table th.price {
 width: 11%;
 }
 
-#reg-sys-form-info .not_early_bird #packages table th.price {
+#regsys-form .not_early_bird #packages table th.price {
 width: 16%;
 }
 
-#reg-sys-form-info td.note input[type=text], #reg-sys-form-info textarea {
+#regsys-form td.note input[type=text], #regsys-form textarea {
 width: 100%;
 }
 
-#reg-sys-form-info td.note ul, #reg-sys-form-info td.note ul li {
+#regsys-form td.note ul, #regsys-form td.note ul li {
 margin: 0 !important;
 padding: 0 !important;
 list-style: inside circle;
 }
 
-#reg-sys-form-info fieldset#shirt table {
+#regsys-form fieldset#shirt table {
 width: 95%;
 }
 
-#reg-sys-form-info fieldset#shirt select {
+#regsys-form fieldset#shirt select {
 width: 100%;
 }
 
-#reg-sys-form-info div#shirt-description {
+#regsys-form div#shirt-description {
 margin-top: 1.5em;
 }
 
-#reg-sys-form-info div#shirt-description img {
+#regsys-form div#shirt-description img {
 float: left;
 clear: left;
 margin-right: 1em;
 }
 
-#reg-sys-form-info div#shirt-description h3 {
+#regsys-form div#shirt-description h3 {
 margin-top: 1em;
 font-weight: bold;
 }
 
-#reg-sys-form-confirm table {
+#regsys-form tr.no-openings {
+	background-color: #d1d1d1;
+}
+
+#regsys-form-confirm table {
 margin-top: 2em;
 }
 
-#reg-sys-form-confirm td.label {
+#regsys-form-confirm td.label {
 width: 30%;
 }
 
-#reg-sys-form-confirm td.value {
+#regsys-form-confirm td.value {
 width: 60%;
 }
 
-#reg-sys-form-confirm td.price {
+#regsys-form-confirm td.price {
 width: 10%;
 text-align: right;
 }
 
-#reg-sys-form-confirm #submit {
+#regsys-form-confirm #submit {
 margin: 2em 0 1em;
 }

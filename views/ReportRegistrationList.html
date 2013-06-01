@@ -1,19 +1,19 @@
-{% extends 'report.html' %}
+{% extends 'Report.html' %}
 
-{% from 'admin.html' import message as message %}
+{% from 'Admin.html' import message as message %}
 
 {% block content %}
 	<style type="text/css">
 		@media screen {
-			#reg-sys #report_reg_list td { vertical-align: middle; }
-			#reg-sys #report_reg_list td.paid { text-align: center; }
-			#reg-sys #report_reg_list td.owed input { text-align: right; }
-			#reg-sys #report-reg-list td.total-cost { text-align: right; }
-			#reg-sys #report-reg-list .overdue { background-color: #fcc; }
+			#regsys #ReportRegistrationList td { vertical-align: middle; }
+			#regsys #ReportRegistrationList td.paid { text-align: center; }
+			#regsys #ReportRegistrationList td.owed input { text-align: right; }
+			#regsys #ReportRegistrationList td.total-cost { text-align: right; }
+			#regsys #ReportRegistrationList .overdue { background-color: #fcc; }
 		}
 		@media print {
-			#reg-sys #report-reg-list td { font-family: Georgia, serif !important; }
-			#reg-sys #report-reg-list td.owed input {
+			#regsys #ReportRegistrationList td { font-family: Georgia, serif !important; }
+			#regsys #ReportRegistrationList td.owed input {
 				text-align: right;
 				border: 0;
 				background-color: inherit;
@@ -23,26 +23,27 @@
 		}
 	</style>
 
-	{%- if POST %}{{ "\t" }}{{ message('Payment info updated.') }}{{ "\n" }}{% endif %}
-	<form action="{{ request_href ~ 'report_reg_list' }}{% if GET.vip_only == 'true' %}&amp;vip_only=true{% endif %}" method="post">
+	{%- if POST %}{{ "\t" }}{{ message('Payment info updated.') }}{% endif %}
+
+	<form action="{{ requestHref ~ 'ReportRegistrationList' }}" method="post">
 {% if dancers %}
 		<input type="submit" value="Save Payment Info" class="no-print button" style="float: right; margin: -0.7em 0 1em;" />
 {% endif %}
-		<h3>{{ GET.vip_only == 'true' ? 'VIP Payment Confirmation' : 'Registration List' }}</h3>
+		<h3>Registration List</h3>
 
 {% if dancers %}
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
 				<th class="manage-column column-title" width="19%"><div>Name</div></th>
-{% 	for item in items %}
+{% 	for item in event.items %}
 				<th class="manage-column">{{ item.name }}</th>
 {% 	endfor %}
 				<th class="manage-column" width="17%"><div>Level</div></th>
 				<th class="manage-column" width="11%"><div class="ellipsis">Date Registered</div></th>
 				<th class="manage-column total-cost" width="6%"><div>Total</div></th>
 				<th class="manage-column paid" width="6%"><div>Paid?</div></th>
-				<th class="manage-column owed" width="9%"><div>Owed</div></th>
+				<th class="manage-column owed" width="8%"><div>Owed</div></th>
 				<th class="manage-column no-print" width="8%"><div>Method</div></th>
 			</tr>
 		</thead>
@@ -50,7 +51,7 @@
 		<tfoot>
 			<tr>
 				<th class="manage-column column-title">Name</th>
-{% 	for item in items %}
+{% 	for item in event.items %}
 				<th class="manage-column">{{ item.name }}</th>
 {% 	endfor %}
 				<th class="manage-column">Level</th>
@@ -65,22 +66,22 @@
 		<tbody>
 {% for dancer in dancers %}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
-				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}{% if dancer.is_vip %} [VIP]{% endif %}</td>
-{% 	for item in items %}
-				<td>{% if dancer.registered_items[item.id] %}&bull;{% endif %}</td>
+				<td class="column-title"><a href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id }}">{{ dancer.nameReversed }}</td>
+{% 	for item in event.items %}
+				<td>{% if dancer.registeredItems[item.id] %}&bull;{% endif %}</td>
 {% 	endfor %}
 				<td class="ellipsis">{{ dancer.level }}</td>
-				<td class="date">{{ dancer.date_registered | date('Y-m-d, g:i A') }}</td>
-				<td class="total-cost">${{ dancer.price_total }}</td>
-				<td class="paid">{% do form.set_array_name('payment_confirmed') %}{{ form.input_checkbox(dancer.id, {'checked': dancer.payment_confirmed}) | raw }}</td>
-				<td class="owed">{% do form.set_array_name('payment_owed') %}{{ form.input_text(dancer.id,  dancer.payment_owed, {'size': 3}) | raw }}{% do form.set_array_name(null) %}</td>
-				<td class="no-print">{{ dancer.payment_method }}</td>
+				<td class="date">{{ dancer.dateRegistered | date() }}</td>
+				<td class="total-cost">${{ dancer.priceTotal }}</td>
+				<td class="paid"><input type="checkbox" {%- if dancer.paymentConfirmed %} checked="checked"{% endif %} name="paymentConfirmed[{{ dancer.id }}]" value="1" /></td>
+				<td class="owed"><input type="text" value="{{ dancer.paymentOwed }}" name="paymentOwed[{{ dancer.id }}]" size="3" /></td>
+				<td class="no-print">{{ dancer.paymentMethod }}</td>
 			</tr>
 {% endfor %}
 		</tbody>
 	</table>
 {% else %}
-		<p>There are no registered {{ GET.vip_only == 'true' ? 'VIPs' : 'dancers' }} for this event.</p>
+		<p>There are no registered dancers for this event.</p>
 {% endif %}
 	</form>
 {% endblock content %}

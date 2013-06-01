@@ -1,114 +1,118 @@
-{% extends 'form.html' %}
+{% extends 'Form.html' %}
 
-{% block id %}reg-sys-form-confirm{% endblock %}
+{% block id %}regsys-confirm{% endblock %}
 
 {% block title %}Confirm Registration for {{ event.name }}{% endblock %}
 
 {% block content %}
-			<form action="{{ permalink }}{% if vip %}?vip{% endif %}" method="post"{% if vip %} class="vip"{% endif %}>
-				<input type="hidden" name="{{ 'first_name'     }}" value="{{ POST.first_name }}">
-				<input type="hidden" name="{{ 'last_name'      }}" value="{{ POST.last_name }}">
-				<input type="hidden" name="{{ 'email'          }}" value="{{ POST.email }}">
-				<input type="hidden" name="{{ 'confirm_email'  }}" value="{{ POST.confirm_email }}">
-				<input type="hidden" name="{{ 'mobile_phone'   }}" value="{{ POST.mobile_phone }}">
-				<input type="hidden" name="{{ 'position'       }}" value="{{ POST.position }}">
-				<input type="hidden" name="{{ 'level_id'       }}" value="{{ POST.level_id }}">
-				<input type="hidden" name="{{ 'status'         }}" value="{{ POST.status }}">
-				<input type="hidden" name="{{ 'payment_method' }}" value="{{ POST.payment_method }}">
-				<input type="hidden" name="{{ 'confirmed'      }}" value="{{ POST.confirmed }}">
-{% if POST.discount_code %}
-				<input type="hidden" name="discount_code" value="{{ POST.discount_code }}">
-{% endif %}
+	<form action="{{ permalink }}{% if vip %}?vip{% endif %}" method="post"{% if vip %} class="vip"{% endif %}>
+		<input type="hidden" name="firstName"     value="{{ dancer.firstName }}">
+		<input type="hidden" name="lastName"      value="{{ dancer.lastName }}">
+		<input type="hidden" name="email"         value="{{ dancer.email }}">
+		<input type="hidden" name="confirmEmail"  value="{{ dancer.confirmEmail }}">
+		<input type="hidden" name="phone"         value="{{ dancer.phone }}">
+		<input type="hidden" name="position"      value="{{ dancer.position }}">
+		<input type="hidden" name="levelID"       value="{{ dancer.levelID }}">
+		<input type="hidden" name="volunteer"     value="{{ dancer.volunteer }}">
+		<input type="hidden" name="paymentMethod" value="{{ dancer.paymentMethod }}">
+		{% if dancer.discountCode -%}
+		<input type="hidden" name="discountCode"  value="{{ dancer.discountCode }}">
+		{%- endif %}
 
-{% for key, item in validated_items %}
-{% 	if item.type == 'package' %}
-				<input type="hidden" name="package" value="{{ POST.package }}">
-				<input type="hidden" name="package_tier[{{ key }}]" value="{{ POST.package_tier[key] ? POST.package_tier[key] : item.price_tier }}">
-{% 	else %}
-				<input type="hidden" name="items[{{ key }}]" value="{{ item.meta == 'size' ? POST.items[key] : key }}">
-{% 		if POST.item_meta[key] %}
-				<input type="hidden" name="item_meta[{{ key }}]" value="{{ POST.item_meta[key] }}">
-{% 		endif %}
-{% 	endif %}
-{% endfor %}
+		<input type="hidden" name="confirmed" value="1">
 
-{% if event.has_housing_registrations and dancer.needs_housing %}
-				<input type="hidden" name="{{ 'housing_type_needed' }}" value="{{ POST.housing_type_needed }}">
-{% 	for field in ['from_scene', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment'] %}
-				<input type="hidden" name="{{ 'housing_needed[housing_%s]' | format(field) }}" value="{{ POST.housing_needed['housing_' ~ field] }}">
-{% 	endfor %}
-{% elseif event.has_housing_support and dancer.is_housing_provider %}
-				<input type="hidden" name="{{ 'housing_type_provider' }}" value="{{ POST.housing_type_provider }}">
-{% 	for field in ['spots_available', 'smoke', 'pets', 'nights', 'gender', 'bedtime', 'comment'] %}
-				<input type="hidden" name="{{ 'housing_provider[housing_%s]' | format(field) }}" value="{{ POST.housing_provider['housing_' ~ field] }}">
-{% 	endfor %}
-{% endif %}
+		{% for item in dancer.registeredItems -%}
+		{% if item.type == 'package' -%}
+		<input type="hidden" name="package" value="{{ item.id }}">
+		{% if POST.packageTier[item.id] -%}
+		<input type="hidden" name="packageTier[{{ item.id }}]" value="{{ POST.packageTier[item.id] ? POST.packageTier[item.id] : item.priceTier }}">
+		{%- endif %}
+		{%- else -%}
+		<input type="hidden" name="items[{{ item.id }}]" value="{{ item.meta == 'size' ? item.registeredMeta : item.id }}">
+		{% if item.registeredMeta -%}
+		<input type="hidden" name="itemMeta[{{ item.id }}]" value="{{ item.registeredMeta }}">
+		{%- endif %}
+		{%- endif %}
+		{%- else -%}
+		<input type="hidden" name="package" value="0">
+		{%- endfor %}
 
-				<table>
-					<tr>
-						<td class="label">Name</td>
-						<td class="value">{{ dancer.name }}</td>
-						<td class="price">{% if dancer.is_vip %}<strong>VIP</strong>{% endif %}</td>
-					</tr>
-					<tr>
-						<td class="label">Email Address</td>
-						<td class="value">{{ dancer.email }}</td>
-						<td class="price"></td>
-					</tr>
-					<tr>
-						<td class="label">Mobile Phone Number</td>
-						<td class="value">{{ dancer.mobile_phone }}</td>
-						<td class="price"></td>
-					</tr>
-					<tr>
-						<td class="label">Position</td>
-						<td class="value">{{ dancer.position }}</td>
-						<td class="price"></td>
-					</tr>
-{% if event.has_levels %}
-					<tr>
-						<td class="label">Level</td>
-						<td class="value">{{ event.levels[POST.level_id].label }}{# dancer.level has not been JOINed by query yet #}</td>
-						<td class="price"></td>
-					</tr>
-{% endif %}
-{% if event.has_volunteers and dancer.is_volunteer %}
-					<tr>
-						<td class="label">Volunteer</td>
-						<td class="value"></td>
-						<td class="price"></td>
-					</tr>
-{% endif %}
-{% if event.has_housing_registrations and dancer.needs_housing %}
-					<tr>
-						<td class="label">Housing Needed</td>
-						<td class="value"></td>
-						<td class="price"></td>
-					</tr>
-{% elseif event.has_housing_support and dancer.is_housing_provider %}
-					<tr>
-						<td class="label">Housing Provider</td>
-						<td class="value">(Thank you!)</td>
-						<td class="price"></td>
-					</tr>
-{% endif %}
-{% for key, item in validated_items %}
-					<tr>
-						<td class="label">{{ item.name }}</td>
-						<td class="value">{{ item.type == 'package' and POST.discount_code ? 'Discount code "%s"%s' | format(POST.discount_code, (discount_amount < 0 ? ' [-$%s]' | format(discount_amount * -1) : '')) : POST.item_meta[key] }}</td>
-						<td class="price">${{ dancer.is_vip ? item.price_for_vip : item.type == 'package' ? attribute(item, 'price_for_prereg', [discount_amount]) : item.price_for_prereg }}</td>
-					</tr>
-{% endfor %}
-					<tr>
-						<td class="label">Total Amount Owed</td>
-						<td class="value">{% if dancer.price_total > 0 %}{% if dancer.payment_method == 'PayPal'%}Pay with PayPal{% else %}Pay by mail{% endif %}{% endif %}</td>
-						<td class="price"><strong>${{ dancer.price_total }}<strong></td>
-					</tr>
-				</table>
 
-				<div id="submit">
-					<input type="submit" value="Confirm Registration">
-					<script type="text/javascript">jQuery(document).ready(function($) { $('#submit').append('<a href="javascript:history.go(-1)" style="margin-left:2em">Make Changes</a>'); });</script>
-				</div>
-			</form>
+		{% if event.hasHousingRegistrations and dancer.needsHousing -%}
+		<input type="hidden" name="housingTypeNeeded" value="1">
+		{%- for field in ['FromScene', 'Smoke', 'Pets', 'Nights', 'Gender', 'Bedtime', 'Comment'] %}{{ '' }}
+		<input type="hidden" name="{{ 'housingNeeded[housing%s]' | format(field) }}" value="{{ attribute(dancer, 'housing' ~ field) }}">
+		{%- endfor %}
+		{%- elseif event.hasHousingSupport and dancer.isHousingProvider -%}
+		<input type="hidden" name="housingTypeProvider" value="1">
+		{%- for field in ['SpotsAvailable', 'Smoke', 'Pets', 'Nights', 'Gender', 'Bedtime', 'Comment'] %}{{ '' }}
+		<input type="hidden" name="{{ 'housingProvider[housing%s]' | format(field) }}" value="{{ attribute(dancer, 'housing' ~ field) }}">
+		{%- endfor %}
+		{%- endif %}
+
+
+		<table>
+		<tbody>
+			<tr>
+				<td class="label">Name</td>
+				<td class="value">{{ dancer.name }}</td>
+				<td class="price">{# Required for first row in table #}</td>
+			</tr>
+			<tr>
+				<td class="label">Email Address</td>
+				<td class="value" colspan="2">{{ dancer.email }}</td>
+			</tr>
+			<tr>
+				<td class="label">Mobile Phone Number</td>
+				<td class="value" colspan="2">{{ dancer.phone }}</td>
+			</tr>
+			<tr>
+				<td class="label">Position</td>
+				<td class="value" colspan="2">{{ dancer.positionLabel }}</td>
+			</tr>
+			{% if event.hasLevels -%}
+			<tr>
+				<td class="label">Level</td>
+				<td class="value" colspan="2">{{ dancer.level }}</td>
+			</tr>
+			{%- endif %}
+
+			{% if event.hasVolunteers and dancer.volunteer -%}
+			<tr>
+				<td class="label" colspan="3">Volunteer</td>
+			</tr>
+			{%- endif %}
+
+			{% if dancer.needsHousing -%}
+			<tr>
+				<td class="label" colspan="3">Housing Needed</td>
+			</tr>
+			{%- elseif dancer.isHousingProvider -%}
+			<tr>
+				<td class="label">Housing Provider</td>
+				<td class="value" colspan="2">(Thank you!)</td>
+			</tr>
+			{%- endif %}
+
+			{% for item in dancer.registeredItems -%}
+			<tr>
+				<td class="label">{{ item.name }}</td>
+				<td class="value">{{ item.type == 'package' and dancer.discountCode ? 'Discount code "%s"%s' | format(dancer.discountCode, (discountAmount < 0 ? ' [-$%s]' | format(discountAmount * -1) : '')) : item.registeredMeta }}</td>
+				<td class="price">{{ '$' ~ item.registeredPrice }}</td>
+			</tr>
+			{%- endfor %}
+
+			<tr>
+				<td class="label">Total Amount Owed</td>
+				<td class="value">{% if dancer.priceTotal > 0 %}{% if dancer.paymentMethod == 'PayPal'%}Pay with PayPal{% else %}Pay by mail{% endif %}{% endif %}</td>
+				<td class="price"><strong>{{ '$' ~ dancer.priceTotal }}<strong></td>
+			</tr>
+		</tbody>
+		</table>
+
+		<div id="submit">
+			<input type="submit" value="Confirm Registration">
+			<script type="text/javascript">jQuery(document).ready(function($) { $('#submit').append("\t" + '<a href="javascript:history.go(-1)" style="margin-left:2em">Make Changes</a>' + "\n\t\t"); });</script>
+		</div>
+	</form>
 {% endblock %}

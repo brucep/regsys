@@ -1,0 +1,124 @@
+{% extends 'Admin.html' %}
+
+{% import 'Admin.html' as form %}
+
+{% block content %}
+	{%- if editing %}
+	<h2>Edit Item
+		<a class="delete" href="{{ requestHref ~ 'AdminItemDelete' ~ '&itemID=' ~ item.id }}">Delete Item</a>
+	</h2>
+	{% if POST and not hasErrors() %}{{ form.message('Item updated.') }}{% endif %}
+	{%- else %}
+	<h2>Add New Item</h2>
+	{%- endif %}
+
+	<form action="{{ requestHref ~ 'AdminItem' }}{% if editing %}&itemID={{ item.id }}{% else %}&new{% endif %}" method="post">
+		<h3>Information</h3>
+
+		<table class="form-table">
+		<tbody>
+			{{- form.text('Name', 'name', 'Required') }}
+			{{- form.radios('Type', 'type', [
+				{'label': 'Package',     'value': 'package', 'default': not editing, 'parameters': {'id': 'regsys-type-package-radio'}},
+				{'label': 'Competition', 'value': 'competition'},
+				{'label': 'Shirt',       'value': 'shirt', 'parameters': {'id': 'regsys-type-shirt-radio'}},
+				]) }}
+			{{- form.select('Needs Additional Info?', 'meta', [
+				{'label': 'None', 'value': '', 'default': true},
+				{'label': 'Requires Position (J&J)', 'value': 'Position'},
+				{'label': 'Requires Partner Name (Strictly)',   'value': 'Partner'},
+				{'label': 'Requires Team Members',   'value': 'Team Members'},
+				{'label': 'Package has Classes',     'value': 'Count for Classes'},
+				]) }}
+			{{- form.text('Shirt Sizes', 'description', 'Example: Small,Medium,Large,XL,2XL,3XL') }}
+		</tbody>
+		</table>
+
+		<h3>Pricing</h3>
+
+		<table class="form-table">
+		<tbody>
+			{{- form.text('Price for Preregistration', 'pricePrereg', 'Required') }}
+			{{- form.text('Price at the Door', 'priceDoor', '', item.priceDoor ? item.priceDoor : '') }}
+		</tbody>
+		</table>
+
+		<h3 class="regsys-tiered-pricing {%- if editing and item.type != 'package' %} hidden{% endif %}">Tiered Pricing For Packages<button type="button" style="margin-left:1.25em; font-weight: normal; font-size: 0.83em" id="regsys-tier-add">Add Tier</button></h3>
+
+		<table class="form-table regsys-tiered-pricing {%- if editing and item.type != 'package' %} hidden{% endif %}">
+		<tbody>
+			<tr valign="top">
+				<th scope="row"></th>
+				<td>Tier Count <span class="description">(Example: First 20 dancers)</span></td>
+				<td>Tier Price</td>
+				<td>Delete?</td>
+			</tr>
+			{% for tier in item.priceTiers | default({1: {'count': '', 'price': ''}}) -%}
+			<tr valign="top" class="regsys-tier-row" id="regsys__tier_row_{{ loop.index }}">
+				<th scope="row"></th>
+				<td><input type="text" name="priceTiersCount[{{ loop.index }}]" value="{{ tier.count }}" /></td>
+				<td><input type="text" name="priceTiersPrice[{{ loop.index }}]" value="{{ tier.price }}" /></td>
+				<td><input type="checkbox" name="priceTiersDelete[{{ tier.count }}]" value="1" /></td>
+			</tr>
+			{%- endfor %}
+
+		</tbody>
+		</table>
+
+		<h3>Options</h3>
+
+		<table class="form-table">
+		<tbody>
+			{{- form.text('Limit Per Position', 'limitPerPosition', 'Example: 20 ⟹ 20 leads and 20 follows for Jack & Jill.', item.limitPerPosition ? item.limitPerPosition : '') }}
+			{{- form.text('Limit Total', 'limitTotal', 'Example: 10 ⟹ 10 couples for a Strictly.', item.limitTotal ? item.limitTotal : '') }}
+			{{- form.text('Expiration Date', 'dateExpires', 'Example: Cutoff date for shirt orders.', item.dateExpires ? item.dateExpires | date : '' ) }}
+		</tbody>
+		</table>
+
+		<input type="hidden" name="eventID" value="{{ event.id }}" />
+		{%- if editing %}{{ "\n\t\t" }}<input type="hidden" name="itemID" value="{{ item.id }}" />{% endif %}
+
+		<p class="submit">
+			<input type="submit" class="button-primary" value="{{ editing ? 'Edit Item' : 'Add Item' }}">
+			{% if editing %}<a style="margin-left: 2em" href="{{ requestHref ~ 'ReportItems' }}">Back to Items Report</a>{% endif %}
+		</p>
+	</form>
+
+	<script type="text/javascript">
+		jQuery(document).ready(function($) {
+			$('#regsys-form-description').addClass('hidden');
+
+			$('#regsys-form-type .radio').change(function() {
+				if ($('#regsys-type-shirt-radio').prop('checked')) {
+					$('#regsys-form-description').removeClass('hidden');
+					$('#regsys-form-meta').addClass('hidden');
+				}
+				else if (!$('#regsys-type-shirt-radio').prop('checked')) {
+					$('#regsys-form-description').addClass('hidden');
+					$('#regsys-form-meta').removeClass('hidden');
+				}
+
+				if ($('#regsys-type-package-radio').prop('checked')) {
+					$('.regsys-tiered-pricing').removeClass('hidden');
+				}
+				else if (!$('#regsys-type-package-radio').prop('checked')) {
+					$('.regsys-tiered-pricing').addClass('hidden');
+				}
+			});
+
+			$('#regsys-tier-add').click(function() {
+				// http://charlie.griefer.com/blog/2009/09/17/jquery-dynamically-adding-form-elements/
+
+				var num    = $('.regsys-tier-row').length;
+				var newNum = num + 1;
+
+				var newElem = $('#regsys__tier_row_' + num).clone().attr('id', 'regsys__tier_row_' + newNum);
+
+				// newElem.children('th:first-child').html('Tier ' + newNum);
+				newElem.find('input').attr('name', function(index, attr) { return attr.replace('[' + num + ']', '[' + newNum + ']'); }).val('');
+
+				$('#regsys__tier_row_' + num).after(newElem);
+			});
+		});
+	</script>
+{% endblock content %}

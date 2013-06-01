@@ -1,10 +1,10 @@
-{% extends 'admin.html' %}
+{% extends 'Admin.html' %}
 
 {% block content %}
-	<h2>Delete Event</h2>
+	<h2>Delete Dancer</h2>
 
-	<form action="{{ request_href ~ 'admin_dancer_delete' ~ '&dancer_id=' ~ dancer.id ~ '&noheader=true' }}" method="post">
-		<p style="padding-top: 1.5em;">{{ form.input_checkbox('confirmed') | raw }} <strong>I'm sure I want to delete <em>all information</em> for {{ dancer.name }}.</strong><span style="margin-left: 1em">{{ '[%s] [#%s]' | format(dancer.email, dancer.id) }}</span></p>
-		<p class="submit"><input type="submit" class="delete" value="Delete Dancer"></p>
+	<form action="{{ requestHref ~ 'AdminDancerDelete' ~ '&dancerID=' ~ dancer.id ~ '&noheader=true' }}" method="post">
+		<p style="padding-top: 1.5em;"><input type="checkbox" name="confirmed" value="1" /> <strong>I'm sure I want to delete <em>all information</em> for {{ dancer.name }}.</strong><span style="margin-left: 1em">{{ '[%s] [#%s]' | format(dancer.email, dancer.id) }}</span></p>
+		<p class="submit"><input type="submit" class="delete" value="Delete Dancer" /></p>
 	</form>
 {% endblock content %}

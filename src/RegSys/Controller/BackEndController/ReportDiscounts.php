@@ -1,12 +1,11 @@
 <?php
 
-$dancers = $database->fetchAll('SELECT d.*, ed.discount_code FROM regsys_dancers AS d LEFT JOIN regsys_event_discounts AS ed USING(discount_id) WHERE d.event_id = ? AND d.discount_id IS NOT NULL ORDER BY discount_id ASC, last_name ASC, first_name ASC', array($event->id()), 'RegistrationSystem_Model_Dancer');
+namespace RegSys\Controller\BackEndController;
 
-$groups = array();
-foreach ($dancers as $dancer) {
-	$groups[$dancer->discount_code][] = $dancer;
+class ReportDiscounts extends \RegSys\Controller\BackEndController
+{	
+	public function getContext()
+	{
+		return array();
+	}
 }
-
-echo self::render_template('report-discounts.html', array(
-	'event'  => $event,
-	'groups' => $groups));

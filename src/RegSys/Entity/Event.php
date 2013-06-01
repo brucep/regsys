@@ -1,22 +1,23 @@
 <?php
 
-class RegistrationSystem_Model_Event extends RegistrationSystem_Model
+namespace RegSys\Entity;
+
+class Event extends \RegSys\Entity
 {
-	public  $name,
-	        $visualization,
-	        $visualization_color;
-	
-	private $event_id,
-	        $date_mail_prereg_end,
-	        $date_paypal_prereg_end,
-	    	$date_refund_end,
-	        $discounts,
-	        $has_housing,
-	        $has_levels,
-	        $has_vip,
-	        $has_volunteers,
-	        $housing_nights,
-	        $levels;
+	protected $eventID,
+	          $dateMail,
+	          $datePayPal,
+	          $dateRefund,
+	          $discounts,
+	          $hasHousing = 2,
+	          $hasLevels,
+	          $hasVolunteers,
+	          $housingNights = 'Friday,Saturday,Sunday',
+	          $levels,
+	          $name,
+	          $visualization,
+	          $visualizationColor,
+	          $volunteerDescription;
 	
 	public function __construct(array $parameters = array())
 	{
@@ -25,34 +26,56 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		}
 	}
 	
+	public function __call($name, $arguments)
+	{
+		return isset($this->$name) ? $this->$name : null;
+	}
+	
 	public function __toString()
 	{
-		return sprintf('%s [#%d]', $this->name, $this->event_id);
+		return sprintf('%s [#%d]', $this->name, $this->eventID);
 	}
 	
-	static public function get_event_by_id($event_id)
+	static public function eventByID($eventID)
 	{
-		return self::$database->fetchObject('SELECT * FROM regsys_events WHERE event_id = ?', array($event_id), 'RegistrationSystem_Model_Event');
+		return self::$db->fetchObject('SELECT * FROM regsys__events WHERE eventID = ?', array($eventID), '\RegSys\Entity\Event');
+	}
+		
+	public function countDancers(array $where = array())
+	{
+		$query = array('eventID = :eventID');
+		
+		foreach ($where as $field => $value) {
+			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
+		}
+		
+		$query = implode(' AND', $query);
+		$where[':eventID'] = $this->eventID;
+		
+		$result = self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__dancers WHERE '.$query, $where);
+		return ($result !== false) ? (int) $result : false;
 	}
 	
-	public function items()
+	public function countDiscountsUsed($code, $paymentMethod = null)
 	{
-		return self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? ORDER BY item_id ASC', array($this->event_id), 'RegistrationSystem_Model_Item');
-	}
-	
-	public function item_by_id($item_id)
-	{
-		return self::$database->fetchObject('SELECT * FROM regsys_items WHERE event_id = ? AND item_id = ?', array($this->event_id, $item_id), 'RegistrationSystem_Model_Item');
+		if ($paymentMethod == null) {
+			$result = self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__dancers AS d JOIN regsys__event_discounts USING(discountID) WHERE d.eventID = ? AND discountCode = ?', array($this->eventID, $code));
+		}
+		else {
+			$result = self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__dancers AS d JOIN regsys__event_discounts USING(discountID) WHERE d.eventID = ? AND discountCode = ? AND paymentMethod = ?', array($this->eventID, $code, $payment_method));
+		}
+		
+		return ($result !== false) ? (int) $result : false;
 	}
 	
 	public function dancers()
 	{
-		return self::$database->fetchAll('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels AS el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE d.event_id = ? ORDER BY last_name ASC, first_name ASC, date_registered ASC', array($this->event_id), 'RegistrationSystem_Model_Dancer');
+		return self::$db->fetchAll('SELECT *, el.levelLabel AS level, d.eventID AS eventID FROM regsys__dancers AS d LEFT JOIN regsys__event_levels AS el USING(levelID, eventID) LEFT JOIN regsys__housing USING(dancerID) WHERE d.eventID = ? ORDER BY lastName ASC, firstName ASC, dateRegistered ASC', array($this->eventID), '\RegSys\Entity\Dancer');
 	}
 	
-	public function dancers_where(array $where, $equal = true)
+	public function dancersWhere(array $where, $equal = true)
 	{
-		$query = array('d.event_id = :event_id');
+		$query = array('d.eventID = :eventID');
 		
 		foreach ($where as $field => $value) {
 			$query[] = sprintf(' `%1$s` %2$s :%1$s',
@@ -61,207 +84,147 @@ class RegistrationSystem_Model_Event extends RegistrationSystem_Model
 		}
 		
 		$query = implode(' AND', $query);
-		$where[':event_id'] = $this->event_id;
+		$where[':eventID'] = $this->eventID;
 		
-		return self::$database->fetchAll('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels as el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE ' . $query . ' ORDER BY last_name ASC, first_name ASC, date_registered ASC', $where, 'RegistrationSystem_Model_Dancer');
+		return self::$db->fetchAll('SELECT *, el.levelLabel AS level, d.eventID AS eventID FROM regsys__dancers AS d LEFT JOIN regsys__event_levels as el USING(levelID, eventID) LEFT JOIN regsys__housing USING(dancerID) WHERE ' . $query . ' ORDER BY lastName ASC, firstName ASC, dateRegistered ASC', $where, '\RegSys\Entity\Dancer');
 	}
 	
-	public function dancer_by_id($dancer_id)
+	public function dancerByID($dancerID)
 	{
-		return self::$database->fetchObject('SELECT *, el.label AS level, d.event_id AS event_id FROM regsys_dancers AS d LEFT JOIN regsys_event_levels AS el USING(level_id, event_id) LEFT JOIN regsys_housing USING(dancer_id) WHERE d.event_id = ? AND d.dancer_id = ?', array($this->event_id, $dancer_id), 'RegistrationSystem_Model_Dancer');
+		return self::$db->fetchObject('SELECT *, el.levelLabel AS level, d.eventID AS eventID FROM regsys__dancers AS d LEFT JOIN regsys__event_levels AS el USING(levelID, eventID) LEFT JOIN regsys__housing USING(dancerID) WHERE d.eventID = ? AND d.dancerID = ?', array($this->eventID, $dancerID), '\RegSys\Entity\Dancer');
 	}
 	
 	public function discounts()
 	{
 		if (!isset($this->discounts)) {
 			$this->discounts = array();
-			$discounts = self::$database->fetchAll('SELECT * FROM regsys_event_discounts WHERE event_id = ? ORDER BY discount_code ASC', array($this->event_id));
+			$result = self::$db->fetchAll('SELECT discountCode, discountAmount, discountLimit, discountExpires FROM regsys__event_discounts WHERE eventID = ? ORDER BY discountCode ASC', array($this->eventID));
 			
-			foreach ($discounts as $d) {
-				$this->discounts[$d->discount_id] = $d;
+			foreach ($result as $d) {
+				$this->discounts[$d->discountCode] = $d;
 			}
 		}
 		
 		return $this->discounts;
 	}
 	
-	public function unset_discounts()
+	public function discountByCode($code)
 	{
-		# Used after editing discounts with the Edit Event form.
-		unset($this->discounts);
+		return self::$db->fetchObject('SELECT * FROM regsys__event_discounts WHERE eventID = ? AND discountCode = ?', array($this->eventID, $code));
 	}
 	
-	public function discount_by_code($code)
-	{
-		return self::$database->fetchObject('SELECT * FROM regsys_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code));
-	}
-	
-	public function count_dancers(array $where = array())
-	{
-		$query = array('event_id = :event_id');
-		
-		foreach ($where as $field => $value) {
-			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
-		}
-		
-		$query = implode(' AND', $query);
-		$where[':event_id'] = $this->event_id;
-		
-		$result = self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_dancers WHERE '.$query, $where);
-		return ($result !== false) ? (int) $result : false;
-	}
-	
-	public function count_discounts_used($code, $payment_method = null)
-	{
-		if ($payment_method == null) {
-			$result = self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_dancers AS d JOIN regsys_event_discounts USING(discount_id) WHERE d.event_id = ? AND discount_code = ?', array($this->event_id, $code));
-		}
-		else {
-			$result = self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_dancers AS d JOIN regsys_event_discounts USING(discount_id) WHERE d.event_id = ? AND discount_code = ? AND payment_method = ?', array($this->event_id, $code, $payment_method));
-		}
-		
-		return ($result !== false) ? (int) $result : false;
-	}
-	
-	public function add_registration($parameters)
-	{
-		$statement = self::$database->query('INSERT regsys_registrations VALUES (?, ?, ?, ?, DEFAULT, ?)', array(
-			$this->event_id,
-			$parameters['dancer_id'],
-			$parameters['item_id'],
-			$parameters['price'],
-			$parameters['item_meta'],
-			));
-		
-		return $statement->rowCount();
-	}
-	
-	public function id()
-	{
-		return (int) $this->event_id;
-	}
-	
-	public function date_mail_prereg_end()
-	{
-		return (int) $this->date_mail_prereg_end;
-	}
-	
-	public function date_paypal_prereg_end()
-	{
-		return (int) $this->date_paypal_prereg_end;
-	}
-	
-	public function date_refund_end()
-	{
-		return (int) $this->date_refund_end ? $this->date_refund_end : $this->date_paypal_prereg_end;
-	}
-	
-	public function housing_nights()
-	{
-		if (is_string($this->housing_nights)) {
-			$this->housing_nights = explode(',', $this->housing_nights);
-		}
-		
-		return $this->housing_nights;
-	}
-	
-	public function levels()
-	{
-		if (!isset($this->levels)) {
-			$this->levels = array();
-			$levels = self::$database->fetchAll('SELECT level_id, label, has_tryouts FROM regsys_event_levels WHERE event_id = ?', array($this->event_id));
-			
-			foreach ($levels as $level) {
-				$this->levels[$level->level_id] = $level;
-			}
-		}
-		
-		return $this->levels;
-	}
-	
-	public function levels_for_registration_form()
-	{
-		$levels = array();
-		
-		foreach ($this->levels() as $level) {
-			$levels[] = array('value' => $level->level_id, 'label' => !$level->has_tryouts ? esc_html($level->label) : esc_html($level->label) . ' <em>(Tryouts required)</em>');
-		}
-		
-		return $levels;
-	}
-	
-	public function levels_for_validation()
-	{
-		$result = array();
-		
-		foreach ($this->levels() as $level) {
-			$result[] = $level->level_id;
-		}
-		
-		return implode(',', $result);
-	}
-	
-	public function unset_levels()
-	{
-		# Used after editing levels with the Edit Event form.
-		unset($this->levels);
-	}
-	
-	public function total_money_from_registrations($payment_method)
-	{
-		return self::$database->fetchColumn('SELECT SUM(price) FROM regsys_registrations AS r LEFT JOIN regsys_dancers USING (dancer_id) WHERE r.event_id = ? AND payment_method = ?', array($this->event_id, $payment_method));
-	}
-	
-	public function has_discounts()
+	public function hasDiscounts()
 	{
 		return (bool) $this->discounts();
 	}
 	
-	public function has_discount_expired($code)
+	public function hasDiscountExpired($code)
 	{
-		$expires = self::$database->query('SELECT discount_expires FROM regsys_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code))->fetchColumn();
+		$expires = self::$db->fetchColumn('SELECT discountExpires FROM regsys__event_discounts WHERE eventID = ? AND discountCode = ?', array($this->eventID, $code));
 		return $expires ? $expires <= time() : false;
 	}
 	
-	public function has_discount_openings($code)
+	public function hasDiscountOpenings($code)
 	{
-		$limit = self::$database->fetchColumn('SELECT discount_limit FROM regsys_event_discounts WHERE event_id = ? AND discount_code = ?', array($this->event_id, $code));
+		$limit = self::$db->fetchColumn('SELECT discountLimit FROM regsys__event_discounts WHERE eventID = ? AND discountCode = ?', array($this->eventID, $code));
 		
 		if ($limit !== false) {
-			return ($limit > 0) ? (bool) ($limit - $this->count_discounts_used($code)) : true;
+			return ($limit > 0) ? (bool) ($limit - $this->countDiscountsUsed($code)) : true;
 		}
 		else {
 			return false;
 		}
 	}
 	
-	public function has_housing_support()
+	public function hasHousingRegistrations()
 	{
-		return ($this->has_housing == 2 or $this->has_housing == 1);
+		return ($this->hasHousing == '2');
 	}
 	
-	public function has_housing_registrations()
+	public function hasHousingSupport()
 	{
-		return ($this->has_housing == 2);
+		return ($this->hasHousing == '2' or $this->hasHousing == '1');
+	}
+		
+	public function hasLevels()
+	{
+		return (bool) $this->hasLevels;
+	}
+		
+	public function hasVolunteers()
+	{
+		return (bool) $this->hasVolunteers;
+	}
+		
+	public function id()
+	{
+		return (int) $this->eventID;
 	}
 	
-	public function has_levels()
+	public function items()
 	{
-		return (bool) $this->has_levels;
+		return self::$db->fetchAll('SELECT * FROM regsys__items WHERE eventID = ? ORDER BY itemID ASC', array($this->eventID), '\RegSys\Entity\Item');
 	}
 	
-	public function has_vip()
+	public function itemByID($itemID)
 	{
-		return (bool) $this->has_vip;
+		return self::$db->fetchObject('SELECT * FROM regsys__items WHERE eventID = ? AND itemID = ?', array($this->eventID, $itemID), '\RegSys\Entity\Item');
 	}
 	
-	public function has_volunteers()
+	public function itemsForRegistrationByType($type)
 	{
-		return (bool) $this->has_volunteers;
+		return self::$db->fetchAll('SELECT * FROM regsys__items WHERE eventID = ? AND (dateExpires IS NULL OR dateExpires > ?) AND type = ? ORDER BY itemID ASC', array($this->eventID, time(), $type), '\RegSys\Entity\Item');
 	}
 	
-	public function payment_methods()
+	public function levels()
+	{
+		if (!isset($this->levels)) {
+			$this->levels = array();
+			$levels = self::$db->fetchAll('SELECT levelID, levelLabel, hasTryouts FROM regsys__event_levels WHERE eventID = ?', array($this->eventID));
+			
+			foreach ($levels as $level) {
+				$this->levels[$level->levelID] = $level;
+			}
+		}
+		
+		return $this->levels;
+	}
+	
+	public function levelsForRegistrationForm()
+	{
+		$levels = array();
+		
+		foreach ($this->levels() as $level) {
+			$levels[] = array('value' => $level->levelID, 'label' => !$level->hasTryouts ? htmlspecialchars($level->levelLabel, ENT_NOQUOTES, 'UTF-8') : htmlspecialchars($level->levelLabel, ENT_NOQUOTES, 'UTF-8') . ' <em>(Tryouts required)</em>');
+		}
+		
+		return $levels;
+	}
+		
+	public function paymentMethods()
 	{
 		return array('Mail', 'PayPal');
+	}
+	
+	public function totalMoneyFromRegistrations($paymentMethod)
+	{
+		return self::$db->fetchColumn('SELECT SUM(price) FROM regsys__registrations AS r LEFT JOIN regsys__dancers USING (dancerID) WHERE r.eventID = ? AND paymentMethod = ?', array($this->eventID, $paymentMethod));
+	}
+		
+	public function validate()
+	{
+		$validationErrors = array();
+		
+		foreach (array('name' => 'Name', 'dateMail' => 'Mail date', 'datePayPal' => 'PayPal date') as $field => $label) {
+			$this->$field = trim($this->$field);
+			if (empty($this->$field)) {
+				$validationErrors[$field] = $label . ' is a required field.';
+			}
+		}
+		
+		$this->dateMail = strtotime($this->dateMail);
+		$this->datePayPal = strtotime($this->datePayPal);
+		
+		return $validationErrors;
 	}
 }

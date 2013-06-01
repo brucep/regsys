@@ -1,15 +1,20 @@
 <?php
 
-$total  = $database->fetchColumn('SELECT SUM(price) FROM regsys_registrations WHERE event_id = ?', array($event->id()));
-$total += $database->fetchColumn('SELECT SUM(paypal_fee) FROM regsys_dancers  WHERE event_id = ?', array($event->id()));
+namespace RegSys\Controller\BackEndController;
 
-$groups = array('Mail' => array(), 'PayPal' => array());
-foreach ($event->dancers() as $dancer) {
-	$groups[$dancer->payment_method][] = $dancer;
+class ReportMoney extends \RegSys\Controller\BackEndController
+{	
+	public function getContext()
+	{
+		$total = $this->db->fetchColumn('SELECT SUM(price) FROM regsys__registrations WHERE eventID = ?', array($this->event->id()));
+		$total += $this->db->fetchColumn('SELECT SUM(paypalFee) FROM regsys__dancers  WHERE eventID = ?', array($this->event->id()));
+		
+		$groups = array('Mail' => array(), 'PayPal' => array());
+		
+		foreach ($this->event->dancers() as $dancer) {
+			$groups[$dancer->paymentMethod()][] = $dancer;
+		}
+		
+		return array('groups' => $groups, 'total'  => $total);
+	}
 }
-
-echo self::render_template('report-money.html', array(
-	'event'  => $event,
-	'groups' => $groups,
-	'items'  => $event->items(),
-	'total'  => $total));

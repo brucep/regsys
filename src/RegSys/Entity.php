@@ -1,15 +1,17 @@
 <?php
 
-abstract class RegistrationSystem_Model
+namespace RegSys;
+
+abstract class Entity
 {
-	static protected $database, $options;
+	static protected $db, $options;
 	
-	static public function set_database($database)
+	static public function setDatabase(\RegSys\Database $db)
 	{
-		self::$database = $database;
+		self::$db = $db;
 	}
 	
-	static public function set_options($options)
+	static public function setOptions(array $options)
 	{
 		self::$options = $options;
 	}

@@ -1,40 +1,71 @@
-{% extends 'admin.html' %}
+{% extends 'Admin.html' %}
+
+{% import 'Admin.html' as form %}
 
 {% block content %}
-	<h2 style="margin-bottom: 1em">Edit Registrations for {{ dancer.name }}</h2>
+	<h2>Manage Registered Items for {{ dancer.name }}</h2>
+	{% if POST and not hasErrors() %}{{ form.message('Dancer updated.') }}{% endif %}
 
-	{% if validation.did_validate %}{{ form.message('Registrations updated.') | raw }}{% endif %}
+	<style type="text/css">
+		#regsys td {
+			text-align: center;
+		}
+		tr.regsys-item {
+			border-top: 1px solid #dfdfdf;
+		}
+	</style>
 
-	<form action="{{ request_href ~ 'admin_dancer_registration_edit' ~ '&dancer_id=' ~ dancer.id }}" method="post" id="registration-edit">
-		{{ form.input_hidden('position', dancer.postion) | raw }}{# Needed when item.meta == 'position' #}
+	<form action="{{ requestHref ~ 'AdminDancerRegisteredItems' ~ '&dancerID=' ~ dancer.id }}" method="post">
+		<table class="form-table">
+		<tbody>
+			<tr valign="top">
+				<th style="font-weight: bold">Item</th>
+				<td style="font-weight: bold">Registered?</td>
+				<td style="font-weight: bold">Add Registration</td>
+				<td style="font-weight: bold">Delete Registration</td>
+				<td style="font-weight: bold">Edit Info</td>
+			</tr>
+			{% for item in event.items -%}
+			{%- set error = getError('item' ~ item.id) %}{% if error %}{{ ("\n\t\t\t\t" ~ '<tr valign="top" class="regsys-validation-error"><td>' ~ error ~ '</td></tr>') | raw }}{% endif %}
 
-{% for item in items %}
-			{{ attribute(validation, 'get_error', ['item_' ~ item.id]) | raw }}
-			<div style="margin-bottom: 1em">
-				{% do form.set_array_name('items') %}{% if item.meta != 'size' %}{{ form.input_checkbox(item.id, {'checked': dancer.registered_items[item.id], 'disabled': dancer.registered_items[item.id] != null or not item.count_openings or item.is_expired}) | raw }} {% endif %}{{ item.name }}
+			<tr valign="top" class="regsys-item">
+				<th scope="row">{{ item.name }}{% if item.isExpired %}<br /><span class="description">(Item has expired)</span>{% endif %}{% if not item.countOpenings %}<br /><span class="description">(Item has no openings)</span>{% endif %}</th>
+				<td><input type="checkbox" disabled="disabled" {%- if dancer.registeredItems[item.id] %} checked="checked"{% endif %} /></td>
+				<td><input type="checkbox" value="{{ item.id }}" name="itemsAdd[{{ item.id }}]"    {%- if     dancer.registeredItems[item.id] %} disabled="disabled"{% endif %}{% if POST.itemsAdd[item.id] %}    checked="checked"{% endif%} /></td>
+				<td><input type="checkbox" value="{{ item.id }}" name="itemsDelete[{{ item.id }}]" {%- if not dancer.registeredItems[item.id] %} disabled="disabled"{% endif %}{% if POST.itemsDelete[item.id] %} checked="checked"{% endif%} /></td>
+				<td class="regsys-meta">
+				{%- if item.type == 'competition' -%}
+				{%- set tempMeta = POST.itemMeta[item.id] ? POST.itemMeta[item.id] : dancer.registeredItems[item.id] ? dancer.registeredItems[item.id].registeredMeta : null -%}
+					{%- if item.meta == 'Position' -%}
+					<label><input type="radio" name="itemMeta[{{ item.id }}]" value="Lead" {%- if tempMeta == 'Lead' %} checked="checked"{% endif %} />&nbsp;Lead</label><label><input type="radio" name="itemMeta[{{ item.id }}]" value="Follow" {%- if tempMeta == 'Follow' %} checked="checked"{% endif %} style="margin-left: 0.75em" />&nbsp;Follow</label>
+					{%- elseif item.meta == 'Partner' -%}
+					<label>Partner:&nbsp;<input type="text" name="itemMeta[{{ item.id }}]" value="{{ tempMeta }}"/></label>
+					{%- elseif item.meta == 'Team Members' -%}
+					<label>Team Members:<br /><textarea name="itemMeta[{{ item.id }}]" rows="6" cols="20">{{ tempMeta }}</textarea></label>
+					{%- else -%}
+					&mdash;
+					{%- endif -%}
+				{%- elseif item.type == 'shirt' -%}
+					{%- set selectedSize = POST ? POST.itemMeta[item.id] : dancer.registeredItems[item.id] ? dancer.registeredItems[item.id].registeredMeta : 'None' %}
+					<select name="itemMeta[{{ item.id }}]">
+						{% for size in ('None,' ~ item.description) | split(',') -%}
+						<option value="{{ size }}" {%- if size == selectedSize %} selected="selected"{% endif %} />{{ size }}</option>
+						{%- endfor %}
+					</select>
+				{%- else -%}
+					&mdash;
+				{%- endif -%}
 
-{% 	if item.meta %}{% do form.set_array_name('item_meta') %}
-{% 		if item.meta == 'position' %}
-				<div {{ _self.meta_style }}>Register as: {{ form.input_radio(item.id, {'value': 'lead', 'checked': dancer.registered_items[item.id].registered_meta == 'lead', 'disabled': not attribute(item, 'count_openings', ['lead'])}) | raw }}&nbsp;Lead {{ form.input_radio(item.id, {'value': 'follow', 'checked': dancer.registered_items[item.id].registered_meta == 'follow', 'disabled': not attribute(item, 'count_openings', ['follow'])}) | raw }}&nbsp;Follow</div>
-{% 		elseif item.meta == 'partner_name' %}
-				<div {{ _self.meta_style }}>Partner: {{ form.input_text(item.id, {'value': dancer.registered_items[item.id] ? dancer.registered_items[item.id].registered_meta : null}) | raw }}</div>
-{% 		elseif item.meta == 'team_members' %}
-				<div {{ _self.meta_style }}>{{ item.description }}<br>{{ form.input_textarea(item.id) | raw }}</div>
-{% 		elseif item.meta == 'size' %}
-				<div {{ _self.meta_style }}>{% do form.set_array_name('items') %}
-					{{ form.input_select(item.id, 'None,' ~ item.description, {'indent': "\t\t\t\t\t"}) | raw }}
-				</div>
-{% 		endif %}
-{% 	endif %}
-			</div>
-{% endfor %}
+				</td>
+			</tr>
+			{%- endfor %}
+		</tbody>
+		</table>
 
-			<p class="sumbit">
-	    	<input type="submit" class="button-primary" value="Edit Registrations">
-				<a style="margin-left: 2em" href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id  }}">Back to Dancer Report</a>
-			</p>
+		<p class="sumbit">
+    	<input type="submit" class="button-primary" value="Update Registered Items">
+			<a style="margin-left: 2em" href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id  }}">Back to Dancer Report</a>
+		</p>
     </form>
 </div>
 {% endblock %}
-
-{% macro meta_style() %}style="margin-top: 0.5em; margin-bottom: 2em"{% endmacro %}

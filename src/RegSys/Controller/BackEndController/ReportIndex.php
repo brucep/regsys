@@ -1,4 +1,11 @@
 <?php
 
-$events = $database->fetchAll('SELECT * FROM regsys_events ORDER BY date_paypal_prereg_end DESC', array(), 'RegistrationSystem_Model_Event');
-echo self::render_template('report-index.html', array('events' => $events));
+namespace RegSys\Controller\BackEndController;
+
+class ReportIndex extends \RegSys\Controller\BackEndController
+{	
+	public function getContext()
+	{
+		return array('events' => $this->db->fetchAll('SELECT * FROM regsys__events ORDER BY datePayPal DESC', array(), '\RegSys\Entity\Event'));
+	}
+}

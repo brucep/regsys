@@ -1,5 +1,11 @@
 <?php
 
-echo self::render_template('report-packet-printout.html', array(
-	'event'   => $event,
-	'dancers' => $event->dancers()));
+namespace RegSys\Controller\BackEndController;
+
+class ReportPacketPrintout extends \RegSys\Controller\BackEndController
+{	
+	public function getContext()
+	{
+		return array('dancers' => $this->event->dancers());
+	}
+}

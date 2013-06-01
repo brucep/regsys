@@ -1,29 +1,32 @@
 <?php
 
-if (isset($_POST['confirmed'])) {
-	$database->query('DELETE FROM regsys_registrations WHERE event_id = ?;', array($event->id()));
-	$database->query('DELETE FROM regsys_housing       WHERE event_id = ?;', array($event->id()));
-	$database->query('DELETE FROM regsys_dancers       WHERE event_id = ?;', array($event->id()));
-	
-	if (isset($_GET['registrations_only']) and $_GET['registrations_only'] == 'true') {
-		wp_redirect(site_url('wp-admin/admin.php') . '?page=reg-sys&request=report_index&deleted_event=' . rawurlencode($event->name) . '&registrations_only=true');
-		exit();
-	}
-	else {
-		$database->query('DELETE FROM regsys_item_prices     WHERE event_id = ?;', array($event->id()));
-		$database->query('DELETE FROM regsys_items           WHERE event_id = ?;', array($event->id()));
-		$database->query('DELETE FROM regsys_event_discounts WHERE event_id = ?;', array($event->id()));
-		$database->query('DELETE FROM regsys_event_levels    WHERE event_id = ?;', array($event->id()));
-		$database->query('DELETE FROM regsys_events          WHERE event_id = ?;', array($event->id()));
+namespace RegSys\Controller\BackEndController;
+
+class AdminEventDelete extends \RegSys\Controller\BackEndController
+{
+	public function getContext()
+	{
+		if (isset($_POST['confirmed'])) {
+			$this->requestHref = preg_replace('/&eventID=\d+/', '', $this->requestHref);
+			
+			$this->db->query('DELETE FROM regsys__registrations WHERE eventID = ?;', array($this->event->id()));
+			$this->db->query('DELETE FROM regsys__housing       WHERE eventID = ?;', array($this->event->id()));
+			$this->db->query('DELETE FROM regsys__dancers       WHERE eventID = ?;', array($this->event->id()));
+			
+			if (isset($_GET['registrationsOnly'])) {
+				return sprintf('%s%s&deleted=%s&registrationsOnly', $this->requestHref, 'ReportIndex', rawurlencode($this->event->name()));
+			}
+			else {
+				$this->db->query('DELETE FROM regsys__item_prices     WHERE eventID = ?;', array($this->event->id()));
+				$this->db->query('DELETE FROM regsys__items           WHERE eventID = ?;', array($this->event->id()));
+				$this->db->query('DELETE FROM regsys__event_discounts WHERE eventID = ?;', array($this->event->id()));
+				$this->db->query('DELETE FROM regsys__event_levels    WHERE eventID = ?;', array($this->event->id()));
+				$this->db->query('DELETE FROM regsys__events          WHERE eventID = ?;', array($this->event->id()));
+				
+				return sprintf('%s%s&deleted=%s', $this->requestHref, 'ReportIndex', rawurlencode($this->event->name()));
+			}
+		}
 		
-		wp_redirect(site_url('wp-admin/admin.php') . '?page=reg-sys&request=report_index&deleted_event=' . rawurlencode($event->name));
-		exit();
+		return array();
 	}
 }
-
-# Needed if the confirmation checkbox wasn't checked.
-if (isset($_GET['noheader'])) {
-	require_once ABSPATH . 'wp-admin/admin-header.php';
-}
-
-echo self::render_template('admin-event-delete.html', array('event' => $event));

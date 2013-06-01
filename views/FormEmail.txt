@@ -2,75 +2,72 @@
 Thanks for registering for {{ event.name }}. We're excited that you're joining us!
 
 
-First Name: {{ dancer.first_name }}
-Last Name: {{ dancer.last_name }}
-Mobile Phone: {{ dancer.mobile_phone }}
+First Name: {{ dancer.firstName }}
+Last Name: {{ dancer.lastName }}
+Mobile Phone: {{ dancer.phone }}
 Position: {{ dancer.position }}
-{% if event.has_levels %}
+{% if event.hasLevels -%}
 Level: {{ dancer.level }}
-{% endif %}
-{% if dancer.is_volunteer %}
-Status: Volunteer
-{% endif %}
-{% if dancer.is_vip %}
-Status: VIP
-{% endif -%}
+{%- endif %}
+{% if dancer.volunteer -%}
+Volunteer :)
+{%- endif %}
 
-{% if event.has_housing_registrations and dancer.needs_housing %}
+{% if dancer.needsHousing %}
 
 Housing Needed: 
-{% 	if dancer.housing_prefers_no_smoke %}
+{% if dancer.prefersNoSmoke %}
   - I would prefer no smoking.
-{% 	endif %}
-{% 	if dancer.housing_prefers_no_pets %}
+{% endif %}
+{% if dancer.prefersNoPets %}
   - I would prefer no pets.
-{% 	endif %}
-  - I would prefer to be housed with: {{ dancer.housing_gender }}
-  - I will need housing for: {{ dancer.housing_nights | join(', ') }}
-{% 	if dancer.housing_comment %}
-  - {{ dancer.housing_comment }}
-{% 	endif %}
-{% elseif event.has_housing_support and dancer.is_housing_provider %}
+{% endif %}
+  - I would prefer to be housed with: {{ dancer.housingGender }}
+  - I will need housing for: {{ dancer.housingNights | split(',') | join(', ') }}
+{% if dancer.housingComment %}
+  - Comment: {{ dancer.housingComment }}
+{% endif %}
+{% elseif dancer.isHousingProvider %}
 
 Housing Provider:
-  - I have room for {{ pluralize('%d person.', '%d persons.', dancer.housing_spots_available) | format(dancer.housing_spots_available) }}
-{% 	if dancer.housing_has_smoke %}
+  - I have room for {{ pluralize('%d person.', '%d persons.', dancer.housingSpotsAvailable) | format(dancer.housingSpotsAvailable) }}
+{% if dancer.hasSmoke %}
   - I smoke.
-{% 	endif %}
-{% 	if dancer.housing_has_pets %}
+{% endif %}
+{% if dancer.housingHasPets %}
   - I have pets.
-{% 	endif %}
-  - I will house: {{ dancer.housing_gender }}
-  - I will provide housing for: {{ dancer.housing_nights | join(', ') }}
-{% 	if dancer.housing_comment %}
-  - {{ dancer.housing_comment }}
-{% 	endif %}
+{% endif %}
+  - I will house: {{ dancer.housingGender }}
+  - I will provide housing for: {{ dancer.housingNights | split(',') | join(', ') }}
+{% if dancer.housingComment %}
+  - Comment: {{ dancer.housingComment }}
+{% endif %}
 {% endif %}
 
 Items:
-{% for item in dancer.registered_items %}
-  {{ "- %s: $%d" | format(item.name, item.registered_price) }}{% if item.registered_meta %}{{ ' (%s)' | format(item.registered_meta | capitalize) }}{% endif %}{{ "\n" -}}
+{% for item in dancer.registeredItems %}
+  {{ "- %s: $%d" | format(item.name, item.registeredPrice) }}{% if item.registeredMeta %}{{ ' (%s)' | format(item.registeredMeta) }}{% endif %}{{ "\n" -}}
 {% endfor %}
 
-Total Cost: ${{ dancer.price_total }}{% if dancer.payment_method == 'PayPal' and options.paypal_fee %}{{ ' (plus $%d processing fee)' | format(options.paypal_fee) }}{% endif %}
+Total Cost: ${{ dancer.priceTotal }}{% if dancer.paymentMethod == 'PayPal' and options.paypalFee %}{{ ' (plus $%d processing fee)' | format(options.paypalFee) }}{% endif %}
 
 
 
-{% if dancer.price_total > 0 %}
-{% 	if dancer.payment_method == 'Mail' %}
-You still need to write a check to "{{ options.payable_to }}" and mail it to:
+{% if dancer.priceTotal > 0 %}
+{% if dancer.paymentMethod == 'Mail' %}
+You still need to write a check to "{{ options.payableTo }}" and mail it to:
 
-{{ options.mailing_address }}
+{{ options.mailingAddress }}
 
-Your check must be postmarked by {{ dancer.date_postmark_by | date('F jS') }}.
-{% 	elseif dancer.payment_method == 'PayPal' %}
+Your check must be postmarked by {{ dancer.datePostmarkBy | date('F jS') }}.
+{% 	elseif dancer.paymentMethod == 'PayPal' %}
 If you haven't already paid via PayPal, you may use this link to do so:
 
-{{ dancer.paypal_href }}
+{{ attribute(dancer, 'paypalHref', [notifyUrl]) }}
 
-Your payment must be received in full by {{ dancer.date_postmark_by | date('F jS') }}.
-{% 	endif %}
+Your payment must be received in full by {{ dancer.datePostmarkBy | date('F jS') }}.
+{% endif %}
 
-Refunds are available until {{ event.date_refund_end | date('F jS') }} at the discretion of {{ options.payable_to }}.
+Refunds are available until {{ event.dateRefund | date('F jS') }} at the discretion of {{ options.payableTo }}.
 {% endif %}
 {% endautoescape %}

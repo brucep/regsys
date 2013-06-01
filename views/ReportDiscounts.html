@@ -1,23 +1,39 @@
-{% extends 'report.html' %}
+{% extends 'Report.html' %}
 
 {% block content %}
 	<h3>Discounts</h3>
 
-{%- for discount_code, dancers in groups %}
+	{% if event.dancers -%}
+	<table class="widefat page fixed report">
+		<thead>
+			<tr>
+				<th class="manage-column column-title"><div>Name</div></th>
+				<th class="manage-column"><div>Discount Code</div></th>
+				<th class="manage-column"><div>Date Registered</div></th>
+			</tr>
+		</thead>
 
+		<tfoot>
+			<tr>
+				<th class="manage-column column-title"><div>Name</div></th>
+				<th class="manage-column"><div>Discount Code</div></th>
+				<th class="manage-column"><div>Date Registered</div></th>
+			</tr>
+		</tfoot>
 
-	<h4>{{ discount_code }}</h4>
-	<p>{{ '%d used; %d Mail; %d PayPal' | format(
-		attribute(event, 'count_discounts_used', [discount_code]),
-		attribute(event, 'count_discounts_used', [discount_code, 'Mail']),
-		attribute(event, 'count_discounts_used', [discount_code, 'PayPal'])
-		) }}</p>
-	<ul>
-{% 	for dancer in dancers %}
-		<li><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}</a></li>
-{% 	endfor %}
-	</ul>
-{%- else %}
-	<p>No discount codes have been used for this event.</p>
-{% endfor %}
+		<tbody>
+			{% for dancer in event.dancers if dancer.discountCode -%}
+			<tr>
+				<td class="column-title"><a href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id }}">{{ dancer.nameReversed }}</a></td>
+				<td class="tel">{{ dancer.discountCode }}</td>
+				<td class="date">{{ dancer.dateRegistered | date }}</td>
+			</tr>
+			{%- else -%}
+			<tr><td colspan="3">There are no registered dancers with discount codes for this event.</td></tr>
+			{%- endfor %}
+		</tbody>
+	</table>
+	{%- else -%}
+	<p>There are no registered dancers for this event.</p>
+	{%- endif %}
 {% endblock content %}

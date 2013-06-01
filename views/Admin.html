@@ -1,24 +1,101 @@
 
-<div id="reg-sys" class="wrap">
-<div id="{{ GET.request }}">
+<div id="regsys" class="wrap">
+<div id="{{ request }}">
 
 {% block content %}{% endblock content %}
 
 </div>
 </div>
 
+
+
 {% macro message(text, class) %}{# Classes 'updated' and 'error' used by WordPress stylesheets #}
 <div class="{{ class | default('updated') }}"><p><strong>{{ text }}</strong></p></div>
 {% endmacro %}
 
-{% macro form_table_row(label, input, description, class) %}
-<tr valign="top" {%- if class %} class="{{ class }}"{% endif %}>
+{% macro text(label, name, description, value) %}
+			{%- set error = getError(name) %}{% if error %}{{ ("\n\t\t\t\t" ~ '<tr valign="top" class="regsys-validation-error"><td colspan="2">' ~ error ~ '</td></tr>') | raw }}{% endif %}
+
+			<tr valign="top" class="regular-text" id="regsys-form-{{ name }}">
 				<th scope="row">{{ label }}</th>
 				<td>
-					{{ input | raw }}
-{% if description %}
+					<input name="{{ name }}" value="{{ not value is sameas(null) ? value : getThingValue(name) }}" type="text" class="regular-text" />
+					{% if description -%}
 					<span class="description">{{ description | raw }}</span>
-{% endif %}
+					{%- endif %}
+
 				</td>
 			</tr>
-{% endmacro %}
+{%- endmacro %}
+
+{% macro checkbox(label, name, description, checked, parameters) %}
+			{%- set error = getError(name) %}{% if error %}{{ ("\n\t\t\t\t" ~ '<tr valign="top" class="regsys-validation-error"><td colspan="2">' ~ error ~ '</td></tr>') | raw }}{% endif %}
+
+			<tr valign="top" class="regular-text" id="regsys-form-{{ name }}">
+				<th scope="row">{{ label }}</th>
+				<td>
+					{% if description %}<label>{% endif %}<input type="checkbox" name="{{ name }}" value="1" {%- if getThingValue(name) %} checked="checked"{% endif %}{%- for key, value in parameters %}{{ key }}="{{ value }}"{% endfor %} />{% if description %}&nbsp;{{ description | raw }}</label>{% endif %}
+
+				</td>
+			</tr>
+{%- endmacro %}
+
+{% macro radios(label, name, radios, description) %}
+			{%- set error = getError(name) %}{% if error %}{{ ("\n\t\t\t\t" ~ '<tr valign="top" class="regsys-validation-error"><td colspan="2">' ~ error ~ '</td></tr>') | raw }}{% endif %}
+
+			<tr valign="top" class="regular-text" id="regsys-form-{{ name }}">
+				<th scope="row">{{ label }}</th>
+				<td>
+					{% for radio in radios -%}
+					<label class="radio radio-{{ name }}" {%- if radio.parameters.id %} id="{{ radio.parameters.id }}-label"{% endif %}><input type="radio" name="{{ name }}" value="{{ radio.value }}" {%- if getThingValue(name) == radio.value and not getThingValue(name) is sameas(null) %} checked="checked"{% endif %}{%- for key, value in radio.parameters %}{{ key }}="{{ value }}"{% endfor %} />&nbsp;{{ radio.label | raw }}</label>
+					{%- endfor %}
+					{% if description -%}
+					<span class="description">{{ description | raw }}</span>
+					{%- endif %}
+
+				</td>
+			</tr>
+{%- endmacro %}
+
+{% macro select(label, name, options) %}
+			{%- set error = getError(name) %}{% if error %}{{ ("\n\t\t\t\t" ~ '<tr valign="top" class="regsys-validation-error"><td colspan="2">' ~ error ~ '</td></tr>') | raw }}{% endif %}
+
+			<tr valign="top" class="regular-text" id="regsys-form-{{ name }}">
+				<th scope="row">{{ label }}</th>
+				<td>
+					<select name="{{ name }}">
+						{% for option in options -%}
+						<option value="{{ option.value }}" {%- if getThingValue(name) == option.value or option.default == true %} selected="selected"{% endif %} />{{ option.label }}</option>
+						{%- endfor %}
+
+					</select>
+				</td>
+			</tr>
+{%- endmacro %}
+
+{% macro textarea(label, name, description, value) %}
+			{%- set error = getError(name) %}{% if error %}{{ ("\n\t\t\t\t" ~ '<tr valign="top" class="regsys-validation-error"><td colspan="2">' ~ error ~ '</td></tr>') | raw }}{% endif %}
+
+			<tr valign="top" class="regular-text" id="regsys-form-{{ name }}">
+				<th scope="row">{{ label }}</th>
+				<td>
+					<textarea name="{{ name }}" cols="40" rows="4">{{ value | default(getThingValue(name)) }}</textarea>
+					{% if description -%}
+					<span class="description">{{ description | raw }}</span>
+					{%- endif %}
+
+				</td>
+			</tr>
+{%- endmacro %}
+
+
+{% macro row(label, name, content) %}
+			{%- set error = getError(name) %}{% if error %}{{ ("\n\t\t\t\t" ~ '<tr valign="top" class="regsys-validation-error"><td colspan="2">' ~ error ~ '</td></tr>') | raw }}{% endif %}
+
+			<tr valign="top" class="regular-text" id="regsys-form-{{ name }}">
+				<th scope="row">{{ label }}</th>
+				<td>
+					{{ content | raw }}
+				</td>
+			</tr>
+{%- endmacro %}

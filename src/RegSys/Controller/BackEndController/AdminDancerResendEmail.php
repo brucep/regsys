@@ -1,17 +1,14 @@
 <?php
 
-try {
-	if (!$dancer->send_confirmation_email()) {
-		throw new Exception('Email could not be sent to ' . $dancer->email());
+namespace RegSys\Controller\BackEndController;
+
+class AdminDancerResendEmail extends \RegSys\Controller\BackEndController
+{
+	public function getContext()
+	{
+		$dancer = $this->getRequestedDancer();
+		$dancer->sendConfirmationEmail($this->event, $this->loadTwig(), $this->container['notifyUrl']);
+		
+		return sprintf('%s%s&dancerID=%d&sentConfirmationEmail=true', $this->requestHref, 'ReportDancer', rawurlencode($dancer->id()));
 	}
-	
-	wp_redirect(site_url('wp-admin/admin.php') . sprintf('?page=reg-sys&request=report_dancer&event_id=%d&dancer_id=%d&confirmation_email=true', $event->id(), $dancer->id()));
-	exit();
-}
-catch (Exception $e) {
-	if (isset($_GET['noheader'])) {
-		require_once ABSPATH . 'wp-admin/admin-header.php';
-	}
-	
-	echo $e->getMessage();
 }

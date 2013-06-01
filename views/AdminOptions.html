@@ -1,140 +1,82 @@
+{% set request = 'regsys-options' %}
+{% extends 'Admin.html' %}
 
-<div id="reg-sys" class="wrap">
+{% import 'Admin.html' as form %}
+
+{% block content %}
 	<h2>Registration Options</h2>
-	{% if GET['settings-updated'] == 'true' %}{{ form.message('Options saved.') | raw }}{% endif %}
+	{%- if GET['settings-updated'] == 'true' %}{{ "\n\t" }}{{ form.message('Options saved.') }}{% endif %}
 
-	<form method="post" action="options.php">
-		{{ settings_fields('reg_sys') }}{{ form.set_array_name('reg_sys') }}
+	<form action="options.php" method="post">
+		{{ settings_fields('regsys') }}
 
 		<h3>Registration</h3>
 
 		<table class="form-table">
-			{{ form.row_select('Current Event',
-				'current_event_id',
-				events,
-				{'default_option': option.current_event_id},
-				'The event currently used by the registration form.'
-				) | raw }}
-			{{ form.row_checkbox('Registration Testing',
-				'registration_testing',
-				{'checked': options.registration_testing},
-				' Only &quot;capable&quot; users will be able to access the registration form.'
-				) | raw }}
-			{{ form.row('Postmark Within',
-				'<span>Payments must be postmarked within ' ~ form.input_text('postmark_within', options.postmark_within, {'class': 'regulat-text', 'style': 'width: 3em'}) | raw ~ ' days.</span>'
-				) | raw }}
+		<tbody>
+			{{- form.select('Current Event', 'regsys[currentEventID]', events) }}
+
+			{{- form.checkbox('Registration Testing', 'regsys[registrationTesting]', 'Only "capable" users will be able to access the registration form.') }}
+
+			{{- form.row('Postmark Within', 'postmarkWithin',
+				'<span>Payments must be postmarked within <input type="text" name="regsys[postmarkWithin]" value="%s" class="regular-text" style="width: 3em" /> days.</span>' | format(options.postmarkWithin)) }}
+		</tbody>
 		</table>
 
 		<h3>Pay by Mail</h3>
 
 		<table class="form-table">
-			{{ form.row_text('Payable To',
-				'payable_to',
-				options.payable_to,
-				{'class': 'regular-text'}
-				) | raw }}
-			{{ form.row_textarea('Mailing Address',
-				'mailing_address',
-				options.mailing_address,
-				{'class': 'regular-text'}
-				) | raw }}
+		<tbody>
+			{{- form.text('Payable To', 'regsys[payableTo]') }}
+			{{- form.textarea('Mailing Address', 'regsys[mailingAddress]') }}
+		</tbody>
 		</table>
 
 		<h3>PayPal</h3>
 
 		<table class="form-table">
-			{{ form.row_text('PayPal Business Address',
-				'paypal_business',
-				options.paypal_business,
-				{'class': 'regular-text'},
-				'The email address used to receive payments via PayPal.'
-				) | raw }}
-			{{ form.row_text('PayPal Processing Fee',
-				'paypal_fee',
-				options.paypal_fee,
-				{'class': 'regular-text'},
-				'The processing fee, if any, for payments made via PayPal.'
-				) | raw }}
-			{{ form.row_checkbox('PayPal Sandbox',
-				'paypal_sandbox',
-				{'checked': options.paypal_sandbox},
-				' Use the PayPal <a href="https://developer.paypal.com/">Sandbox</a> (advanced testing only).'
-				) | raw }}
-			{{ form.row_text('PayPal Sandbox Address',
-				'paypal_sandbox_email',
-				options.paypal_sandbox_email,
-				{'class': 'regular-text'},
-				'The email address used for the PayPal Sandbox.'
-				) | raw }}	
+		<tbody>
+			{{- form.text('PayPal Business Address', 'regsys[paypalBusiness]', 'The email address used to receive payments via PayPal.') }}
+
+			{{- form.text('PayPal Processing Fee', 'regsys[paypalFee]',	'The processing fee, if any, for payments made via PayPal.') }}
+
+			{{- form.checkbox('PayPal Sandbox', 'regsys[paypalSandbox]regsys[', 'Use the <a href="https://developer.paypal.com/webapps/developer/applications/accounts">PayPal Sandbox</a> (advanced testing only).') }}
+
+			{{- form.text('PayPal Sandbox Address', 'regsys[paypalSandboxEmail]', 'The email address used for the PayPal Sandbox.') }}
+		</tbody>	
 		</table>
 
 		<h3>Confirmation Email</h3>
 
 		<table class="form-table">
-			{{ form.row_text('Email From',
-				'email_from',
-				options.email_from,
-				{'class': 'regular-text'}
-				) | raw }}
-			{{ form.row_text('Email Reply-To',
-				'email_reply_to',
-				options.email_reply_to,
-				{'class': 'regular-text'}
-				) | raw }}
-			{{ form.row_text('Email Bcc',
-				'email_bcc',
-				options.email_bcc,
-				{'class': 'regular-text'}
-				) | raw }}
-			{{ form.row_checkbox('Send Email While Testing',
-				'email_testing',
-				{'checked': options.email_testing},
-				' Send confirmation email while registration testing is enabled.'
-				) | raw }}
-			{{ form.row_radio('Transport Type',
-				'email_transport',
-				[{'label': '<span><abbr title="Simple Mail Transfer Protocol">SMTP</abbr></span>', 'checked': (options.email_transport == 'smtp'), 'value': 'smtp', 'default': true},
-				 {'label': '<span title="PHP&#39;s internal mail function">Mail</span>',           'checked': (options.email_transport == 'mail'), 'value': 'mail'}],
-				'Specify the <a href="http://swiftmailer.org/docs/sending.html#transport-types">transport type to be used by Swift Mailer</a>.'
-				) | raw }}
-			{{ form.row_text('SMTP Host',
-				'email_smtp_host',
-				options.email_smtp_host,
-				{'class': 'regular-text'},
-				'',
-				['reg-sys-options-smtp']
-				) | raw }}
-			{{ form.row_text('SMTP Port',
-				'email_smtp_port',
-				options.email_smtp_port,
-				{'class': 'regular-text'},
-				'',
-				['reg-sys-options-smtp']
-				) | raw }}
-			{{ form.row_text('SMTP Username',
-				'email_smtp_username',
-				options.email_smtp_username,
-				{'class': 'regular-text'},
-				'',
-				['reg-sys-options-smtp']
-				) | raw }}
-			{{ form.row_text('SMTP Password',
-				'email_smtp_password',
-				options.email_smtp_password,
-				{'type': 'password', 'class': 'regular-text'},
-				'',
-				['reg-sys-options-smtp']
-				) | raw }}
-			{{ form.row_radio('SMTP Encryption',
-				'email_smtp_encryption',
-				[{'label': '<span><abbr title="Secure Sockets Layer">SSL</abbr></span>',     'checked': (options.email_smtp_encryption == 'ssl'),  'value': 'ssl', 'default': true},
-				 {'label': '<span><abbr title="Transport Layer Security">TSL</abbr></span>', 'checked': (options.email_smtp_encryption == 'tls'),  'value': 'tls'},
-				 {'label': '<span>None</span>',                                              'checked': (options.email_smtp_encryption == 'none'), 'value': 'none'}],
-				'',
-				['reg-sys-options-smtp']
-				) | raw }}
+		<tbody>
+			{{- form.text('Email From', 'regsys[emailFrom]') }}
+
+			{{- form.text('Email Reply-To', 'regsys[emailReplyTo]') }}
+
+			{{- form.text('Email Bcc', 'regsys[emailBcc]') }}
+
+			{{- form.checkbox('Send Email While Testing', 'regsys[emailTesting]', 'Send confirmation email while registration testing is enabled.') }}
+
+			{{- form.radios('Transport Type', 'regsys[emailTransport]', [
+				{'value': 'smtp', 'label': '<abbr title="Simple Mail Transfer Protocol">SMTP</abbr>'},
+				{'value': 'mail', 'label': '<span title="PHP&#39;s internal mail function">Mail</span>'}
+				],
+				'Specify the <a href="http://swiftmailer.org/docs/sending.html#transport-types">transport type to be used by Swift Mailer</a>.') }}
+
+			{{- form.text('SMTP Host', 'regsys[emailHost]') }}
+			{{- form.text('SMTP Port', 'regsys[emailPort]') }}
+			{{- form.text('SMTP Username', 'regsys[emailUsername]') }}
+			{{- form.text('SMTP Password', 'regsys[emailPassword]') }}
+
+			{{- form.radios('SMTP Encryption', 'regsys[emailEncryption]', [
+				{'value': 'ssl',  'label': '<abbr title="Secure Sockets Layer">SSL</abbr>'},
+				{'value': 'tls',  'label': '<abbr title="Transport Layer Security">TSL</abbr>'},
+				{'value': 'none', 'label': 'None'}
+				]) }}
+		</tbody>
 		</table>
 
 		<p class="submit"><input type="submit" class="button-primary" value="Save Changes"></p>
 	</form>
-</div>
+{% endblock content %}

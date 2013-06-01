@@ -1,81 +1,84 @@
 <?php
 
 if (empty($_POST)) {
-	header('HTTP/1.1 500 Internal Server Error');
+	header('HTTP/1.0 500 Internal Server Error');
 	exit();
 }
 
-require dirname(__FILE__) . '/paypal-ipn.php';
-set_error_handler('RegistrationSystem_PayPal_IPN::error_handler', E_ALL);
+set_error_handler(function ($number, $message, $file, $line) {
+	throw new \Exception(sprintf("Error: %s [%s:%d]\n\n\n%s", $message, $file, $line, print_r($_POST, true)));
+	}, E_ALL);
 
 try {
-	$notification = new RegistrationSystem_PayPal_IPN($_POST);
+	# Load WordPress to access plugin (change path if needed)
+	require __DIR__ . '/../../../wp/wp-load.php';
 	
 	
-	require dirname(__FILE__) . '/../../../../wp/wp-load.php';
+	$options = \RegSys::getOptions();
 	
-	$options = RegistrationSystem::get_options();
+	$notification = new \RegSys\Payment\PayPal\IPN($_POST);
 	
+	if (!$options['registrationTesting'] and isset($_GET['test'])) {
+		unset($_GET['test']);
+	}
 	
 	if (!isset($_GET['test'])) {
-		if (!$notification->is_valid()) {
-			throw new Exception('PayPal notification invalid.');
+		if (!$notification->isValid()) {
+			throw new \Exception('PayPal notification invalid.');
 		}
 		elseif ($notification->payment_status != 'Completed') {
 			exit(); # The "Pending" status will spam you to death!
 		}
-		if (!$notification->is_test() and $notification->receiver_email != $options['paypal_business']) {
-			throw new Exception('Receiver email does not match: ' . $notification->receiver_email);
+		if (!$notification->isTest() and $notification->receiver_email != $options['paypalBusiness']) {
+			throw new \Exception('Receiver email does not match: ' . $notification->receiver_email);
 		}
 	}
 	
 	
-	$database = RegistrationSystem::get_database_connection();
-	RegistrationSystem_Model::set_database($database);
+	$db = \RegSys::getDatabaseConnection();
+	\RegSys\Entity::setDatabase($db);
 	
-	
-	$event = RegistrationSystem_Model_Event::get_event_by_id($options['current_event_id']);
+	$event = \RegSys\Entity\Event::eventByID($options['currentEventID']);
 	
 	if (!$event) {
-		throw new Exception(sprintf('Event ID not found: %d', $options['current_event_id']));
+		throw new Exception(sprintf('Event not found for ID: %d', $options['currentEventID']));
 	}
 	
-	$dancer = $event->dancer_by_id($notification->custom);
+	$dancer = $event->dancerByID($notification->custom);
 	
 	if (!$dancer) {
-		throw new Exception(sprintf('Dancer ID not found: %d', $notification->custom));
+		throw new Exception(sprintf('Dancer not found for ID: %d', $notification->custom));
 	}
 	
-	
-	$payment_owed = $dancer->payment_owed();
+	$paymentOwed = $dancer->paymentOwed();
 	unset($event);
 	
 	
-	$unconfirmed_registrations = array();
+	$unconfirmedRegistrations = array();
 	
-	$tmp_registrations = $database->fetchAll('SELECT item_id, price FROM regsys_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom));
+	$result = $db->fetchAll('SELECT itemID, price FROM regsys__registrations WHERE dancerID = ? AND paypalConfirmed = 0', array($notification->custom));
 	
-	foreach ($tmp_registrations as $reg) {
-		$unconfirmed_registrations[$reg->item_id] = $reg->price;
+	foreach ($result as $reg) {
+		$unconfirmedRegistrations[$reg->itemID] = $reg->price;
 	}
 	
-	unset($tmp_registrations, $reg);
+	unset($tempRegistrations, $reg);
 	
 	
 	$output[] = 'Dancer ID ' . $notification->custom;
-	$confirmed_registrations = 0;
+	$confirmedRegistrations = 0;
 	
-	foreach ($notification->get_all_items() as $item) {
+	foreach ($notification->allItems() as $item) {
 		if (empty($item['number'])) {
 			continue; # Skip PayPal fee
 		}
 		
-		if (isset($unconfirmed_registrations[$item['number']])) {
-			$payment_owed = $payment_owed - $item['mc_gross'];
+		if (isset($unconfirmedRegistrations[$item['number']])) {
+			$paymentOwed = $paymentOwed - $item['mc_gross'];
 			
-			$database->query('UPDATE regsys_registrations SET paypal_confirmed = 1 WHERE dancer_id = ? AND item_id = ?', array($notification->custom, $item['number']));
+			$db->query('UPDATE regsys__registrations SET paypalConfirmed = 1 WHERE dancerID = ? AND itemID = ?', array($notification->custom, $item['number']));
 			
-			$confirmed_registrations++;
+			$confirmedRegistrations++;
 			$output[] = 'Confirmed item ' . $item['number'];
 		}
 		else {
@@ -83,37 +86,28 @@ try {
 		}
 	}
 	
-	if ($confirmed_registrations > 0) {
-		$fee = $options['paypal_fee'] ? $options['paypal_fee'] - $notification->mc_fee : $notification->mc_fee;
-		$database->query('UPDATE regsys_dancers SET paypal_fee = ? WHERE dancer_id = ?', array($fee + $dancer->paypal_fee, $notification->custom));
-		$output[] = sprintf('$%.2f fee recorded%s', $fee, $options['paypal_fee'] ? sprintf(' (%d - %.2f)', $options['paypal_fee'], $notification->mc_fee) : '');
+	if ($confirmedRegistrations > 0) {
+		$fee = $options['paypalFee'] ? $options['paypalFee'] - $notification->mc_fee : $notification->mc_fee;
+		$db->query('UPDATE regsys__dancers SET paypalFee = ? WHERE dancerID = ?', array($fee + $dancer->paypalFee(), $notification->custom));
+		$output[] = sprintf('$%.2f fee recorded%s', $fee, $options['paypalFee'] ? sprintf(' (%d - %.2f)', $options['paypalFee'], $notification->mc_fee) : '');
 	}
 	else {
 		$output[] = 'No fee recorded';
 	}
 	
-	$registrations_remaining = $database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_registrations WHERE dancer_id = ? AND paypal_confirmed = 0', array($notification->custom));
+	$registrationsRemaining = $db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__registrations WHERE dancerID = ? AND paypalConfirmed = 0', array($notification->custom));
 	
-	$output[] = sprintf('$%d owed', $payment_owed);
-	$output[] = sprintf('%d registration%s remaining', $registrations_remaining, $registrations_remaining == 1 ? '' : 's');
+	$output[] = sprintf('$%d owed', $paymentOwed);
+	$output[] = sprintf('%d registration%s remaining', $registrationsRemaining, $registrationsRemaining == 1 ? '' : 's');
 	
-	$database->query('UPDATE regsys_dancers SET payment_owed = ?, payment_confirmed = ? WHERE dancer_id = ?', array($payment_owed, (!$registrations_remaining and $payment_owed == 0), $notification->custom));
+	$db->query('UPDATE regsys__dancers SET paymentOwed = ?, paymentConfirmed = ? WHERE dancerID = ?', array($paymentOwed, ($registrationsRemaining == 0 and $paymentOwed == 0), $notification->custom));
 	
 	isset($_GET['test']) ? exit(implode("\n", $output)) : exit();
 }
 catch (Exception $e) {
-	header('HTTP/1.1 500 Internal Server Error');
+	header('HTTP/1.0 500 Internal Server Error');
 	
-	switch (get_class($e)) {
-		case 'ErrorException':
-			$message = sprintf("Error: %s [%s:%d]\n\n\n%s", $e->getMessage(), $e->getFile(), $e->getLine(), print_r($_POST, true));
-			break;
-		
-		default:
-			$message = $e->getMessage();
-	}
+	@mail(@get_option('admin_email'), 'IPN Exception: ' . basename(__FILE__, '.php'), $e->getMessage());
 	
-	@mail(@get_option('admin_email'), 'IPN Exception: ' . basename(__FILE__, '.php'), $message);
-	
-	exit($message);
+	exit($e->getMessage());
 }

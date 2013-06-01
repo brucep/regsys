@@ -1,97 +1,67 @@
-{% extends 'admin.html' %}
+{% extends 'Admin.html' %}
 
-{% from 'admin.html' import form_table_row as form_table_row %}
+{% import 'Admin.html' as form %}
 
 {% block content %}
-{% if GET.request == 'admin_event_add' %}
-	<h2>Add New Event</h2>
-{% else %}
+	{%- if editing %}
 	<h2>Edit Event
-		<a href="{{ request_href ~ 'admin_event_delete' }}" class="delete add-new-h2">Delete Event</a>
-		<a href="{{ request_href ~ 'admin_event_delete' ~ '&registrations_only=true' }}" class="delete add-new-h2">Delete Registrations</a>
+		<a href="{{ requestHref ~ 'AdminEventDelete' }}" class="delete add-new-h2">Delete Event</a>
+		<a href="{{ requestHref ~ 'adminEventDelete' ~ '&registrationsOnly=true' }}" class="delete add-new-h2">Delete Registrations</a>
 	</h2>
-{% endif %}
+	{% if POST and not hasErrors() %}{{ form.message('Event updated.') }}{% endif %}
+	{%- else %}
+	<h2>Add New Event</h2>
+	{%- endif %}
 
-	{% if validation.did_validate and GET.added == 'true' %}{{ form.message('Event created.') | raw }}{% elseif validation.did_validate and GET.added != 'true' %}{{ form.message('Event updated.') | raw }}{% else %}{{ validation.get_errors | raw }}{% endif %}
-
-	<form action="{{ request_href ~ GET.request }}{% if GET.request == 'admin_event_add' %}&amp;noheader=true{% endif %}" method="post">
-		{{ form.input_hidden('event_id') | raw }}
-
+	<form action="{{ requestHref ~ 'AdminEvent' }}" method="post">
 		<h3>Event Information</h3>
-
 		<table class="form-table">
-			{{ form.row_text('Name',                           'name',                   null, {'class': 'regular-text'}) | raw }}
-			{{ form.row_text('Preregistration by Mail Ends',   'date_mail_prereg_end',   null, {'class': 'regular-text'}) | raw }}
-			{{ form.row_text('Preregistration by PayPal Ends', 'date_paypal_prereg_end', null, {'class': 'regular-text'}) | raw }}
-			{{ form.row_text('Refunds End',                    'date_refund_end',        null, {'class': 'regular-text'}) | raw }}
+		<tbody>
+			{{- form.text('Name',                           'name', 'Required') }}
+			{{- form.text('Preregistration by Mail Ends',   'dateMail', 'Required', event.dateMail | date()) }}
+			{{- form.text('Preregistration by PayPal Ends', 'datePayPal', 'Required', event.datePayPal | date()) }}
+			{{- form.text('Refunds End',                    'dateRefund', 'PayPal date is used if this field is left empty.', event.dateRefund ? event.dateRefund | date() : '') }}
+		</tbody>
 		</table>
 
 		<h3>Event Options</h3>
-
 		<table class="form-table">
-			{{ form.row_checkbox('Has VIPs?',       'has_vip',        {}, 'This event supports <a href="' ~ vip_href ~ '">VIP registrations</a>.') | raw }}
-			{{ form.row_checkbox('Has Volunteers?', 'has_volunteers', {}, 'This event supports volunteer registrations.') | raw }}
+		<tbody>
+			{{- form.checkbox('Has Volunteers?', 'hasVolunteers', 'This event supports volunteer registrations.') }}
+			{{- form.text('Volunteer Description', 'volunteerDescription', 'Appears on registration form.<br />Useful for informing dancers about money for working.') }}
+		</tbody>
 		</table>
 
 		<h3>Housing</h3>
-
 		<table class="form-table">
-			{{ form.row_radio('Housing Support',
-				'has_housing',
-				[{'label': 'No housing for this event.', 'value': 0, 'default': true},
-				 {'label': 'Housing reports are enabled, but new housing registrations <strong>are not</strong> allowed.', 'value': 1},
-				 {'label': 'Housing reports are enabled, and new housing registrations <strong>are</strong> allowed.', 'value': 2}]
-				) | raw }}
-			{{ form.row_text('Housing Nights', 'housing_nights', null, {'class': 'regular-text'}, 'Example: Friday,Saturday,Sunday') | raw }}
+		<tbody>
+			{{- form.radios('Housing Support', 'hasHousing', [
+				{'value': 0, 'label': 'No housing for this event.', 'default': true},
+				{'value': 1, 'label': 'Housing reports are enabled, but new housing registrations <strong>are not</strong> allowed.'},
+				{'value': 2, 'label': 'Housing reports are enabled, and new housing registrations <strong>are</strong> allowed.'},
+				]) }}
+			{{- form.text('Housing Nights', 'housingNights', 'Example: Friday,Saturday,Sunday') }}
+		</tbody>
 		</table>
 
-{% if GET.request != 'admin_event_add' %}
 		<h3>Levels</h3>
-
 		<table class="form-table">
-			{{ form.row_checkbox('Level Support', 'has_levels', {}, 'This event records levels for dancers.') | raw }}
+		<tbody>
+			{{- form.checkbox('Level Support', 'hasLevels', 'This event records levels for dancers.') | raw }}
+			{% for i in 1..4 -%}
 			<tr valign="top">
-				<th scope="row">Level 1</th>
+				<th scope="row">Level {{ i }}</th>
 				<td>
-					{% do form.set_array_name('edit_levels') %}
-					{{ form.input_text('1', event.levels_keyed_by_id[1], {'class': 'regular-text'}) | raw }}
-					{% do form.set_array_name('edit_tryouts') %}
-					{{ form.input_checkbox('1', {'checked': event.levels[1].has_tryouts}) | raw }} Has Tryouts
+					<input type="text" name="editLevels[{{ i }}]" value="{{ event.levels[i].levelLabel }}" class="regular-text" />
+					<input type="checkbox" name="editTryouts[{{ i }}]" value="1" {%- if event.levels[i].hasTryouts %} checked="checked"{% endif %}/>&nbsp;Has&nbsp;Tryouts
 				</td>
 			</tr>
+			{%- endfor %}
 
-			<tr valign="top">
-				<th scope="row">Level 2</th>
-				<td>
-					{% do form.set_array_name('edit_levels') %}
-					{{ form.input_text('2', event.levels_keyed_by_id[2], {'class': 'regular-text'}) | raw }}
-					{% do form.set_array_name('edit_tryouts') %}
-					{{ form.input_checkbox('2', {'checked': event.levels[2].has_tryouts}) | raw }} Has Tryouts
-				</td>
-			</tr>
-
-			<tr valign="top">
-				<th scope="row">Level 3</th>
-				<td>
-					{% do form.set_array_name('edit_levels') %}
-					{{ form.input_text('3', event.levels_keyed_by_id[3], {'class': 'regular-text'}) | raw }}
-					{% do form.set_array_name('edit_tryouts') %}
-					{{ form.input_checkbox('3', {'checked': event.levels[3].has_tryouts}) | raw }} Has Tryouts
-				</td>
-			</tr>
-
-			<tr valign="top">
-				<th scope="row">Level 4</th>
-				<td>
-					{% do form.set_array_name('edit_levels') %}
-					{{ form.input_text('4', event.levels_keyed_by_id[4], {'class': 'regular-text'}) | raw }}
-					{% do form.set_array_name('edit_tryouts') %}
-					{{ form.input_checkbox('4', {'checked': event.levels[4].has_tryouts}) | raw }} Has Tryouts
-				</td>
-			</tr>{% do form.set_array_name(null) %}
+		</tbody>
 		</table>
 
-		<script charset="utf-8">
+		<script type="text/javascript">
 			jQuery(document).ready(function($) {
 				$('#add_discount_code').click(function() {
 					// http://charlie.griefer.com/blog/2009/09/17/jquery-dynamically-adding-form-elements/
@@ -110,50 +80,42 @@
 			});
 		</script>
 
-		<h3>Discount Codes<button type="button" style="margin-left:1.25em " id="add_discount_code">Add New Code</button></h3>
-
+		<h3>Discount Codes<button type="button" style="margin-left:1.25em; font-weight: normal; font-size: 0.83em" id="add_discount_code">Add New Code</button></h3>
 		<p>Discount amounts: Negative number for amount off; Positive number (or zero) for fixed price.</p>
-
 		<table class="form-table">
+		<tbody>
 			<tr valign="top">
-				<th scope="row"></th>
 				<td>Code</td>
 				<td>Amount</td>
 				<td>Limit</td>
 				<td>Expiration Date</td>
+				<td>Delete?</td>
 			</tr>
+			{% for discount in event.discounts | default({1: {'discountExpires': 'now' | date('Y-m-d, 11:59 \\P\\M')}}) -%}
+			<tr valign="top" class="discount-row" id="discount_row_{{ loop.index }}">
+				<td><input type="text" name="editDiscountCode[{{ loop.index }}]"    value="{{ discount.discountCode   }}" /></td>
+				<td><input type="text" name="editDiscountAmount[{{ loop.index }}]"  value="{{ discount.discountAmount }}" /></td>
+				<td><input type="text" name="editDiscountLimit[{{ loop.index }}]"   value="{{ discount.discountLimit  }}" /></td>
+				<td><input type="text" name="editDiscountExpires[{{ loop.index }}]" value="{{ discount.discountExpires ? discount.discountExpires | date() : ''  }}" /></td>
+				<td><input type="checkbox" name="editDiscountDelete[{{ discount.discountCode }}]" value="1" /></td>
+			</tr>
+			{%- endfor %}
 
-{% for id, discount in event.discounts | default({1: {'discount_expires': 'now' | date('Y-m-d, 11:59 \\P\\M')}}) %}
-			<tr valign="top" class="discount-row" id="discount_row_{{ id }}">
-				<th scope="row">Discount {{ id }}</th>
-				<td>
-					{% do form.set_array_name('edit_discount_code') -%}
-					{{ form.input_text(id, discount.discount_code, {'id': ''}) | raw }}
-				</td>
-				<td>
-					{% do form.set_array_name('edit_discount_amount') -%}
-					{{ form.input_text(id, discount.discount_amount, {'id': ''}) | raw }}
-				</td>
-				<td>
-					{% do form.set_array_name('edit_discount_limit') -%}
-					{{ form.input_text(id, discount.discount_limit, {'id': ''}) | raw }}
-				</td>
-				<td>
-					{% do form.set_array_name('edit_discount_expires') -%}
-					{{ form.input_text(id, discount.discount_expires ? discount.discount_expires | date : 0, {'id': 'discount_expires_' ~ id}) | raw }}
-				</td>
-			</tr>
-{% endfor %}
+		</tbody>
 		</table>
-
+		
 		<h3>Visualization</h3>
-
 		<table class="form-table">
-			{{ form.row_checkbox('Include in Visualization?', 'visualization', {}, 'This event is included in the registration visualization chart.') | raw }}
-			{{ form.row_text('Line Color', 'visualization', null, {'class': 'regular-text'}) | raw }}
+		<tbody>
+			{{- form.checkbox('Include in Visualization?', 'visualization', 'This event is included in the registration visualization chart.') }}
+			{{- form.text('Visualization Line Color', 'visualizationColor') }}
+		</tbody>
 		</table>
-{% endif %}
 
-		<p class="submit"><input type="submit" class="button-primary" value="{% if GET.request == 'admin_event_add' %}Add Event{% else %}Edit Event{% endif %}"></p>
+		{% if editing -%}
+		<input type="hidden" name="eventID" value="{{ event.id }}" />
+		{%- endif %}
+
+		<p class="submit"><input type="submit" class="button-primary" value="{{ editing ? 'Edit Event' : 'Add Event' }}"></p>
 	</form>
 {% endblock content %}

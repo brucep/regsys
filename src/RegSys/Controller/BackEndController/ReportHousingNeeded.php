@@ -1,10 +1,23 @@
 <?php
 
-$dancers = $event->dancers_where(array(':housing_type' => 1));
+namespace RegSys\Controller\BackEndController;
 
-echo self::render_template('report-housing.html', array(
-	'event'         => $event,
-	'dancers'       => $dancers,
-	'housing_count' => count($dancers),
-	'housing_type'  => 'Housing Needed',
-	'housing_href'  => 'housing_needed'));
+class ReportHousingNeeded extends \RegSys\Controller\BackEndController
+{	
+	public function getContext()
+	{
+		$dancers = $this->event->dancersWhere(array(':housingType' => 0));
+		
+		return array(
+			'dancers'      => $dancers,
+			'housingCount' => count($dancers),
+			'housingType'  => 'Housing Needed',
+			'housingHref'  => 'housingNeeded',			
+			);
+	}
+	
+	public function render(array $context)
+	{
+		return parent::render($context, 'ReportHousing.html');
+	}
+}

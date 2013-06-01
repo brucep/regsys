@@ -1,0 +1,58 @@
+{% extends 'Admin.html' %}
+
+{% import 'Admin.html' as form %}
+
+{% block content %}
+	{% if editing -%}
+	<h2>Edit Housing Info for {{ dancer.name }}
+		<a class="delete" href="{{ requestHref ~ 'AdminDancerHousingDelete' ~ '&dancerID=' ~ dancer.id }}">Delete Housing Info</a>
+	</h2>
+	{% if POST and not hasErrors() %}{{ form.message('Housing info updated.') }}{% endif %}
+	{%- else -%}
+	<h2>Add Housing Info for {{ dancer.name }}</h2>
+	{%- endif %}
+
+	<form action="{{ requestHref ~ 'AdminDancerHousing' ~ '&dancerID=' ~ dancer.id }}" method="post">
+		<h3>Housing</h3>
+
+		<table class="form-table">
+		<tbody>
+			{{- form.radios('Housing Type', 'housingType', [
+				{'label': 'Housing Needed',   'value': 0, 'parameters': {'id': 'regsys-housingNeeded'}},
+				{'label': 'Housing Provider', 'value': 1, 'parameters': {'id': 'regsys-housingProvider'}},
+				]) }}
+
+			{{- form.radios('I prefer to house:', 'housingGender', [
+				{'label': 'Boys and/or Girls', 'value': 3},
+				{'label': 'Boys only',         'value': 1},
+				{'label': 'Girls only',        'value': 2},
+				]) }}
+
+			{{- form.radios('Bedtime preference:', 'housingBedtime', [
+				{'label': 'No Preference', 'value': 0},
+				{'label': 'Early Bird',    'value': 1},
+				{'label': 'Night Owl',     'value': 2},
+				]) }}
+
+			{{- form.checkbox('Pets', 'housingPets', 'Prefer no pets (Needed) / Has pets (Provider)') }}
+
+			{{- form.checkbox('Smoke', 'housingSmoke', 'Prefer no smoking (Needed) / Has smoking (Provider)') }}
+
+			{{- form.text('Spots Available', 'housingSpotsAvailable', 'Housing Provider only') }}
+			
+			{{- form.text('From Scene', 'housingFromScene', 'Housing Needed only') }}
+
+			{{- form.text('Nights', 'housingNights', 'Example: Friday,Saturday,Sunday') }}
+
+			{{- form.textarea('Comment', 'housingComment') }}
+		</tbody>
+		</table>
+
+		<p class="submit">
+			<input type="submit" class="button-primary" value="{{ editing ? 'Edit Housing Info' : 'Add Housing Info' }}">
+			{% if editing -%}
+			<a style="margin-left: 2em" href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id  }}">Back to Dancer Report</a>
+			{%- endif %}
+		</p>
+	</form>
+{% endblock content %}

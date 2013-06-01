@@ -1,47 +1,55 @@
-{% extends 'admin.html' %}
+{% extends 'Admin.html' %}
+
+{% import 'Admin.html' as form %}
 
 {% block content %}
+	{%- if editing %}
 	<h2>Edit Dancer
-		<a class="delete" href="{{ request_href ~ 'admin_dancer_delete' ~ '&dancer_id=' ~ dancer.id }}">Delete Dancer</a>
+		<a class="delete" href="{{ requestHref ~ 'AdminDancerDelete' ~ '&dancerID=' ~ dancer.id }}">Delete Dancer</a>
 	</h2>
+	{% if POST and not hasErrors() %}{{ form.message('Dancer updated.') }}{% endif %}
+	{%- else %}
+	<h2>Add New Dancer</h2>
+	{%- endif %}
 
-	{% if validation.did_validate %}{{ form.message('Dancer updated.') | raw }}{% else %}{{ validation.get_errors | raw }}{% endif %}
-
-	<form action="{{ request_href ~ 'admin_dancer_edit' ~ '&dancer_id=' ~ dancer.id }}" method="post">
+	<form action="{{ requestHref ~ 'AdminDancer' }}{% if editing %}&dancerID={{ dancer.id }}{% else %}&new{% endif %}" method="post">
 		<h3>Dancer Information</h3>
 
 		<table class="form-table">
-			{{ form.row_text('First Name',   'first_name',   null, {'class': 'regular-text'}) | raw }}
-			{{ form.row_text('Last Name',    'last_name',    null, {'class': 'regular-text'}) | raw }}
-			{{ form.row_text('Email',        'email',        null, {'class': 'regular-text'}) | raw }}
-			{{ form.row_text('Mobile Phone', 'mobile_phone', null, {'class': 'regular-text'}) | raw }}
+		<tbody>
+			{{- form.text('First Name',   'firstName') }}
+			{{- form.text('Last Name',    'lastName') }}
+			{{- form.text('Email',        'email') }}
+			{{- form.text('Mobile Phone', 'phone') }}
 
-			{{ form.row_radio('Position', 'position', [
-				{ 'label': 'Lead',   'checked': (dancer.position == 'Lead'),   'value': 1, 'default': true },
-				{ 'label': 'Follow', 'checked': (dancer.position == 'Follow'), 'value': 2 },
-				]) | raw }}
+			{{- form.radios('Position', 'position', [
+				{'label': 'Lead',   'value': 1, 'default': true},
+				{'label': 'Follow', 'value': 2},
+				]) }}
 
-{% if event.has_levels %}
-			{{ form.row_select('Level', 'level_id', event.levels_keyed_by_id) | raw }}
-{% endif %}
+			{% if event.hasLevels -%}
+			{{- form.radios('Level', 'levelID', event.levelsForRegistrationForm) }}
+			{%- endif %}
 
-			{{ form.row_radio('Status', 'status', [
-				{ 'label': 'None',      'value': 0, 'default': true },
-				{ 'label': 'Volunteer', 'value': 1, 'checked': (dancer.is_volunteer) },
-				{ 'label': 'VIP',       'value': 2, 'checked': (dancer.is_vip) },
-				]) | raw }}
+			{% if event.hasVolunteers -%}
+			{{- form.checkbox('Volunteer?', 'volunteer', 'Dancer is interested in volunteering.') }}
+			{%- endif %}
 			
-			{{ form.row_text('Date Registered', 'date_registered', null, {'class': 'regular-text'}) | raw }}
+			{{- form.text('Date Registered', 'dateRegistered', '', editing ? (dancer.dateRegistered ? dancer.dateRegistered | date() : '') : 'now' | date) }}
 
-			{{ form.row_radio('Payment Method', 'payment_method', [
-				{ 'label': 'Mail',   'checked': (dancer.payment_method == 'Mail'),   'value': 'Mail', 'default': true },
-				{ 'label': 'PayPal', 'checked': (dancer.payment_method == 'PayPal'), 'value': 'PayPal' },
-				]) | raw }}
+			{{- form.radios('Payment Method', 'paymentMethod', [
+				{'label': 'Mail',   'value': 'Mail', 'default': true},
+				{'label': 'PayPal', 'value': 'PayPal'},
+				]) }}
+		</tbody>
 		</table>
 
+		<input type="hidden" name="eventID" value="{{ event.id }}" />
+		{%- if editing %}{{ "\n\t\t" }}<input type="hidden" name="dancerID" value="{{ dancer.id }}" />{% endif %}
+
 		<p class="submit">
-			<input type="submit" class="button-primary" value="Edit Dancer">
-			<a style="margin-left: 2em" href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id  }}">Back to Dancer Report</a>
+			<input type="submit" class="button-primary" value="{{ editing ? 'Edit Dancer' : 'Add Dancer' }}">
+			{% if editing %}<a style="margin-left: 2em" href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id  }}">Back to Dancer Report</a>{% endif %}
 		</p>
 	</form>
 {% endblock content %}

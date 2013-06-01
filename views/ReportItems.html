@@ -1,0 +1,42 @@
+{% extends 'Report.html' %}
+
+{% from 'Admin.html' import message as message %}
+
+{% block content %}
+	<h3>Items
+		{%- if admin %}
+		<a class="button" href="{{ requestHref ~ 'AdminItem' ~ '&new' }}">Add New Item</a>
+		{%- endif %}
+	</h3>
+	
+
+	{%- if items %}
+	<table class="widefat page fixed report">
+		<thead>
+			<tr>
+				<th class="manage-column column-title">Name</th>
+				<th class="manage-column">Price for Preregistration</th>
+				<th class="manage-column">Price at the Door</th>
+				{% if admin %}
+				<th class="manage-column ellipsis" width="9%">Edit Item</th>
+				{% endif %}
+			</tr>
+		</thead>
+
+		<tbody>
+			{%- for item in items %}
+			<tr class="{{ cycle(['', 'alternate'], loop.index) }}">
+				<td class="column-title">{{ item.name }}</a></td>
+				<td>${{ item.pricePrereg }}</td>
+				<td>${{ item.priceDoor }}</td>
+				{%- if admin %}
+				<td><a href="{{ requestHref ~ 'AdminItem' ~ '&itemID=' ~ item.id }}">Edit Item</a></td>
+				{%- endif %}
+			</tr>{% if not loop.last %}{{ "\n\n" }}{% else %}{{ "\n" }}{% endif %}
+			{%- endfor %}
+		</tbody>
+	</table>
+	{%- else %}
+	<p>No items have been created yet.<p>
+	{%- endif %}
+{% endblock content %}

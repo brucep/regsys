@@ -1,27 +1,26 @@
-{% extends 'report.html' %}
+{% extends 'Report.html' %}
 
 {% block content %}
 	<h3>Money <span style="float: right; font-weight: bold;">Total: {{ '$%.2f' | format(total) }}</span></h3>
 
 	<style type="text/css">
-		#reg-sys .total { text-align: right; }
+		#regsys .total { text-align: right; }
 	</style>
 
-{%- for payment_method, dancers in groups %}
-
-
-	<h4 style="margin-top: 2em">{{ payment_method }}</h4>
+	{% for paymentMethod, dancers in groups -%}
+	<h4 style="margin-top: 2em">{{ paymentMethod }}</h4>
 
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
 				<th class="manage-column column-title" width="19%">Name</th>
-{% 	for item in items %}
+				{% for item in event.items -%}
 				<th class="manage-column">{{ item.name }}</th>
-{% 	endfor %}
-{% 	if payment_method == 'PayPal' %}
+				{% endfor %}
+				{% if paymentMethod == 'PayPal' -%}
 				<th class="manage-column" width="7%">Fee</th>
-{% 	endif %}
+				{%- endif %}
+
 				<th class="manage-column total" width="9%">Total</th>
 			</tr>
 		</thead>
@@ -29,49 +28,53 @@
 		<tfoot>
 			<tr>
 				<th class="manage-column column-title">Name</th>
-{% 	for item in items %}
+				{% for item in event.items -%}
 				<th class="manage-column">{{ item.name }}</th>
-{% 	endfor %}
-{% 	if payment_method == 'PayPal' %}
+				{% endfor %}
+				{% if paymentMethod == 'PayPal' -%}
 				<th class="manage-column">Fee</th>
-{% 	endif %}
+				{%- endif %}
+
 				<th class="manage-column total">Total</th>
 			</tr>
 		</tfoot>
 
 		<tbody>
-{% 	set fee_total = 0 %}
-{% 	for dancer in dancers if dancer.price_total %}
+			{%- set feeTotal = 0 %}
+			{% for dancer in dancers -%}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
-				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}</a></td>
-{% 		for item in items %}
-				<td>{% set price = attribute(dancer, 'price_for_registered_item', [item.id]) %}{% if price %}{{ '$%d' | format(price) }}{% endif %}</td>
-{% 		endfor %}
-{% 	if payment_method == 'PayPal' %}
-				<td>{% if dancer.paypal_fee %}{{ '$%.2f' | format(dancer.paypal_fee) }}{% set fee_total = fee_total + dancer.paypal_fee %}{% endif %}</td>				
-				<td class="total">{{ '$%.2f' | format(dancer.price_total + dancer.paypal_fee) }}</td>
-{% 	else %}
-				<td class="total">{{ '$%d' | format(dancer.price_total) }}</td>
-{% 	endif %}
-				
-			</tr>
+				<td class="column-title"><a href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id }}">{{ dancer.nameReversed }}</a></td>
+				{% for item in event.items -%}
+				<td>{% set price = dancer.registeredItems[item.id].registeredPrice %}{% if price %}{{ '$%d' | format(price) }}{% endif %}</td>
+				{%- endfor %}
 
-{% 	endfor %}
+				{% if paymentMethod == 'PayPal' -%}
+				<td>{% if dancer.paypalFee %}{{ '$%.2f' | format(dancer.paypalFee) }}{% set feeTotal = feeTotal + dancer.paypalFee %}{% endif %}</td>				
+				<td class="total">{{ '$%.2f' | format(dancer.priceTotal + dancer.paypalFee) }}</td>
+				{%- else -%}
+				<td class="total">{{ '$%d' | format(dancer.priceTotal) }}</td>
+				{%- endif %}
+
+			</tr>
+			{%- endfor %}
+
 			<tr style="background-color: rgba(0, 255, 0, 0.1);">
 				<td class="column-title"><strong>Total<strong></td>
-{% 	for item in items %}
-				<td>{{ '$%d' | format(attribute(item, 'total_money_from_registrations', [payment_method])) }}</td>
-{% 	endfor %}
-{% 	if payment_method == 'PayPal' %}
-				<td>{{ '$%.2f' | format(fee_total) }}</td>
-				<td class="total">{{ '$%.2f' | format(attribute(event, 'total_money_from_registrations', [payment_method]) + fee_total) }}</td>
-{% 	else %}
-				<td class="total">{{ '$%d' | format(attribute(event, 'total_money_from_registrations', [payment_method])) }}</td>
-{% 	endif %}
+				{% for item in event.items -%}
+				<td>{{ '$%d' | format(attribute(item, 'totalMoneyFromRegistrations', [paymentMethod])) }}</td>
+				{% 	endfor %}
+
+				{% if paymentMethod == 'PayPal' -%}
+				<td>{{ '$%.2f' | format(feeTotal) }}</td>
+				<td class="total">{{ '$%.2f' | format(attribute(event, 'totalMoneyFromRegistrations', [paymentMethod]) + feeTotal) }}</td>
+				{%- else -%}
+				<td class="total">{{ '$%d' | format(attribute(event, 'totalMoneyFromRegistrations', [paymentMethod])) }}</td>
+				{%- endif %}
 			</tr>
 		</tbody>
 	</table>
-{%- else %}
+	{%- else -%}
 	<p>There are no registered dancers for this event.</p>
-{% endfor %}
+	{%- endfor %}
+
 {% endblock content %}

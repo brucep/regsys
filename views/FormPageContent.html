@@ -1,11 +1,11 @@
-{% extends 'form.html' %}
+{% extends 'Form.html' %}
 
-{% block id %}reg-sys-form-info{% endblock %}
+{% block id %}regsys-form{% endblock %}
 
 {% block title %}Register for {{ event.name }}{% endblock %}
 
 {% block content %}
-			<div class="entry-content">
-				{{ the_content | raw }}
-			</div>
+	<div class="entry-content">
+		{{ the_content | raw }}
+	</div>
 {% endblock %}

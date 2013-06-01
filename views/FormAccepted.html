@@ -1,32 +1,34 @@
-{% extends 'form.html' %}
+{% extends 'Form.html' %}
 
-{% block id %}reg-sys-form-accepted{% endblock %}
+{% block id %}regsys-accepted{% endblock %}
 
 {% block title %}Registration Accepted for {{ event.name }}{% endblock %}
 
 {% block content %}
-			<div{% if vip %} class="vip"{% endif %}>
-				<p>Your registration has been recorded.{% if dancer.price_total == 0 %} (Your total cost was $0, so no payment is required.){% endif %}</p>
+	<div>
+		<p>Your registration has been recorded.</p>
 
-{% if dancer.price_total > 0 %}
-{% 	if dancer.payment_method == 'PayPal' %}
-				<p>Use the button below to pay via PayPal. (A PayPal link has also been included in your confirmation email.)</p>
+		{% if dancer.priceTotal == 0 -%}
+		<p>Your total cost was $0, so no payment is required.</p>
+		{%- else -%}
+		{% if dancer.paymentMethod == 'PayPal' -%}
+		<p>Use the button below to pay via PayPal. (A PayPal link has also been included in your confirmation email.)</p>
 
-				<a href="{{ dancer.paypal_href }}"><img src="https://www.paypal.com/en_US/i/btn/x-click-but6.gif" alt="Send payment via PayPal" style="display: block; margin: 1.5em auto;"></a>
-{% 	elseif dancer.payment_method == 'Mail' %}
-				<p>Please mail your check for <strong>${{ dancer.price_total }}</strong> (made out to <em>{{ options.payable_to }}</em>), along with your name and email address, to:</p>
-				<p style="font-weight: bold;">{{ options.mailing_address | nl2br }}</p>
+		<a href="{{ attribute(dancer, 'paypalHref', [notifyUrl]) }}"><img src="https://www.paypal.com/en_US/i/btn/x-click-but6.gif" alt="Send payment via PayPal" style="display: block; margin: 1.5em auto;"></a>
+		{%- elseif dancer.paymentMethod == 'Mail' -%}
+		<p>Please mail your check for <strong>{{ '$' ~ dancer.priceTotal }}</strong> (made out to <em>{{ options.payableTo }}</em>), along with your name and email address, to:</p>
+		<p style="font-weight: bold;">{{ options.mailingAddress | nl2br }}</p>
 
-				<p>(Note that checks are processed in batches, so there will be a delay in cashing your check after it is received.)</p>
-{% 	endif %}
-				<p>Your payment must be {{ dancer.payment_method == 'Mail' ? 'postmarked' : 'received in full' }} by {{ dancer.date_postmark_by | date('F jS') }}.
-				If payment is not received on time you will forfeit your registration. You will have to register again &mdash; with the going price and subject to availability &mdash; to secure your reservation.</p>
+		<p>(Note that checks are processed in batches, so there will be a delay in cashing your check after it is received.)</p>
+		{%- endif %}
+		<p>Your payment must be {{ dancer.paymentMethod == 'Mail' ? 'postmarked' : 'received in full' }} by {{ dancer.datePostmarkBy | date('F jS') }}.
+		If payment is not received on time you will forfeit your registration. You will have to register again &mdash; with the going price and subject to availability &mdash; to secure your reservation.</p>
 
-				<p>Refunds are available until {{ event.date_refund_end | date('F jS') }} at the discretion of {{ options.payable_to }}.</p>
-{% endif %}
+		<p>Refunds are available until {{ event.dateRefund | date('F jS') }} at the discretion of {{ options.payableTo }}.</p>
+		{%- endif %}
 
-{% if confirmation_email_failed %}
-				<p style="background-color: #fcc;">Your registration has been recorded, but it appears that your confirmation email failed to send. If you would like, you may email {{ '<a href="mailto:%1$s">%1$s</a>' | format(options.reply_to ? options.reply_to : options.email_from) | raw }} to request that your confirmation email be re-sent.<br><br>Reason: {{ confirmation_email_failed.message }}</p>
-{% endif %}
-			</div>
+		{% if confirmationEmailFailed -%}
+		<p style="background-color: #fcc; padding: 0.5em;">Your registration has been recorded, but it appears that your confirmation email failed to send. If you would like, you may email {{ '<a href="mailto:%1$s">%1$s</a>' | format(options.emailReplyTo ? options.emailReplyTo : options.emailFrom) | raw }} to request that your confirmation email be re-sent.<br><br>Reason: <span style="font-family: monospace; font-size: 1.2em">{{ confirmationEmailFailed.message }}</span></p>
+		{%- endif %}
+	</div>
 {% endblock %}

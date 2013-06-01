@@ -1,3 +1,11 @@
 <?php
 
-echo self::render_template('report-index-event.html', array('event' => $event));
+namespace RegSys\Controller\BackEndController;
+
+class ReportIndexEvent extends \RegSys\Controller\BackEndController
+{	
+	public function getContext()
+	{
+		return array();
+	}
+}

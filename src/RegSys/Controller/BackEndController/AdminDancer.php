@@ -1,72 +1,50 @@
 <?php
 
-$validation = new RegistrationSystem_Form_Validation;
+namespace RegSys\Controller\BackEndController;
 
-if (!empty($_POST)) {
-	$validation->add_rules(array(
-		'first_name'      => 'trim|required|max_length[100]|ucfirst',
-		'last_name'       => 'trim|required|max_length[100]|ucfirst',
-		'email'           => 'trim|valid_email|max_length[100]', # TODO: Update RegistrationSystem::validate_*
-		'mobile_phone'    => 'trim|required|max_length[30]',
-		'position'        => 'intval|in[1,2]',
-		'payment_method'  => 'in[Mail,PayPal]',
-		'date_registered' => 'required|strtotime',
-		));
-	
-	if ($event->has_levels()) {
-		$validation->add_rule('level_id', sprintf('intval|in[%s]', $event->levels_for_validation()));
-	}
-	else {
-		$_POST['level'] = 1;
-	}
-	
-	if ($validation->validate()) {
-		$database->query('UPDATE regsys_dancers SET first_name = ?, last_name = ?, email = ?, position = ?, level_id = ?, status = ?, date_registered = ?, payment_method = ?, mobile_phone = ? WHERE dancer_id = ?;', array(
-			@$_POST['first_name'],
-			@$_POST['last_name'],
-			@$_POST['email'],
-			@$_POST['position'],
-			@$_POST['level_id'],
-			@$_POST['status'],
-			@$_POST['date_registered'],
-			@$_POST['payment_method'],
-			@$_POST['mobile_phone'],
-			$dancer->id()));
-		
-		$dancer = $event->dancer_by_id($dancer->id());
-	}
-}
-else {
-	# Put values into POST so that form is pre-populated.
-	$reflection = new ReflectionObject($dancer);
-	
-	if (version_compare(PHP_VERSION, '5.3', '>=')) {
-		foreach ($reflection->getProperties() as $property) {
-				$property->setAccessible(true);
-				$_POST[$property->getName()] = $property->getValue($dancer);
+class AdminDancer extends \RegSys\Controller\BackEndController
+{
+	public function getContext()
+	{
+		if (isset($_GET['new'])) {
+			$dancer = new \RegSys\Entity\Dancer();
+			$editing = false;
 		}
-	}
-	else {
-		$temp = (array) $dancer;
+		else {
+			$dancer = $this->getRequestedDancer();
+			$editing = true;
+		}
 		
-		foreach ($reflection->getProperties() as $property) {
-			if (isset($temp[$property->getName()])) {
-				$_POST[$property->getName()] = $temp[$property->getName()];
+		if (!empty($_POST)) {
+			$dancer = new \RegSys\Entity\Dancer($_POST);
+			$validationErrors = $dancer->validate($this->event, true);
+			
+			if (!$validationErrors) {
+				if (!$editing) {
+					$dancer->add($this->event->id());
+					$editing = true;
+				}
+				else {
+					$this->db->query('UPDATE regsys__dancers SET firstName = ?, lastName = ?, email = ?, position = ?, levelID = ?, volunteer = ?, dateRegistered = ?, paymentMethod = ?, phone = ? WHERE dancerID = ?;', array(
+						$dancer->firstName(),
+						$dancer->lastName(),
+						$dancer->email(),
+						$dancer->position(),
+						$dancer->levelID(),
+						$dancer->volunteer(),
+						$dancer->dateRegistered(),
+						$dancer->paymentMethod(),
+						$dancer->phone(),
+						$dancer->id()));
+				}
 			}
 			else {
-				$_POST[$property->getName()] = $temp["\0RegistrationSystem_Model_Dancer\0" . $property->getName()];
+				$this->viewHelper->setErrors($validationErrors);
 			}
 		}
 		
-		unset($temp);
+		$this->viewHelper->setThing($dancer);
+		
+		return array('dancer' => $dancer, 'editing' => $editing);
 	}
 }
-
-if (isset($_POST['date_registered']) and is_numeric($_POST['date_registered'])) {
-	$_POST['date_registered'] = date('Y-m-d h:i A', $_POST['date_registered']);
-}
-
-echo self::render_template('admin-dancer-edit.html', array(
-	'event'      => $event,
-	'dancer'     => $dancer,
-	'validation' => $validation));

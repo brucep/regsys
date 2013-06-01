@@ -1,21 +1,21 @@
 <?php
 
-if (isset($_GET['vip_only']) and $_GET['vip_only'] == 'true') {
-	$dancers = $event->dancers_where(array(':status' => 2));
-}
-else {
-	$dancers = $event->dancers_where(array(':status' => 2), false); # false = not equal to 2
-}
+namespace RegSys\Controller\BackEndController;
 
-if (!empty($_POST)) {
-	foreach ($dancers as $dancer) {
-		$dancer->update_payment_confirmation(
-			(int) isset($_POST['payment_confirmed'][$dancer->id()]),
-			(int) isset($_POST['payment_owed'][$dancer->id()]) ? $_POST['payment_owed'][$dancer->id()] : $dancer->payment_owed());
+class ReportRegistrationList extends \RegSys\Controller\BackEndController
+{	
+	public function getContext()
+	{
+		$dancers = $this->event->dancers();
+		
+		if (!empty($_POST)) {
+			foreach ($dancers as $dancer) {
+				$dancer->updatePaymentConfirmation(
+					(int) isset($_POST['paymentConfirmed'][$dancer->id()]),
+					(int) isset($_POST['paymentOwed'][$dancer->id()]) ? $_POST['paymentOwed'][$dancer->id()] : $dancer->paymentOwed());
+			}
+		}
+		
+		return array('dancers' => $dancers);
 	}
 }
-
-echo self::render_template('report-reg-list.html', array(
-	'event'   => $event,
-	'items'   => $event->items(),
-	'dancers' => $dancers));

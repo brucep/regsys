@@ -1,0 +1,11 @@
+{
+	"require": {
+		"twig/twig": "1.*",
+		"pimple/pimple": "1.0.*@dev",
+		"swiftmailer/swiftmailer": "4.3.*"
+	},
+	"prefer-stable": true,
+	"autoload": {
+		"psr-0": {"RegSys": "src/"}
+	}
+}

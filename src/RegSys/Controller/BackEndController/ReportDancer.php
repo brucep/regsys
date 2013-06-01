@@ -1,5 +1,11 @@
 <?php
 
-echo self::render_template('report-dancer.html', array(
-	'event'  => $event,
-	'dancer' => $dancer));
+namespace RegSys\Controller\BackEndController;
+
+class ReportDancer extends \RegSys\Controller\BackEndController
+{	
+	public function getContext()
+	{
+		return array('dancer' => $this->getRequestedDancer(), 'notifyUrl' => $this->container['notifyUrl']);
+	}
+}

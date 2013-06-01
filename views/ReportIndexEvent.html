@@ -1,32 +1,27 @@
-{% from 'admin.html' import message as message %}
-
-<div id="reg-sys" class="wrap">
-<div id="report_index_event">
+<div id="regsys" class="wrap">
+<div id="ReportIndexEvent">
 	<h2>Reports for {{ event.name }}</h2>
-	{%- if GET.deleted_dancer %}{{ "\n\t\t" }}{{ message('Deleted %s.' | format(GET.deleted_dancer), 'error') }}{% endif %}
 
 	<h3>Choose Report</h3>
 
 	<ul style="font-weight: bold">
-		<li><a href="{{ request_href ~ 'report_numbers' }}">Attendance&nbsp;/&nbsp;Numbers</a></li>
-		<li><a href="{{ request_href ~ 'report_competitions' }}">Competitions</a></li>
-		<li><a href="{{ request_href ~ 'report_dancers' }}">Dancers</a></li>
-{% if event.has_housing_support %}
-		<li><a href="{{ request_href ~ 'report_housing_needed' }}">Housing Needed</a></li>
-		<li><a href="{{ request_href ~ 'report_housing_providers' }}">Housing Providers</a></li>
-{% endif %}
-{% if event.has_discounts %}
-		<li><a href="{{ request_href ~ 'report_discounts' }}">Discounts</a></li>
-{% endif %}
-		<li><a href="{{ request_href ~ 'report_money' }}">Money</a></li>
-		<li><a href="{{ request_href ~ 'report_packet_printout' }}">Packet Printout</a></li>
-		<li><a href="{{ request_href ~ 'report_reg_list' }}">Registration List</a></li>
-{% if event.has_vip %}
-		<li><a href="{{ request_href ~ 'report_reg_list' ~ '&vip_only=true' }}">VIP Payment Confirmation</a></li>
-{% endif %}
-{% if event.has_volunteers %}
-		<li><a href="{{ request_href ~ 'report_volunteers' }}">Volunteers</a></li>
-{% endif %}
+		<li><a href="{{ requestHref ~ 'ReportItems' }}">Items</a></li>
+		<li><a href="{{ requestHref ~ 'ReportNumbers' }}">Attendance&nbsp;/&nbsp;Numbers</a></li>
+		<li><a href="{{ requestHref ~ 'ReportCompetitions' }}">Competitions</a></li>
+		<li><a href="{{ requestHref ~ 'ReportDancers' }}">Dancers</a></li>
+		{%- if event.hasHousingSupport %}
+		<li><a href="{{ requestHref ~ 'ReportHousingNeeded' }}">Housing Needed</a></li>
+		<li><a href="{{ requestHref ~ 'ReportHousingproviders' }}">Housing Providers</a></li>
+		{%- endif %}
+		{%- if event.hasDiscounts %}
+		<li><a href="{{ requestHref ~ 'ReportDiscounts' }}">Discounts</a></li>
+		{%- endif %}
+		<li><a href="{{ requestHref ~ 'ReportMoney' }}">Money</a></li>
+		<li><a href="{{ requestHref ~ 'ReportPacketPrintout' }}">Packet Printout</a></li>
+		<li><a href="{{ requestHref ~ 'ReportRegistrationList' }}">Registration List</a></li>
+		{%- if event.hasVolunteers %}
+		<li><a href="{{ requestHref ~ 'ReportVolunteers' }}">Volunteers</a></li>
+		{%- endif %}
 	</ul>
 </div>
 </div>

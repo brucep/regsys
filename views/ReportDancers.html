@@ -1,13 +1,19 @@
-{% extends 'report.html' %}
+{% extends 'Report.html' %}
+
+{% from 'Admin.html' import message as message %}
 
 {% block content %}
 	<h3>Dancers
-{% if dancers %}
-		<a class="button" href="{{ request_href ~ 'report_download_csv' ~ '&noheader=true&data=dancers' }}">Download Email Addresses</a>
-{% endif %}
+		{%- if dancers %}
+		<a class="button" href="{{ requestHref ~ 'DownloadCSV' ~ '&noheader=true&data=dancers' }}">Download Email Addresses</a>
+		{%- endif %}
+		{%- if admin %}
+		<a href="{{ requestHref ~ 'AdminDancer' ~ '&new' }}" class="button">Add New Dancer</a>
+		{%- endif %}
 	</h3>
+	{%- if GET.deleted %}{{ "\n\t" }}{{ message('Deleted %s.' | format(GET.deleted), 'error') }}{% endif %}
 
-{% if dancers %}
+	{% if dancers -%}
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
@@ -32,19 +38,21 @@
 		</tfoot>
 
 		<tbody>
-{% for dancer in dancers %}
+			{% for dancer in dancers -%}
 			<tr class="vcard {{- cycle(['', ' alternate'], loop.index) }}">
-				<td class="column-title"><a class="n" href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}"><span class="family-name">{{ dancer.last_name }}</span>, <span class="given-name">{{ dancer.first_name }}</span></a>{% if dancer.is_vip %} [VIP]{% endif %}</td>
+				<td class="column-title"><a class="n" href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id }}"><span class="family-name">{{ dancer.lastName }}</span>, <span class="given-name">{{ dancer.firstName }}</span></a></td>
 				<td><a href="{{ dancer.mailto }}"><span class="email">{{ dancer.email }}</span></a></td>
-				<td>{{ dancer.mobile_phone }}</td>
-				<td>{{ dancer.position }}</td>
+				<td>{{ dancer.phone }}</td>
+				<td>{{ dancer.positionLabel }}</td>
 				<td class="ellipsis">{{ dancer.level }}</td>
-				<td class="date">{{ dancer.date_registered | date }}</td>
+				<td class="date">{{ dancer.dateRegistered | date }}</td>
 			</tr>
-{% endfor %}
+			{%- endfor %}
+
 		</tbody>
 	</table>
-{% else %}
+	{%- else -%}
 	<p>There are no registered dancers for this event.<p>
-{% endif %}
+	{%- endif %}
+
 {% endblock content %}

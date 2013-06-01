@@ -1,5 +1,11 @@
 <?php
 
-echo self::render_template('report-volunteers.html', array(
-	'event'      => $event,
-	'volunteers' => $event->dancers_where(array(':status' => 1))));
+namespace RegSys\Controller\BackEndController;
+
+class ReportVolunteers extends \RegSys\Controller\BackEndController
+{	
+	public function getContext()
+	{
+		return array('volunteers' => $this->event->dancersWhere(array(':volunteer' => 1)));
+	}
+}

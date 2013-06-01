@@ -1,63 +1,67 @@
-{% extends 'report.html' %}
+{% extends 'Report.html' %}
 
 {% block content %}
 	<h3>Competitions
-{% if items %}
-		<a class="button" href="{{ request_href ~ 'report_download_csv' ~ '&noheader=true&data=competitions' }}">Download Email Addresses</a>
-{% endif %}
+		{% if items -%}
+		<a class="button" href="{{ requestHref ~ 'report_download_csv' ~ '&noheader=true&data=competitions' }}">Download Email Addresses</a>
+		{%- endif %}
+
 	</h3>
 
-{% for item in items %}
-
+	{% for item in items -%}
 	<h4>{{ item.name }}
-	{%- if item.meta != 'position' -%}
-		{{ ' (%d)' | format(item.count_registrations) }}
+	{%- if item.meta != 'Position' -%}
+		{{ ' (%d)' | format(item.countRegistrations) }}
 	{%- else -%}
-		{{ ' (%s)' | format(item.registrations_by_position) }}
+		{{ pluralize('1 lead', '%d leads', attribute(item, 'countOpenings', ['lead'])) }}, {{ pluralize('1 follow', '%d follows', attribute(item, 'countOpenings', ['follow'])) }}
 	{%- endif -%}
+
 	</h4>
+
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
 				<th class="manage-column column-title"><div>Name</div></th>
-{% if item.meta == 'position' %}
+				{% if item.meta == 'Position' -%}
 				<th class="manage-column"><div>Position</div></th>
-{% elseif item.meta == 'partner_name' %}
+				{%- elseif item.meta == 'Partner' -%}
 				<th class="manage-column"><div>Partner</div></th>
-{% elseif item.meta == 'team_members' %}
+				{%- elseif item.meta == 'Team Members' -%}
 				<th class="manage-column"><div>Team Members</div></th>
-{% endif %}
+				{%- endif %}
+
 			</tr>
 		</thead>
 
 		<tfoot>
 			<tr>
 				<th class="manage-column column-title"><div>Name</div></th>
-{% if item.meta == 'position' %}
+				{% if item.meta == 'Position' -%}
 				<th class="manage-column"><div>Position</div></th>
-{% elseif item.meta == 'partner_name' %}
+				{%- elseif item.meta == 'Partner' -%}
 				<th class="manage-column"><div>Partner</div></th>
-{% elseif item.meta == 'team_members' %}
+				{%- elseif item.meta == 'Team Members' -%}
 				<th class="manage-column"><div>Team Members</div></th>
-{% endif %}
+				{%- endif %}
 			</tr>
 		</tfoot>
 
 		<tbody>
-{% for dancer in item.registered_dancers %}
+			{% for dancer in item.registeredDancers -%}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
-				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name }}</a></td>
-{% if item.meta in ['position', 'partner_name', 'team_members'] %}
-				<td>{{ dancer.item_meta | title }}</td>
-{% endif %}
+				<td class="column-title"><a href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id }}">{{ dancer.name }}</a></td>
+				{% if item.meta in ['Position', 'Partner', 'Team Members'] -%}
+				<td>{{ dancer.itemMeta | title }}</td>
+				{%- endif %}
 			</tr>
-
-{% else %}
+			{%- else -%}
 			<tr><td {%- if item.meta %} colspan="2" {%- endif %}>There are no registered dancers for this competition.</td></tr>
-{% endfor %}
+			{%- endfor %}
+
 		</tbody>
 	</table>
-{% else %}
+	{%- else -%}
 	<p>There aren't any competitions for this event.</p>
-{% endfor %}
+	{%- endfor %}
+
 {% endblock content %}

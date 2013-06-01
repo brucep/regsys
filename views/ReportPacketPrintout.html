@@ -1,76 +1,63 @@
-{% extends 'report.html' %}
+{% extends 'Report.html' %}
 
 {% block content %}
 	<style type="text/css">
-		#reg-sys #report-packet-printout div.dancer span.paid-owed { float: right; }
+		#regsys #ReportPacketPrintout div.dancer span.paid-owed { float: right; }
 
 		@media screen {
-			#reg-sys #report-packet-printout div.dancer {
+			#regsys #ReportPacketPrintout div.dancer {
 				margin-bottom: 2em;
 				padding-bottom: 0.5em;
 				border-bottom: 1px dotted #000;
 			}
 		}
 		@media print {
-			#reg-sys #report-packet-printout h2 { display: none; }
-			#reg-sys #report-packet-printout h4 { font-size: 32pt !important; margin: 1em 0 2em; }
-			#reg-sys #report-packet-printout h5 { font-size: 16pt !important; }
-			#reg-sys #report-packet-printout ul { font-size: 16pt !important; }
-			#reg-sys #report-packet-printout div.dancer { page-break-after: always; }
-			#reg-sys #report-packet-printout div.dancer:nth-last-of-type(1) { page-break-after: avoid; }
+			#regsys #ReportPacketPrintout h2 { display: none; }
+			#regsys #ReportPacketPrintout h4 { font-size: 28pt !important; margin: 1em 0 2em; }
+			#regsys #ReportPacketPrintout h5 { font-size: 16pt !important; }
+			#regsys #ReportPacketPrintout ul { font-size: 16pt !important; }
+			#regsys #ReportPacketPrintout div.dancer { page-break-after: always; }
 		}
 	</style>
 
 	<h3 class="no-print" style="margin-bottom: 2em;">Packet Printouts</h3>
 
-{% for dancer in dancers %}
+	{% for dancer in dancers -%}
 	<div class="dancer">
-		<h4>{{ dancer.name_last_first }}
-{% if not dancer.is_vip %}
-			<span class="paid-owed">{% if dancer.payment_confirmed %}Paid &#x2714;{% else %}Owed: ${{ dancer.payment_owed }}{% endif %}</span>
-{% else %}
-			<span class="paid-owed">VIP</span>
-{% endif %}
+		<h4>{{ dancer.nameReversed }}
+		<span class="paid-owed">{% if dancer.paymentConfirmed %}Paid &#x2714;{% else %}Owed: ${{ dancer.paymentOwed }}{% endif %}</span>
 		</h4>
 
 		<h5>Personal Info</h5>
 		<ul>
-			<li>Position: {{ dancer.position }}</li>
-{% if event.has_levels %}
+			<li>Position: {{ dancer.positionLabel }}</li>
+			{% if event.hasLevels -%}
 			<li>Level: {{ dancer.level }}</li>
-{% endif %}
-{% if dancer.is_volunteer %}
+			{%- endif %}
+
+			{% if dancer.volunteer -%}
 			<li>Volunteer</li>
-{% endif %}
+			{%- endif %}
+
 		</ul>
 
 		<h5>Registrations</h5>
 		<ul>
-{% for item in dancer.registered_items %}
-			<li>{{ item.name }} {%- if item.registered_meta -%} {{ ' (%s)' | format(item.registered_meta) }} {%- endif %}</li>
-{% else %}
+			{% for item in dancer.registeredItems -%}
+			<li>{{ item.name }} {%- if item.registeredMeta %}{{ ' (%s)' | format(item.registeredMeta) }}{% endif %}</li>
+			{%- else -%}
 			<li>There are no registrations for this dancer.</li>
-{% endfor %}
+			{%- endfor %}
+
 		</ul>
 
-{%- if event.has_housing_support and dancer.needs_housing %}
+		{% if dancer.needsHousing -%}
+		<h5>{{ dancer.housingTypeLabel }}</h5>
+		{%- endif %}
 
-
-		<h5>{{ dancer.housing_type }}</h5>
-		<ul>
-{% if dancer.housing_prefers_no_smoke %}
-			<li>Prefers no smoking</li>
-{% endif %}
-{% if dancer.housing_prefers_no_pets %}
-			<li>Prefers no pets</li>
-{% endif %}
-			<li>{{ dancer.housing_gender }}</li>
-			<li>{{ dancer.housing_nights | join(', ') }}</li>
-		</ul>
-{% else %}{{ "\n" }}{% endif %}
 	</div>
-
-{% else %}
+	{% else -%}
 	<p>There are no registered dancers for this event.<p>
-{% endfor %}
+	{%- endfor %}
+
 {% endblock content %}

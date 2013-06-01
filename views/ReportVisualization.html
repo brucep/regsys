@@ -1,6 +1,6 @@
-<div id="reg-sys" class="wrap">
-<div id="report_index_visualization">
-	<h2>Registration Visualization</h2>
+<div id="regsys" class="wrap">
+<div id="ReportIndexVisualization">
+	<h2>Registration Visualization Chart</h2>
 
 	<!-- http://code.google.com/apis/ajax/playground/?type=visualization#line_chart -->
 	<!-- https://google-developers.appspot.com/chart/interactive/docs/gallery/linechart -->
@@ -11,7 +11,7 @@
 		jQuery(document).ready(function($) {
 			// Create and populate the data table.
 			var data = google.visualization.arrayToDataTable(
-				{{ registration_data | json_encode | raw }}
+				{{ registrationData | json_encode | raw }}
 			);
 
 			// Create and draw the visualization.
@@ -20,7 +20,8 @@
 					curveType: "none",
 					width:  850,
 					height: 500,
-					vAxis: {maxValue: 10},
+					vAxis: {maxValue: 10, title: 'Registered Dancers'},
+					hAxis: {title:'Date'},
 					colors: {{ colors | json_encode | raw }},
 					});
 		});
@@ -28,4 +29,4 @@
 
 	<div id="visualization"></div>
 </div>
-</div>
+</div> <!-- #regsys -->

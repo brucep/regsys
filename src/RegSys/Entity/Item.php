@@ -1,181 +1,85 @@
 <?php
 
-class RegistrationSystem_Model_Item extends RegistrationSystem_Model
+namespace RegSys\Entity;
+
+class Item extends \RegSys\Entity
 {
-	public  $name,
-	        $description,
-	        $meta,
-	        $registered_meta,
-	        $registered_price,
-	        $type;
+	protected $itemID,
+	          $eventID,
+	          $name,
+	          $countRegistrations,
+	          $countRegistrationsForVIPs,
+	          $countRegistrationsByPosition,
+	          $dateExpires,
+	          $description,
+	          $limitPerPosition,
+	          $limitTotal,
+	          $meta,
+	          $openings,
+	          $pricePrereg,
+	          $priceDoor,
+	          $priceForTier,
+	          $priceTier,
+	          $priceTiers,
+	          $registeredDancers,
+	          $registeredPrice,
+	          $registeredMeta,
+	          $type;
 	
-	private $event_id,
-	        $item_id,
-	        $count_registrations,
-	        $count_registrations_for_vips,
-	        $count_registrations_by_position,
-	        $date_expires,
-	        $limit_per_position,
-	        $limit_total,
-	        $openings,
-	        $preregistration,
-	        $price_prereg,
-	        $price_door,
-	        $price_scaled,
-	        $price_tier,
-	        $price_vip,
-	        $registered_dancers;
+	public function __construct(array $parameters = array())
+	{
+		foreach ($parameters as $key => $value) {
+			$this->$key = $value;
+		}
+	}
+	
+	public function __call($name, $arguments)
+	{
+		return isset($this->$name) ? $this->$name : null;
+	}
 		
 	public function __toString()
 	{
-		return sprintf('%s [#%d]', $this->name, $this->item_id);
+		return sprintf('%s [#%d]', $this->name, $this->itemID);
 	}
 	
-	public function id()
+	public function addRegistration($dancerID)
 	{
-		return (int) $this->item_id;
-	}
-	
-	public function date_expires()
-	{
-		return (int) $this->date_expires;
-	}
-	
-	public function limit_per_position()
-	{
-		return (int) $this->limit_per_position;
-	}
-	
-	public function limit_total()
-	{
-		return (int) $this->limit_total;
-	}
-	
-	public function meta_label()
-	{
-		switch ($this->meta) {
-			case 'position':
-				return 'Position';
-			
-			case 'partner_name':
-				return 'Partner';
-				
-			case 'team_members':
-				return 'Team Members';
-			
-			case 'size':
-				return 'Size';
-			
-			default:
-				return false;
-		}
-	}
-	
-	public function price_at_door()
-	{
-		return (int) $this->price_door;
-	}
-	
-	public function price_for_prereg($discount_amount = false)
-	{
-		if ($this->type != 'package') {
-			return (int) $this->price_prereg;
-		}
-		else {
-			if (!isset($this->price_scaled)) {
-				$number_dancers = self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_registrations AS r JOIN regsys_items AS i USING(item_id) JOIN regsys_dancers AS d USING(dancer_id) WHERE r.event_id = ? AND i.item_id = ? AND d.status != 2', array($this->event_id, $this->item_id));
-				
-				$this->price_scaled = self::$database->fetchColumn('SELECT scale_price FROM regsys_item_prices WHERE event_id = ? AND item_id = ? AND ? <= scale_count ORDER BY scale_count ASC LIMIT 1', array($this->event_id, $this->item_id, $number_dancers));
-			}
-			
-			$price = !empty($this->price_scaled) ? $this->price_scaled : $this->price_prereg;
-			
-			if ($discount_amount !== false) {
-				if ($discount_amount < 0) {
-					$price = $price - $discount_amount * -1; # Negative numbers for amount off
-				}
-				else {
-					$price = $discount_amount; # Zero or positive number for fixed price
-				}
-			}
-			
-			return (int) $price;
-		}
-	}
-	
-	public function price_for_vip()
-	{
-		return (int) $this->price_vip;
-	}
-	
-	public function price_tier()
-	{
-		if ($this->type != 'package') {
-			return false;
-		}
-		else {
-			if (!isset($this->price_tier)) {
-				$number_dancers = self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_registrations AS r JOIN regsys_items AS i USING(item_id) JOIN regsys_dancers AS d USING(dancer_id) WHERE r.event_id = ? AND i.item_id = ? AND d.status != 2', array($this->event_id, $this->item_id));
-				
-				$this->price_tier = (int) self::$database->fetchColumn('SELECT scale_count FROM regsys_item_prices WHERE event_id = ? AND item_id = ? AND ? < scale_count ORDER BY scale_count ASC LIMIT 1', array($this->event_id, $this->item_id, $number_dancers));
-			}
-			
-			return $this->price_tier;
-		}
-	}
-	
-	public function registered_dancers()
-	{
-		if (!isset($this->registered_dancers)) {
-			$order_by = ($this->meta != 'position') ? '' : 'item_meta DESC, ';
-			$order_by .= 'last_name ASC, first_name ASC';
-			
-			$this->registered_dancers = self::$database->fetchAll('SELECT d.*, r.item_meta FROM regsys_registrations AS r LEFT JOIN regsys_dancers AS d USING(dancer_id) WHERE r.event_id = ? AND item_id = ? ORDER BY ' . $order_by, array($this->event_id, $this->item_id), 'RegistrationSystem_Model_Dancer');
-		}
+		$result = self::$db->query('INSERT regsys__registrations VALUES (?, ?, ?, ?, DEFAULT, ?)', array(
+			$this->eventID,
+			$dancerID,
+			$this->itemID,
+			$this->registeredPrice,
+			$this->registeredMeta,
+			));
 		
-		return $this->registered_dancers;
+		return $result->rowCount();
 	}
 	
-	public function total_money_from_registrations($payment_method)
-	{
-		return self::$database->fetchColumn('SELECT SUM(price) FROM regsys_registrations AS r LEFT JOIN regsys_dancers USING (dancer_id) WHERE r.event_id = ? AND payment_method = ? AND item_id = ?', array($this->event_id, $payment_method, $this->item_id));
-	}
-	
-	public function is_expired()
-	{
-		return (!empty($this->date_expires) and time() > $this->date_expires);
-	}
-	
-	public function sizes()
-	{
-		return $this->type == 'shirt' ? explode(',', 'None,' . $this->description) : null;
-	}
-	
-	public function count_openings($position = false)
+	public function countOpenings($position = false)
 	{
 		if (!isset($this->openings)) {
-			if (!$this->limit_total and !$this->limit_per_position) {
+			if (!$this->limitTotal and !$this->limitPerPosition) {
 				$this->openings = true;
 			}
 			else {
-				if ($this->limit_total) {
-					$limit = $this->limit_total;
-					$number_dancers = $this->count_registrations_where(array(':item_id' => $this->item_id));
+				if ($this->limitTotal) {
+					$limit = $this->limitTotal;
+					$numberDancers = $this->countRegistrationsWhere(array(':itemID' => $this->itemID));
 				}
 				elseif ($position === false) {
-					$limit = $this->limit_per_position * 2;
-					return $limit - $this->count_registrations_where(array(':item_id' => $this->item_id));
+					$limit = $this->limitPerPosition * 2;
+					return $limit - $this->countRegistrationsWhere(array(':itemID' => $this->itemID));
 				}
 				else {
-					$limit = $this->limit_per_position;
-					$number_dancers = $this->count_registrations_where(array(':item_id' => $this->item_id, ':position' => $position), 'dancers');
+					$limit = $this->limitPerPosition;
+					$numberDancers = $this->countRegistrationsWhere(array(':itemID' => $this->itemID, ':position' => $position), 'dancers');
 				}
-			
-				if ($number_dancers !== false) {
-					$openings = (($limit - $number_dancers) > 0) ? $limit - $number_dancers : 0;
+				
+				if ($numberDancers !== false) {
+					$openings = (($limit - $numberDancers) > 0) ? $limit - $numberDancers : 0;
 				}
-				else
-				{
+				else {
 					# If there was an error communicating with the database, assume there are no more openings.
 					$openings = false;
 				}
@@ -191,82 +95,172 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		
 		return $this->openings;
 	}
-	
-	public function openings_by_position()
-	{
-		$leads   = $this->count_openings('lead');
-		$follows = $this->count_openings('follow');
 		
-		return sprintf('%1$d %3$s, %2$d %4$s',
-			$leads,
-			$follows,
-			_n('lead',   'leads',   $leads),
-			_n('follow', 'follows', $follows));
-	}
-	
-	public function count_registrations()
+	public function countRegistrations()
 	{
-		if (!isset($this->count_registrations)) {
-			$this->count_registrations = (int) self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_registrations WHERE item_id = ?', array($this->item_id));
+		if (!isset($this->countRegistrations)) {
+			$this->countRegistrations = (int) self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__registrations WHERE itemID = ?', array($this->itemID));
 		}
 		
-		return $this->count_registrations;
+		return $this->countRegistrations;
 	}
 	
-	public function count_registrations_for_vips() {
-		if (!isset($this->count_registrations_for_vips)) {
-			$this->count_registrations_for_vips = (int) self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_registrations LEFT JOIN regsys_dancers USING(dancer_id) WHERE item_id = ? AND status = 2', array($this->item_id));
-		}
-		
-		return $this->count_registrations_for_vips;
-	}
-	
-	public function count_registrations_by_position()
+	public function countRegistrationsByPaymentMethod($payment_method)
 	{
-		if (!isset($this->count_registrations_by_position)) {
-			$this->count_registrations_by_position = array();
+		return self::$db->fetchColumn('SELECT COUNT(dancerID) from regsys__registrations LEFT JOIN regsys__dancers USING (dancerID) WHERE price > 0 AND itemID = ? AND paymentMethod = ?', array($this->itemID, $payment_method));
+	}
+	
+	public function countRegistrationsByPosition()
+	{
+		if (!isset($this->countRegistrationsByPosition)) {
+			$this->countRegistrationsByPosition = array();
 			
 			foreach (array('leads' => 1, 'follows' => 2) as $key => $value) {
-				$result = (int) self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_registrations JOIN regsys_dancers USING(dancer_id) WHERE item_id = ? AND position = ?', array($this->item_id, $value));
+				$result = (int) self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__registrations JOIN regsys__dancers USING(dancerID) WHERE itemID = ? AND position = ?', array($this->itemID, $value));
 				
-				$this->count_registrations_by_position[$key] = $result;
+				$this->countRegistrationsByPosition[$key] = $result;
 			}
 		}
 		
-		return $this->count_registrations_by_position;
+		return $this->countRegistrationsByPosition;
 	}
 	
-	public function registrations_by_position()
+	public function countRegistrationsBySize($size)
 	{
-		$result = $this->count_registrations_by_position();
-		
-		return sprintf('%1$d %3$s, %2$d %4$s',
-			$result['leads'],
-			$result['follows'],
-			_n('lead',   'leads',   $result['leads']),
-			_n('follow', 'follows', $result['follows']));
+		return self::$db->fetchColumn('SELECT COUNT(dancerID) from regsys__registrations WHERE itemID = ? AND itemMeta = ?', array($this->itemID, $size));
 	}
 	
-	public function registration_price_numbers() {
-		$event = RegistrationSystem_Model_Event::get_event_by_id($this->event_id);
+	private function countRegistrationsWhere(array $where = array(), $join_dancers_table = false)
+	{
+		$where[':itemID'] = $this->itemID;
+		$query = array('r.eventID = :eventID');
+		
+		foreach ($where as $field => $value) {
+			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
+		}
+		
+		$query = ' WHERE ' . implode(' AND', $query);
+		$where[':eventID'] = $this->eventID;
+		
+		if ($join_dancers_table) {
+			$query = ' JOIN regsys__dancers USING(dancerID)' . $query;
+		}
+		
+		$result = self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__registrations AS r' . $query, $where);
+		return ($result !== false) ? (int) $result : false;
+	}
+	
+	public function id()
+	{
+		return (int) $this->itemID;
+	}
+	
+	public function isExpired()
+	{
+		return (!empty($this->dateExpires) and time() > $this->dateExpires);
+	}
+	
+	public function pricePreregPackage($discountAmount = null)
+	{
+		if ($this->type == 'package') {
+			if (!isset($this->priceForTier)) {
+				$numberDancers = self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__registrations AS r JOIN regsys__items AS i USING(itemID) JOIN regsys__dancers AS d USING(dancerID) WHERE r.eventID = ? AND i.itemID = ? AND d.volunteer != 2', array($this->eventID, $this->itemID));
+				
+				$this->priceForTier = self::$db->fetchColumn('SELECT tierPrice FROM regsys__item_prices WHERE eventID = ? AND itemID = ? AND ? <= tierCount ORDER BY tierCount ASC LIMIT 1', array($this->eventID, $this->itemID, $numberDancers));
+			}
+			
+			$price = !empty($this->priceForTier) ? $this->priceForTier : $this->pricePrereg;
+			
+			if ($discountAmount !== null) {
+				if ($discountAmount < 0) {
+					$price = $price - $discountAmount * -1; # Negative numbers for amount off
+				}
+				else {
+					$price = $discountAmount; # Zero or positive number for fixed price
+				}
+			}
+			
+			return (int) $price;
+		}
+		else {
+			return null;
+		}
+	}
+	
+	public function priceTier()
+	{
+		if ($this->type != 'package') {
+			return false;
+		}
+		else {
+			if (!isset($this->priceTier)) {
+				$numberDancers = self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__registrations AS r JOIN regsys__items AS i USING(itemID) JOIN regsys__dancers AS d USING(dancerID) WHERE r.eventID = ? AND i.itemID = ? AND d.volunteer != 2', array($this->eventID, $this->itemID));
+				
+				$this->priceTier = (int) self::$db->fetchColumn('SELECT tierCount FROM regsys__item_prices WHERE eventID = ? AND itemID = ? AND ? < tierCount ORDER BY tierCount ASC LIMIT 1', array($this->eventID, $this->itemID, $numberDancers));
+			}
+			
+			return $this->priceTier;
+		}
+	}
+	
+	public function priceTiers()
+	{
+		if ($this->type != 'package') {
+			return false;
+		}
+		elseif (!isset($this->priceTiers)) {
+			$result = self::$db->fetchAll('SELECT tierCount as `count`, tierPrice as price FROM regsys__item_prices WHERE itemID = ? ORDER BY tierCount ASC', array($this->itemID));
+			$this->priceTiers = array();
+			
+			foreach ($result as $tier) {
+				$this->priceTiers[$tier->count] = $tier;
+			}
+		}
+		return $this->priceTiers;
+	}
+	
+	public function registeredDancers()
+	{
+		if (!isset($this->registeredDancers)) {
+			$orderBy = ($this->meta != 'Position') ? '' : 'itemMeta DESC, ';
+			$orderBy .= 'lastName ASC, firstName ASC';
+			
+			$this->registeredDancers = self::$db->fetchAll('SELECT d.*, itemMeta FROM regsys__registrations AS r LEFT JOIN regsys__dancers AS d USING(dancerID) WHERE r.eventID = ? AND itemID = ? ORDER BY ' . $orderBy, array($this->eventID, $this->itemID), '\RegSys\Entity\Dancer');
+		}
+		
+		return $this->registeredDancers;
+	}
+	
+	public function sizes()
+	{
+		return $this->type == 'shirt' ? explode(',', 'None,' . $this->description) : null;
+	}
+	
+	public function totalMoneyFromRegistrations($paymentMethod)
+	{
+		return self::$db->fetchColumn('SELECT SUM(price) FROM regsys__registrations AS r LEFT JOIN regsys__dancers USING (dancerID) WHERE r.eventID = ? AND paymentMethod = ? AND itemID = ?', array($this->eventID, $paymentMethod, $this->itemID));
+	}
+	
+	public function registrationPriceNumbers() {
+		$event = \RegSys\Entity\Event::eventByID($this->eventID);
 		$result = array();
 		
-		if ($this->type == 'package' and self::$database->fetchColumn('SELECT item_id FROM regsys_item_prices WHERE item_id = ?', array($this->item_id))) {
-			$registrations = self::$database->fetchAll('SELECT price, payment_method FROM regsys_registrations LEFT JOIN regsys_dancers USING (dancer_id) WHERE price > 0 AND item_id = ? ORDER BY price ASC', array($this->item_id));
+		if ($this->type == 'package' and self::$db->fetchColumn('SELECT itemID FROM regsys__item_prices WHERE itemID = ?', array($this->itemID))) {
+			$registrations = self::$db->fetchAll('SELECT price, paymentMethod FROM regsys__registrations LEFT JOIN regsys__dancers USING (dancerID) WHERE price > 0 AND itemID = ? ORDER BY price ASC', array($this->itemID));
 			
 			foreach ($registrations as $reg) {
 				if (!isset($result[$reg->price])) {
-					$result[$reg->price] = array_combine(array_merge(array('Total'), $event->payment_methods()), array(0, 0, 0));
+					$result[$reg->price] = array_combine(array_merge(array('Total'), $event->paymentMethods()), array(0, 0, 0));
 				}
 				
 				$result[$reg->price]['Total']++;
-				$result[$reg->price][$reg->payment_method]++;
+				$result[$reg->price][$reg->paymentMethod]++;
 			}
 			
-			$result['Total']['Total'] = sprintf('%d%s', $this->count_registrations() - $this->count_registrations_for_vips(), $this->count_registrations_for_vips() ? sprintf(' (+%d VIPs)', $this->count_registrations_for_vips()) : '');
+			$result['Total']['Total'] = $this->countRegistrations();
 			
-			foreach ($event->payment_methods() as $payment_method) {
-				$result['Total'][$payment_method] = $this->count_registrations_by_payment_method($payment_method);
+			foreach ($event->paymentMethods() as $paymentMethod) {
+				$result['Total'][$paymentMethod] = $this->countRegistrationsByPaymentMethod($paymentMmethod);
 			}
 			
 			return $result;
@@ -276,33 +270,45 @@ class RegistrationSystem_Model_Item extends RegistrationSystem_Model
 		}
 	}
 	
-	public function count_registrations_by_payment_method($payment_method)
+	# Used by \RegSys\Entity\Dancer#validateItems
+	public function setRegisteredPrice($price)
 	{
-		return self::$database->fetchColumn('SELECT COUNT(dancer_id) from regsys_registrations LEFT JOIN regsys_dancers USING (dancer_id) WHERE price > 0 AND item_id = ? AND payment_method = ?', array($this->item_id, $payment_method));
+		$this->registeredPrice = $price;
 	}
 	
-	public function count_registrations_by_size($size)
+	# Used by \RegSys\Entity\Dancer#validateItems
+	public function setRegisteredMeta($meta)
 	{
-		return self::$database->fetchColumn('SELECT COUNT(dancer_id) from regsys_registrations WHERE item_id = ? AND item_meta = ?', array($this->item_id, $size));
+		$this->registeredMeta = $meta;
 	}
 	
-	private function count_registrations_where(array $where = array(), $join_dancers_table = false)
+	public function validate()
 	{
-		$where[':item_id'] = $this->item_id;
-		$query = array('r.event_id = :event_id');
+		$validationErrors = array();
 		
-		foreach ($where as $field => $value) {
-			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
+		$this->name = trim($this->name);
+		$this->dateExpires = !empty($this->dateExpires) ? strtotime($this->dateExpires) : null;
+		
+		foreach (array('pricePrereg', 'priceDoor', 'limitPerPosition', 'limitTotal') as $field) {
+			$this->$field = (int) $this->$field;
 		}
 		
-		$query = ' WHERE ' . implode(' AND', $query);
-		$where[':event_id'] = $this->event_id;
-		
-		if ($join_dancers_table) {
-			$query = ' JOIN regsys_dancers USING(dancer_id)' . $query;
+		foreach (array('name' => 'Name', 'type' => 'Type', 'pricePrereg' => 'Price for Preregistration') as $field => $label) {
+			if (empty($this->$field)) {
+				$validationErrors[$field] = $label . ' is a required field.';
+			}
 		}
 		
-		$result = self::$database->fetchColumn('SELECT COUNT(dancer_id) FROM regsys_registrations AS r' . $query, $where);
-		return ($result !== false) ? (int) $result : false;
+		if (!in_array($this->type, array('package', 'competition', 'shirt'))) {
+			$validationErrors['type'] = 'Type has an invalid value.';
+		}
+		
+		if ($this->type == 'package' and !in_array($this->meta, array('', 'Count for Classes')) or
+			$this->type == 'competition' and !in_array($this->meta, array('', 'Position', 'Partner', 'Team Members')) or
+			$this->type == 'shirt') {
+			$this->meta = null;
+		}
+		
+		return $validationErrors;
 	}
 }

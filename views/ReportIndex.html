@@ -1,25 +1,25 @@
-{% from 'admin.html' import message as message %}
+{% from 'Admin.html' import message as message %}
 
-<div id="reg-sys" class="wrap">
-<div id="report_index">
+<div id="regsys" class="wrap">
+<div id="ReportIndex">
 	<h2>Registration Reports
-{% if admin %}
-		<a class="button add-new-h2" href="{{ request_href ~ 'admin_event_add' }}">Add New Event</a>
-{% endif %}
-		<a class="button add-new-h2" href="{{ request_href ~ 'report_index_visualization' }}">Load Visualization</a>
+		{%- if admin %}
+		<a class="button add-new-h2" href="{{ requestHref ~ 'AdminEvent' }}">Add New Event</a>
+		{%- endif %}
+		<a class="button add-new-h2" href="{{ requestHref ~ 'ReportVisualization' }}">View Registration Visualization Chart</a>
 	</h2>
-	{%- if GET.deleted_event %}{{ "\n\t\t" }}{{ message('Deleted %s%s.' | format((GET.registrations_only == 'true' ? 'registrations for ' : ''), GET.deleted_event), 'error') }}{% endif %}
+	{%- if GET.deleted %}{{ "\n\t" }}{{ message('Deleted %s%s.' | format((GET.registrationsOnly == 'true' ? 'registrations for ' : ''), GET.deleted), 'error') }}{% endif %}
 
 	<style type="text/css">
-		#reg-sys tr.current-event td.column-title {
+		#regsys tr.current-event td.column-title {
 			font-size: 1.1em;
 			font-style: italic;
 		}
 	</style>
 
+	{%- if events %}
 	<h3>Choose Event</h3>
 
-{% if events %}
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
@@ -27,9 +27,9 @@
 				<th class="manage-column" width="24%">Mail Preregistration End Date</th>
 				<th class="manage-column" width="25%">PayPal Preregistration End Date</th>
 				<th class="manage-column" width="20%">No Refunds After</th>
-{% if admin %}
+				{% if admin %}
 				<th class="manage-column ellipsis" width="9%">Edit Event</th>
-{% endif %}
+				{% endif %}
 			</tr>
 		</thead>
 
@@ -39,29 +39,28 @@
 				<th class="manage-column">Mail Preregistration End Date</th>
 				<th class="manage-column">PayPal Preregistration End Date</th>
 				<th class="manage-column">No Refunds After</th>
-{% if admin %}
+				{% if admin %}
 				<th class="manage-column ellipsis">Edit Event</th>
-{% endif %}
+				{% endif %}
 			</tr>
 		</tfoot>
 
 		<tbody>
-{% for event in events %}
-			<tr class="{{ cycle(['', 'alternate'], loop.index) }}{% if options.current_event_id == event.id %} current-event{% endif %}">
-				<td class="column-title"><a href="{{ request_href ~ 'report_index_event' ~ '&event_id=' ~ event.id }}">{{ event.name }}</a></td>
-				<td class="date">{% if event.date_mail_prereg_end %}{{ event.date_mail_prereg_end | date }}{% else %}&mdash;{% endif %}</td>
-				<td class="date">{{ event.date_paypal_prereg_end | date }}</td>
-				<td class="date">{{ event.date_refund_end | date }}</td>
-{% if admin %}
-				<td><a href="{{ request_href ~ 'admin_event_edit' ~ '&event_id=' ~ event.id }}">Edit Event</a></td>
-{% endif %}
-			</tr>
-
-{% endfor %}
+			{%- for event in events %}
+			<tr class="{{ cycle(['', 'alternate'], loop.index) }}{% if options.currentEventID == event.id %} current-event{% endif %}">
+				<td class="column-title"><a href="{{ requestHref ~ 'ReportIndexEvent' ~ '&eventID=' ~ event.id }}">{{ event.name }}</a></td>
+				<td class="date">{{ event.dateMail | date }}</td>
+				<td class="date">{{ event.datePayPal | date }}</td>
+				<td class="date">{{ event.dateRefund ? event.dateRefund | date : '—' }}</td>
+				{%- if admin %}
+				<td><a href="{{ requestHref ~ 'AdminEvent' ~ '&eventID=' ~ event.id }}">Edit Event</a></td>
+				{%- endif %}
+			</tr>{% if not loop.last %}{{ "\n\n" }}{% else %}{{ "\n" }}{% endif %}
+			{%- endfor %}
 		</tbody>
 	</table>
-{% else %}
+	{%- else %}
 	<p>No events have been created yet.<p>
-{% endif %}
+	{%- endif %}
 </div>
 </div>

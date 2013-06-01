@@ -1,6 +1,8 @@
 <?php
 
-class RegistrationSystem_PayPal_IPN
+namespace RegSys\Payment\PayPal;
+
+class IPN
 {
 	private $data = array();
 	
@@ -9,15 +11,15 @@ class RegistrationSystem_PayPal_IPN
 		$this->data = $data;
 	}
 	
-	public function is_test()
+	public function isTest()
 	{
 		return ($this->test_ipn == '1');
 	}
 	
-	public function is_valid()
+	public function isValid()
 	{
 		if (empty($this->data)) {
-			throw new Exception('No data provided.');
+			throw new \Exception('No data provided.');
 		}
 		
 		$request = 'cmd=_notify-validate';
@@ -31,11 +33,11 @@ class RegistrationSystem_PayPal_IPN
 			$request .= sprintf('&%s=%s', rawurlencode($key), rawurlencode($value));
 		}
 		
-		$host = $this->is_test() ? 'ssl://www.sandbox.paypal.com' : 'ssl://www.paypal.com';
+		$host = $this->isTest() ? 'ssl://www.sandbox.paypal.com' : 'ssl://www.paypal.com';
 		$fp = fsockopen($host, 443, $errno, $errstr, 30);
 		
 		if (!$fp) {
-			throw new Exception(sprintf('Unable to establish connection with PayPal: [%s] %s', $errno, $errstr));
+			throw new \Exception(sprintf('Unable to establish connection with PayPal: [%s] %s', $errno, $errstr));
 		}
 		else {
 			$header = 'POST /cgi-bin/webscr HTTP/1.0' . "\r\n" .
@@ -54,7 +56,7 @@ class RegistrationSystem_PayPal_IPN
 		}
 	}
 	
-	public function get_all_items(array $default_options = array())
+	public function allItems(array $defaultOptions = array())
 	{
 		$items = array();
 		$index = 0;
@@ -67,17 +69,17 @@ class RegistrationSystem_PayPal_IPN
 					'mc_gross' => $this->{'mc_gross_'   . $index},
 					'options'  => array());
 				
-				$option_index = 0;
-				while (++$option_index) {
-					if (isset($this->{'option_name' . $option_index . '_' . $index}) and isset($this->{'option_selection' . $option_index . '_' . $index})) {
-						$items[$index]['options'][$this->{'option_name' . $option_index . '_' . $index}] = $this->{'option_selection' . $option_index . '_' . $index};
+				$optionIndex = 0;
+				while (++$optionIndex) {
+					if (isset($this->{'option_name' . $optionIndex . '_' . $index}) and isset($this->{'option_selection' . $optionIndex . '_' . $index})) {
+						$items[$index]['options'][$this->{'option_name' . $optionIndex . '_' . $index}] = $this->{'option_selection' . $optionIndex . '_' . $index};
 					}
 					else {
 						break;
 					}
 				}
 				
-				$items[$index]['options'] = array_merge($default_options, $items[$index]['options']);
+				$items[$index]['options'] = array_merge($defaultOptions, $items[$index]['options']);
 			}
 			else {
 				break;
@@ -87,7 +89,7 @@ class RegistrationSystem_PayPal_IPN
 		return $items;
 	}
 	
-	public function get_single_item(array $default_options = array())
+	public function singleItem(array $defaultOptions = array())
 	{
 		$item = array(
 			'name'     => $this->item_name,
@@ -95,17 +97,17 @@ class RegistrationSystem_PayPal_IPN
 			'mc_gross' => $this->mc_gross,
 			'options'  => array());
 		
-		$option_index = 0;
-		while (++$option_index) {
-			if (isset($this->{'option_name' . $option_index}) and isset($this->{'option_selection' . $option_index})) {
-				$item['options'][$this->{'option_name' . $option_index}] = $this->{'option_selection' . $option_index};
+		$optionIndex = 0;
+		while (++$optionIndex) {
+			if (isset($this->{'option_name' . $optionIndex}) and isset($this->{'option_selection' . $optionIndex})) {
+				$item['options'][$this->{'option_name' . $optionIndex}] = $this->{'option_selection' . $optionIndex};
 			}
 			else {
 				break;
 			}
 		}
 		
-		$item['options'] = array_merge($default_options, $item['options']);
+		$item['options'] = array_merge($defaultOptions, $item['options']);
 		
 		return $item;
 	}
@@ -118,10 +120,5 @@ class RegistrationSystem_PayPal_IPN
 	public function __isset($name)
 	{
 		return isset($this->data[$name]);
-	}
-	
-	static public function error_handler($errno, $errstr, $errfile, $errline)
-	{
-		throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 	}
 }

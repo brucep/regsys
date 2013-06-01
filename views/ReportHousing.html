@@ -1,33 +1,35 @@
-{% extends 'report.html' %}
+{% extends 'Report.html' %}
 
 {% block content %}
-	<h3>{{ housing_type }}
-{%- if dancers -%}
-		{%- if housing_count %}{{ " (%d %s)\n" | format(housing_count, pluralize('spot', 'spots', housing_count)) }}{% endif %}
-		<a class="button" href="{{ request_href ~ 'report_download_csv' ~ '&noheader=true&data=' ~ housing_href }}">Download Housing Info</a>
-{% endif %}
+	<h3>{{ housingType }}
+		{% if dancers -%}
+		{% if housingCount %}{{ " (%d %s)\n" | format(housingCount, pluralize('spot', 'spots', housingCount)) }}{% endif %}
+		<a class="button" href="{{ requestHref ~ 'DownloadCSV' ~ '&noheader=true&data=' ~ housingHref }}">Download Housing Info</a>
+		{%- endif %}
 	</h3>
 
-{% if dancers %}
+	{% if dancers -%}
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
 				<th class="manage-column column-title" width="19%"><div>Name</div></th>
-{% for night in event.housing_nights %}
+				{% for night in event.housingNights | split(',') -%}
 				<th class="manage-column"><div>{{ night }}</div></th>
-{% endfor %}
+				{%- endfor %}
+
 				<th class="manage-column" width="9%"><div>Gender</div></th>
-{% if housing_href == 'housing_needed' %}
+				{% if housingHref == 'housingNeeded' -%}
 				<th class="manage-column" width="6%"><div>No Pets</div></th>
 				<th class="manage-column" width="7%"><div>No Smoke</div></th>
 				<th class="manage-column" width="8%"><div>Bedtime</div></th>
 				<th class="manage-column" width="15%"><div>From</div></th>
-{% else %}
+				{%- else -%}
 				<th class="manage-column" width="6%"><div>Spots</div></th>
 				<th class="manage-column" width="6%"><div>Has Pets</div></th>
 				<th class="manage-column" width="7%"><div>Smokes</div></th>
 				<th class="manage-column" width="9%"><div>Bedtime</div></th>
-{% endif %}
+				{%- endif %}
+
 				<th class="manage-column" width="12%"><div>Comment</div></th>
 				<th class="manage-column" width="18%"><div>Date Registered</div></th>
 			</tr>
@@ -36,53 +38,58 @@
 		<tfoot>
 			<tr>
 				<th class="manage-column column-title">Name</th>
-{% for night in event.housing_nights %}
+				{% for night in event.housingNights | split(',') -%}
 				<th class="manage-column">{{ night }}</th>
-{% endfor %}
+				{%- endfor %}
+
 				<th class="manage-column" width="9%"><div>Gender</div></th>
-{% if housing_href == 'housing_needed' %}
+				{% if housingHref == 'housingNeeded' -%}
 				<th class="manage-column"><div>No Pets</div></th>
 				<th class="manage-column"><div>No Smoke</div></th>
 				<th class="manage-column"><div>Bedtime</div></th>
 				<th class="manage-column"><div>From</div></th>
-{% else %}
+				{%- else -%}
 				<th class="manage-column"><div>Spots</div></th>
 				<th class="manage-column"><div>Has Pets</div></th>
 				<th class="manage-column"><div>Smokes</div></th>
 				<th class="manage-column"><div>Bedtime</div></th>
-{% endif %}
+				{%- endif %}
+
 				<th class="manage-column"><div>Comment</div></th>
 				<th class="manage-column"><div>Date Registered</div></th>
 			</tr>
 		</tfoot>
 
 		<tbody>
-{% for dancer in dancers %}
+			{% for dancer in dancers -%}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
-				<td class="column-title"><a href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}">{{ dancer.name_last_first }}</a>{% if dancer.is_vip %} [VIP]{% endif %}</td>
-{% for night in event.housing_nights %}
-				<td>{% if night in dancer.housing_nights %}&bull;{% endif %}</td>
-{% endfor %}
-				<td>{{ dancer.housing_gender }}</td>
-{% if housing_href == 'housing_needed' %}
-				<td>{% if dancer.housing_prefers_no_pets %}&bull;{% endif %}</td>
-				<td>{% if dancer.housing_prefers_no_smoke %}&bull;{% endif %}</td>
-				<td class="ellipsis">{{ dancer.housing_bedtime }}</td>
-				<td>{{ dancer.housing_from_scene }}</td>
-{% else %}
-				<td>{{ dancer.housing_spots_available }}</td>
-				<td>{% if dancer.housing_has_pets %}&bull;{% endif %}</td>
-				<td>{% if dancer.housing_has_smoke %}&bull;{% endif %}</td>
-				<td class="ellipsis">{{ dancer.housing_bedtime }}</td>
-{% endif %}
-				<td>{{ dancer.housing_comment }}</td>
-				<td class="date">{{ dancer.date_registered | date }}</td>
-			</tr>
+				<td class="column-title"><a href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id }}">{{ dancer.nameReversed }}</a></td>
+				{% for night in event.housingNights | split(',') -%}
+				<td>{% if night in dancer.housingNights | split(',') %}&bull;{% endif %}</td>
+				{%- endfor %}
 
-{% endfor %}
+				<td>{{ dancer.housingGender }}</td>
+				{% if housingHref == 'housingNeeded' -%}
+				<td>{% if dancer.prefersNoPets %}&bull;{% endif %}</td>
+				<td>{% if dancer.prefersNoSmoke %}&bull;{% endif %}</td>
+				<td class="ellipsis">{{ dancer.housingBedtime }}</td>
+				<td>{{ dancer.housingFromScene }}</td>
+				{%- else -%}
+				<td>{{ dancer.housingSpotsAvailable }}</td>
+				<td>{% if dancer.hasPets %}&bull;{% endif %}</td>
+				<td>{% if dancer.hasSmoke %}&bull;{% endif %}</td>
+				<td class="ellipsis">{{ dancer.housingBedtime }}</td>
+				{%- endif %}
+
+				<td>{{ dancer.housingComment }}</td>
+				<td class="date">{{ dancer.dateRegistered | date }}</td>
+			</tr>
+			{%- endfor %}
+
 		</tbody>
 	</table>
-{% else %}
+	{%- else -%}
 	<p>There are no housing entries for this event.</p>
-{% endif %}
+	{%- endif %}
+
 {% endblock content %}

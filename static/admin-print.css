@@ -4,6 +4,6 @@
 
 html { background-color: #fff; }
 
-#reg-sys .no-print { display: none; }
+#regsys .no-print { display: none; }
 
-#reg-sys td.dancer-name a { color: inherit !important; }
+#regsys td.dancer-name a { color: inherit !important; }

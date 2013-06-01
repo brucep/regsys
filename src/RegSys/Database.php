@@ -1,39 +1,53 @@
 <?php
 
-class RegistrationSystem_Database
+namespace RegSys;
+
+class Database
 {
-	private $pdo, $prefix = '';
+	protected $pdo, $debug;
 	
-	public function __construct(array $settings)
+	public function __construct(\Pimple $container)
 	{
 		try {
-			$this->pdo = @new PDO(
+			$this->debug = (bool) $container['debug'];
+			
+			$this->pdo = @new \PDO(
 				sprintf('%s:host=%s;%sdbname=%s',
 					'mysql',
-					$settings['host'],
-					!empty($settings['port']) ? sprintf('port=%d;', $settings['port']) : '',
-					$settings['name']),
-				$settings['user'],
-				$settings['password'],
-				array(
-					PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ));
+					$container['host'],
+					!empty($container['port']) ? sprintf('port=%d;', $container['port']) : '',
+					$container['name']),
+				$container['user'],
+				$container['pass']);
 			
 			$this->pdo->exec('SET NAMES "utf8";');
 		}
-		catch (PDOException $e) {
+		catch (\PDOException $e) {
 			$message = preg_replace('/^[A-Z]+\[[A-Z0-9]+\]:? \[[0-9]+\] (.*?)/', '$1', $e->getMessage());
 			exit('<pre>' . $message . '</pre>');
 		}
+		catch (\Exception $e) {
+			throw $e;
+		}
+	}
+	
+	public function beginTransaction()
+	{
+		return $this->pdo->beginTransaction();
+	}
+	
+	public function commit()
+	{
+		return $this->pdo->commit();
 	}
 	
 	public function fetchAll($query, array $params = array(), $class = null)
 	{
 		if (class_exists($class)) {
-			return $this->query($query, $params)->fetchAll(PDO::FETCH_CLASS, $class);
+			return $this->query($query, $params)->fetchAll(\PDO::FETCH_CLASS, $class);
 		}
 		else {
-			return $this->query($query, $params)->fetchAll(PDO::FETCH_OBJ);
+			return $this->query($query, $params)->fetchAll(\PDO::FETCH_OBJ);
 		}
 	}
 	
@@ -52,9 +66,9 @@ class RegistrationSystem_Database
 		}
 	}
 	
-	public function lastInsertID($name = '')
+	public function lastInsertID()
 	{
-		return $this->pdo->lastInsertID($name);
+		return $this->pdo->lastInsertID();
 	}
 	
 	public function query($query, array $params = array())
@@ -63,19 +77,33 @@ class RegistrationSystem_Database
 			$statement = $this->pdo->prepare($query);
 			
 			if (!($statement->execute($params))) {
-				throw PDOException();
+				$errorInfo = $statement->errorInfo();
+				throw new \PDOException($errorInfo[2]);
 			}
 			
 			return $statement;
 		}
-		catch (PDOException $e) {
-			$message = preg_replace("/^[A-Z]+\[[A-Z0-9]+\]:?(.+ [0-9]+)? (.+)$/", '$2', $e->getMessage());
+		catch (\PDOException $e) {
+			$message = trim(preg_replace("/^[A-Z]+\[[A-Z0-9]+\]:?(.+ [0-9]+)? (.+)$/", '$2', $e->getMessage()));
 			
-			if (defined('WP_DEBUG')) {
-				$message .= "</p>\n\n<pre>$query\n\n" . print_r($params, true) . "</pre>\n\n";
+			if ($this->debug) {
+				ob_start(); 
+				debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS); 
+				$backtrace = ob_get_contents(); 
+				ob_end_clean(); 
+				
+				$message .= sprintf("\n\n<pre>%s\n\n%s</pre>\n\n<pre>%s</pre>\n\n", $query, print_r($params, true), $backtrace);
 			}
 			
-			throw new Exception($message);
+			throw new \Exception($message);
 		}
+		catch (\Exception $e) {
+			throw $e;
+		}
+	}
+	
+	public function rollBack()
+	{
+		return $this->pdo->rollBack();
 	}
 }

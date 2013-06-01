@@ -1,14 +1,14 @@
-{% extends 'report.html' %}
+{% extends 'Report.html' %}
 
 {% block content %}
 	<h3>Volunteers
-{%- if volunteers -%}
+		{% if volunteers -%}
 		{{- ' (%d %s)' | format(volunteers | length, pluralize('volunteer', 'volunteers', volunteers | length)) }}
-		<a class="button" href="{{ request_href ~ 'report_download_csv' ~ '&noheader=true&data=volunteers' }}">Download Email Addresses</a>
-{% endif %}
+		<a class="button" href="{{ requestHref ~ 'DownloadCSV' ~ '&noheader=true&data=volunteers' }}">Download Email Addresses</a>
+		{%- endif %}
 	</h3>
 
-{% if volunteers %}
+	{% if volunteers -%}
 	<table class="widefat page fixed report">
 		<thead>
 			<tr>
@@ -27,16 +27,17 @@
 		</tfoot>
 
 		<tbody>
-{% for dancer in volunteers %}
+			{% for dancer in volunteers -%}
 			<tr class="vcard">
-				<td class="column-title"><a class="n" href="{{ request_href ~ 'report_dancer' ~ '&dancer_id=' ~ dancer.id }}"><span class="family-name">{{ dancer.last_name }}</span>, <span class="given-name">{{ dancer.first_name }}</span></a></td>
-				<td class="tel">{{ dancer.mobile_phone }}</td>
-				<td class="date">{{ dancer.date_registered | date }}</td>
+				<td class="column-title"><a class="n" href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id }}"><span class="family-name">{{ dancer.lastName }}</span>, <span class="given-name">{{ dancer.firstName }}</span></a></td>
+				<td class="tel">{{ dancer.phone }}</td>
+				<td class="date">{{ dancer.dateRegistered | date }}</td>
 			</tr>
-{% endfor %}
+			{%- endfor %}
 		</tbody>
 	</table>
-{% else %}
+	{%- else -%}
 	<p>There are no volunteers for this event.</p>
-{% endif %}
+	{%- endif %}
+
 {% endblock content %}

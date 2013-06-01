@@ -1,89 +1,97 @@
-{% extends 'report.html' %}
+{% extends 'Report.html' %}
 
-{% from 'admin.html' import message as message %}
+{% from 'Admin.html' import message as message %}
 
 {% block content %}
+	<style type="text/css">
+		#regsys h4 {
+			margin-top: 2.5em;
+		}
+	</style>
+
 	<div class="vcard">
-	<h3><span class="fn n"><span class="given-name">{{ dancer.first_name }}</span> <span class="family-name">{{ dancer.last_name }}</span></span>
-{% if admin %}
-		<a class="button" href="{{ request_href ~ 'admin_dancer_edit'   ~ '&dancer_id=' ~ dancer.id }}">Edit Dancer</a>
-{% endif %}
+	<h3><span class="fn n"><span class="given-name">{{ dancer.firstName }}</span> <span class="family-name">{{ dancer.lastName }}</span></span>
+	{%- if admin %}
+		<a class="button" href="{{ requestHref ~ 'AdminDancer'   ~ '&dancerID=' ~ dancer.id }}">Edit Dancer</a>
+	{%- endif %}
 	</h3>
-	{%- if GET.confirmation_email == 'true' %}{{ "\n\t\t" }}{{ message('Confirmation email sent.') }}{% endif %}
+	{%- if GET.deleted %}{{ "\n\t" }}{{ message('Deleted %s.' | format(GET.deleted), 'error') }}{% endif %}
+	{%- if GET.sentConfirmationEmail %}{{ "\n\t" }}{{ message('Confirmation email sent.') }}{% endif %}
 
 	<ul>
 		<li><a href="{{ dancer.mailto }}"><span class="email">{{ dancer.email }}</span></a></li>
-		<li class="tel">{{ dancer.mobile_phone }}</li>
-		<li><strong>Position:</strong> {{ dancer.position }}</li>
-{% if event.has_levels %}
+		<li class="tel">{{ dancer.phone }}</li>
+		<li><strong>Position:</strong> {{ dancer.positionLabel }}</li>
+		{% if event.hasLevels -%}
 		<li><strong>Level:</strong> {{ dancer.level }}</li>
-{% endif %}
-{% if event.has_discounts and dancer.discount_id != null %}
-		<li><strong>Discount Code:</strong> {{ event.discounts[dancer.discount_id].discount_code }}
-{% endif %}
-{% if dancer.is_vip %}
-		<li><strong>VIP</strong></li>
-{% elseif dancer.is_volunteer %}
+		{%- endif %}
+
+		{% if event.hasDiscounts and dancer.discountCode -%}
+		<li><strong>Discount Code:</strong> {{ dancer.discountCode }}
+		{%- endif %}
+
+		{% if dancer.volunteer -%}
 		<li><strong>Volunteer</strong></li>
-{% endif %}
+		{%- endif %}
+
 	</ul>
 	</div> <!-- .vcard -->
 
-	<h4>Registrations
-{% if admin %}
-		<a class="button" href="{{ request_href ~ 'admin_dancer_registration_edit' ~ '&dancer_id=' ~ dancer.id }}">Edit Registrations</a>
-		<a class="button" href="{{ dancer.paypal_href }}" >PayPal Link</a>
-		<a class="button" href="{{ request_href ~ 'admin_dancer_resend_email' ~ '&dancer_id=' ~ dancer.id ~ '&noheader=true' }}">Resend Confirmation Email</a>
-{% endif %}
+	<h4>Registered Items
+		{% if admin -%}
+		<a class="button" href="{{ requestHref ~ 'AdminDancerRegisteredItems' ~ '&dancerID=' ~ dancer.id }}">Manage Registered Items</a>
+		<a class="button" href="{{ dancer.paypalHref }}">PayPal Link</a>
+		<a class="button" href="{{ requestHref ~ 'AdminDancerResendEmail' ~ '&dancerID=' ~ dancer.id ~ '&noheader=true' }}">Resend Confirmation Email</a>
+		{%- endif %}
 	</h4>
 
 	<ul>
-{% for item in dancer.registered_items %}
-		<li>{{ item.name }} {%- if item.registered_meta %}{{ ' (%s)' | format(item.registered_meta | capitalize) }}{% endif %}</li>
-{% else %}
+		{% for item in dancer.registeredItems -%}
+		<li>{{ item.name }} {%- if item.registeredMeta %}{{ ' (%s)' | format(item.registeredMeta | capitalize) }}{% endif %}</li>
+		{%- else -%}
 		<li>There are no registrations for this dancer.</li>
-{% endfor %}
+		{%- endfor %}
 	</ul>
 
-{% if dancer.needs_housing or dancer.is_housing_provider %}
-	<h4>
-		{{ dancer.housing_type }}
-{% if admin %}
-		<a href="{{ request_href ~ 'housing-delete' ~ '&dancer_id=' ~ dancer.id }}" class="button add-new-h4">Delete Housing Info</a>
-{%- endif %}
+	{% if event.hasHousingSupport -%}
+	{% if dancer.needsHousing or dancer.isHousingProvider -%}
+	<h4>{{ dancer.housingTypeLabel }}
+		{%- if admin -%}
+		<a href="{{ requestHref ~ 'AdminDancerHousing' ~ '&dancerID=' ~ dancer.id }}" class="button">Edit Housing Info</a>
+		{%- endif -%}
 	</h4>
 
 	<ul>
-{% if dancer.is_housing_provider %}
-		<li>Available spots: {{ dancer.housing_spots_available }}</li>
-{% if dancer.housing_has_smoke %}
-		<li>Smokes</li>
-{% endif %}
-{% if dancer.housing_has_pets %}
-		<li>Has pets</li>
-{% endif %}
-{% else %}
-{% if dancer.housing_from_scene %}
-		<li>From Scene: {{ dancer.housing_from_scene }}</li>
-{% endif %}
-{% if dancer.housing_prefers_no_smoke %}
-		<li>Prefers no smoking</li>
-{% endif %}
-{% if dancer.housing_prefers_no_pets %}
-		<li>Prefers no pets</li>
-{% endif %}
-{% endif %}
-		<li>{{ dancer.housing_gender }}</li>
-		<li>{{ dancer.housing_nights | join(', ') }}</li>
-{% if dancer.housing_comment %}
-		<li>{{ dancer.housing_comment }}</li>
-{% endif %}
+	{%- if dancer.isHousingProvider %}
+		<li>Available spots: {{ dancer.housingSpotsAvailable }}</li>
+		<li>{{ dancer.hasSmoke ? 'Smokes' : 'Does not smoke' }}</li>
+		<li>{{ dancer.hasPets ? 'Has pets' : 'Does not have pets' }}</li>
+	{%- else %}
+		<li>From Scene: {{ dancer.housingFromScene }}</li>
+		<li>{{ dancer.prefersNoSmoke ? 'Prefers no smoke' : 'No preference on smoking' }}</li>
+		<li>{{ dancer.prefersNoPets ? 'Prefers no pets' : 'No preference on pets' }}</li>
+	{%- endif %}
+		<li>Nights: {{ dancer.housingNights | split(',') | join(', ') }}</li>
+		<li>Gender: {{ dancer.housingGenderLabel }}</li>
+		<li>Bedtime: {{ dancer.housingBedtimeLabel }}</li>
+		{% if dancer.housingComment -%}
+		<li>Comment: {{ dancer.housingComment }}</li>
+		{%- endif %}
 	</ul>
-{% endif %}
+	{%- else %}
+	<h4>Housing
+		{%- if admin -%}
+		<a href="{{ requestHref ~ 'AdminDancerHousing' ~ '&dancerID=' ~ dancer.id }}" class="button">Add Housing Info</a>
+		{%- endif -%}
+	</h4>
 
-{% if dancer.note %}
-	<h4>Admin's Note</h4>
+	<ul><li>This dancer is not registered for housing.</li></ul>
+	{%- endif %}
+	{%- endif %}
+
+	{% if dancer.note -%}
+	<h4>Admin Note</h4>
 
 	<p>{{ dancer.note | nl2br }}</p>
-{% endif %}
+	{%- endif %}
 {% endblock content %}

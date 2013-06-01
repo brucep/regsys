@@ -1,36 +1,10 @@
-<?php
+{% extends 'Admin.html' %}
 
-if (!$dancer->populate_housing_info()) {
-	throw new Exception('Housing information not found for Dancer ID: %d', $dancer->get_id());
-}
+{% block content %}
+	<h2>Delete Housing for {{ dancer.name }}</h2>
 
-if (isset($_POST['confirm_delete'])):
-    $nsevent_database = NSEvent_Database::get_instance();
-	
-	if (isset($dancer->available)) {
-		$statement = $nsevent_database->query('DELETE FROM regsys_housing_providers WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $event->get_id(), ':dancer_id' => $dancer->get_id()));
-	}
-	else {
-		$statement = $nsevent_database->query('DELETE FROM regsys_housing_needed WHERE event_id = :event_id AND dancer_id = :dancer_id LIMIT 1', array(':event_id' => $event->get_id(), ':dancer_id' => $dancer->get_id()));
-	}
-
-?>
-<div class="wrap" id="nsevent">
-	<h2><?php _e('Delete Housing Information', 'nsevent'); ?></h2>
-    
-	<p><?php printf('<strong>%s (%d)</strong>: <em>%s</em>', $dancer->get_name(), $dancer->get_id(), $dancer->housing_type); ?></p>
-	<p><?php printf('Deleted %d row(s).', $statement->rowCount()); ?></p>
-
-	<p><a href="?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->get_id(); ?>&amp;request=dancer&amp;parameter=<?php echo $dancer->get_id(); ?>"><?php printf(__('Back to "%s"', 'nsevent'), $dancer->get_name()); ?></a></p>
-</div>
-<?php else: ?>
-<div class="wrap" id="nsevent">
-	<h2><?php _e('Delete Housing Information', 'nsevent'); ?></h2>
-
-	<form action="<?php bloginfo('wpurl'); ?>/wp-admin/admin.php?page=nsevent&amp;event_id=<?php echo $event->get_id(); ?>&amp;request=housing-delete&amp;parameter=<?php echo $_GET['parameter'] ?>" method="post">
-		<p><?php printf('<strong>%s (%d)</strong>: <em>%s</em>', $dancer->get_name(), $dancer->get_id(), $dancer->housing_type); ?></p>
-	    <p><?php NSEvent_FormInput::checkbox('confirm_delete', array('label' => __('I\'m sure I want to delete housing information for this dancer.', 'nsevent'))); ?></p>
-	    <input type="submit" class="button-primary" value="<?php _e('Delete Housing Information', 'nsevent'); ?>" />
-    </form>
-</div>
-<?php endif; ?>
+	<form action="{{ requestHref ~ 'AdminDancerHousingDelete' ~ '&dancerID=' ~ dancer.id ~ '&noheader=true' }}" method="post">
+		<p style="padding-top: 1.5em;"><input type="checkbox" name="confirmed" value="1" /> <strong>I'm sure I want to delete housing info for {{ dancer.name }}.</strong><span style="margin-left: 1em">{{ '[%s] [#%s]' | format(dancer.email, dancer.id) }}</span></p>
+		<p class="submit"><input type="submit" class="delete" value="Delete Housing Info" /></p>
+	</form>
+{% endblock content %}
