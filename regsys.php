@@ -1,11 +1,10 @@
 <?php
 /*
-Plugin Name: Registration System
-Description: An event registration and reporting system for dance organizations.
-Version: 2.0-dev
+Plugin Name: RegSys
+Description: An event registration system for dance organizations.
+Version: 2.0
 Author: Bruce Phillips
 License: X11
-Note: Requires PHP 5.2.3 or later.
 */
 /*
 Copyright (C) 2010 Bruce Phillips
@@ -19,922 +18,438 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Except as contained in this notice, the name of the author not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from the author.
 */
 
-if (!class_exists('RegistrationSystem')):
-class RegistrationSystem
+if (!class_exists('RegSys')):
+class RegSys
 {
-	static public $event, $validation, $validated_items = array(); # Used by validation methods
-	static private $twig, $database, $vip;
-	static private $default_options = array(
-		'current_event_id'      => '',
-		'email_bcc'             => '',
-		'email_from'            => '',
-		'email_reply_to'        => '',
-		'email_smtp_host'       => 'smtp.gmail.com',
-		'email_smtp_port'       => '465',
-		'email_smtp_username'   => '',
-		'email_smtp_password'   => '',
-		'email_smtp_encryption' => 'ssl',
-		'email_testing'         => false,
-		'email_transport'       => 'mail',
-		'mailing_address'       => '',
-		'payable_to'            => '',
-		'paypal_business'       => '',
-		'paypal_fee'            => 0,
-		'paypal_sandbox'        => false,
-		'paypal_sandbox_email'  => '',
-		'postmark_within'       => 7,
-		'registration_testing'  => false,
-		);
-	const database_version = '2.0-dev';
+	static private $db;
+	const version = '2.0';
 	
-	private function __clone() {}
-	private function __construct() {}
-	
-	static public function admin_init()
+	static public function getDatabaseConnection()
 	{
-		register_setting('reg_sys', 'reg_sys', 'RegistrationSystem::admin_validate_options');
+		if (!self::$db) {
+			$container = new \Pimple();
+			$container['host'] = DB_HOST;
+			$container['port'] = defined('DB_PORT') ? DB_PORT : null;
+			$container['name'] = DB_NAME;
+			$container['user'] = DB_USER;
+			$container['pass'] = DB_PASSWORD;
+			$container['debug'] = WP_DEBUG;
+			
+			self::$db = new \RegSys\Database($container);
+		}
+		
+		return self::$db;
 	}
 	
-	static public function admin_menu()
+	static public function getOptions()
 	{
-		$hookname = add_menu_page('Registration Reports', 'Registration Reports', 'edit_pages', 'reg-sys', 'RegistrationSystem::page_request');
-		add_submenu_page('reg-sys', 'Registration Options', 'Registration Options', 'manage_options', 'reg-sys-options', 'RegistrationSystem::page_options');
-		
-		add_action('admin_print_scripts-' . $hookname, 'RegistrationSystem::admin_print_scripts');
-		add_action('admin_print_styles-' . $hookname,  'RegistrationSystem::admin_print_styles');
-		add_action('admin_print_styles',               'RegistrationSystem::admin_menu_hide_icon');
+		return array_merge(array(
+			'currentEventID'      => '',
+			'emailBcc'            => '',
+			'emailFrom'           => '',
+			'emailReplyTo'        => '',
+			'emailHost'           => 'smtp.gmail.com',
+			'emailPort'           => '465',
+			'emailUsername'       => '',
+			'emailPassword'       => '',
+			'emailEncryption'     => 'ssl',
+			'emailTesting'        => false,
+			'emailTransport'      => 'mail',
+			'mailingAddress'      => '',
+			'payableTo'           => '',
+			'paypalBusiness'      => '',
+			'paypalFee'           => 0,
+			'paypalSandbox'       => false,
+			'paypalSandboxEmail'  => '',
+			'postmarkWithin'      => 7,
+			'registrationTesting' => false,
+			),
+			get_option('regsys', array()));
 	}
 	
-	static public function admin_menu_hide_icon()
+	static public function handleMenuOptionsPage()
 	{
-		echo '<style type="text/css">li#toplevel_page_reg-sys div.wp-menu-image { display: none; } body.folded li#toplevel_page_reg-sys div.wp-menu-image { display: inherit; }</style>';
-	}
-	
-	static public function admin_print_scripts()
-	{
-		wp_enqueue_script('reg-sys-tablesorter',      plugins_url('static/jquery.tablesorter.min.js',  __FILE__), array('jquery'));
-		wp_enqueue_script('reg-sys-tablesorter-init', plugins_url('static/jquery.tablesorter-init.js', __FILE__), array('reg-sys-tablesorter'));
-		
-		if (isset($_GET['request']) and $_GET['request'] == 'report_index_visualization') {
-			wp_enqueue_script('reg-sys-google-jsapi', 'http://www.google.com/jsapi');
-		}
-	}
-	
-	static public function admin_print_styles()
-	{
-		wp_enqueue_style('reg-sys-admin', plugins_url('static/admin.css', __FILE__));
-		echo '<meta name="viewport" content="initial-scale=1.0;" />';
-	}
-	
-	static public function admin_validate_options($input)
-	{
-		$options = self::get_options();
-		
-		RegistrationSystem_Model::set_database(self::get_database_connection());
-		
-		if (isset($input['current_event_id']) and RegistrationSystem_Model_Event::get_event_by_id($input['current_event_id'])) {
-			$options['current_event_id'] = (int) $input['current_event_id'];
-		}
-		
-		$options['registration_testing'] = isset($input['registration_testing']);
-		
-		if (isset($input['postmark_within'])) {
-			$options['postmark_within'] = (int) $input['postmark_within'];
-		}
-		else {
-			$options['postmark_within'] = 7;
-		}
-		
-		if (isset($input['payable_to'])) {
-			$options['payable_to'] = trim($input['payable_to']);
-		}
-		
-		if (isset($input['mailing_address'])) {
-			$options['mailing_address'] = trim($input['mailing_address']);
-		}
-		
-		if (isset($input['paypal_business'])) {
-			$options['paypal_business'] = trim($input['paypal_business']);
-		}
-		
-		if (isset($input['paypal_fee'])) {
-			$options['paypal_fee'] = (int) $input['paypal_fee'];
-		}
-		
-		$options['paypal_sandbox'] = isset($input['paypal_sandbox']);
-		
-		if (isset($input['paypal_sandbox_email'])) {
-			$options['paypal_sandbox_email'] = trim($input['paypal_sandbox_email']);
-		}
-		
-		if (isset($input['email_from'])) {
-			$options['email_from'] = trim($input['email_from']);
-		}
-		else {
-			$options['email_from'] = get_option('admin_email');
-		}
-		
-		if (isset($input['email_reply_to'])) {
-			$options['email_reply_to'] = trim($input['email_reply_to']);
-		}
-		
-		if (isset($input['email_bcc'])) {
-			$options['email_bcc'] = trim($input['email_bcc']);
-		}
-		
-		$options['email_testing'] = isset($input['email_testing']);
-		
-		if (isset($input['email_transport']) and in_array($input['email_transport'], array('smtp', 'mail'))) {
-			$options['email_transport'] = $input['email_transport'];
-		}
-		
-		if (!empty($input['email_smtp_port'])) {
-			if (is_numeric($input['email_smtp_port'])) {
-				$options['email_smtp_port'] = (int) $input['email_smtp_port'];
+		try {
+			if (!current_user_can('manage_options')) {
+				throw new Exception(__('Cheatin&#8217; uh?'));
 			}
+			
+			$container = new Pimple();
+			
+			$container['db'] = $container->share(function () { return RegSys::getDatabaseConnection(); });
+			$container['debug'] = WP_DEBUG;
+			$container['options'] = RegSys::getOptions();
+			$container['viewsPath'] = __DIR__ . '/views';
+			
+			$controller = new \RegSys\Controller\BackEndController\AdminOptions($container);
+			echo $controller->render($controller->getContext());
 		}
-		else {
-			$options['email_smtp_port'] = '';
-		}
-		
-		if (isset($input['email_smtp_username'])) {
-			$options['email_smtp_username'] = trim($input['email_smtp_username']);
-		}
-		
-		if (isset($input['email_smtp_password'])) {
-			$options['email_smtp_password'] = $input['email_smtp_password'];
-		}
-		
-		if (isset($input['email_smtp_encryption']) and in_array($input['email_smtp_encryption'], array('ssl', 'tsl', 'none'))) {
-			$options['email_smtp_encryption'] = $input['email_smtp_encryption'];
-		}
-		
-		return $options;
-	}
-	
-	static public function autoload($class)
-	{
-		if (substr($class, 0, 19) == 'RegistrationSystem_') {
-			$class = implode('-', explode('_', strtolower(substr($class, 19))));
-			require dirname(__FILE__) . '/includes/' . $class . '.php';
+		catch (\Exception $e) {
+			printf('<div id="regsys-exception">%s</div>'."\n", $e->getMessage());
 		}
 	}
 	
-	static public function get_database_connection()
-	{
-		if (!(self::$database instanceof RegistrationSystem_Database)) {
-			self::$database = new RegistrationSystem_Database(array(
-				'host'     => DB_HOST,
-				'port'     => defined('DB_HOST_PORT') ? DB_HOST_PORT : null,
-				'name'     => DB_NAME,
-				'user'     => DB_USER,
-				'password' => DB_PASSWORD,
-				));
-		}
-		
-		return self::$database;
-	}
-	
-	static public function get_options()
-	{
-		return array_merge(self::$default_options, get_option('reg_sys', array()));
-	}
-	
-	static public function page_options()
-	{
-		if (!current_user_can('administrator')) {
-			throw new Exception(__('Cheatin&#8217; uh?'));
-		}
-		
-		$events = array();
-		$result = self::get_database_connection()->fetchAll('SELECT event_id, name FROM regsys_events ORDER BY date_paypal_prereg_end DESC');
-		
-		foreach ($result as $event) {
-			$events[$event->event_id] = $event->name;
-		}
-		
-		echo self::render_template('admin-options.html', array('events' => $events));
-	}
-	
-	static public function page_request()
+	static public function handleMenuReportsPage()
 	{
 		try {
 			@date_default_timezone_set(get_option('timezone_string'));
 			
 			if (empty($_GET['request'])) {
-				$_GET['request'] = 'report_index';
+				 $_GET['request'] = 'ReportIndex';
 			}
 			
-			if (!current_user_can('edit_pages') or (substr($_GET['request'], 0, 6) == 'admin_' and !current_user_can('administrator'))) {
+			if (!current_user_can('edit_pages') or (!current_user_can('administrator') and substr($_GET['request'], 0, 5) == 'Admin')) {
 				throw new Exception(__('Cheatin&#8217; uh?'));
 			}
 			
-			$filename = sprintf('%s/controllers/%s.php', dirname(__FILE__), str_replace('_', '-', $_GET['request']));
+			$container = new Pimple();
 			
-			if (file_exists($filename)) {
-				$database = self::get_database_connection();
-				$options  = self::get_options();
-				
-				RegistrationSystem_Model::set_database($database);
-				RegistrationSystem_Model::set_options($options);
-				
-				if (!in_array($_GET['request'], array('report_index', 'report_index_visualization', 'admin_event_add'))) {
-					if (!($event = self::$event = RegistrationSystem_Model_Event::get_event_by_id($_GET['event_id']))) {
-						throw new Exception(sprintf('Event ID not found: %d', $_GET['event_id']));
-					}
-					
-					if (isset($_GET['dancer_id'])) {
-						if (!($dancer = $event->dancer_by_id($_GET['dancer_id']))) {
-							throw new Exception(sprintf('Dancer ID not found: %d', $_GET['dancer_id']));
-						}
-					}
-					
-					if (isset($_GET['item_id'])) {
-						if (!($item = $event->item_by_id($_GET['item_id']))) {
-							throw new Exception(sprintf('Item ID not found: %d', $_GET['dancer_id']));
-						}
-					}
-				}
-				
-				require $filename;
+			$container['db'] = $container->share(function () { return RegSys::getDatabaseConnection(); });
+			$container['debug'] = WP_DEBUG;
+			$container['options'] = RegSys::getOptions();
+			$container['viewsPath'] = __DIR__ . '/views';
+			$container['notifyUrl'] = function () { return plugins_url('confirm-paypal.php', __FILE__); };
+			
+			$container['eventID'] = isset($_GET['eventID']) ? (int) $_GET['eventID'] : null;
+			$container['isAdmin'] = current_user_can('administrator');
+			$container['request'] = $_GET['request'];
+			$container['requestHref'] = site_url('wp-admin/admin.php') . '?page=regsys';
+			
+			$class = '\\RegSys\\Controller\\BackEndController\\' . $container['request'];
+			$controller = new $class($container);
+			$context = $controller->getContext();
+			
+			if (is_string($context)) {
+				wp_redirect($context);
+				exit();
 			}
 			else {
-				throw new Exception(sprintf('Unable to handle page request: %s', esc_html($_GET['request'])));
+				if (isset($_GET['noheader'])) {
+					require_once ABSPATH . 'wp-admin/admin-header.php';
+				}
+				echo $controller->render($context);
 			}
 		}
-		catch (Exception $e) {
-			printf('<div id="reg-sys-exception">%s</div>', $e->getMessage());
+		catch (\Exception $e) {
+			if (isset($_GET['noheader'])) {
+				require_once ABSPATH . 'wp-admin/admin-header.php';
+			}
+			
+			printf('<div id="regsys-exception">%s</div>'."\n", $e->getMessage());
 		}
 	}
 	
-	static public function plugin_activate()
-	{
-		if (version_compare(get_option('reg_sys_db_version'), self::database_version, '<')) {
-			$query = "" .
-			"CREATE TABLE regsys_dancers (
-				event_id int(11) unsigned NOT NULL,
-				dancer_id int(11) unsigned NOT NULL AUTO_INCREMENT,
-				first_name varchar(100) NOT NULL,
-				last_name varchar(100) NOT NULL,
-				email varchar(255) NOT NULL,
-				position tinyint(1) NOT NULL DEFAULT '1',
-				level_id tinyint(1) unsigned NOT NULL DEFAULT '1',
-				status tinyint(1) unsigned NOT NULL DEFAULT '0',
-				date_registered int(11) unsigned NOT NULL DEFAULT '0',
-				discount_id tinyint(3) unsigned NOT NULL DEFAULT NULL,
-				payment_method varchar(6) NOT NULL,
-				payment_confirmed tinyint(1) unsigned NOT NULL DEFAULT '0',
-				payment_owed smallint(5) unsigned NOT NULL DEFAULT '0',
-				paypal_fee decimal(2,2) DEFAULT NULL,
-				mobile_phone varchar(30) NOT NULL DEFAULT '',
-				note varchar(255) NOT NULL DEFAULT '',
-				PRIMARY KEY  (dancer_id)
-				);" .
-			"CREATE TABLE regsys_events (
-				event_id int(11) unsigned NOT NULL AUTO_INCREMENT,
-				name varchar(255) NOT NULL,
-				date_mail_prereg_end int(11) unsigned NOT NULL DEFAULT '0',
-				date_paypal_prereg_end int(11) unsigned NOT NULL DEFAULT '0',
-				date_refund_end int(11) unsigned NOT NULL DEFAULT '0',
-				has_levels tinyint(1) unsigned NOT NULL DEFAULT '1',
-				has_vip tinyint(1) unsigned NOT NULL DEFAULT '0',
-				has_volunteers tinyint(1) unsigned NOT NULL DEFAULT '0',
-				has_housing tinyint(1) unsigned NOT NULL DEFAULT '0',
-				housing_nights set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
-				visualization tinyint(1) unsigned NOT NULL DEFAULT '1',
-				visualization_color char(6) NOT NULL DEFAULT '#333',
-				PRIMARY KEY  (event_id),
-				UNIQUE KEY name (name)
-				);" .
-			"CREATE TABLE regsys_event_discounts (
-				event_id int(11) unsigned NOT NULL,
-				discount_id tinyint(3) unsigned NOT NULL,
-				discount_code varchar(255) NOT NULL,
-				discount_amount smallint(5) NOT NULL,
-				discount_limit smallint(5) unsigned NOT NULL DEFAULT '0',
-				discount_expires int(11) unsigned NOT NULL DEFAULT '0',
-				PRIMARY KEY  (event_id,discount_id),
-				UNIQUE KEY discount_code (event_id,discount_code)
-				);" .
-			"CREATE TABLE regsys_event_levels (
-				event_id int(11) unsigned NOT NULL,
-				level_id tinyint(1) unsigned NOT NULL,
-				label varchar(255) NOT NULL,
-				has_tryouts tinyint(1) unsigned NOT NULL DEFAULT '0',
-				PRIMARY KEY  (event_id,level_id),
-				UNIQUE KEY label (event_id,label)
-				);" .
-			"CREATE TABLE regsys_housing (
-				event_id int(11) UNSIGNED NOT NULL,
-				dancer_id int(11) UNSIGNED NOT NULL,
-				housing_type tinyint(1) UNSIGNED NOT NULL DEFAULT '1',
-				housing_spots_available tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
-				housing_nights set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
-				housing_gender tinyint(1) UNSIGNED NOT NULL DEFAULT '3',
-				housing_bedtime tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
-				housing_pets tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
-				housing_smoke tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
-				housing_from_scene varchar(255) NOT NULL DEFAULT '',
-				housing_comment text NOT NULL,
-				PRIMARY KEY  (event_id,dancer_id)
-				);" .
-			"CREATE TABLE regsys_items (
-				event_id int(11) unsigned NOT NULL,
-				item_id int(11) unsigned NOT NULL AUTO_INCREMENT,
-				name varchar(255) NOT NULL,
-				type varchar(11) NOT NULL,
-				preregistration tinyint(1) unsigned NOT NULL DEFAULT '1',
-				price_prereg tinyint(3) unsigned NOT NULL DEFAULT '0',
-				price_door tinyint(3) unsigned NOT NULL DEFAULT '0',
-				price_vip tinyint(3) unsigned NOT NULL DEFAULT '0',
-				limit_total smallint(5) unsigned NOT NULL DEFAULT '0',
-				limit_per_position smallint(5) unsigned NOT NULL DEFAULT '0',
-				date_expires int(11) unsigned NOT NULL DEFAULT '0',
-				meta varchar(20) NOT NULL DEFAULT '',
-				description varchar(255) NOT NULL DEFAULT '',
-				PRIMARY KEY  (item_id),
-				UNIQUE KEY name (event_id,name)
-				);" .
-			"CREATE TABLE regsys_item_prices (
-				event_id int(11) unsigned NOT NULL,
-				item_id int(11) unsigned NOT NULL,
-				scale_count smallint(5) unsigned NOT NULL,
-				scale_price smallint(5) unsigned NOT NULL,
-				PRIMARY KEY  (event_id,item_id,scale_count)
-				);" .
-			"CREATE TABLE regsys_registrations (
-				event_id int(11) unsigned NOT NULL,
-				dancer_id int(11) unsigned NOT NULL,
-				item_id int(11) unsigned NOT NULL,
-				price tinyint(3) unsigned NOT NULL,
-				paypal_confirmed tinyint(1) unsigned NOT NULL DEFAULT '0',
-				item_meta text NOT NULL,
-				PRIMARY KEY  (dancer_id,item_id)
-				);";
-			
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-			dbDelta($query);
-			
-			delete_option('reg_sys_db_version');
-			add_option('reg_sys_db_version', self::database_version, '', 'no');
-		}
-		
-		$options = get_option('reg_sys', array());
-		
-		if (empty($options['email_from'])) {
-			$options['email_from'] = get_option('admin_email');
-		}
-		
-		delete_option('reg_sys');
-		add_option('reg_sys', array_merge(self::$default_options, $options), '', 'no');
-	}
-	
-	static public function registration_form()
+	static public function registrationForm()
 	{
 		global $post;
 		
-		try {
-			# Define a constant for themes to use
-			define('REGISTRATION_FORM', true);
-			
-			# Stop the `WP Super Cache` plugin from caching registration pages
-			define('DONOTCACHEPAGE', true);
-			
+		try {			
 			# Don't mess with my timezone WordPress!
 			@date_default_timezone_set(get_option('timezone_string'));
 			
-			RegistrationSystem_Model::set_database(self::get_database_connection());
-			RegistrationSystem_Model::set_options(self::get_options());
+			$container = new \Pimple();
 			
-			$options = self::get_options();
-			self::$validation = new RegistrationSystem_Form_Validation;
-			self::$event = RegistrationSystem_Model_Event::get_event_by_id($options['current_event_id']);
+			$container['db'] = $container->share(function () { return RegSys::getDatabaseConnection(); });
+			$container['debug'] = WP_DEBUG;
+			$container['options'] = RegSys::getOptions();
+			$container['viewsPath'] = __DIR__ . '/views';
+			$container['notifyUrl'] = function () { return plugins_url('confirm-paypal.php', __FILE__); };
 			
-			if (!self::$event) {
-				throw new Exception(sprintf('Event ID not found: %d', $options['current_event_id']));
-			}
+			$container['isTester'] = current_user_can('edit_pages');
+			$container['permalink'] = function () { return get_permalink(); };
+			$container['wordpressContent'] = function () use ($post) { return apply_filters('the_content', $post->post_content); };
+			$container['shirtDescription'] = function () { return @file_get_contents(sprintf('%s/%s/regsys-shirt-description.html', get_theme_root(), get_stylesheet())); };
 			
-			self::$vip = (self::$event->has_vip() and isset($_GET['vip']));
-			
-			# Display page content when registration is not available.
-			if ((time() > self::$event->date_paypal_prereg_end() and time() > self::$event->date_mail_prereg_end() and !self::$vip) or ($options['registration_testing'] and !current_user_can('edit_pages'))) {
-				if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
-				
-				echo self::render_template('form-page-content.html', array(
-					'event'       => self::$event,
-					'the_content' => apply_filters('the_content', $post->post_content),
-					));
-				
-				if (!get_post_meta($post->ID, 'registration_form', true)) { get_footer(); }
-				
-				return;
-			}
-			
-			# Setup validation rules
-			if (!empty($_POST)) {
-				self::$validation->add_rules(array(
-					'first_name'      => 'trim|required|max_length[100]|ucfirst',
-					'last_name'       => 'trim|required|max_length[100]|ucfirst',
-					'email'           => 'trim|valid_email|max_length[255]|RegistrationSystem::validate_email_address',
-					'confirm_email'   => 'trim|valid_email|max_length[255]',
-					'mobile_phone'    => 'trim|required|max_length[30]|RegistrationSystem::validate_mobile_phone',
-					'position'        => 'intval|in[1,2]',
-					'status'          => 'RegistrationSystem::validate_status',
-					'package'         => 'intval|RegistrationSystem::validate_package',
-					'items'           => 'RegistrationSystem::validate_items',
-					'payment_method'  => 'in[Mail,PayPal]',
-					));
-				
-				# Level
-				if (self::$event->has_levels()) {
-					$validation->add_rule('level_id', sprintf('intval|in[%s]', $event->levels_for_validation()));
-				}
-				else {
-					$_POST['level_id'] = 1;
-				}
-				
-				# Discount
-				if (self::$event->has_discounts()) {
-					self::$validation->add_rule('discount_code', 'trim|RegistrationSystem::validate_discount_code');
-				}
-				else {
-					unset($_POST['discount_code']);
-				}
-				
-				# Housing
-				if (self::$event->has_housing_support()) {
-					self::$validation->add_rules(array(
-						'housing_provider[housing_spots_available]' => 'if_set[housing_type_provider]|intval|greater_than[0]',
-						'housing_provider[housing_smoke]'           => 'if_set[housing_type_provider]|intval|in[0,1]',
-						'housing_provider[housing_pets]'            => 'if_set[housing_type_provider]|intval|in[0,1]',
-						'housing_provider[housing_gender]'          => 'if_set[housing_type_provider]|intval|in[1,2,3]',
-						'housing_provider[housing_bedtime]'         => 'if_set[housing_type_provider]|intval|in[0,1,2]',
-						'housing_provider[housing_nights]'          => 'if_set[housing_type_provider]|RegistrationSystem::validate_housing_nights',
-						'housing_provider[housing_comment]'         => 'if_set[housing_type_provider]|trim|stripslashes|max_length[65536]',
-						));
-				}
-				
-				if (self::$event->has_housing_registrations()) {
-					self::$validation->add_rules(array(
-						'housing_needed[housing_from_scene]' => 'if_set[housing_type_needed]|trim|required|max_length[255]|ucwords',
-						'housing_needed[housing_smoke]'      => 'if_set[housing_type_needed]|intval|in[0,1]',
-						'housing_needed[housing_pets]'       => 'if_set[housing_type_needed]|intval|in[0,1]',
-						'housing_needed[housing_gender]'     => 'if_set[housing_type_needed]|intval|in[1,2,3]',
-						'housing_needed[housing_bedtime]'    => 'if_set[housing_type_needed]|intval|in[0,1,2]',
-						'housing_needed[housing_nights]'     => 'if_set[housing_type_needed]|RegistrationSystem::validate_housing_nights',
-						'housing_needed[housing_comment]'    => 'if_set[housing_type_needed]|trim|stripslashes|max_length[65536]',
-						));
-				}
-				elseif (self::$event->has_housing_support()) {
-					# Invalidate form if housing registrations were shut off during the registration process.
-					self::$validation->add_rules(array(
-						'housing_type_needed'   => 'if_set[housing_type_needed]|in[0]',
-						));
-				}
-			}
-			
-			# Determine appropriate file for current step
-			if (empty($_POST) or !self::$validation->validate()) {
-				$file = 'form-register';
-				
-				# Change housing night values back to array to retain values
-				if (self::$event->has_housing_registrations() and isset($_POST['housing_type_needed'])) {
-					$_POST['housing_needed']['housing_nights'] = array_combine(explode(',', $_POST['housing_needed']['housing_nights']), explode(',', $_POST['housing_needed']['housing_nights']));
-				}
-				elseif (self::$event->has_housing_support() and isset($_POST['housing_type_provider'])) {
-					$_POST['housing_provider']['housing_nights'] = array_combine(explode(',', $_POST['housing_provider']['housing_nights']), explode(',', $_POST['housing_provider']['housing_nights']));
-				}
-				
-				$context = array(
-					'packages'     => self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? AND (date_expires = 0 OR date_expires > ?) AND type = ? ORDER BY item_id ASC', array(self::$event->id(), time(), 'package'),     'RegistrationSystem_Model_Item'),
-					'competitions' => self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? AND (date_expires = 0 OR date_expires > ?) AND type = ? ORDER BY item_id ASC', array(self::$event->id(), time(), 'competition'), 'RegistrationSystem_Model_Item'),
-					'shirts'       => self::$database->fetchAll('SELECT * FROM regsys_items WHERE event_id = ? AND (date_expires = 0 OR date_expires > ?) AND type = ? ORDER BY item_id ASC', array(self::$event->id(), time(), 'shirt'),       'RegistrationSystem_Model_Item'),
-					'validation'   => self::$validation,
-					'the_content'  => apply_filters('the_content', $post->post_content),
-					'shirt_description' => @file_get_contents(sprintf('%s/%s/shirt-description.html', get_theme_root(), get_stylesheet())),
-					);
-			}
-			else {
-				$price_total = 0;
-				
-				if (empty($_POST['discount_code'])) {
-					$_POST['discount_code'] = null;
-					$discount_amount = false;
-				}
-				else {
-					$discount_amount = self::$event->discount_by_code($_POST['discount_code'])->discount_amount;
-				}
-				
-				if (self::$vip) {
-					foreach (self::$validated_items as $item) {
-						$price_total += $item->price_for_vip();
-					}
-				}
-				else {
-					foreach (self::$validated_items as $item) {
-						$price_total += $item->price_for_prereg($discount_amount);
-					}
-				}
-				
-				if ($price_total == 0) {
-					$_POST['payment_method'] = 'Mail';
-				}
-				
-				# Prep info before creating new dancer object
-				$dancer_data = $_POST;
-				unset($dancer_data['items'], $dancer_data['item_meta'], $dancer_data['confirmed'], $dancer_data['confirm_email']);
-				
-				$dancer_data['payment_owed']      = $price_total;
-				$dancer_data['price_total']       = $price_total; // Needed for confirmation page
-				$dancer_data['payment_confirmed'] = ($price_total == 0) ? 1 : 0;
-				
-				if (!empty($_POST['discount_code'])) {
-					$dancer_data['discount_id'] = self::$event->discount_by_code($_POST['discount_code'])->discount_id;
-				}
-				
-				if ($options['registration_testing']) {
-					$dancer_data['note'] = 'TEST';
-				}
-				else {
-					if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-						$ip = $_SERVER['HTTP_CLIENT_IP'];
-					}
-					elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-						$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-					}
-					elseif (!empty($_SERVER['HTTP_X_FORWARDED'])) {
-						$ip = $_SERVER['HTTP_X_FORWARDED'];
-					}
-					elseif (!empty($_SERVER['HTTP_FORWARDED_FOR'])) {
-						$ip = $_SERVER['HTTP_FORWARDED_FOR'];
-					}
-					elseif (!empty($_SERVER['HTTP_FORWARDED'])) {
-						$ip = $_SERVER['HTTP_FORWARDED'];
-					}
-					else {
-						$ip = $_SERVER['REMOTE_ADDR'];
-					}
-					
-					$dancer_data['note'] = 'IP Address: ' . $ip;
-				}
-				
-				if (self::$event->has_housing_registrations() and isset($dancer_data['housing_type_needed'])) {
-					$dancer_data = array_merge($dancer_data, $dancer_data['housing_needed']);
-					$dancer_data['housing_type'] = 1;
-				}
-				elseif (self::$event->has_housing_support() and isset($dancer_data['housing_type_provider'])) {
-					$dancer_data = array_merge($dancer_data, $dancer_data['housing_provider']);
-					$dancer_data['housing_type'] = 2;
-				}
-				
-				unset($dancer_data['discount_code'], $dancer_data['housing_type_needed'], $dancer_data['housing_needed'], $dancer_data['housing_type_provider'], $dancer_data['housing_provider']);
-				
-				$dancer = new RegistrationSystem_Model_Dancer($dancer_data);
-				unset($dancer_data);
-				
-				if (!isset($_POST['confirmed'])) {
-					$file = 'form-confirm';
-					
-					$context = array(
-						'dancer' => $dancer,
-						'discount_amount' => $discount_amount,
-						'validated_items' => self::$validated_items,
-						);
-				}
-				else {
-					# Add dancer
-					$dancer->add(self::$event->id());
-					
-					# Add housing
-					if ((self::$event->has_housing_registrations() and $dancer->needs_housing()) or (self::$event->has_housing_support() and $dancer->is_housing_provider())) {
-						$dancer->add_housing();
-					}
-					
-					# Add registrations
-					foreach (self::$validated_items as $item) {
-						if (self::$vip) {
-							$item_price = $item->price_for_vip();
-						}
-						else {
-							$item_price = $item->price_for_prereg($discount_amount);
-						}
-						
-						self::$event->add_registration(array(
-							'dancer_id' => $dancer->id(),
-							'item_id'   => $item->id(),
-							'price'     => $item_price,
-							'item_meta' => (!isset($_POST['item_meta'][$item->id()]) ? '' : $_POST['item_meta'][$item->id()]),
-							));
-					}
-					
-					# Create new dancer object with data from JOIN querys. Needed for confirmation email.
-					$dancer = self::$event->dancer_by_id($dancer->id());
-					
-					if (!$dancer) {
-						throw new Exception('Unable to retrieve new dancer info from database.');
-					}
-					
-					# Confirmation email
-					if (!$options['registration_testing'] or ($options['registration_testing'] and $options['email_testing'])) {
-						try {
-							if (!$dancer->send_confirmation_email()) {
-								throw new Exception('Email could not be sent to ' . $dancer->email);
-							}
-						}
-						catch (Exception $confirmation_email_failed) {
-							error_log('Error sending confirmation email: ' . $confirmation_email_failed->getMessage());
-						}
-					}
-					
-					$file = 'form-accepted';
-					
-					$context = array(
-						'dancer' => $dancer,
-						'confirmation_email_failed' => isset($confirmation_email_failed) ? $confirmation_email_failed : null,
-						'notify_url' => plugins_url('includes/paypal-confirm.php', __FILE__),
-						);
-				}
-			}
-			
-			if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
-			
-			echo self::render_template(sprintf('%s.html', $file), array_merge($context, array(
-				'event'     => self::$event,
-				'time'      => time(),
-				'vip'       => self::$vip,
-				'permalink' => get_permalink(),
-				)));
-			
-			if (!get_post_meta($post->ID, 'registration_form', true)) { get_footer(); }
+			$controller = new \RegSys\Controller\FrontEndController($container);
+			list($view, $context) = $controller->registrationForm();
+			$output = $controller->render($view, $context);
 		}
-		catch (Exception $e) {
-			if (!get_post_meta($post->ID, 'registration_form', true)) { get_header(); }
-			printf('<div id="reg-sys-exception">%s</div>'."\n", $e->getMessage());
-			if (!get_post_meta($post->ID, 'registration_form', true)) { get_footer(); }
+		catch (\Exception $e) {
+			$output = printf('<div id="regsys-exception">%s</div>'."\n", $e->getMessage());
+		}
+		
+		# Include default header and footer, unless post meta is used to flag form when not using the default (e.g., a WordPress Page Template for multiple pages).
+		if (!get_post_meta($post->ID, 'regsysRegistrationForm', true)) {
+			get_header();
+			echo $output;
+			get_footer();
+		}
+		else {
+			echo $output;
 		}
 	}
 	
-	static public function registration_head()
+	static public function registrationHead()
 	{
-		add_action('wp_head', 'RegistrationSystem::registration_wp_head');
-		wp_enqueue_style('reg-sys-form', plugins_url('static/register.css', __FILE__));
+		add_action('wp_head', 'RegSys::wpHead');
 		
-		# Check if the current theme has a stylesheet for the registration
-		$theme_stylesheet = sprintf('%s/%s/style-reg-sys-form.css', get_theme_root(), get_stylesheet());
-		if (file_exists($theme_stylesheet)) {
-			wp_enqueue_style('reg-sys-form-theme', get_stylesheet_directory_uri() . '/style-reg-sys-form.css');
+		if (file_exists(sprintf('%s/%s/style-regsys-override.css', get_theme_root(), get_stylesheet()))) {
+			wp_enqueue_style('regsys-css-theme-override', get_stylesheet_directory_uri() . '/style-regsys-override.css');
+		}
+		else {
+			wp_enqueue_style('regsys-css', plugins_url('static/regsys-register.css', __FILE__));
+			
+			if (file_exists(sprintf('%s/%s/style-regsys.css', get_theme_root(), get_stylesheet()))) {
+				wp_enqueue_style('regsys-css-theme', get_stylesheet_directory_uri() . '/style-regsys.css');
+			}
 		}
 		
-		wp_enqueue_script('reg-sys-form-script', plugins_url('static/register.js', __FILE__), array('jquery'));
+		wp_enqueue_script('regsys-script', plugins_url('static/regsys-register.js', __FILE__), array('jquery'));
+	}
+		
+	static public function wpAdminInit()
+	{
+		register_setting('regsys', 'regsys', 'RegSys::wpAdminValidateOptions');
 	}
 	
-	static public function registration_wp_head()
+	static public function wpAdminMenu()
 	{
-		# Block search engines for this page if they are not blocked already
+		$reportsHook = add_menu_page('Registration Reports', 'Registration Reports', 'edit_pages', 'regsys', 'RegSys::handleMenuReportsPage');
+		$optionsHook = add_submenu_page('regsys', 'Registration Options', 'Registration Options', 'manage_options', 'regsys-options', 'RegSys::handleMenuOptionsPage');
+		
+		add_action('admin_print_scripts-' . $reportsHook, 'RegSys::wpAdminPrintScripts');
+		add_action('admin_print_styles-'  . $reportsHook, 'RegSys::wpAdminPrintStyles');
+		add_action('admin_print_styles-'  . $optionsHook, 'RegSys::wpAdminPrintStyles');
+		add_action('admin_print_styles', 'RegSys::wpAdminMenuHideIcon');
+	}
+	
+	static public function wpAdminMenuHideIcon()
+	{
+		echo '<!-- RegSys: Hide Menu Icon --><style type="text/css">li#toplevel_page_regsys div.wp-menu-image { display: none; } body.folded li#toplevel_page_regsys div.wp-menu-image { display: inherit; }</style>';
+	}
+	
+	static public function wpAdminPrintScripts()
+	{
+		wp_enqueue_script('regsys-tablesorter',      plugins_url('static/jquery.tablesorter.min.js',  __FILE__), array('jquery'));
+		wp_enqueue_script('regsys-tablesorter-init', plugins_url('static/jquery.tablesorter-init.js', __FILE__), array('regsys-tablesorter'));
+		
+		if (isset($_GET['request']) and $_GET['request'] == 'ReportVisualization') {
+			wp_enqueue_script('regsys-google-jsapi', 'http://www.google.com/jsapi');
+		}
+	}
+	
+	static public function wpAdminPrintStyles()
+	{
+		wp_enqueue_style('regsys-admin-style', plugins_url('static/regsys-admin.css', __FILE__));
+	}
+	
+	static public function wpAdminValidateOptions($input)
+	{
+		$options = self::getOptions();
+		
+		\RegSys\Entity::setDatabase(self::getDatabaseConnection());
+		
+		if (isset($input['currentEventID']) and \RegSys\Entity\Event::eventByID($input['currentEventID'])) {
+			$options['currentEventID'] = (int) $input['currentEventID'];
+		}
+		
+		$options['registrationTesting'] = isset($input['registrationTesting']);
+		
+		if (isset($input['postmarkWithin'])) {
+			$options['postmarkWithin'] = (int) $input['postmarkWithin'];
+		}
+		else {
+			$options['postmarkWithin'] = 7;
+		}
+		
+		if (isset($input['payableTo'])) {
+			$options['payableTo'] = trim($input['payableTo']);
+		}
+		
+		if (isset($input['mailingAddress'])) {
+			$options['mailingAddress'] = trim($input['mailingAddress']);
+		}
+		
+		if (isset($input['paypalBusiness'])) {
+			$options['paypalBusiness'] = trim($input['paypalBusiness']);
+		}
+		
+		if (isset($input['paypalFee'])) {
+			$options['paypalFee'] = (int) $input['paypalFee'];
+		}
+		
+		$options['paypalSandbox'] = isset($input['paypalSandbox']);
+		
+		if (isset($input['paypalSandboxEmail'])) {
+			$options['paypalSandboxEmail'] = trim($input['paypalSandboxEmail']);
+		}
+		
+		if (isset($input['emailFrom'])) {
+			$options['emailFrom'] = trim($input['emailFrom']);
+		}
+		else {
+			$options['emailFrom'] = get_option('adminEmail');
+		}
+		
+		if (isset($input['emailReplyTo'])) {
+			$options['emailReplyTo'] = trim($input['emailReplyTo']);
+		}
+		
+		if (isset($input['emailBcc'])) {
+			$options['emailBcc'] = trim($input['emailBcc']);
+		}
+		
+		$options['emailTesting'] = isset($input['emailTesting']);
+		
+		if (isset($input['emailTransport']) and in_array($input['emailTransport'], array('smtp', 'mail'))) {
+			$options['emailTransport'] = $input['emailTransport'];
+		}
+		else {
+			$options['emailTransport'] = 'mail';
+		}
+		
+		if (isset($input['emailPort']) and is_numeric($input['emailPort'])) {
+			$options['emailPort'] = (int) $input['emailPort'];
+		}
+		
+		if (isset($input['emailUsername'])) {
+			$options['emailUsername'] = trim($input['emailUsername']);
+		}
+		
+		if (isset($input['emailPassword'])) {
+			$options['emailPassword'] = $input['emailPassword'];
+		}
+		
+		if (isset($input['emailEncryption']) and in_array($input['emailEncryption'], array('ssl', 'tsl', 'none'))) {
+			$options['emailEncryption'] = $input['emailEncryption'];
+		}
+		
+		return $options;
+	}
+	
+	static public function wpHead()
+	{
+		# Block search engines for registration page if they are not blocked already
 		if (get_option('blog_public')) {
 			echo "<meta name='robots' content='noindex,nofollow' />\n";
 		}
 	}
 	
-	static public function render_template($file, array $context = array())
+	static public function wpPluginActivate()
 	{
-		if (!isset(self::$twig)) {
-			require dirname(__FILE__) . '/includes/Twig/lib/Twig/Autoloader.php';
-			Twig_Autoloader::register();
+		if (version_compare(get_option('regsysVersion'), self::version, '<')) {
+			$query = "" .
+			"CREATE TABLE regsys__dancers (
+				eventID int(11) unsigned NOT NULL,
+				dancerID int(11) unsigned NOT NULL AUTO_INCREMENT,
+				firstName varchar(100) NOT NULL,
+				lastName varchar(100) NOT NULL,
+				email varchar(254) NOT NULL,
+				position tinyint(1) NOT NULL,
+				levelID tinyint(1) unsigned NOT NULL DEFAULT '1',
+				volunteer tinyint(1) NOT NULL DEFAULT '0',
+				dateRegistered int(11) unsigned NOT NULL DEFAULT '0',
+				discountCode varchar(255) DEFAULT NULL,
+				paymentMethod enum('Mail','PayPal') DEFAULT NULL,
+				paymentConfirmed tinyint(1) NOT NULL DEFAULT '0',
+				paymentOwed smallint(5) unsigned NOT NULL DEFAULT '0',
+				paypalFee decimal(4,2) DEFAULT NULL,
+				phone varchar(50) DEFAULT NULL,
+				note varchar(255) DEFAULT NULL,
+				PRIMARY KEY  (dancerID)
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8;".
+			"CREATE TABLE regsys__events (
+				eventID int(11) unsigned NOT NULL AUTO_INCREMENT,
+				`name` varchar(255) NOT NULL,
+				dateMail int(11) unsigned NOT NULL DEFAULT '0',
+				datePayPal int(11) unsigned NOT NULL DEFAULT '0',
+				dateRefund int(11) unsigned NOT NULL DEFAULT '0',
+				hasLevels tinyint(1) NOT NULL DEFAULT '0',
+				hasVolunteers tinyint(1) NOT NULL DEFAULT '0',
+				hasHousing tinyint(1) NOT NULL DEFAULT '0',
+				housingNights set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
+				visualization tinyint(1) NOT NULL DEFAULT '1',
+				visualizationColor char(7) NOT NULL DEFAULT '#333',
+				volunteerDescription varchar(255) NOT NULL DEFAULT '',
+				PRIMARY KEY  (eventID),
+				UNIQUE KEY  `name` (`name`)
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8;".
+			"CREATE TABLE regsys__event_discounts (
+				eventID int(11) unsigned NOT NULL,
+				discountCode varchar(255) NOT NULL,
+				discountAmount smallint(5) NOT NULL,
+				discountLimit smallint(5) unsigned NOT NULL DEFAULT '0',
+				discountExpires int(11) unsigned NOT NULL DEFAULT '0',
+				PRIMARY KEY  (eventID,discountCode),
+				UNIQUE KEY  discount_code (eventID,discountCode)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8;".
+			"CREATE TABLE regsys__event_levels (
+				eventID int(11) unsigned NOT NULL,
+				levelID tinyint(1) unsigned NOT NULL,
+				levelLabel varchar(255) NOT NULL,
+				hasTryouts tinyint(1) NOT NULL DEFAULT '0',
+				PRIMARY KEY  (eventID,levelID),
+				UNIQUE KEY  levelLabel (eventID,levelLabel)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8;".
+			"CREATE TABLE regsys__housing (
+				eventID int(11) unsigned NOT NULL,
+				dancerID int(11) unsigned NOT NULL,
+				housingType tinyint(1) NOT NULL,
+				housingSpotsAvailable tinyint(3) unsigned DEFAULT NULL,
+				housingNights set('Friday','Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday') NOT NULL,
+				housingGender tinyint(1) NOT NULL DEFAULT '3',
+				housingBedtime tinyint(1) NOT NULL DEFAULT '0',
+				housingPets tinyint(1) NOT NULL DEFAULT '0',
+				housingSmoke tinyint(1) NOT NULL DEFAULT '0',
+				housingFromScene varchar(255) DEFAULT NULL,
+				housingComment text,
+				PRIMARY KEY  (eventID,dancerID)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8;".
+			"CREATE TABLE regsys__items (
+				eventID int(11) unsigned NOT NULL,
+				itemID int(11) unsigned NOT NULL AUTO_INCREMENT,
+				`name` varchar(255) NOT NULL,
+				`type` varchar(11) NOT NULL,
+				pricePrereg tinyint(3) unsigned NOT NULL DEFAULT '0',
+				priceDoor tinyint(3) unsigned NOT NULL DEFAULT '0',
+				limitTotal smallint(5) unsigned NOT NULL DEFAULT '0',
+				limitPerPosition smallint(5) unsigned NOT NULL DEFAULT '0',
+				dateExpires int(11) unsigned DEFAULT NULL,
+				meta enum('Position','Partner','Team Members','Count for Classes') DEFAULT NULL,
+				description varchar(255) NOT NULL DEFAULT '',
+				PRIMARY KEY  (itemID),
+				UNIQUE KEY  `name` (eventID,`name`)
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8;".
+			"CREATE TABLE regsys__item_prices (
+				eventID int(11) unsigned NOT NULL,
+				itemID int(11) unsigned NOT NULL,
+				tierCount smallint(5) unsigned NOT NULL,
+				tierPrice smallint(5) unsigned NOT NULL,
+				PRIMARY KEY  (itemID,tierCount)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8;".
+			"CREATE TABLE regsys__registrations (
+				eventID int(11) unsigned NOT NULL,
+				dancerID int(11) unsigned NOT NULL,
+				itemID int(11) unsigned NOT NULL,
+				price tinyint(3) unsigned NOT NULL,
+				paypalConfirmed tinyint(1) NOT NULL DEFAULT '0',
+				itemMeta text,
+				PRIMARY KEY  (dancerID,itemID)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 			
-			self::$twig = new Twig_Environment(
-				new Twig_Loader_Filesystem(dirname(__FILE__) . '/templates'),
-				array('debug' => WP_DEBUG));
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+			dbDelta($query); # Voodoo
 			
-			if (WP_DEBUG) {
-				self::$twig->addExtension(new Twig_Extension_Debug());
-			}
-			
-			self::$twig->getExtension('core')->setDateFormat('Y-m-d, h:i A');
-			self::$twig->addGlobal('form', new RegistrationSystem_Form_Controls);
-			self::$twig->addFunction('getPost',  new Twig_Function_Function('RegistrationSystem_Form_Validation::get_post_value'));
-			self::$twig->addFunction('getError', new Twig_Function_Function('RegistrationSystem::template_error_helper'));
-			self::$twig->addFunction('pluralize', new Twig_Function_Function('_n'));
-			
-			if (is_admin() and $_GET['page'] == 'reg-sys-options') {
-				self::$twig->addFunction('settings_fields', new Twig_Function_Function('settings_fields', array('is_safe' => array('html'))));
-			}
+			delete_option('regsysVersion');
+			add_option('regsysVersion', self::version, '', 'no');
 		}
 		
-		$context['GET'] = $_GET;
-		$context['POST'] = $_POST;
-		$context['options'] = self::get_options();
+		$options = self::getOptions();
 		
-		if (is_admin()) {
-			$context['admin'] = current_user_can('administrator');
-			
-			if (isset(self::$event)) {
-				$context['request_href'] = site_url('wp-admin/admin.php') . sprintf('?page=reg-sys&event_id=%d&request=', self::$event->id());
-			}
-			else {
-				$context['request_href'] = site_url('wp-admin/admin.php') . '?page=reg-sys&request=';
-			}
+		if (empty($options['emailFrom'])) {
+			$options['emailFrom'] = get_option('admin_email');
 		}
 		
-		return self::$twig->loadTemplate($file)->render($context);
+		delete_option('regsys');
+		add_option('regsys', $options, '', 'no');
 	}
 	
-	static public function template_error_helper($key, $prefix = null, $suffix = null)
-	{
-		return self::$validation->get_error($key, $prefix, $suffix);
-	}
-	
-	static public function validate_discount_code($code)
-	{
-		if (empty($code)) {
-			return true;
-		}
-		elseif (!self::$event->has_discount_openings($code)) {
-			unset($_POST['discount_code']);
-			self::$validation->set_error('discount_code', sprintf('"%s" is either an invalid code or its limit has been reached.', esc_html($code)));
-			return false;
-		}
-		elseif (self::$event->has_discount_expired($code)) {
-			unset($_POST['discount_code']);
-			self::$validation->set_error('discount_code', sprintf('Discount code "%s" has expired.', esc_html($code)));
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-	
-	static public function validate_email_address($email)
-	{
-		$options = self::get_options();
-		
-		if (isset($_POST['confirm_email']) and $_POST['confirm_email'] == $email) {
-			if ($options['registration_testing'] or empty($_POST['first_name']) or empty($_POST['last_name'])) {
-				return true;
-			}
-			elseif (!self::$event->dancers_where(array(':first_name' => $_POST['first_name'], ':last_name' => $_POST['last_name'], ':email' => $email))) {
-				return true;
-			}
-			else {
-				self::$validation->set_error('email', sprintf('Someone has already registered with this information. If you have already registered and need to change your information, then please reply to your confirmation email. For any other concerns, email <a href="mailto:%1$s">%1$s</a>.', $options['email_reply_to'] ? $options['email_reply_to'] : $options['email_from']));
-				return false;
-			}
-		}
-		else {
-			self::$validation->set_error('email', 'Your email addresses do not match.');
-			return false;
-		}
-	}
-	
-	static public function validate_mobile_phone($phone_number)
-	{
-		preg_match('/^(?:\(?([0-9]{3})\)?)?[- \.]?([0-9]{3})[- \.]?([0-9]{4})/', $phone_number, $matches);
-		unset($matches[0]);
-		
-		return (!empty($matches)) ? implode('-', array_filter($matches)) : true;
-	}
-	
-	static public function validate_package($package_id)
-	{
-		if ($package_id === 0) {
-			return true;
-		}
-		elseif (self::validate_items(array($package_id => $package_id))) {
-			$item = self::$event->item_by_id($package_id);
-			
-			if (isset($_POST['package_tier'][$package_id]) and $_POST['package_tier'][$package_id] != $item->price_tier()) {
-				self::$validation->set_error('package', 'The price has changed on this package. Review the price before continuing with your registration.');
-				return false;
-			}
-			else {
-				return true;
-			}
-		}
-		else {
-			return false;
-		}
-	}
-	
-	static public function validate_items($items)
-	{
-		if (empty($items)) {
-			return true; # skip
-		}
-		elseif (!is_array($items)) {
-			return false;
-		}
-		
-		if (empty($_POST['item_meta']) or !is_array($_POST['item_meta'])) {
-			$_POST['item_meta'] = array();
-		}
-		
-		$items_did_validate = true;
-		
-		foreach ($items as $key => $value) {
-			$item = self::$event->item_by_id($key);
-			
-			if (!$item) {
-				continue;
-			}
-			
-			switch ($item->meta) {
-				# If position wasn't specified specifically for item, use dancer's position.
-				case 'position':
-					if (!isset($_POST['item_meta'][$item->id()]) or !in_array($_POST['item_meta'][$item->id()], array('Lead', 'Follow'))) {
-						if (!self::$validation->get_error('position')) {
-							$_POST['item_meta'][$item->id()] = ($_POST['position'] == 1) ? 'Lead' : 'Follow';
-						}
-					}
-					break;
-				
-				case 'partner_name':
-					if (empty($_POST['item_meta'][$item->id()])) {
-						self::$validation->set_error('item_' . $item->id(), sprintf('Your partner\'s name must be specified for %s.', $item->name));
-						$items_did_validate = false;
-						continue 2;
-					}
-					else {
-						$_POST['item_meta'][$item->id()] = trim($_POST['item_meta'][$item->id()]);
-						// TODO: Check if partner has already registered for this item.
-					}
-					break;
-				
-				case 'team_members':
-					if (empty($_POST['item_meta'][$item->id()])) {
-						self::$validation->set_error('item_' . $item->id(), sprintf('Team members must be specified for %s.', $item->name));
-						$items_did_validate = false;
-						continue 2;
-					}
-					else {
-						# Standarize formatting
-						$_POST['item_meta'][$item->id()] = ucwords(preg_replace(array("/[\r\n]+/", "/\n+/", "/\r+/", '/,([^ ])/', '/, , /'), ', $1', trim($_POST['item_meta'][$item->id()])));
-						
-						if (strlen($_POST['item_meta'][$item->id()]) > 65536) {
-							self::$validation->set_error('item_' . $item->id(), sprintf('Team members list for %s is too long.', $item->name));
-							$items_did_validate = false;
-							continue 2;
-						}
-					}
-					break;
-				
-				case 'size':
-					if (!in_array($value, array_merge(array('None'), explode(',', $item->description)))) {
-						self::$validation->set_error('item_' . $item->id(), sprintf('An invalid size was choosen for %s.', $item->name));
-						$items_did_validate = false;
-						continue 2;
-					}
-					elseif ($value === 'None') {
-						continue 2; # No size selected;
-					}
-					$_POST['item_meta'][$item->id()] = $value; # Populate `item_meta` for the confirmation and PayPal page
-					break;
-			}
-			
-			# Check openings again, in case they have filled since the form was first displayed to the user
-			if (($item->meta != 'position' and !$item->count_openings()) or ($item->meta == 'position' and !$item->count_openings($_POST['item_meta'][$item->id()]))) {
-				self::$validation->set_error('item_' . $item->id(), sprintf('There are no longer any openings for %s.', $item->name));
-				$items_did_validate = false;
-				continue;
-			}
-			
-			self::$validated_items[$item->id()] = $item;
-		}
-		
-		return $items_did_validate;
-	}
-	
-	static public function validate_status($status)
-	{
-		if (self::$vip === true) {
-			return 2;
-		}
-		elseif (self::$event->has_volunteers() and isset($_POST['status']) and $_POST['status'] == '1') {
-			return 1;
-		}
-		else {
-			return 0;
-		}
-	}
-	
-	static public function validate_housing_nights($nights)
-	{
-		if (is_array($nights)) {
-			$nights = implode(',', $nights);
-		}
-		
-		if (!empty($nights)) {
-			return $nights;
-		}
-		else {
-			$key = isset($_POST['housing_type_needed']) ? 'housing_needed[housing_nights]' : 'housing_provider[housing_nights]';
-			self::$validation->set_error($key, 'You must specify nights for housing.');
-			return false;
-		}
-	}
+	private function __clone() {}
+	private function __construct() {}
 }
 
-add_action('admin_init', 'RegistrationSystem::admin_init');
-add_action('admin_menu', 'RegistrationSystem::admin_menu');
-register_activation_hook(__FILE__, 'RegistrationSystem::plugin_activate');
-spl_autoload_register('RegistrationSystem::autoload');
+add_action('admin_init', 'RegSys::wpAdminInit');
+add_action('admin_menu', 'RegSys::wpAdminMenu');
+register_activation_hook(__FILE__, 'RegSys::wpPluginActivate');
+require __DIR__ . '/vendor/autoload.php';
 endif;
