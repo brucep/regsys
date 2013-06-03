@@ -38,13 +38,17 @@ class FrontEndController extends \RegSys\Controller
 			$dancer = new \RegSys\Entity\Dancer($dancerData);
 			unset($dancerData);
 			
+			if (!isset($_POST['package'])) {
+				$_POST['package'] = '0';
+			}
+			
 			$validationErrors = array_merge(
 				$dancer->validate($event),
 				$dancer->validateHousing($event),
 				$dancer->validatePackage(
 					$event,
-					isset($_POST['package']) ? $_POST['package'] : 0,
-					isset($_POST['packageTier']) ? $_POST['packageTier'] : null),
+					$_POST['package'],
+					isset($_POST['packageTier'][$_POST['package']]) ? $_POST['packageTier'][$_POST['package']] : null),
 				$dancer->validateItems(
 					$event,
 					isset($_POST['items']) ? $_POST['items'] : array(),
