@@ -304,7 +304,7 @@ class Item extends \RegSys\Entity
 		}
 		
 		if ($this->type == 'package' and !in_array($this->meta, array('', 'Count for Classes')) or
-			$this->type == 'competition' and !in_array($this->meta, array('', 'Position', 'Partner', 'Team Members')) or
+			$this->type == 'competition' and !in_array($this->meta, array('', 'Position', 'Partner', 'Team Members', 'CrossoverJJ')) or
 			$this->type == 'shirt') {
 			$this->meta = null;
 		}

@@ -38,6 +38,9 @@
 				{%- set tempMeta = POST.itemMeta[item.id] ? POST.itemMeta[item.id] : dancer.registeredItems[item.id] ? dancer.registeredItems[item.id].registeredMeta : null -%}
 					{%- if item.meta == 'Position' -%}
 					<label><input type="radio" name="itemMeta[{{ item.id }}]" value="Lead" {%- if tempMeta == 'Lead' %} checked="checked"{% endif %} />&nbsp;Lead</label><label><input type="radio" name="itemMeta[{{ item.id }}]" value="Follow" {%- if tempMeta == 'Follow' %} checked="checked"{% endif %} style="margin-left: 0.75em" />&nbsp;Follow</label>
+					{%- elseif item.meta == 'CrossoverJJ' -%}
+					<label><input type="radio" name="itemMeta[{{ item.id }}]" value="Lead" {%- if tempMeta == 'Lead' %} checked="checked"{% endif %} />&nbsp;Lead</label><label><input type="radio" name="itemMeta[{{ item.id }}]" value="Follow" {%- if tempMeta == 'Follow' %} checked="checked"{% endif %} style="margin-left: 0.75em" />&nbsp;Follow</label>
+					need to add check for int/adv
 					{%- elseif item.meta == 'Partner' -%}
 					<label>Partner:&nbsp;<input type="text" name="itemMeta[{{ item.id }}]" value="{{ tempMeta }}"/></label>
 					{%- elseif item.meta == 'Team Members' -%}
