@@ -24,6 +24,8 @@
 				<th class="manage-column column-title"><div>Name</div></th>
 				{% if item.meta == 'Position' -%}
 				<th class="manage-column"><div>Position</div></th>
+				{%- elseif item.meta == 'CrossoverJJ' -%}
+				<th class="manage-column"><div>Crossover JJ</div></th>				
 				{%- elseif item.meta == 'Partner' -%}
 				<th class="manage-column"><div>Partner</div></th>
 				{%- elseif item.meta == 'Team Members' -%}
@@ -38,6 +40,8 @@
 				<th class="manage-column column-title"><div>Name</div></th>
 				{% if item.meta == 'Position' -%}
 				<th class="manage-column"><div>Position</div></th>
+				{%- elseif item.meta == 'CrossoverJJ' -%}
+				<th class="manage-column"><div>Crossover JJ</div></th>
 				{%- elseif item.meta == 'Partner' -%}
 				<th class="manage-column"><div>Partner</div></th>
 				{%- elseif item.meta == 'Team Members' -%}
@@ -50,7 +54,7 @@
 			{% for dancer in item.registeredDancers -%}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
 				<td class="column-title"><a href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id }}">{{ dancer.name }}</a></td>
-				{% if item.meta in ['Position', 'Partner', 'Team Members'] -%}
+				{% if item.meta in ['Position', 'Partner', 'Team Members', 'CrossoverJJ'] -%}
 				<td>{{ dancer.itemMeta | title }}</td>
 				{%- endif %}
 			</tr>

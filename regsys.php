@@ -405,7 +405,7 @@ class RegSys
 				limitTotal smallint(5) unsigned NOT NULL DEFAULT '0',
 				limitPerPosition smallint(5) unsigned NOT NULL DEFAULT '0',
 				dateExpires int(11) unsigned DEFAULT NULL,
-				meta enum('Position','Partner','Team Members','Count for Classes') DEFAULT NULL,
+				meta enum('Position','Partner','Team Members','CrossoverJJ','Count for Classes') DEFAULT NULL,
 				description varchar(255) NOT NULL DEFAULT '',
 				PRIMARY KEY  (itemID),
 				UNIQUE KEY  `name` (eventID,`name`)
