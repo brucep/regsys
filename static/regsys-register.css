@@ -85,6 +85,7 @@ margin-top: -1px;
 
 #regsys-form table, div#regsys table {
 width: 100%;
+margin-bottom: 0px;
 }
 
 #regsys-form thead th, div#regsys thead th {
