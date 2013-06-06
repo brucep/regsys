@@ -122,12 +122,20 @@
 								&nbsp;<label><input name="itemMeta[{{ item.id }}]" type="radio" value="Follow" {%- if POST.itemMeta[item.id] == 'Follow' %} checked{% endif %}{%- if not attribute(item, 'countOpenings', ['Follow']) %} disabled{% endif %}>&nbsp;Follow</label>
 							</span>
 							{%- elseif item.meta == 'CrossoverJJ' -%}
-							<span class="inline_radio">Register as:
-								&nbsp;<label><input name="itemMeta[{{ item.id }}]" type="radio" value="Lead"   {%- if POST.itemMeta[item.id] == 'Lead'   %} checked{% endif %}{%- if not attribute(item, 'countOpenings', ['Lead'])   %} disabled{% endif %}>&nbsp;Lead</label>
-								&nbsp;<label><input name="itemMeta[{{ item.id }}]" type="radio" value="Follow" {%- if POST.itemMeta[item.id] == 'Follow' %} checked{% endif %}{%- if not attribute(item, 'countOpenings', ['Follow']) %} disabled{% endif %}>&nbsp;Follow</label>
-								<br/>
-								<label><input name="itemMeta[{{ item.id}}]" type="radio" value="Intermediate" {%- if POST.itemMeta[item.id] == "Intermediate" -%} checked {% endif %}>Intermediate</label>
-								<label><input name="itemMeta[{{ item.id}}]" type="radio" value="Advanced" {%- if POST.itemMeta[item.id] == "Advanced" -%} checked {% endif %}>Advanced</label>
+							<span class="inline_radio">
+								<style type="text/css">
+									.inline_radio table td{
+										border-top: none !important;
+									}
+								</style>
+								<table><tr><td>Register as:</td><td>
+								<label><input name="itemMeta[{{ item.id }}]-position" type="radio" value="Lead"   {%- if POST.itemMeta[item.id] == 'Lead'   %} checked{% endif %}{%- if not attribute(item, 'countOpenings', ['Lead'])   %} disabled{% endif %}>&nbsp;Lead</label>
+								&nbsp;<label><input name="itemMeta[{{ item.id }}]-position" type="radio" value="Follow" {%- if POST.itemMeta[item.id] == 'Follow' %} checked{% endif %}{%- if not attribute(item, 'countOpenings', ['Follow']) %} disabled{% endif %}>&nbsp;Follow</label>
+								</td></tr>
+								<tr><td></td><td>
+								<label><input name="itemMeta[{{ item.id}}]-level" type="radio" value="Intermediate" {%- if POST.itemMeta[item.id] == "Intermediate" -%} checked {% endif %}>Intermediate</label>
+								<label><input name="itemMeta[{{ item.id}}]-level" type="radio" value="Advanced" {%- if POST.itemMeta[item.id] == "Advanced" -%} checked {% endif %}>Advanced</label>
+								</td></tr></table>
 							</span>
 							{%- elseif item.meta == 'Partner' -%}
 							<label>Partner:&nbsp;<input name="itemMeta[{{ item.id }}]" value="{{ POST.itemMeta[item.id] }}" type="text" placeholder="Partner's name"></label><br>(Only one of you needs to sign up.)
