@@ -495,6 +495,35 @@ class Dancer extends \RegSys\Entity
 						}
 					}
 				}
+				elseif ($item->meta() == 'CrossoverJJ') {
+					if (isset($meta[$item->id()])) {
+						# Pass array for position/level on registration form
+						if (is_array($meta[$item->id()])) {
+							# If position wasn't specified specifically for item, use dancer's position
+							if (!isset($meta[$item->id()]['position']) or !in_array($meta[$item->id()]['position'], array('Lead', 'Follow'))) {
+								if ($this->position != null) {
+									$meta[$item->id()]['position'] = !$this->position ? 'Lead' : 'Follow';
+								}
+								else {
+									$validationErrors['item' . $item->id()] = sprintf('Can\'t determine position for %s.', $item->name());
+									continue;
+								}
+							}
+							
+							if (!isset($meta[$item->id()]['level'])) {
+								$validationErrors['item' . $item->id()] = sprintf('Level must be specified for %s.', $item->name());
+								continue;
+							}
+							
+							$meta[$item->id()] = $meta[$item->id()]['position'] . '/' . $meta[$item->id()]['level'];
+							
+						}
+						# Accept string value from confirmation page
+					}
+					else {
+						$validationErrors['item' . $item->id()] = sprintf('Position and level must be specified for %s.', $item->name());
+					}
+				}
 				elseif ($item->meta() == 'Partner') {
 					if (isset($meta[$item->id()])) {
 						$meta[$item->id()] = ucwords(trim($meta[$item->id()]));
