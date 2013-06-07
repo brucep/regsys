@@ -47,7 +47,7 @@
 
 	<ul>
 		{% for item in dancer.registeredItems -%}
-		<li>{{ item.name }} {%- if item.registeredMeta %}{{ ' (%s)' | format(item.registeredMeta | capitalize) }}{% endif %}</li>
+		<li>{{ item.name }} {%- if item.registeredMeta %}{{ ' (%s)' | format(item.registeredMeta) }}{% endif %}</li>
 		{%- else -%}
 		<li>There are no registrations for this dancer.</li>
 		{%- endfor %}
