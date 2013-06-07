@@ -22,31 +22,14 @@
 		<thead>
 			<tr>
 				<th class="manage-column column-title"><div>Name</div></th>
-				{% if item.meta == 'Position' -%}
-				<th class="manage-column"><div>Position</div></th>
-				{%- elseif item.meta == 'CrossoverJJ' -%}
-				<th class="manage-column"><div>Crossover JJ</div></th>				
-				{%- elseif item.meta == 'Partner' -%}
-				<th class="manage-column"><div>Partner</div></th>
-				{%- elseif item.meta == 'Team Members' -%}
-				<th class="manage-column"><div>Team Members</div></th>
-				{%- endif %}
-
+				<th class="manage-column"><div>{% if item.meta == 'CrossoverJJ' %}Position/Level{% else %}{{ item.meta }}{% endif %}</div></th>
 			</tr>
 		</thead>
 
 		<tfoot>
 			<tr>
 				<th class="manage-column column-title"><div>Name</div></th>
-				{% if item.meta == 'Position' -%}
-				<th class="manage-column"><div>Position</div></th>
-				{%- elseif item.meta == 'CrossoverJJ' -%}
-				<th class="manage-column"><div>Crossover JJ</div></th>
-				{%- elseif item.meta == 'Partner' -%}
-				<th class="manage-column"><div>Partner</div></th>
-				{%- elseif item.meta == 'Team Members' -%}
-				<th class="manage-column"><div>Team Members</div></th>
-				{%- endif %}
+				<th class="manage-column"><div>{% if item.meta == 'CrossoverJJ' %}Position/Level{% else %}{{ item.meta }}{% endif %}</div></th>
 			</tr>
 		</tfoot>
 
@@ -54,12 +37,10 @@
 			{% for dancer in item.registeredDancers -%}
 			<tr {{- cycle(['', ' class="alternate"'], loop.index) | raw }}>
 				<td class="column-title"><a href="{{ requestHref ~ 'ReportDancer' ~ '&dancerID=' ~ dancer.id }}">{{ dancer.name }}</a></td>
-				{% if item.meta in ['Position', 'Partner', 'Team Members', 'CrossoverJJ'] -%}
-				<td>{{ dancer.itemMeta | title }}</td>
-				{%- endif %}
+				<td>{{ dancer.itemMeta }}</td>
 			</tr>
 			{%- else -%}
-			<tr><td {%- if item.meta %} colspan="2" {%- endif %}>There are no registered dancers for this competition.</td></tr>
+			<tr><td colspan="2">There are no registered dancers for this competition.</td></tr>
 			{%- endfor %}
 
 		</tbody>
