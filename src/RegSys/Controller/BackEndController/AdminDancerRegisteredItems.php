@@ -9,6 +9,7 @@ class AdminDancerRegisteredItems extends \RegSys\Controller\BackEndController
 		$dancer = $this->getRequestedDancer();
 		
 		if (!empty($_POST)) {
+			$validationErrors = array();
 			$paymentOwed = $dancer->paymentOwed();
 			
 			if (isset($_POST['itemsAdd'])) {
@@ -28,9 +29,6 @@ class AdminDancerRegisteredItems extends \RegSys\Controller\BackEndController
 						
 						unset($_POST['itemsAdd'][$itemID], $_POST['itemMeta'][$itemID]);
 					}
-				}
-				else {
-					$this->viewHelper->setErrors($validationErrors);
 				}
 			}
 			
@@ -54,12 +52,28 @@ class AdminDancerRegisteredItems extends \RegSys\Controller\BackEndController
 				# Reload dancer to reset registeredItems
 				$dancer = $this->getRequestedDancer();
 				
-				foreach ($_POST['itemMeta'] as $itemID => $meta) {
-					if ($dancer->registeredItems($itemID) and $dancer->registeredItems($itemID)->registeredMeta() != $meta) {
-						$this->db->query('UPDATE regsys__registrations SET itemMeta = ? WHERE dancerID = ? AND itemID = ?', array($meta, $dancer->id(), $itemID));
+				foreach ($_POST['itemMeta'] as $itemID => $newMeta) {
+					 $item = $dancer->registeredItems($itemID);
+					
+					if ($item instanceof \RegSys\Entity\Item) {
+						if ($item->meta() == 'CrossoverJJ') {
+							if (isset($newMeta['position']) and isset($newMeta['level'])) {
+								$newMeta = $newMeta['position'] . '/' . $newMeta['level'];
+							}
+							else {
+								$validationErrors['item' . $item->id()] = sprintf('Position and level must be specified for %s.', $item->name());
+								continue;
+							}
+						}
+						
+						if ($dancer->registeredItems($itemID)->registeredMeta() != $newMeta) {
+							$this->db->query('UPDATE regsys__registrations SET itemMeta = ? WHERE dancerID = ? AND itemID = ?', array($newMeta, $dancer->id(), $itemID));
+						}
 					}
 				}
 			}
+			
+			$this->viewHelper->setErrors($validationErrors);
 			
 			# Reload dancer to reset registeredItems
 			$dancer = $this->getRequestedDancer();

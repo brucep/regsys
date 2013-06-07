@@ -35,12 +35,18 @@
 				<td><input type="checkbox" value="{{ item.id }}" name="itemsDelete[{{ item.id }}]" {%- if not dancer.registeredItems[item.id] %} disabled="disabled"{% endif %}{% if POST.itemsDelete[item.id] %} checked="checked"{% endif%} /></td>
 				<td class="regsys-meta">
 				{%- if item.type == 'competition' -%}
-				{%- set tempMeta = POST.itemMeta[item.id] ? POST.itemMeta[item.id] : dancer.registeredItems[item.id] ? dancer.registeredItems[item.id].registeredMeta : null -%}
+					{%- set tempMeta = POST.itemMeta[item.id] ? POST.itemMeta[item.id] : dancer.registeredItems[item.id] ? dancer.registeredItems[item.id].registeredMeta : null -%}
 					{%- if item.meta == 'Position' -%}
-					<label><input type="radio" name="itemMeta[{{ item.id }}]" value="Lead" {%- if tempMeta == 'Lead' %} checked="checked"{% endif %} />&nbsp;Lead</label><label><input type="radio" name="itemMeta[{{ item.id }}]" value="Follow" {%- if tempMeta == 'Follow' %} checked="checked"{% endif %} style="margin-left: 0.75em" />&nbsp;Follow</label>
+					<label><input type="radio" name="itemMeta[{{ item.id }}]" value="Lead" {%-   if tempMeta == 'Lead'   %} checked="checked"{% endif %} />&nbsp;Lead</label>
+					<label><input type="radio" name="itemMeta[{{ item.id }}]" value="Follow" {%- if tempMeta == 'Follow' %} checked="checked"{% endif %} style="margin-left: 0.75em" />&nbsp;Follow</label>
 					{%- elseif item.meta == 'CrossoverJJ' -%}
-					<label><input type="radio" name="itemMeta[{{ item.id }}]" value="Lead" {%- if tempMeta == 'Lead' %} checked="checked"{% endif %} />&nbsp;Lead</label><label><input type="radio" name="itemMeta[{{ item.id }}]" value="Follow" {%- if tempMeta == 'Follow' %} checked="checked"{% endif %} style="margin-left: 0.75em" />&nbsp;Follow</label>
-					need to add check for int/adv
+					{%- set tempMetaPosition = POST.itemMeta[item.id].position ? POST.itemMeta[item.id].position : dancer.registeredItems[item.id] ? (dancer.registeredItems[item.id].registeredMeta | split('/'))[0] : null -%}
+					{%- set tempMetaLevel    = POST.itemMeta[item.id].level    ? POST.itemMeta[item.id].level    : dancer.registeredItems[item.id] ? (dancer.registeredItems[item.id].registeredMeta | split('/'))[1] : null -%}
+					<label><input type="radio" name="itemMeta[{{ item.id }}][position]" value="Lead" {%-   if tempMetaPosition == 'Lead'   %} checked="checked"{% endif %} />&nbsp;Lead</label>
+					<label><input type="radio" name="itemMeta[{{ item.id }}][position]" value="Follow" {%- if tempMetaPosition == 'Follow' %} checked="checked"{% endif %} style="margin-left: 0.75em" />&nbsp;Follow</label>
+					<br />
+					<label><input type="radio" name="itemMeta[{{ item.id }}][level]" value="Intermediate" {%- if tempMetaLevel == 'Intermediate' %} checked="checked"{% endif %} />&nbsp;Intermediate</label>
+					<label><input type="radio" name="itemMeta[{{ item.id }}][level]" value="Advanced" {%-     if tempMetaLevel == 'Advanced'     %} checked="checked"{% endif %} style="margin-left: 0.75em" />&nbsp;Advanced</label>
 					{%- elseif item.meta == 'Partner' -%}
 					<label>Partner:&nbsp;<input type="text" name="itemMeta[{{ item.id }}]" value="{{ tempMeta }}"/></label>
 					{%- elseif item.meta == 'Team Members' -%}
