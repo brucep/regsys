@@ -299,7 +299,7 @@
 				{'value': 'Mail',   'label': 'Mail'   ~ (options.postmarkWithin ? ' (Check must be postmarked within %d days from date of registration.)' | format(options.postmarkWithin) : ''), 'disabled': ('now' | date('U')) > event.dateMail},
 				]) }}
 
-			<p class="caption">Refunds are available until {{ event.date_refund_end | date('F jS') }} at the discretion of {{ options.payableTo }}.</p>
+			<p class="caption">Refunds are available until {{ event.dateRefund | date('F jS') }} at the discretion of {{ options.payableTo }}.</p>
 		</fieldset>
 
 		<div id="submit"><input type="submit" value="Continue&hellip;"></div>
