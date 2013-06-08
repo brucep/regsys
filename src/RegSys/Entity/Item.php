@@ -10,8 +10,6 @@ class Item extends \RegSys\Entity
 	          $countOpenings,
 	          $countOpeningsPosition = array(),
 	          $countRegistrations,
-	          $countRegistrationsForVIPs,
-	          $countRegistrationsByPosition,
 	          $dateExpires,
 	          $description,
 	          $limitPerPosition,
@@ -109,44 +107,9 @@ class Item extends \RegSys\Entity
 		return self::$db->fetchColumn('SELECT COUNT(dancerID) from regsys__registrations LEFT JOIN regsys__dancers USING (dancerID) WHERE price > 0 AND itemID = ? AND paymentMethod = ?', array($this->itemID, $payment_method));
 	}
 	
-	public function countRegistrationsByPosition()
-	{
-		if (!isset($this->countRegistrationsByPosition)) {
-			$this->countRegistrationsByPosition = array();
-			
-			foreach (array('leads' => 1, 'follows' => 2) as $key => $value) {
-				$result = (int) self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__registrations JOIN regsys__dancers USING(dancerID) WHERE itemID = ? AND position = ?', array($this->itemID, $value));
-				
-				$this->countRegistrationsByPosition[$key] = $result;
-			}
-		}
-		
-		return $this->countRegistrationsByPosition;
-	}
-	
 	public function countRegistrationsBySize($size)
 	{
 		return self::$db->fetchColumn('SELECT COUNT(dancerID) from regsys__registrations WHERE itemID = ? AND itemMeta = ?', array($this->itemID, $size));
-	}
-	
-	private function countRegistrationsWhere(array $where = array(), $join_dancers_table = false)
-	{
-		$where[':itemID'] = $this->itemID;
-		$query = array('r.eventID = :eventID');
-		
-		foreach ($where as $field => $value) {
-			$query[] = sprintf(' `%1$s` = :%1$s', substr($field, 1));
-		}
-		
-		$query = ' WHERE ' . implode(' AND', $query);
-		$where[':eventID'] = $this->eventID;
-		
-		if ($join_dancers_table) {
-			$query = ' JOIN regsys__dancers USING(dancerID)' . $query;
-		}
-		
-		$result = self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__registrations AS r' . $query, $where);
-		return ($result !== false) ? (int) $result : false;
 	}
 	
 	public function id()
