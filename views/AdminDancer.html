@@ -23,8 +23,8 @@
 			{{- form.text('Mobile Phone', 'phone') }}
 
 			{{- form.radios('Position', 'position', [
-				{'label': 'Lead',   'value': 1, 'default': true},
-				{'label': 'Follow', 'value': 2},
+				{'label': 'Lead',   'value': 0},
+				{'label': 'Follow', 'value': 1},
 				]) }}
 
 			{% if event.hasLevels -%}
