@@ -556,11 +556,24 @@ class Dancer extends \RegSys\Entity
 				}
 			}
 			elseif ($item->type() == 'shirt') {
-				if ($value == 'None' or !in_array($value, explode(',', $item->description()))) {
+				if (!$isAdminForm) {
+					# Select element is *not* in meta array for public form
+					# There is not a separate checkbox to register for a shirt — choosing the size is what counts
+					$size = $value;
+				}
+				else {
+					# Select element is in meta array for admin form
+					$size = isset($meta[$item->id()]) ? $meta[$item->id()] : null;
+				}
+				
+				if ($size == 'None' or !in_array($size, explode(',', $item->description()))) {
 					continue;
 				}
 				
-				$meta[$item->id()] = $value; # Populate meta for the confirmation and PayPal page
+				if ($isAdminForm) {
+					# Populate meta for use by `setRegisteredMeta` below
+					$meta[$item->id()] = $size;
+				}
 			}
 			
 			# Check openings again, in case they have filled since the form was first displayed to the user

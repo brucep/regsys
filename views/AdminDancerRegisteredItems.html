@@ -55,9 +55,9 @@
 					&mdash;
 					{%- endif -%}
 				{%- elseif item.type == 'shirt' -%}
-					{%- set selectedSize = POST ? POST.itemMeta[item.id] : dancer.registeredItems[item.id] ? dancer.registeredItems[item.id].registeredMeta : 'None' %}
+					{%- set selectedSize = POST.itemMeta[item.id] ? POST.itemMeta[item.id] : dancer.registeredItems[item.id] ? dancer.registeredItems[item.id].registeredMeta : null %}
 					<select name="itemMeta[{{ item.id }}]">
-						{% for size in ('None,' ~ item.description) | split(',') -%}
+						{% for size in item.description | split(',') -%}
 						<option value="{{ size }}" {%- if size == selectedSize %} selected="selected"{% endif %} />{{ size }}</option>
 						{%- endfor %}
 					</select>
