@@ -7,6 +7,8 @@ class Item extends \RegSys\Entity
 	protected $itemID,
 	          $eventID,
 	          $name,
+	          $countOpenings,
+	          $countOpeningsPosition = array(),
 	          $countRegistrations,
 	          $countRegistrationsForVIPs,
 	          $countRegistrationsByPosition,
@@ -15,7 +17,6 @@ class Item extends \RegSys\Entity
 	          $limitPerPosition,
 	          $limitTotal,
 	          $meta,
-	          $openings,
 	          $pricePrereg,
 	          $priceDoor,
 	          $priceForTier,
@@ -56,44 +57,42 @@ class Item extends \RegSys\Entity
 		return $result->rowCount();
 	}
 	
-	public function countOpenings($position = false)
+	public function countOpenings($position = null)
 	{
-		if (!isset($this->openings)) {
-			if (!$this->limitTotal and !$this->limitPerPosition) {
-				$this->openings = true;
-			}
-			else {
-				if ($this->limitTotal) {
-					$limit = $this->limitTotal;
-					$numberDancers = $this->countRegistrationsWhere(array(':itemID' => $this->itemID));
-				}
-				elseif ($position === false) {
-					$limit = $this->limitPerPosition * 2;
-					return $limit - $this->countRegistrationsWhere(array(':itemID' => $this->itemID));
-				}
-				else {
-					$limit = $this->limitPerPosition;
-					$numberDancers = $this->countRegistrationsWhere(array(':itemID' => $this->itemID, ':position' => $position), 'dancers');
-				}
-				
-				if ($numberDancers !== false) {
-					$openings = (($limit - $numberDancers) > 0) ? $limit - $numberDancers : 0;
-				}
-				else {
-					# If there was an error communicating with the database, assume there are no more openings.
-					$openings = false;
-				}
-				
-				if ($position === false) {
-					$this->openings = $openings;
-				}
-				else {
-					return $openings;
-				}
-			}
+		if (!$this->limitTotal and !$this->limitPerPosition) {
+			return true;
 		}
-		
-		return $this->openings;
+		elseif ($this->limitTotal) {
+			if (!isset($this->countOpenings)) {
+				$this->countOpenings = $this->limitTotal - $this->countRegistrations();
+				if ($this->countOpenings < 0) { $this->countOpenings = 0; }
+			}
+			
+			return $this->countOpenings;
+		}
+		elseif ($this->limitPerPosition and $position === null) {
+			if (!isset($this->countOpenings)) {
+				$this->countOpenings = $this->limitPerPosition * 2 - $this->countRegistrations();
+				if ($this->countOpenings < 0) { $this->countOpenings = 0; }
+			}
+			
+			return $this->countOpenings;
+		}
+		elseif ($this->limitPerPosition and $position !== null) {
+			if (!isset($this->countOpeningsPosition[$position])) {
+				if ($this->meta == 'Position' or $this->meta == 'CrossoverJJ') {
+					$numberDancers = self::$db->fetchColumn('SELECT COUNT(dancerID) FROM regsys__registrations WHERE itemID = ? AND itemMeta LIKE ?', array($this->itemID, $position . '%'));
+				}
+				else {
+					$numberDancers = self::$db->fetchColumn('SELECT COUNT(r.dancerID) FROM regsys__registrations AS r JOIN regsys__dancers USING(dancerID) WHERE itemID = ? AND position = ?', array($this->itemID, $position));
+				}
+				
+				$this->countOpeningsPosition[$position] = $this->limitPerPosition - $numberDancers;
+				if ($this->countOpeningsPosition[$position] < 0) { $this->countOpeningsPosition[$position] = 0; }
+			}
+			
+			return $this->countOpeningsPosition[$position];
+		}
 	}
 		
 	public function countRegistrations()
