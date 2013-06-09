@@ -220,8 +220,8 @@ class Dancer extends \RegSys\Entity
 			
 			$href .= sprintf('&item_number_%1$d=%2$d&item_name_%1$d=%3$s&amount_%1$d=%4$s', $i,rawurlencode($item->id()), rawurlencode($item->name()), rawurlencode($item->registeredPrice()));
 			
-			if ($item->meta() == 'size') {
-				$href .= sprintf('&on0_%1$d=%2$s&os0_%1$d=%3$s', $i, $item->metaLabel(), $item->registeredMeta());
+			if ($item->type() == 'shirt') {
+				$href .= sprintf('&on0_%1$d=Size&os0_%1$d=%2$s', $i, $item->registeredMeta());
 			}
 			
 			$i++;
@@ -559,20 +559,11 @@ class Dancer extends \RegSys\Entity
 				if (!$isAdminForm) {
 					# Select element is *not* in meta array for public form
 					# There is not a separate checkbox to register for a shirt — choosing the size is what counts
-					$size = $value;
-				}
-				else {
-					# Select element is in meta array for admin form
-					$size = isset($meta[$item->id()]) ? $meta[$item->id()] : null;
+					$meta[$item->id()] = $value;
 				}
 				
-				if ($size == 'None' or !in_array($size, explode(',', $item->description()))) {
+				if (!isset($meta[$item->id()]) or $meta[$item->id()] == 'None' or !in_array($meta[$item->id()], explode(',', $item->description()))) {
 					continue;
-				}
-				
-				if ($isAdminForm) {
-					# Populate meta for use by `setRegisteredMeta` below
-					$meta[$item->id()] = $size;
 				}
 			}
 			

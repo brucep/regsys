@@ -28,8 +28,8 @@
 		<input type="hidden" name="packageTier[{{ item.id }}]" value="{{ POST.packageTier[item.id] ? POST.packageTier[item.id] : item.priceTier }}">
 		{%- endif %}
 		{%- else -%}
-		<input type="hidden" name="items[{{ item.id }}]" value="{{ item.meta == 'size' ? item.registeredMeta : item.id }}">
-		{% if item.registeredMeta -%}
+		<input type="hidden" name="items[{{ item.id }}]" value="{{ item.type == 'shirt' ? item.registeredMeta : item.id }}">
+		{% if item.registeredMeta and item.type != 'shirt' -%}
 		<input type="hidden" name="itemMeta[{{ item.id }}]" value="{{ item.registeredMeta }}">
 		{%- endif %}
 		{%- endif %}
