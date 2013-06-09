@@ -62,7 +62,7 @@
 					<tr>
 						<td><label><input name="package" value="{{ item.id }}" type="radio" {%- if POST.package == item.id %} checked{% endif %}{% if not item.countOpenings %} disabled{% endif %}>&nbsp;{{ item.name }}</label></td>
 						<td class="price">{{ '$' ~ item.pricePreregPackage }}</td>
-						<td class="price">{{ item.priceDoor ? '$' ~ item.priceDoor : ('&mdash;' | raw) }}</td>
+						<td class="price">{{ item.priceDoor ? '$' ~ item.priceDoor : '—' }}</td>
 						<td class="description">{{ item.description }}</td>
 						{% if item.priceTier -%}
 						<input name="packageTier[{{ item.id }}]" value="{{ item.priceTier }}" type="hidden">
@@ -180,7 +180,7 @@
 					<tr>
 						<td>{{ item.name }}</td>
 						<td class="price">{{ '$' ~ item.pricePrereg }}</td>
-						<td class="price">{{ item.priceDoor ? '$' ~ item.priceDoor : ('&mdash;' | raw) }}</td>
+						<td class="price">{{ item.priceDoor ? '$' ~ item.priceDoor : '—' }}</td>
 						<td class="size">
 							<select name="items[{{ item.id }}]">
 								{%- for size in item.sizes %}{{ '' }}
