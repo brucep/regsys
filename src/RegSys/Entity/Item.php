@@ -222,7 +222,7 @@ class Item extends \RegSys\Entity
 			$result['Total']['Total'] = $this->countRegistrations();
 			
 			foreach ($event->paymentMethods() as $paymentMethod) {
-				$result['Total'][$paymentMethod] = $this->countRegistrationsByPaymentMethod($paymentMmethod);
+				$result['Total'][$paymentMethod] = $this->countRegistrationsByPaymentMethod($paymentMethod);
 			}
 			
 			return $result;
