@@ -6,7 +6,7 @@
 		{%- if admin %}
 		<a class="button add-new-h2" href="{{ requestHref ~ 'AdminEvent' }}">Add New Event</a>
 		{%- endif %}
-		<a class="button add-new-h2" href="{{ requestHref ~ 'ReportVisualization' }}">View Registration Visualization Chart</a>
+		<a class="button add-new-h2" href="{{ requestHref ~ 'ReportVisualizationRegistration' }}">View Registration Visualization Chart</a>
 	</h2>
 	{%- if GET.deleted %}{{ "\n\t" }}{{ message('Deleted %s%s.' | format((GET.registrationsOnly == 'true' ? 'registrations for ' : ''), GET.deleted), 'error') }}{% endif %}
 

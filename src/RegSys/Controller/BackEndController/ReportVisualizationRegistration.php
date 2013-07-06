@@ -2,7 +2,7 @@
 
 namespace RegSys\Controller\BackEndController;
 
-class ReportVisualization extends \RegSys\Controller\BackEndController
+class ReportVisualizationRegistration extends \RegSys\Controller\BackEndController
 {	
 	public function getContext()
 	{

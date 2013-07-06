@@ -1,11 +1,13 @@
+
 <div id="regsys" class="wrap">
-<div id="ReportIndexVisualization">
+<div id="ReportVisualizationRegistration">
 	<h2>Registration Visualization Chart</h2>
 
 	<!-- http://code.google.com/apis/ajax/playground/?type=visualization#line_chart -->
 	<!-- https://google-developers.appspot.com/chart/interactive/docs/gallery/linechart -->
 
-	<script type='text/javascript' charset="utf-8">
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript">
 		google.load('visualization', '1', {packages: ['corechart']});
 
 		jQuery(document).ready(function($) {
@@ -21,7 +23,7 @@
 					width:  850,
 					height: 500,
 					vAxis: {maxValue: 10, title: 'Registered Dancers'},
-					hAxis: {title:'Date'},
+					hAxis: {title: 'Date'},
 					colors: {{ colors | json_encode | raw }},
 					});
 		});
