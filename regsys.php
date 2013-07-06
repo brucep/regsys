@@ -222,10 +222,6 @@ class RegSys
 	{
 		wp_enqueue_script('regsys-tablesorter',      plugins_url('static/jquery.tablesorter.min.js',  __FILE__), array('jquery'));
 		wp_enqueue_script('regsys-tablesorter-init', plugins_url('static/jquery.tablesorter-init.js', __FILE__), array('regsys-tablesorter'));
-		
-		if (isset($_GET['request']) and $_GET['request'] == 'ReportVisualization') {
-			wp_enqueue_script('regsys-google-jsapi', 'http://www.google.com/jsapi');
-		}
 	}
 	
 	static public function wpAdminPrintStyles()

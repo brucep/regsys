@@ -1,0 +1,40 @@
+
+<div id="regsys" class="wrap">
+<div id="ReportVisualizationMoney">
+	<h2>Money Visualization Chart</h2>
+
+	<!-- http://code.google.com/apis/ajax/playground/?type=visualization#line_chart -->
+	<!-- https://google-developers.appspot.com/chart/interactive/docs/gallery/linechart -->
+
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript">
+		google.load('visualization', '1', {packages: ['corechart']});
+
+		jQuery(document).ready(function($) {
+			// Create and populate the data table.
+			var data = google.visualization.arrayToDataTable(
+				{{ moneyData | json_encode | raw }}
+			);
+
+			// Formatting
+			var formatter = new google.visualization.NumberFormat({fractionDigits: 2, prefix: '$'});
+			for (var i=1; i < data.getNumberOfColumns(); i++) {
+				formatter.format(data, i);
+			}
+
+			// Create and draw the visualization.
+			new google.visualization.LineChart(document.getElementById('visualization')).
+				draw(data, {
+					curveType: "none",
+					width:  850,
+					height: 500,
+					vAxis: {title: 'Money From Registrations', format: '$##,###'},
+					hAxis: {title: 'Date'},
+					colors: {{ colors | json_encode | raw }},
+					});
+		});
+	</script>
+
+	<div id="visualization"></div>
+</div>
+</div> <!-- #regsys -->
